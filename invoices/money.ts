@@ -1,5 +1,5 @@
 import { Amount } from './amount';
-import { Numeric } from './numeric';
+import { Numeric } from './numeric/numeric';
 import { Currency } from './currency';
 
 export class Money {

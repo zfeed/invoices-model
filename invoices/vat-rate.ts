@@ -1,4 +1,4 @@
-import { Numeric } from './numeric';
+import { Numeric } from './numeric/numeric';
 export class VatRate {
     #value: Numeric;
 
