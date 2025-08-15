@@ -24,10 +24,13 @@ export class Invoice {
         return new Invoice(money, VatRate.fromPercent(vatRate || '0'));
     }
 
+
     applyVatRate(vatRate: VatRate) {
-        const vatRateAmount = this.total.amount.multiplyBy(vatRate);
-        const totalAmount = this.total.amount.add(vatRateAmount);
-        this.#total = Money.fromAmount(totalAmount, this.#total.currency);
+        const vat = this.total.amount.value.multiplyBy(vatRate.value);
+        const total = this.total.amount.value.add(vat);
+        const money = Money.fromNumeric(total, this.total.currency);
+
+        this.#total = money;
         this.#vatRate = vatRate;
     }
 }

@@ -1,11 +1,20 @@
-import { Unit } from './unit';
+import { Numeric } from './numeric';
+export class VatRate {
+    #value: Numeric;
 
-export class VatRate extends Unit {
-    private constructor(value: string) {
-        super(value);
+    public get value(): Numeric {
+        return this.#value;
+    }
+
+    private constructor(value: Numeric) {
+        this.#value = value;
+    }
+
+    equals(other: VatRate): boolean {
+        return this.#value.equals(other.value);
     }
 
     static fromPercent(value: string) {
-        return new VatRate(String(Number(value) / 100));
+        return new VatRate(Numeric.fromString(String(Number(value) / 100)));
     }
 }
