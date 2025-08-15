@@ -1,10 +1,10 @@
 import { Decimal } from 'decimal.js';
 
 export class Unit {
-    private value: Decimal;
+    #value: Decimal;
 
     protected constructor(value: string) {
-        this.value = new Decimal(value);
+        this.#value = new Decimal(value);
     }
 
     static fromString(value: string) {
@@ -12,14 +12,14 @@ export class Unit {
     }
 
     multiplyBy(unit: Unit) {
-        return new Unit(this.value.mul(unit.value).toString());
+        return new Unit(this.#value.mul(unit.#value).toString());
     }
 
     add(unit: Unit) {
-        return new Unit(this.value.add(unit.value).toString());
+        return new Unit(this.#value.add(unit.#value).toString());
     }
 
     equals(unit: Unit) {
-        return this.value.equals(unit.value);
+        return this.#value.equals(unit.#value);
     }
 }
