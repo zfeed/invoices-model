@@ -1,4 +1,4 @@
-import { CURRENCY_CODE } from "./currency-code";
+import { CURRENCY_CODE } from "./code";
 
 export class Currency {
     #code: CURRENCY_CODE;

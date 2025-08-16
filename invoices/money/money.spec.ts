@@ -1,9 +1,9 @@
 import { Money } from "./money";
-import { Currency } from "./currency";
+import { Currency } from "./currency/currency";
 import { Numeric } from "../numeric/numeric";
 import { DECIMAL_PLACES, ROUNDING } from "../numeric/rounding";
-import { CURRENCY_CODE } from "./currency-code";
-import { Amount } from "../amount";
+import { CURRENCY_CODE } from "./currency/code";
+import { Amount } from "./amount";
 
 describe("Money", () => {
     test.each([

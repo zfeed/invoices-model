@@ -1,8 +1,8 @@
-import { Amount } from '../amount';
+import { Amount } from './amount';
 import { Numeric } from '../numeric/numeric';
 import { DECIMAL_PLACES } from '../numeric/rounding';
-import { Currency } from './currency';
-import { CURRENCY_CODE } from './currency-code';
+import { Currency } from './currency/currency';
+import { CURRENCY_CODE } from './currency/code';
 
 export class Money {
     #amount: Amount;

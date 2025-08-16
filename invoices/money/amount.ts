@@ -1,5 +1,5 @@
-import { Numeric } from './numeric/numeric';
-import { ROUNDING, DECIMAL_PLACES } from './numeric/rounding';
+import { Numeric } from '../numeric/numeric';
+import { ROUNDING, DECIMAL_PLACES } from '../numeric/rounding';
 
 export class Amount {
     #value: Numeric;
