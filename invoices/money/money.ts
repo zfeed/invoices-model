@@ -1,6 +1,5 @@
 import { Amount } from './amount';
 import { Numeric } from '../numeric/numeric';
-import { DECIMAL_PLACES } from '../numeric/rounding';
 import { Currency } from './currency/codes/currency';
 import { CurrencyFactory } from './currency/factory';
 
