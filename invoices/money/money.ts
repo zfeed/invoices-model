@@ -20,7 +20,6 @@ export class Money {
         return this.#currency;
     }
 
-
     equals(other: Money): boolean {
         const isSameCurrency = this.#currency.equals(other.currency);
         const isSameAmount = this.#amount.equals(other.amount);
@@ -28,11 +27,16 @@ export class Money {
         return isSameCurrency && isSameAmount;
     }
 
+    add(amount: Numeric): Money {
+        const value = this.#amount.value.add(amount);
+        const newAmount = Amount.fromNumeric(value);
+
+        return new Money(newAmount, this.#currency);
+    }
+
     static create(amountValue: string, currencyValue: string) {
         const currency = CurrencyFactory.fromISO4217(currencyValue);
         const amount = Amount.fromString(amountValue, currency.decimalPlaces.value);
-
-
 
         return new Money(amount, currency);
     }

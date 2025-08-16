@@ -26,9 +26,7 @@ export class Invoice {
 
 
     applyVatRate(vatRate: VatRate) {
-        const vat = this.total.amount.value.multiplyBy(vatRate.value);
-        const total = this.total.amount.value.add(vat);
-        const money = Money.fromNumeric(total, this.total.currency);
+        const money = vatRate.applyTo(this.total);
 
         this.#total = money;
         this.#vatRate = vatRate;

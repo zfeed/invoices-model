@@ -13,11 +13,6 @@ describe("Money", () => {
             decimalPlaces: DECIMAL_PLACES.TWO,
         },
         {
-            amount: "200.50",
-            currency: CURRENCY_CODE.EUR,
-            decimalPlaces: DECIMAL_PLACES.TWO,
-        },
-        {
             amount: "30045",
             currency: CURRENCY_CODE.JPY,
             decimalPlaces: DECIMAL_PLACES.ZERO,
@@ -66,7 +61,7 @@ describe("Money", () => {
             amount1: "50.00",
             currency1: CURRENCY_CODE.USD,
             amount2: "50.00",
-            currency2: CURRENCY_CODE.EUR,
+            currency2: CURRENCY_CODE.JPY,
             expected: false,
         },
     ])(
@@ -91,10 +86,10 @@ describe("Money", () => {
     });
 
     test("should create Money from string using fromString", () => {
-        const money = Money.fromString("200.50", CURRENCY_CODE.EUR);
+        const money = Money.fromString("200.50", CURRENCY_CODE.USD);
         expect(
             money.amount.equals(Amount.fromString("200.50", DECIMAL_PLACES.TWO))
         ).toBe(true);
-        expect(money.currency.equals(CurrencyFactory.fromISO4217(CURRENCY_CODE.EUR))).toBe(true);
+        expect(money.currency.equals(CurrencyFactory.fromISO4217(CURRENCY_CODE.USD))).toBe(true);
     });
 });

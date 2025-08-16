@@ -6,19 +6,16 @@ export  class Numeric {
     #rounding: ROUNDING;
     #decimalPlaces: DECIMAL_PLACES;
 
-    private constructor(value: string, rounding: ROUNDING, decimalPlaces: DECIMAL_PLACES) {
-        const roundingMode = rounding === ROUNDING.UP ? Decimal.ROUND_UP : null;
+    private constructor(value: string, rounding?: ROUNDING, decimalPlaces? : DECIMAL_PLACES) {
+        const roundingMode = rounding === ROUNDING.UP ? Decimal.ROUND_UP :  Decimal.ROUND_UP;
 
-        if (roundingMode === null) {
-            throw new Error(`Unsupported rounding mode: ${rounding}`);
-        }
 
-        this.#value = new Decimal(value).toDecimalPlaces(decimalPlaces, roundingMode);
-        this.#rounding = rounding;
-        this.#decimalPlaces = decimalPlaces;
+        this.#value = new Decimal(value).toDecimalPlaces(decimalPlaces || DECIMAL_PLACES.EIGHT, roundingMode);
+        this.#rounding = rounding || ROUNDING.UP;
+        this.#decimalPlaces = decimalPlaces || DECIMAL_PLACES.EIGHT;
     }
 
-    static fromString(value: string, rounding: ROUNDING, decimalPlaces: DECIMAL_PLACES) {
+    static fromString(value: string, rounding?: ROUNDING, decimalPlaces?: DECIMAL_PLACES) {
         return new  this(value, rounding, decimalPlaces);
     }
 
@@ -44,5 +41,20 @@ export  class Numeric {
 
     divideBy(value: Numeric) {
         return new Numeric(this.#value.div(value.#value).toString(), this.#rounding, this.#decimalPlaces);
+    }
+
+    toDecimalPlaces(decimalPlaces: DECIMAL_PLACES, mode: ROUNDING) {
+        let roundingMode: Decimal.Rounding;
+        switch (mode) {
+            case ROUNDING.UP:
+                roundingMode = Decimal.ROUND_UP;
+                break;
+            default:
+                throw new Error(`Unsupported rounding mode: ${mode}`);
+        }
+
+        const value =this.#value.toDecimalPlaces(decimalPlaces, roundingMode);
+
+        return new Numeric(value.toString(), mode, decimalPlaces);
     }
 }

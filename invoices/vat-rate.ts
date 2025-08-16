@@ -1,3 +1,4 @@
+import { Money } from './money/money';
 import { Numeric } from './numeric/numeric';
 import { ROUNDING, DECIMAL_PLACES } from './numeric/rounding';
 export class VatRate {
@@ -16,7 +17,18 @@ export class VatRate {
     }
 
     static fromPercent(value: string) {
-        const numericValue = Numeric.fromString(value, ROUNDING.UP, DECIMAL_PLACES.TWO).divideBy(Numeric.fromString('100', ROUNDING.UP, DECIMAL_PLACES.TWO));
+        const oneHundred = Numeric.fromString('100');
+        const percents = Numeric.fromString(value);
+
+        const numericValue = percents.divideBy(oneHundred).toDecimalPlaces(DECIMAL_PLACES.TWO, ROUNDING.UP);
+
         return new VatRate(numericValue);
+    }
+
+    applyTo(money: Money): Money {
+        const result = money.amount.value.multiplyBy(this.value);
+        const roundedAccordingToCurrency = result.toDecimalPlaces(money.currency.decimalPlaces.value, ROUNDING.UP);
+
+        return money.add(roundedAccordingToCurrency);
     }
 }
