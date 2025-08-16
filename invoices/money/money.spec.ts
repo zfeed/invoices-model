@@ -1,5 +1,5 @@
 import { Money } from "./money";
-import { Currency } from "./currency/currency";
+import { CurrencyFactory } from "./currency/factory";
 import { Numeric } from "../numeric/numeric";
 import { DECIMAL_PLACES, ROUNDING } from "../numeric/rounding";
 import { CURRENCY_CODE } from "./currency/code";
@@ -30,9 +30,9 @@ describe("Money", () => {
     ])("should create Money for %s", ({ amount, currency, decimalPlaces }) => {
         const money = Money.create(amount, currency);
         const expectedAmount = Amount.fromString(amount, decimalPlaces);
-        const expectedCurrency = Currency.fromISO4217(currency);
+        const expectedCurrency = CurrencyFactory.fromISO4217(currency);
         expect(money.amount.equals(expectedAmount)).toBe(true);
-        expect(money.currency.code).toBe(expectedCurrency.code);
+        expect(money.currency.equals(expectedCurrency)).toBe(true);
     });
 
     test.each([
@@ -84,7 +84,7 @@ describe("Money", () => {
             ROUNDING.UP,
             DECIMAL_PLACES.TWO
         );
-        const currency = Currency.fromISO4217(CURRENCY_CODE.BHD);
+        const currency = CurrencyFactory.fromISO4217(CURRENCY_CODE.BHD);
         expect(() => {
             Money.fromNumeric(numeric, currency);
         }).toThrow("Amount decimal places (2) do not match currency (3)");
@@ -95,6 +95,6 @@ describe("Money", () => {
         expect(
             money.amount.equals(Amount.fromString("200.50", DECIMAL_PLACES.TWO))
         ).toBe(true);
-        expect(money.currency.code).toBe(CURRENCY_CODE.EUR);
+        expect(money.currency.equals(CurrencyFactory.fromISO4217(CURRENCY_CODE.EUR))).toBe(true);
     });
 });

@@ -1,8 +1,8 @@
 import { Amount } from './amount';
 import { Numeric } from '../numeric/numeric';
 import { DECIMAL_PLACES } from '../numeric/rounding';
-import { Currency } from './currency/currency';
-import { CURRENCY_CODE } from './currency/code';
+import { Currency } from './currency/codes/currency';
+import { CurrencyFactory } from './currency/factory';
 
 export class Money {
     #amount: Amount;
@@ -11,21 +11,6 @@ export class Money {
     private constructor( amount: Amount,  currency: Currency) {
         this.#amount = amount;
         this.#currency = currency;
-    }
-
-    private  static getDecimalPointsBasedOnCurrencyCode(currency: Currency): DECIMAL_PLACES {
-        switch (currency.code) {
-            case CURRENCY_CODE.USD:
-                return DECIMAL_PLACES.TWO;
-            case CURRENCY_CODE.JPY:
-                return DECIMAL_PLACES.ZERO;
-            case CURRENCY_CODE.EUR:
-                return DECIMAL_PLACES.TWO;
-            case CURRENCY_CODE.BHD:
-                return DECIMAL_PLACES.THREE;
-            default:
-                throw new Error(`Unsupported currency code: ${currency.code}`);
-        }
     }
 
     public get amount(): Amount {
@@ -38,31 +23,32 @@ export class Money {
 
 
     equals(other: Money): boolean {
-        return this.#amount.equals(other.amount) && this.#currency.equals(other.currency);
+        const isSameCurrency = this.#currency.equals(other.currency);
+        const isSameAmount = this.#amount.equals(other.amount);
+
+        return isSameCurrency && isSameAmount;
     }
 
     static create(amountValue: string, currencyValue: string) {
-        const currency = Currency.fromISO4217(currencyValue);
-        const decimalPlaces = this.getDecimalPointsBasedOnCurrencyCode(currency);
-        const amount = Amount.fromString(amountValue, decimalPlaces);
+        const currency = CurrencyFactory.fromISO4217(currencyValue);
+        const amount = Amount.fromString(amountValue, currency.decimalPlaces.value);
+
 
 
         return new Money(amount, currency);
     }
 
     static fromString(amount: string, currency: string) {
-        const currencyValue = Currency.fromISO4217(currency);
-        const decimalPlaces = this.getDecimalPointsBasedOnCurrencyCode(currencyValue);
-        return new Money(Amount.fromString(amount, decimalPlaces), currencyValue);
+        const currencyValue = CurrencyFactory.fromISO4217(currency);
+        return new Money(Amount.fromString(amount, currencyValue.decimalPlaces.value), currencyValue);
     }
 
     static fromNumeric(amount: Numeric, currency: Currency) {
-        const decimalPlaces = this.getDecimalPointsBasedOnCurrencyCode(currency);
 
-        if (amount.decimalPlaces !== decimalPlaces) {
-            throw new Error(`Amount decimal places (${amount.decimalPlaces}) do not match currency (${decimalPlaces})`);
+        if (amount.decimalPlaces !== currency.decimalPlaces.value) {
+            throw new Error(`Amount decimal places (${amount.decimalPlaces}) do not match currency (${currency.decimalPlaces.value})`);
         }
-
+        
         return new Money(Amount.fromNumeric(amount), currency);
     }
 }
