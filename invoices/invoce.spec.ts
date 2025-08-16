@@ -1,4 +1,4 @@
-import { Money } from './money';
+import { Money } from './money/money';
 import { Invoice } from './invoice';
 import { VatRate } from './vat-rate';
 

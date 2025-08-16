@@ -1,4 +1,4 @@
-import { Money } from './money';
+import { Money } from './money/money';
 import { VatRate } from './vat-rate';
 
 export class Invoice {
