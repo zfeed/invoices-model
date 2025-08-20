@@ -27,8 +27,17 @@ export class Money {
         return isSameCurrency && isSameAmount;
     }
 
-    add(amount: Numeric): Money {
-        const value = this.#amount.add(amount);
+    add(other: Money): Money {
+        if (!this.#currency.equals(other.currency)) {
+            throw new Error(`Cannot add money with different currencies: ${this.#currency} and ${other.currency}`);
+        }
+
+        const value = this.#amount.add(other.amount);
+        return new Money(value, this.#currency);
+    }
+
+    multiplyBy(factor: Numeric): Money {
+        const value = this.#amount.multiplyBy(factor).toDecimalPlaces(this.#currency.decimalPlaces.value, ROUNDING.UP);
         return new Money(value, this.#currency);
     }
 
