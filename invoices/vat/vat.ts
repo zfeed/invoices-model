@@ -26,9 +26,8 @@ export class Vat {
     }
 
     applyTo(money: Money): Money {
-        const result = money.amount.multiplyBy(this.rate);
-        const roundedAccordingToCurrency = result.toDecimalPlaces(money.currency.decimalPlaces.value, ROUNDING.UP);
+        const vat = money.multiplyBy(this.rate);
 
-        return money.add(roundedAccordingToCurrency);
+        return money.add(vat);
     }
 }
