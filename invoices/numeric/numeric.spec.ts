@@ -1,36 +1,25 @@
 import { Numeric } from "./numeric";
-import { ROUNDING, DECIMAL_PLACES } from "./rounding";
+import { ROUNDING } from "./rounding";
 
 describe("Numeric", () => {
     test.each([
-        ["123.45", ROUNDING.UP, DECIMAL_PLACES.TWO, "123.45"],
-        ["67.89", ROUNDING.UP, DECIMAL_PLACES.TWO, "67.89"],
-        ["0.123", ROUNDING.UP, DECIMAL_PLACES.TWO, "0.13"],
-    ])(
-        "creates Numeric from %s",
-        (input, rounding, decimalPlaces, expected) => {
-            const num = Numeric.fromString(input, decimalPlaces, rounding);
-            expect(
-                num.equals(
-                    Numeric.fromString(expected,  decimalPlaces, rounding,)
-                )
-            ).toBe(true);
-        }
-    );
+        ["123.45", "123.45"],
+        ["67.89", "67.89"],
+        ["0.123", "0.123"],
+    ])("creates Numeric from %s", (input, expected) => {
+        const num = Numeric.fromString(input);
+        expect(num.equals(Numeric.fromString(expected))).toBe(true);
+    });
 
     test.each([
         ["2", "3", "6"],
         ["0.5", "0.2", "0.1"],
         ["100.35", "2", "200.7"],
     ])("multiplies %s and %s", (a, b, expected) => {
-        const numA = Numeric.fromString(a,  DECIMAL_PLACES.TWO, ROUNDING.UP);
-        const numB = Numeric.fromString(b,  DECIMAL_PLACES.TWO, ROUNDING.UP);
+        const numA = Numeric.fromString(a);
+        const numB = Numeric.fromString(b);
         const result = numA.multiplyBy(numB);
-        expect(
-            result.equals(
-                Numeric.fromString(expected,  DECIMAL_PLACES.TWO, ROUNDING.UP)
-            )
-        ).toBe(true);
+        expect(result.equals(Numeric.fromString(expected))).toBe(true);
     });
 
     test.each([
@@ -38,14 +27,10 @@ describe("Numeric", () => {
         ["0.1", "0.2", "0.3"],
         ["100.35", "2", "102.35"],
     ])("adds %s and %s", (a, b, expected) => {
-        const numA = Numeric.fromString(a,  DECIMAL_PLACES.TWO, ROUNDING.UP);
-        const numB = Numeric.fromString(b,  DECIMAL_PLACES.TWO, ROUNDING.UP);
+        const numA = Numeric.fromString(a);
+        const numB = Numeric.fromString(b);
         const result = numA.add(numB);
-        expect(
-            result.equals(
-                Numeric.fromString(expected,  DECIMAL_PLACES.TWO, ROUNDING.UP)
-            )
-        ).toBe(true);
+        expect(result.equals(Numeric.fromString(expected))).toBe(true);
     });
 
     test.each([
@@ -53,50 +38,32 @@ describe("Numeric", () => {
         ["10.00", "10.01", false],
         ["10.01", "10.01", true],
     ])("compares %s and %s", (a, b, expected) => {
-        const numA = Numeric.fromString(a,  DECIMAL_PLACES.TWO, ROUNDING.UP);
-        const numB = Numeric.fromString(b,  DECIMAL_PLACES.TWO, ROUNDING.UP);
+        const numA = Numeric.fromString(a);
+        const numB = Numeric.fromString(b);
         expect(numA.equals(numB)).toBe(expected);
     });
 
     it("should handle multiplication with zero", () => {
-        const a = Numeric.fromString("0",  DECIMAL_PLACES.TWO, ROUNDING.UP);
-        const b = Numeric.fromString("100",  DECIMAL_PLACES.TWO, ROUNDING.UP);
+        const a = Numeric.fromString("0");
+        const b = Numeric.fromString("100");
         const result = a.multiplyBy(b);
-        expect(
-            result.equals(
-                Numeric.fromString("0",  DECIMAL_PLACES.TWO, ROUNDING.UP)
-            )
-        ).toBe(true);
+        expect(result.equals(Numeric.fromString("0"))).toBe(true);
     });
 
     it("should handle addition with zero", () => {
-        const a = Numeric.fromString("0",  DECIMAL_PLACES.TWO, ROUNDING.UP);
-        const b = Numeric.fromString("100",  DECIMAL_PLACES.TWO, ROUNDING.UP);
+        const a = Numeric.fromString("0");
+        const b = Numeric.fromString("100");
         const result = a.add(b);
-        expect(
-            result.equals(
-                Numeric.fromString("100",  DECIMAL_PLACES.TWO, ROUNDING.UP)
-            )
-        ).toBe(true);
+        expect(result.equals(Numeric.fromString("100"))).toBe(true);
     });
 
     it("should handle large numbers", () => {
-        const a = Numeric.fromString(
-            "1000000000000000000",
-            DECIMAL_PLACES.TWO,
-            ROUNDING.UP
-        );
-        const b = Numeric.fromString("2",  DECIMAL_PLACES.TWO, ROUNDING.UP);
+        const a = Numeric.fromString("1000000000000000000");
+        const b = Numeric.fromString("2");
         const result = a.multiplyBy(b);
-        expect(
-            result.equals(
-                Numeric.fromString(
-                    "2000000000000000000",
-                    DECIMAL_PLACES.TWO,
-                    ROUNDING.UP
-                )
-            )
-        ).toBe(true);
+        expect(result.equals(Numeric.fromString("2000000000000000000"))).toBe(
+            true
+        );
     });
 
     test.each([
@@ -104,43 +71,62 @@ describe("Numeric", () => {
         ["0.12", "0.56", "0.68"],
         ["0.99", "0.01", "1.00"],
     ])("adds %s and %s", (a, b, expected) => {
-        const numA = Numeric.fromString(a,  DECIMAL_PLACES.TWO, ROUNDING.UP);
-        const numB = Numeric.fromString(b,  DECIMAL_PLACES.TWO, ROUNDING.UP);
+        const numA = Numeric.fromString(a);
+        const numB = Numeric.fromString(b);
         const result = numA.add(numB);
-        expect(
-            result.equals(
-                Numeric.fromString(expected,  DECIMAL_PLACES.TWO, ROUNDING.UP)
-            )
-        ).toBe(true);
-    });
-
-    test.each([
-        ["0.1345", "0.14"],
-        ["0.1299", "0.13"],
-        ["4.1550345", "4.16"],
-    ])("rounds %s to %s", (input, expected) => {
-        const a = Numeric.fromString(input,  DECIMAL_PLACES.TWO, ROUNDING.UP);
-        expect(a.rounding).toBe(ROUNDING.UP);
-        expect(a.decimalPlaces).toBe(DECIMAL_PLACES.TWO);
-        expect(
-            a.equals(
-                Numeric.fromString(expected,  DECIMAL_PLACES.TWO, ROUNDING.UP)
-            )
-        ).toBe(true);
+        expect(result.equals(Numeric.fromString(expected))).toBe(true);
     });
 
     test.each([
         ["0.1", "0.2", "0.5"],
-        ["0.13", "0.57", "0.23"],
+        ["0.13", "0.57", "0.22807017543859649123"],
         ["0.99", "0.01", "99"],
     ])("divides %s by %s", (a, b, expected) => {
-        const numA = Numeric.fromString(a,  DECIMAL_PLACES.TWO, ROUNDING.UP);
-        const numB = Numeric.fromString(b,  DECIMAL_PLACES.TWO, ROUNDING.UP);
+        const numA = Numeric.fromString(a);
+        const numB = Numeric.fromString(b);
         const result = numA.divideBy(numB);
-        expect(
-            result.equals(
-                Numeric.fromString(expected,  DECIMAL_PLACES.TWO, ROUNDING.UP)
-            )
-        ).toBe(true);
+        expect(result.equals(Numeric.fromString(expected))).toBe(true);
     });
+    
+        describe("comparison methods", () => {
+            const a = Numeric.fromString("10.5");
+            const b = Numeric.fromString("10.5");
+            const c = Numeric.fromString("11.0");
+            const d = Numeric.fromString("9.99");
+
+            test("lessThanEqual", () => {
+                expect(a.lessThanEqual(b)).toBe(true);
+                expect(a.lessThanEqual(c)).toBe(true);
+                expect(c.lessThanEqual(a)).toBe(false);
+            });
+
+            test("greaterThanEqual", () => {
+                expect(a.greaterThanEqual(b)).toBe(true);
+                expect(c.greaterThanEqual(a)).toBe(true);
+                expect(a.greaterThanEqual(c)).toBe(false);
+            });
+
+            test("lessThan", () => {
+                expect(a.lessThan(c)).toBe(true);
+                expect(d.lessThan(a)).toBe(true);
+                expect(a.lessThan(d)).toBe(false);
+                expect(a.lessThan(b)).toBe(false);
+            });
+
+            test("greaterThan", () => {
+                expect(c.greaterThan(a)).toBe(true);
+                expect(a.greaterThan(d)).toBe(true);
+                expect(d.greaterThan(a)).toBe(false);
+                expect(a.greaterThan(b)).toBe(false);
+            });
+        });
+
+        describe("decimalPlaces", () => {
+            test("returns correct decimal places", () => {
+                expect(Numeric.fromString("10.5").decimalPlaces()).toBe(1);
+                expect(Numeric.fromString("10.50").decimalPlaces()).toBe(1);
+                expect(Numeric.fromString("10").decimalPlaces()).toBe(0);
+                expect(Numeric.fromString("0.1234").decimalPlaces()).toBe(4);
+            });
+        });
 });
