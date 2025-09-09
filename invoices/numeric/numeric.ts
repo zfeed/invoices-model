@@ -1,60 +1,64 @@
-import { Decimal } from 'decimal.js';
-import { DECIMAL_PLACES, ROUNDING } from './rounding';
+import { Decimal } from "decimal.js";
+import { ROUNDING } from "./rounding";
 
-export  class Numeric {
+export class Numeric {
     #value: Decimal;
-    #rounding: ROUNDING;
-    #decimalPlaces: DECIMAL_PLACES;
-
-    private constructor(value: string, rounding?: ROUNDING, decimalPlaces? : DECIMAL_PLACES) {
-        const roundingMode = rounding === ROUNDING.UP ? Decimal.ROUND_UP :  Decimal.ROUND_UP;
-
-
-        this.#value = new Decimal(value).toDecimalPlaces(decimalPlaces || DECIMAL_PLACES.EIGHT, roundingMode);
-        this.#rounding = rounding || ROUNDING.UP;
-        this.#decimalPlaces = decimalPlaces || DECIMAL_PLACES.EIGHT;
+    private constructor(value: string) {
+        this.#value = new Decimal(value);
     }
 
-    static fromString(value: string, decimalPlaces?: DECIMAL_PLACES,  rounding?: ROUNDING,) {
-        return new  this(value, rounding, decimalPlaces);
+    static fromString(value: string) {
+        return new this(value);
     }
 
-    public get rounding() {
-        return this.#rounding;
-    }
-
-    public get decimalPlaces() {
-        return this.#decimalPlaces;
+    static fromNumber(value: number) {
+        return new this(value.toString());
     }
 
     multiplyBy(value: Numeric) {
-        return new Numeric(this.#value.mul(value.#value).toString(), this.#rounding, this.#decimalPlaces);
+        const result = this.#value.mul(value.#value);
+        return new Numeric(result.toString());
     }
 
     add(value: Numeric) {
-        return new Numeric(this.#value.add(value.#value).toString(), this.#rounding, this.#decimalPlaces);
+        return new Numeric(this.#value.add(value.#value).toString());
+    }
+
+    divideBy(value: Numeric) {
+        const result = this.#value.div(value.#value);
+        return new Numeric(result.toString());
+    }
+
+    toDecimalPlaces(places: number, rounding: ROUNDING = ROUNDING.UP) {
+        const result = this.#value.toDecimalPlaces(places, rounding);
+        return new Numeric(result.toString());
+    }
+
+    decimalPlaces(): number {
+        return this.#value.decimalPlaces();
+    }
+
+    greaterThan(value: Numeric) {
+        return this.#value.gt(value.#value);
+    }
+
+    lessThan(value: Numeric) {
+        return this.#value.lt(value.#value);
+    }
+
+    greaterThanEqual(value: Numeric) {
+        return this.#value.gte(value.#value);
+    }
+
+    lessThanEqual(value: Numeric) {
+        return this.#value.lte(value.#value);
     }
 
     equals(value: Numeric) {
         return this.#value.equals(value.#value);
     }
 
-    divideBy(value: Numeric) {
-        return new Numeric(this.#value.div(value.#value).toString(), this.#rounding, this.#decimalPlaces);
-    }
-
-    toDecimalPlaces(decimalPlaces: DECIMAL_PLACES, mode: ROUNDING) {
-        let roundingMode: Decimal.Rounding;
-        switch (mode) {
-            case ROUNDING.UP:
-                roundingMode = Decimal.ROUND_UP;
-                break;
-            default:
-                throw new Error(`Unsupported rounding mode: ${mode}`);
-        }
-
-        const value =this.#value.toDecimalPlaces(decimalPlaces, roundingMode);
-
-        return new Numeric(value.toString(), mode, decimalPlaces);
+    toString() {
+        return this.#value.toString();
     }
 }

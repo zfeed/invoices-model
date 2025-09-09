@@ -1,7 +1,7 @@
-import { Numeric } from '../numeric/numeric';
-import { Currency } from './currency/codes/currency';
-import { CurrencyFactory } from './currency/factory';
-import { ROUNDING } from '../numeric/rounding';
+import { Numeric } from '../../numeric/numeric';
+import { Currency } from '../currency/currency';
+import { ROUNDING } from '../../numeric/rounding';
+import { assertMinorUnits } from './asserts/assert-minor-units';
 
 export class Money {
     #amount: Numeric;
@@ -33,33 +33,23 @@ export class Money {
         }
 
         const value = this.#amount.add(other.amount);
+    
         return new Money(value, this.#currency);
     }
 
-    multiplyBy(factor: Numeric): Money {
-        const value = this.#amount.multiplyBy(factor).toDecimalPlaces(this.#currency.decimalPlaces.value, ROUNDING.UP);
+    multiplyBy(factor: Numeric, rounding: ROUNDING = ROUNDING.UP): Money {
+        const value = this.#amount.multiplyBy(factor).toDecimalPlaces(0, rounding);
         return new Money(value, this.#currency);
-    }
-
-    static create(amountValue: string, currencyValue: string) {
-        const currency = CurrencyFactory.fromISO4217(currencyValue);
-        const amount = Numeric.fromString(amountValue, currency.decimalPlaces.value);
-
-        return new Money(amount, currency);
     }
 
     static fromString(amount: string, currency: string) {
-        const currencyValue = CurrencyFactory.fromISO4217(currency);
         const numericValue = Numeric.fromString(amount);
-        return new Money(numericValue, currencyValue);
+        return Money.fromNumeric(numericValue, new Currency(currency));
     }
 
     static fromNumeric(amount: Numeric, currency: Currency) {
+       assertMinorUnits(amount);
 
-        if (amount.decimalPlaces !== currency.decimalPlaces.value) {
-            throw new Error(`Amount decimal places (${amount.decimalPlaces}) do not match currency (${currency.decimalPlaces.value})`);
-        }
-        
         return new Money(amount, currency);
     }
 }

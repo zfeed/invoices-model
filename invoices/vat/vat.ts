@@ -1,6 +1,6 @@
-import { Money } from '../money/money';
+import { Money } from '../money/money/money';
 import { Numeric } from '../numeric/numeric';
-import { ROUNDING, DECIMAL_PLACES } from '../numeric/rounding';
+import { assertPercents } from './asserts/assert-percents'
 export class Vat {
     #value: Numeric;
 
@@ -17,10 +17,12 @@ export class Vat {
     }
 
     static fromPercent(value: string) {
+        assertPercents(value);
+
         const oneHundred = Numeric.fromString('100');
         const percents = Numeric.fromString(value);
 
-        const numericValue = percents.divideBy(oneHundred).toDecimalPlaces(DECIMAL_PLACES.TWO, ROUNDING.UP);
+        const numericValue = percents.divideBy(oneHundred);
 
         return new Vat(numericValue);
     }
