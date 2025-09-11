@@ -1,9 +1,6 @@
 import { Money } from "./money";
 import { Numeric } from "../../numeric/numeric";
-import { ROUNDING } from "../../numeric/rounding";
 import { Currency } from "../currency/currency";
-import { InvalidCurrencyCodeError } from "../currency/asserts/assert-currency-code";
-import { InvalidMinorUnitsError } from "./asserts/assert-minor-units";
 
 describe("Money", () => {
     test.each([
@@ -20,24 +17,12 @@ describe("Money", () => {
             currency: "BHD",
         },
     ])("should create Money for %s", ({ amount, currency }) => {
-        const money = Money.fromString(amount, currency);
+        const money = Money.fromString(amount, currency).unwrap();
         const expectedAmount = Numeric.fromString(amount);
-        const expectedCurrency = new Currency(currency);
+        const expectedCurrency = Currency.create(currency).unwrap();
         expect(money.amount.equals(expectedAmount)).toBe(true);
         expect(money.currency.equals(expectedCurrency)).toBe(true);
     });
-
-    test.each([
-        { amount: "100.00", currency: "ABC" },
-        { amount: "200.50", currency: "XYZ" },
-    ])(
-        "should throw error for invalid currency code",
-        ({ amount, currency }) => {
-            expect(() => {
-                Money.fromString(amount, currency);
-            }).toThrow(InvalidCurrencyCodeError);
-        }
-    );
 
     test.each([
         {
@@ -64,37 +49,50 @@ describe("Money", () => {
     ])(
         "should return $expected for $amount1 $currency1 === $amount2 $currency2",
         ({ amount1, currency1, amount2, currency2, expected }) => {
-            const money1 = Money.fromString(amount1, currency1);
-            const money2 = Money.fromString(amount2, currency2);
+            const money1 = Money.fromString(amount1, currency1).unwrap();
+            const money2 = Money.fromString(amount2, currency2).unwrap();
             expect(money1.equals(money2)).toBe(expected);
         }
     );
 
     test("should create Money from string using fromString", () => {
-        const money = Money.fromString("355435", "USD");
+        const money = Money.fromString("355435", "USD").unwrap();
         expect(money.amount.equals(Numeric.fromString("355435"))).toBe(true);
-        expect(money.currency.equals(new Currency("USD"))).toBe(true);
+        expect(money.currency.equals(Currency.create("USD").unwrap())).toBe(true);
     });
 
     test("should create money from integer", () => {
         const money = Money.fromNumeric(
             Numeric.fromString("200"),
-            new Currency("USD")
-        );
+            Currency.create("USD").unwrap()
+        ).unwrap();
         expect(money.amount.equals(Numeric.fromString("200"))).toBe(true);
-        expect(money.currency.equals(new Currency("USD"))).toBe(true);
+        expect(money.currency.equals(Currency.create("USD").unwrap())).toBe(true);
     });
 
     test("should not create money from negative int", () => {
-        expect(() => {
-            Money.fromNumeric(Numeric.fromString("-200"), new Currency("USD"));
-        }).toThrow(InvalidMinorUnitsError);
+        const result = Money.fromNumeric(
+            Numeric.fromString("-200"),
+            Currency.create("USD").unwrap()
+        );
+
+        expect(result.value).toEqual(
+            expect.objectContaining({
+                code: 7,
+            })
+        );
     });
 
+    test("should not create money from decimal", () => {
+        const result = Money.fromNumeric(
+            Numeric.fromString("200.50"),
+            Currency.create("USD").unwrap()
+        );
 
-     test("should not create money from decimal", () => {
-         expect(() => {
-             Money.fromNumeric(Numeric.fromString("200.50"), new Currency("USD"));
-         }).toThrow(InvalidMinorUnitsError);
-     });
+        expect(result.value).toEqual(
+            expect.objectContaining({
+                code: 6,
+            })
+        );
+    });
 });

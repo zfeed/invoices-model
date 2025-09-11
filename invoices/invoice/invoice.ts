@@ -1,12 +1,16 @@
 import { Money } from "../money/money/money";
 import { Vat } from "../vat/vat";
 import { LineItem } from "../line-item/line-item";
-import { assertLineItems, InvalidLineItemsError } from "./asserts/assert-line-items";
+import { assertLineItems } from "./asserts/assert-line-items";
+import { left, right } from "@sweet-monads/either";
 
+import { IssueDate } from "../calendar-date/calendar-date";
 export class Invoice {
     #vat: Vat;
     #total: Money;
     #lineItems: LineItem[];
+    #issueDate: IssueDate;
+    #dueDate: IssueDate;
 
     public get total(): Money {
         return this.#total;
@@ -20,42 +24,91 @@ export class Invoice {
         return this.#lineItems;
     }
 
-    private constructor(lineItems: LineItem[], total: Money, vat: Vat) {
+    public get issueDate(): IssueDate {
+        return this.#issueDate;
+    }
+
+    public get dueDate(): IssueDate {
+        return this.#dueDate;
+    }
+
+    private constructor(lineItems: LineItem[], total: Money, vat: Vat, issueDate: IssueDate, dueDate: IssueDate) {
         this.#lineItems = lineItems;
         this.#total = total;
         this.#vat = vat;
+        this.#issueDate = issueDate;
+        this.#dueDate = dueDate;
     }
 
-    static create(options: { lineItems: LineItem[] }) {
-        assertLineItems(options.lineItems);
-
-        // Calculate total from all line items
-        let total = options.lineItems[0].total;
-        for (let i = 1; i < options.lineItems.length; i++) {
-            total = total.add(options.lineItems[i].total);
+    static create(options: { lineItems: LineItem[]; issueDate: IssueDate; dueDate: IssueDate }) {
+        const error = assertLineItems(options.lineItems);
+        if (error) {
+            return left(error);
         }
 
-        return new Invoice(options.lineItems, total, Vat.fromPercent("0"));
+        let total = options.lineItems[0].total;
+        for (let i = 1; i < options.lineItems.length; i++) {
+            const result = total.add(options.lineItems[i].total);
+            if (result.isLeft()) {
+                return left(result.value);
+            }
+            total = result.unwrap();
+        }
+
+        const issueDate = options.issueDate;
+        const dueDate = options.dueDate;
+        const invoice = new Invoice(options.lineItems, total, Vat.fromPercent("0"), issueDate, dueDate);
+
+        return right(invoice);
     }
 
     applyVat(vat: Vat) {
-        const money = vat.applyTo(this.total);
+        let baseTotal = this.#lineItems[0].total;
+        for (let i = 1; i < this.#lineItems.length; i++) {
+            const result = baseTotal.add(this.#lineItems[i].total);
+            if (result.isLeft()) {
+                return left(result.value);
+            }
+            baseTotal = result.unwrap();
+        }
+        const vatResult = vat.applyTo(baseTotal);
 
-        this.#total = money;
+        if (vatResult.isLeft()) {
+            return left(vatResult.value);
+        }
+
+        this.#total = vatResult.unwrap();
         this.#vat = vat;
+
+        return right(this);
     }
 
     addLineItem(lineItem: LineItem) {
-        assertLineItems([...this.#lineItems, lineItem]);
+        const error = assertLineItems([...this.#lineItems, lineItem]);
+        if (error) {
+            return left(error);
+        }
+
         this.#lineItems.push(lineItem);
-        this.#total = this.#total.add(this.#vat.applyTo(lineItem.total));
+        const vatResult = this.#vat.applyTo(lineItem.total);
+        if (vatResult.isLeft()) {
+            return left(vatResult.value);
+        }
+
+        const result = this.#total.add(vatResult.unwrap());
+        if (result.isLeft()) {
+            return left(result.value);
+        }
+        this.#total = result.unwrap();
+
+        return right(this);
     }
 
     removeLineItem(lineItem: LineItem) {
         const index = this.#lineItems.findIndex(item => item.equals(lineItem));
 
         if (index === -1) {
-            return;
+            return right(undefined);
         }
     
         const removed = this.#lineItems[index];
@@ -63,14 +116,29 @@ export class Invoice {
 
         newItems.splice(index, 1);
     
-        assertLineItems(newItems);
+        const error = assertLineItems(newItems);
+
+        if (error) {
+            return left(error);
+        }
+
         this.#lineItems = newItems;
     
         let baseTotal = newItems[0].total;
         for (let i = 1; i < newItems.length; i++) {
-            baseTotal = baseTotal.add(newItems[i].total);
+            const result = baseTotal.add(newItems[i].total);
+            if (result.isLeft()) {
+                return left(result.value);
+            }
+            baseTotal = result.unwrap();
         }
-        this.#total = this.#vat.applyTo(baseTotal);
-        return removed;
+
+        const result = this.#vat.applyTo(baseTotal);
+        if (result.isLeft()) {
+            return left(result.value);
+        }
+        this.#total = result.unwrap();
+
+        return right(removed);
     }
 }

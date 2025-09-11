@@ -27,7 +27,7 @@ export class Vat {
         return new Vat(numericValue);
     }
 
-    applyTo(money: Money): Money {
+    applyTo(money: Money) {
         const vat = money.multiplyBy(this.rate);
 
         return money.add(vat);
