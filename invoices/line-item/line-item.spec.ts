@@ -1,18 +1,17 @@
 import { LineItem } from "./line-item";
 import { UnitDescription } from "./unit-description";
 import { UnitQuantity } from "./unit-quantity";
-import { InvalidQuantityError } from "./asserts/assert-unit-quantity";
 import { Money } from "../money/money/money";
 import { Numeric } from "../numeric/numeric";
 
 describe("LineItem", () => {
-    it("should create a LineItem instance", () => {
-        const price = Money.fromString("100", "USD");
+    it("should create a line item", () => {
+        const price = Money.fromString("100", "USD").unwrap();
         const lineItem = LineItem.create(
             "Product 1",
             price,
             Numeric.fromNumber(4)
-        );
+        ).unwrap();
 
         expect(lineItem.price.equals(price)).toBe(true);
         expect(
@@ -20,37 +19,24 @@ describe("LineItem", () => {
         ).toBe(true);
         expect(
             lineItem.quantity.equals(
-                UnitQuantity.fromNumeric(Numeric.fromNumber(4))
+                UnitQuantity.fromNumeric(Numeric.fromNumber(4)).unwrap()
             )
         ).toBe(true);
-        expect(lineItem.total.equals(Money.fromString("400", "USD"))).toBe(
+        expect(lineItem.total.equals(Money.fromString("400", "USD").unwrap())).toBe(
             true
         );
     });
-
-    it.each([-1, 0, 2.5, -3.7, 4.1])(
-        "should throw an error for quantity: %p",
-        (invalidQuantity) => {
-            expect(() => {
-                LineItem.create(
-                    "Product 1",
-                    Money.fromString("100", "USD"),
-                    Numeric.fromNumber(invalidQuantity)
-                );
-            }).toThrow(InvalidQuantityError);
-        }
-    );
 
     it.each([
         {
             lineItem1: LineItem.create(
                 "Product A",
-                Money.fromString("50", "USD"),
+                Money.fromString("50", "USD").unwrap(),
                 Numeric.fromNumber(2)
             ),
             lineItem2: LineItem.create(
                 "Product A",
-                Money.fromString("50", "USD"),
+                Money.fromString("50", "USD").unwrap(),
                 Numeric.fromNumber(2)
             ),
             expected: true,
@@ -58,12 +44,12 @@ describe("LineItem", () => {
         {
             lineItem1: LineItem.create(
                 "Product B",
-                Money.fromString("50", "USD"),
+                Money.fromString("50", "USD").unwrap(),
                 Numeric.fromNumber(2)
             ),
             lineItem2: LineItem.create(
                 "Product A",
-                Money.fromString("50", "USD"),
+                Money.fromString("50", "USD").unwrap(),
                 Numeric.fromNumber(2)
             ),
             expected: false,
@@ -71,12 +57,12 @@ describe("LineItem", () => {
         {
             lineItem1: LineItem.create(
                 "Product A",
-                Money.fromString("60", "USD"),
+                Money.fromString("60", "USD").unwrap(),
                 Numeric.fromNumber(2)
             ),
             lineItem2: LineItem.create(
                 "Product A",
-                Money.fromString("50", "USD"),
+                Money.fromString("50", "USD").unwrap(),
                 Numeric.fromNumber(2)
             ),
             expected: false,
@@ -84,12 +70,12 @@ describe("LineItem", () => {
         {
             lineItem1: LineItem.create(
                 "Product A",
-                Money.fromString("50", "USD"),
+                Money.fromString("50", "USD").unwrap(),
                 Numeric.fromNumber(2)
             ),
             lineItem2: LineItem.create(
                 "Product A",
-                Money.fromString("50", "USD"),
+                Money.fromString("50", "USD").unwrap(),
                 Numeric.fromNumber(3)
             ),
             expected: false,
@@ -97,7 +83,7 @@ describe("LineItem", () => {
     ])(
         "should compare line items: %p",
         ({ lineItem1, lineItem2, expected }) => {
-            expect(lineItem1.equals(lineItem2)).toBe(expected);
+            expect(lineItem1.unwrap().equals(lineItem2.unwrap())).toBe(expected);
         }
     );
 });

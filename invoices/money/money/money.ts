@@ -2,6 +2,8 @@ import { Numeric } from '../../numeric/numeric';
 import { Currency } from '../currency/currency';
 import { ROUNDING } from '../../numeric/rounding';
 import { assertMinorUnits } from './asserts/assert-minor-units';
+import { assertEqualCurrencies } from './asserts/assert-equal-currencies';
+import { left, right } from '@sweet-monads/either';
 
 export class Money {
     #amount: Numeric;
@@ -27,14 +29,16 @@ export class Money {
         return isSameCurrency && isSameAmount;
     }
 
-    add(other: Money): Money {
-        if (!this.#currency.equals(other.currency)) {
-            throw new Error(`Cannot add money with different currencies: ${this.#currency} and ${other.currency}`);
+    add(other: Money) {
+        const error = assertEqualCurrencies(this.#currency, other.currency);
+
+        if (error) {
+            return left(error);
         }
 
         const value = this.#amount.add(other.amount);
-    
-        return new Money(value, this.#currency);
+
+        return right(new Money(value, this.#currency));
     }
 
     multiplyBy(factor: Numeric, rounding: ROUNDING = ROUNDING.UP): Money {
@@ -42,14 +46,30 @@ export class Money {
         return new Money(value, this.#currency);
     }
 
-    static fromString(amount: string, currency: string) {
+    static fromString(amount: string, currency: string){
         const numericValue = Numeric.fromString(amount);
-        return Money.fromNumeric(numericValue, new Currency(currency));
+        const currencyResult = Currency.create(currency);
+        
+        if (currencyResult.isLeft()) {
+            return left(currencyResult.value);
+        }
+
+        const moneyResult = Money.fromNumeric(numericValue, currencyResult.unwrap());
+    
+        if (moneyResult.isLeft()) {
+            return left(moneyResult.value);
+        }
+
+        return right(moneyResult.unwrap());
     }
 
     static fromNumeric(amount: Numeric, currency: Currency) {
-       assertMinorUnits(amount);
+       const error = assertMinorUnits(amount);
+    
+       if (error) {
+           return left(error);
+       }
 
-        return new Money(amount, currency);
+        return right(new Money(amount, currency));
     }
 }
