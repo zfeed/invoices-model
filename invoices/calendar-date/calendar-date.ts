@@ -8,14 +8,14 @@ export class IssueDate {
         this.#value = value;
     }
 
-    static create(input: string) {
-        const error = assertIsISO8601Date(input);
+    static create(date: string) {
+        const error = assertIsISO8601Date(date);
 
         if (error) {
             return left(error);
         }
 
-        return right(new IssueDate(input));
+        return right(new IssueDate(date));
     }
 
     public equals(other: IssueDate): boolean {

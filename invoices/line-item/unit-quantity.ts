@@ -9,14 +9,14 @@ export class UnitQuantity {
         this.#value = value;
     }
 
-    static create(value: Numeric) {
-        const error = assertUnitQuantity(value.toString());
+    static create(value: string) {
+        const error = assertUnitQuantity(value);
 
         if (error) {
             return left(error);
         }
 
-        return right(new this(value));
+        return right(new this(Numeric.create(value)));
     }
 
     get value(): Numeric {

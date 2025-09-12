@@ -43,19 +43,40 @@ export class LineItem {
         );
     }
 
-    static create(unitDescription: UnitDescription, price: Money, quantity: Numeric) {
-        const result = UnitQuantity.create(quantity);
+    static create({
+        description,
+        price,
+        quantity
+    }: {
+        description: string,
+        price: {
+            amount: string,
+            currency: string
+        },
+        quantity: string
+    }) {
+        const unitDescription = UnitDescription.create(description);
 
-        if (result.isLeft()) {
-            return left(result.value);
+        const unitQuantityResult = UnitQuantity.create(quantity);
+
+        if (unitQuantityResult.isLeft()) {
+            return left(unitQuantityResult.value);
         }
 
-        const unitQuantity = result.unwrap();
+        const moneyResult = Money.create(price.amount, price.currency);
+
+        if (moneyResult.isLeft()) {
+            return left(moneyResult.value);
+        }
+
+        const unitPrice = moneyResult.unwrap();
+
+        const unitQuantity = unitQuantityResult.unwrap();
 
         return right(
             new this(
                 unitDescription,
-                price,
+                unitPrice,
                 unitQuantity
             )
         );
