@@ -1,8 +1,7 @@
 import { UnitDescription } from "./unit-description";
 import { UnitQuantity } from "./unit-quantity";
 import { Money } from "../money/money/money";
-import { Numeric } from "../numeric/numeric";
-import { left, right } from "@sweet-monads/either";
+import { Result } from "../../building-blocks";
 
 export class LineItem {
     #price: Money;
@@ -59,21 +58,21 @@ export class LineItem {
 
         const unitQuantityResult = UnitQuantity.create(quantity);
 
-        if (unitQuantityResult.isLeft()) {
-            return left(unitQuantityResult.value);
+        if (unitQuantityResult.isError()) {
+            return Result.error(unitQuantityResult.value);
         }
 
         const moneyResult = Money.create(price.amount, price.currency);
 
-        if (moneyResult.isLeft()) {
-            return left(moneyResult.value);
+        if (moneyResult.isError()) {
+            return Result.error(moneyResult.value);
         }
 
         const unitPrice = moneyResult.unwrap();
 
         const unitQuantity = unitQuantityResult.unwrap();
 
-        return right(
+        return Result.ok(
             new this(
                 unitDescription,
                 unitPrice,

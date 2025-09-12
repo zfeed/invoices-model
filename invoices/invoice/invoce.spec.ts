@@ -73,7 +73,7 @@ describe("Invoice", () => {
 
         expect(invoice.total.equals(Money.create("156", "USD").unwrap())).toBe(true);
         expect(invoice.vat.equals(Vat.create("20"))).toBe(true);
-        expect(result.isRight()).toBe(true);
+        expect(result.isOk()).toBe(true);
     });
 
     it("should reapply VAT to invoice total", () => {

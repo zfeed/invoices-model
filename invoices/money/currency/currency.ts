@@ -1,5 +1,5 @@
 import { assertCurrencyCode } from './asserts/assert-currency-code';
-import { from, left, right } from '@sweet-monads/either';
+import { Result } from "../../../building-blocks";
 
 export class Currency {
     #code: string;
@@ -12,9 +12,9 @@ export class Currency {
         const error = assertCurrencyCode(code);
     
         if (error) {
-            return left(error);
+            return Result.error(error);
         }
-        return right(new Currency(code));
+        return Result.ok(new Currency(code));
     }
 
     equals(other: Currency): boolean {

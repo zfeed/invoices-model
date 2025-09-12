@@ -1,5 +1,5 @@
 import { assertIsISO8601Date } from "./asserts/assert-isso8601-date";
-import { left, right } from "@sweet-monads/either";
+import { Result } from "../../building-blocks";
 
 export class IssueDate {
     #value: string;
@@ -12,10 +12,10 @@ export class IssueDate {
         const error = assertIsISO8601Date(date);
 
         if (error) {
-            return left(error);
+            return Result.error(error);
         }
 
-        return right(new IssueDate(date));
+        return Result.ok(new IssueDate(date));
     }
 
     public equals(other: IssueDate): boolean {
