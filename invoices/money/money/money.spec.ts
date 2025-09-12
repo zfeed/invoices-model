@@ -78,7 +78,7 @@ describe("Money", () => {
 
         expect(result.value).toEqual(
             expect.objectContaining({
-                code: '3001',
+                code: '4001',
             })
         );
     });
@@ -91,7 +91,20 @@ describe("Money", () => {
 
         expect(result.value).toEqual(
             expect.objectContaining({
-                code: '3000',
+                code: '4000',
+            })
+        );
+    });
+
+    test("should not add two Money values with different currencies", () => {
+        const money1 = Money.fromString("100", "USD").unwrap();
+        const money2 = Money.fromString("50", "EUR").unwrap();
+
+        const result = money1.add(money2);
+
+        expect(result.value).toEqual(
+            expect.objectContaining({
+                code: '4002',
             })
         );
     });

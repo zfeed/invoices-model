@@ -11,7 +11,7 @@ describe("CalendarDate", () => {
         const result = IssueDate.create("invalid-date");
 
         expect(result.value).toEqual(expect.objectContaining({
-            code: '2000',
+            code: '3000',
         }));
     });
 
