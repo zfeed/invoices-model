@@ -2,7 +2,6 @@ import { LineItem } from "./line-item";
 import { UnitDescription } from "./unit-description";
 import { UnitQuantity } from "./unit-quantity";
 import { Money } from "../money/money/money";
-import { Numeric } from "../numeric/numeric";
 
 describe("LineItem", () => {
     it("should create a line item", () => {
