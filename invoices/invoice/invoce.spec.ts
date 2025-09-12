@@ -2,8 +2,6 @@ import { Money } from "../money/money/money";
 import { Invoice } from "./invoice";
 import { Vat } from "../vat/vat";
 import { LineItem } from "../line-item/line-item";
-import { Numeric } from "../numeric/numeric";
-import { UnitDescription } from "../line-item/unit-description";
 import { IssueDate } from "../calendar-date/calendar-date";
 
 describe("Invoice", () => {
