@@ -3,17 +3,18 @@ import { Invoice } from "./invoice";
 import { Vat } from "../vat/vat";
 import { LineItem } from "../line-item/line-item";
 import { Numeric } from "../numeric/numeric";
+import { UnitDescription } from "../line-item/unit-description";
 import { IssueDate } from "../calendar-date/calendar-date";
 
 describe("Invoice", () => {
     it("should create an Invoice instance", () => {
         const lineItem1 = LineItem.create(
-            "Item 1",
+            UnitDescription.fromString("Item 1"),
             Money.fromString("50", "USD").unwrap(),
             Numeric.fromString("2")
         ).unwrap();
         const lineItem2 = LineItem.create(
-            "Item 2",
+            UnitDescription.fromString("Item 2"),
             Money.fromString("30", "USD").unwrap(),
             Numeric.fromString("1")
         ).unwrap();
@@ -41,12 +42,12 @@ describe("Invoice", () => {
 
     it("should apply VAT to invoice total", () => {
         const lineItem1 = LineItem.create(
-            "Item 1",
+            UnitDescription.fromString("Item 1"),
             Money.fromString("50", "USD").unwrap(),
             Numeric.fromString("2")
         ).unwrap();
         const lineItem2 = LineItem.create(
-            "Item 2",
+            UnitDescription.fromString("Item 2"),
             Money.fromString("30", "USD").unwrap(),
             Numeric.fromString("1")
         ).unwrap();
@@ -67,12 +68,12 @@ describe("Invoice", () => {
 
     it("should reapply VAT to invoice total", () => {
         const lineItem1 = LineItem.create(
-            "Item 1",
+            UnitDescription.fromString("Item 1"),
             Money.fromString("50", "USD").unwrap(),
             Numeric.fromString("2")
         ).unwrap();
         const lineItem2 = LineItem.create(
-            "Item 2",
+            UnitDescription.fromString("Item 2"),
             Money.fromString("30", "USD").unwrap(),
             Numeric.fromString("1")
         ).unwrap();
@@ -112,12 +113,12 @@ describe("Invoice", () => {
             dueDate: IssueDate.create("2023-02-01").unwrap(),
             lineItems: [
                 LineItem.create(
-                    "Item 1",
+                    UnitDescription.fromString("Item 1"),
                     Money.fromString("50", "USD").unwrap(),
                     Numeric.fromString("2")
                 ).unwrap(),
                 LineItem.create(
-                    "Item 2",
+                    UnitDescription.fromString("Item 2"),
                     Money.fromString("30", "EUR").unwrap(),
                     Numeric.fromString("1")
                 ).unwrap(),
@@ -133,7 +134,7 @@ describe("Invoice", () => {
 
     it("should add a line item", () => {
         const lineItem1 = LineItem.create(
-            "Item 1",
+            UnitDescription.fromString("Item 1"),
             Money.fromString("50", "USD").unwrap(),
             Numeric.fromString("2")
         ).unwrap();
@@ -143,7 +144,7 @@ describe("Invoice", () => {
             lineItems: [lineItem1],
         }).unwrap();
         const lineItem2 = LineItem.create(
-            "Item 2",
+            UnitDescription.fromString("Item 2"),
             Money.fromString("30", "USD").unwrap(),
             Numeric.fromString("4")
         ).unwrap();
@@ -162,7 +163,7 @@ describe("Invoice", () => {
 
     it("should add respect applied vat when a line item added", () => {
         const lineItem1 = LineItem.create(
-            "Item 1",
+            UnitDescription.fromString("Item 1"),
             Money.fromString("50", "USD").unwrap(),
             Numeric.fromString("2")
         ).unwrap();
@@ -175,7 +176,7 @@ describe("Invoice", () => {
         invoice.applyVat(Vat.fromPercent("10"));
 
         const lineItem2 = LineItem.create(
-            "Item 2",
+            UnitDescription.fromString("Item 2"),
             Money.fromString("30", "USD").unwrap(),
             Numeric.fromString("4")
         ).unwrap();
@@ -187,7 +188,7 @@ describe("Invoice", () => {
 
     it("should not add a duplicate line item", () => {
         const lineItem1 = LineItem.create(
-            "Item 1",
+            UnitDescription.fromString("Item 1"),
             Money.fromString("50", "USD").unwrap(),
             Numeric.fromString("2")
         ).unwrap();
@@ -208,12 +209,12 @@ describe("Invoice", () => {
 
     it("should remove a line item", () => {
         const lineItem1 = LineItem.create(
-            "Item 1",
+            UnitDescription.fromString("Item 1"),
             Money.fromString("50", "USD").unwrap(),
             Numeric.fromString("2")
         ).unwrap();
         const lineItem2 = LineItem.create(
-            "Item 2",
+            UnitDescription.fromString("Item 2"),
             Money.fromString("40", "USD").unwrap(),
             Numeric.fromString("5")
         ).unwrap();
@@ -225,7 +226,7 @@ describe("Invoice", () => {
 
         const removedItem = invoice.removeLineItem(
             LineItem.create(
-                "Item 1",
+                UnitDescription.fromString("Item 1"),
                 Money.fromString("50", "USD").unwrap(),
                 Numeric.fromString("2")
             ).unwrap()
@@ -241,12 +242,12 @@ describe("Invoice", () => {
 
     it("should change total when a line item is removed", () => {
         const lineItem1 = LineItem.create(
-            "Item 1",
+            UnitDescription.fromString("Item 1"),
             Money.fromString("50", "USD").unwrap(),
             Numeric.fromString("2")
         ).unwrap();
         const lineItem2 = LineItem.create(
-            "Item 2",
+            UnitDescription.fromString("Item 2"),
             Money.fromString("40", "USD").unwrap(),
             Numeric.fromString("5")
         ).unwrap();
@@ -258,7 +259,7 @@ describe("Invoice", () => {
 
         invoice.removeLineItem(
             LineItem.create(
-                "Item 1",
+                UnitDescription.fromString("Item 1"),
                 Money.fromString("50", "USD").unwrap(),
                 Numeric.fromString("2")
             ).unwrap()
@@ -269,12 +270,12 @@ describe("Invoice", () => {
 
     it("should change total according to applied vat when a line item is removed", () => {
         const lineItem1 = LineItem.create(
-            "Item 1",
+            UnitDescription.fromString("Item 1"),
             Money.fromString("50", "USD").unwrap(),
             Numeric.fromString("2")
         ).unwrap();
         const lineItem2 = LineItem.create(
-            "Item 2",
+            UnitDescription.fromString("Item 2"),
             Money.fromString("40", "USD").unwrap(),
             Numeric.fromString("5")
         ).unwrap();
@@ -288,7 +289,7 @@ describe("Invoice", () => {
 
         invoice.removeLineItem(
             LineItem.create(
-                "Item 1",
+                UnitDescription.fromString("Item 1"),
                 Money.fromString("50", "USD").unwrap(),
                 Numeric.fromString("2")
             ).unwrap()
