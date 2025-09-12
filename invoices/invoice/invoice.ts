@@ -2,7 +2,7 @@ import { Money } from "../money/money/money";
 import { Vat } from "../vat/vat";
 import { LineItem } from "../line-item/line-item";
 import { assertLineItems } from "./asserts/assert-line-items";
-import { left, right } from "@sweet-monads/either";
+import { Result } from "../../building-blocks";
 
 import { IssueDate } from "../calendar-date/calendar-date";
 export class Invoice {
@@ -43,14 +43,14 @@ export class Invoice {
     static create(options: { lineItems: LineItem[]; issueDate: IssueDate; dueDate: IssueDate }) {
         const error = assertLineItems(options.lineItems);
         if (error) {
-            return left(error);
+            return Result.error(error);
         }
 
         let total = options.lineItems[0].total;
         for (let i = 1; i < options.lineItems.length; i++) {
             const result = total.add(options.lineItems[i].total);
-            if (result.isLeft()) {
-                return left(result.value);
+            if (result.isError()) {
+                return Result.error(result.value);
             }
             total = result.unwrap();
         }
@@ -59,56 +59,56 @@ export class Invoice {
         const dueDate = options.dueDate;
         const invoice = new Invoice(options.lineItems, total, Vat.create("0"), issueDate, dueDate);
 
-        return right(invoice);
+        return Result.ok(invoice);
     }
 
     applyVat(vat: Vat) {
         let baseTotal = this.#lineItems[0].total;
         for (let i = 1; i < this.#lineItems.length; i++) {
             const result = baseTotal.add(this.#lineItems[i].total);
-            if (result.isLeft()) {
-                return left(result.value);
+            if (result.isError()) {
+                return Result.error(result.value);
             }
             baseTotal = result.unwrap();
         }
         const vatResult = vat.applyTo(baseTotal);
 
-        if (vatResult.isLeft()) {
-            return left(vatResult.value);
+        if (vatResult.isError()) {
+            return Result.error(vatResult.value);
         }
 
         this.#total = vatResult.unwrap();
         this.#vat = vat;
 
-        return right(this);
+        return Result.ok(this);
     }
 
     addLineItem(lineItem: LineItem) {
         const error = assertLineItems([...this.#lineItems, lineItem]);
         if (error) {
-            return left(error);
+            return Result.error(error);
         }
 
         this.#lineItems.push(lineItem);
         const vatResult = this.#vat.applyTo(lineItem.total);
-        if (vatResult.isLeft()) {
-            return left(vatResult.value);
+        if (vatResult.isError()) {
+            return Result.error(vatResult.value);
         }
 
         const result = this.#total.add(vatResult.unwrap());
-        if (result.isLeft()) {
-            return left(result.value);
+        if (result.isError()) {
+            return Result.error(result.value);
         }
         this.#total = result.unwrap();
 
-        return right(this);
+        return Result.ok(this);
     }
 
     removeLineItem(lineItem: LineItem) {
         const index = this.#lineItems.findIndex(item => item.equals(lineItem));
 
         if (index === -1) {
-            return right(undefined);
+            return Result.ok(undefined);
         }
     
         const removed = this.#lineItems[index];
@@ -119,7 +119,7 @@ export class Invoice {
         const error = assertLineItems(newItems);
 
         if (error) {
-            return left(error);
+            return Result.error(error);
         }
 
         this.#lineItems = newItems;
@@ -127,18 +127,18 @@ export class Invoice {
         let baseTotal = newItems[0].total;
         for (let i = 1; i < newItems.length; i++) {
             const result = baseTotal.add(newItems[i].total);
-            if (result.isLeft()) {
-                return left(result.value);
+            if (result.isError()) {
+                return Result.error(result.value);
             }
             baseTotal = result.unwrap();
         }
 
         const result = this.#vat.applyTo(baseTotal);
-        if (result.isLeft()) {
-            return left(result.value);
+        if (result.isError()) {
+            return Result.error(result.value);
         }
         this.#total = result.unwrap();
 
-        return right(removed);
+        return Result.ok(removed);
     }
 }

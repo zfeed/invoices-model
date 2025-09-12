@@ -3,7 +3,7 @@ import { Currency } from '../currency/currency';
 import { ROUNDING } from '../../numeric/rounding';
 import { assertMinorUnits } from './asserts/assert-minor-units';
 import { assertEqualCurrencies } from './asserts/assert-equal-currencies';
-import { left, right } from '@sweet-monads/either';
+import { Result } from "../../../building-blocks";
 
 export class Money {
     #amount: Numeric;
@@ -33,12 +33,12 @@ export class Money {
         const error = assertEqualCurrencies(this.#currency, other.currency);
 
         if (error) {
-            return left(error);
+            return Result.error(error);
         }
 
         const value = this.#amount.add(other.amount);
 
-        return right(new Money(value, this.#currency));
+        return Result.ok(new Money(value, this.#currency));
     }
 
     multiplyBy(factor: Numeric, rounding: ROUNDING = ROUNDING.UP): Money {
@@ -51,17 +51,17 @@ export class Money {
        const error = assertMinorUnits(amount);
 
        if (error) {
-           return left(error);
+           return Result.error(error);
        }
 
          const numericValue = Numeric.create(amount);
 
         const currencyResult = Currency.create(currency);
-        
-        if (currencyResult.isLeft()) {
-            return left(currencyResult.value);
+
+        if (currencyResult.isError()) {
+            return Result.error(currencyResult.value);
         }
 
-        return right(new Money(numericValue, currencyResult.unwrap()));
+        return Result.ok(new Money(numericValue, currencyResult.unwrap()));
     }
 }
