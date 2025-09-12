@@ -17,8 +17,8 @@ describe("Money", () => {
             currency: "BHD",
         },
     ])("should create Money for %s", ({ amount, currency }) => {
-        const money = Money.fromString(amount, currency).unwrap();
-        const expectedAmount = Numeric.fromString(amount);
+        const money = Money.create(amount, currency).unwrap();
+        const expectedAmount = Numeric.create(amount);
         const expectedCurrency = Currency.create(currency).unwrap();
         expect(money.amount.equals(expectedAmount)).toBe(true);
         expect(money.currency.equals(expectedCurrency)).toBe(true);
@@ -49,31 +49,31 @@ describe("Money", () => {
     ])(
         "should return $expected for $amount1 $currency1 === $amount2 $currency2",
         ({ amount1, currency1, amount2, currency2, expected }) => {
-            const money1 = Money.fromString(amount1, currency1).unwrap();
-            const money2 = Money.fromString(amount2, currency2).unwrap();
+            const money1 = Money.create(amount1, currency1).unwrap();
+            const money2 = Money.create(amount2, currency2).unwrap();
             expect(money1.equals(money2)).toBe(expected);
         }
     );
 
-    test("should create Money from string using fromString", () => {
-        const money = Money.fromString("355435", "USD").unwrap();
-        expect(money.amount.equals(Numeric.fromString("355435"))).toBe(true);
+    test("should create Money from string using create", () => {
+        const money = Money.create("355435", "USD").unwrap();
+        expect(money.amount.equals(Numeric.create("355435"))).toBe(true);
         expect(money.currency.equals(Currency.create("USD").unwrap())).toBe(true);
     });
 
     test("should create money from integer", () => {
-        const money = Money.fromNumeric(
-            Numeric.fromString("200"),
-            Currency.create("USD").unwrap()
+        const money = Money.create(
+            "200",
+            'USD'
         ).unwrap();
-        expect(money.amount.equals(Numeric.fromString("200"))).toBe(true);
+        expect(money.amount.equals(Numeric.create("200"))).toBe(true);
         expect(money.currency.equals(Currency.create("USD").unwrap())).toBe(true);
     });
 
     test("should not create money from negative int", () => {
-        const result = Money.fromNumeric(
-            Numeric.fromString("-200"),
-            Currency.create("USD").unwrap()
+        const result = Money.create(
+            "-200",
+            "USD"
         );
 
         expect(result.value).toEqual(
@@ -84,9 +84,9 @@ describe("Money", () => {
     });
 
     test("should not create money from decimal", () => {
-        const result = Money.fromNumeric(
-            Numeric.fromString("200.50"),
-            Currency.create("USD").unwrap()
+        const result = Money.create(
+            "200.50",
+            "USD"
         );
 
         expect(result.value).toEqual(
@@ -97,8 +97,8 @@ describe("Money", () => {
     });
 
     test("should not add two Money values with different currencies", () => {
-        const money1 = Money.fromString("100", "USD").unwrap();
-        const money2 = Money.fromString("50", "EUR").unwrap();
+        const money1 = Money.create("100", "USD").unwrap();
+        const money2 = Money.create("50", "EUR").unwrap();
 
         const result = money1.add(money2);
 

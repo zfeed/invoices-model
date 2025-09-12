@@ -44,7 +44,7 @@ export class LineItem {
     }
 
     static create(unitDescription: UnitDescription, price: Money, quantity: Numeric) {
-        const result = UnitQuantity.fromNumeric(quantity);
+        const result = UnitQuantity.create(quantity);
 
         if (result.isLeft()) {
             return left(result.value);

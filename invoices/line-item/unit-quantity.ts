@@ -9,7 +9,7 @@ export class UnitQuantity {
         this.#value = value;
     }
 
-    static fromNumeric(value: Numeric) {
+    static create(value: Numeric) {
         const error = assertUnitQuantity(value.toString());
 
         if (error) {

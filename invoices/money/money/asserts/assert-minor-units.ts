@@ -29,7 +29,7 @@ export function assertMinorUnits(units: string | Numeric): DomainError | null {
         return minorUnitsNotIntegerError;
     }
 
-    if (units.lessThan(Numeric.fromString("0"))) {
+    if (units.lessThan(Numeric.create("0"))) {
         return minorUnitsNotGteZeroError;
     }
 

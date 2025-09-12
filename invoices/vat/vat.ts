@@ -16,11 +16,11 @@ export class Vat {
         return this.#value.equals(other.rate);
     }
 
-    static fromPercent(value: string) {
+    static create(value: string) {
         assertPercents(value);
 
-        const oneHundred = Numeric.fromString('100');
-        const percents = Numeric.fromString(value);
+        const oneHundred = Numeric.create('100');
+        const percents = Numeric.create(value);
 
         const numericValue = percents.divideBy(oneHundred);
 

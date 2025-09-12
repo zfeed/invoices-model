@@ -6,23 +6,23 @@ import { Numeric } from "../numeric/numeric";
 
 describe("LineItem", () => {
     it("should create a line item", () => {
-        const price = Money.fromString("100", "USD").unwrap();
+        const price = Money.create("100", "USD").unwrap();
         const lineItem = LineItem.create(
-            UnitDescription.fromString("Product 1"),
+            UnitDescription.create("Product 1"),
             price,
-            Numeric.fromNumber(4)
+            Numeric.create('4')
         ).unwrap();
 
         expect(lineItem.price.equals(price)).toBe(true);
         expect(
-            lineItem.description.equals(UnitDescription.fromString("Product 1"))
+            lineItem.description.equals(UnitDescription.create("Product 1"))
         ).toBe(true);
         expect(
             lineItem.quantity.equals(
-                UnitQuantity.fromNumeric(Numeric.fromNumber(4)).unwrap()
+                UnitQuantity.create(Numeric.create('4')).unwrap()
             )
         ).toBe(true);
-        expect(lineItem.total.equals(Money.fromString("400", "USD").unwrap())).toBe(
+        expect(lineItem.total.equals(Money.create("400", "USD").unwrap())).toBe(
             true
         );
     });
@@ -30,53 +30,66 @@ describe("LineItem", () => {
     it.each([
         {
             lineItem1: LineItem.create(
-                UnitDescription.fromString("Product A"),
-                Money.fromString("50", "USD").unwrap(),
-                Numeric.fromNumber(2)
+                UnitDescription.create("Product A"),
+                Money.create("50", "USD").unwrap(),
+                Numeric.create('2')
             ),
             lineItem2: LineItem.create(
-                UnitDescription.fromString("Product A"),
-                Money.fromString("50", "USD").unwrap(),
-                Numeric.fromNumber(2)
+                UnitDescription.create("Product A"),
+                Money.create("50", "USD").unwrap(),
+                Numeric.create('2')
             ),
             expected: true,
         },
         {
             lineItem1: LineItem.create(
-                UnitDescription.fromString("Product B"),
-                Money.fromString("50", "USD").unwrap(),
-                Numeric.fromNumber(2)
+                UnitDescription.create("Product B"),
+                Money.create("50", "USD").unwrap(),
+                Numeric.create('2')
             ),
             lineItem2: LineItem.create(
-                UnitDescription.fromString("Product A"),
-                Money.fromString("50", "USD").unwrap(),
-                Numeric.fromNumber(2)
+                UnitDescription.create("Product A"),
+                Money.create("50", "USD").unwrap(),
+                Numeric.create('2')
             ),
             expected: false,
         },
         {
             lineItem1: LineItem.create(
-                UnitDescription.fromString("Product A"),
-                Money.fromString("60", "USD").unwrap(),
-                Numeric.fromNumber(2)
+                UnitDescription.create("Product A"),
+                Money.create("60", "USD").unwrap(),
+                Numeric.create('2')
             ),
             lineItem2: LineItem.create(
-                UnitDescription.fromString("Product A"),
-                Money.fromString("50", "USD").unwrap(),
-                Numeric.fromNumber(2)
+                UnitDescription.create("Product A"),
+                Money.create("50", "USD").unwrap(),
+                Numeric.create('2')
             ),
             expected: false,
         },
         {
             lineItem1: LineItem.create(
-                UnitDescription.fromString("Product A"),
-                Money.fromString("50", "USD").unwrap(),
-                Numeric.fromNumber(2)
+                UnitDescription.create("Product A"),
+                Money.create("60", "USD").unwrap(),
+                Numeric.create('2')
             ),
             lineItem2: LineItem.create(
-                UnitDescription.fromString("Product A"),
-                Money.fromString("50", "USD").unwrap(),
-                Numeric.fromNumber(3)
+                UnitDescription.create("Product A"),
+                Money.create("50", "USD").unwrap(),
+                Numeric.create('2')
+            ),
+            expected: false,
+        },
+        {
+            lineItem1: LineItem.create(
+                UnitDescription.create("Product A"),
+                Money.create("50", "USD").unwrap(),
+                Numeric.create('2')
+            ),
+            lineItem2: LineItem.create(
+                UnitDescription.create("Product A"),
+                Money.create("50", "USD").unwrap(),
+                Numeric.create('3')
             ),
             expected: false,
         },

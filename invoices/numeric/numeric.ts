@@ -7,12 +7,8 @@ export class Numeric {
         this.#value = new Decimal(value);
     }
 
-    static fromString(value: string) {
+    static create(value: string) {
         return new this(value);
-    }
-
-    static fromNumber(value: number) {
-        return new this(value.toString());
     }
 
     multiplyBy(value: Numeric) {
