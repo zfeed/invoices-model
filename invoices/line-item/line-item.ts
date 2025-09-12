@@ -43,7 +43,7 @@ export class LineItem {
         );
     }
 
-    static create(description: string, price: Money, quantity: Numeric) {
+    static create(unitDescription: UnitDescription, price: Money, quantity: Numeric) {
         const result = UnitQuantity.fromNumeric(quantity);
 
         if (result.isLeft()) {
@@ -54,7 +54,7 @@ export class LineItem {
 
         return right(
             new this(
-                UnitDescription.fromString(description),
+                unitDescription,
                 price,
                 unitQuantity
             )

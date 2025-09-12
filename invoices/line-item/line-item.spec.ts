@@ -8,7 +8,7 @@ describe("LineItem", () => {
     it("should create a line item", () => {
         const price = Money.fromString("100", "USD").unwrap();
         const lineItem = LineItem.create(
-            "Product 1",
+            UnitDescription.fromString("Product 1"),
             price,
             Numeric.fromNumber(4)
         ).unwrap();
@@ -30,12 +30,12 @@ describe("LineItem", () => {
     it.each([
         {
             lineItem1: LineItem.create(
-                "Product A",
+                UnitDescription.fromString("Product A"),
                 Money.fromString("50", "USD").unwrap(),
                 Numeric.fromNumber(2)
             ),
             lineItem2: LineItem.create(
-                "Product A",
+                UnitDescription.fromString("Product A"),
                 Money.fromString("50", "USD").unwrap(),
                 Numeric.fromNumber(2)
             ),
@@ -43,12 +43,12 @@ describe("LineItem", () => {
         },
         {
             lineItem1: LineItem.create(
-                "Product B",
+                UnitDescription.fromString("Product B"),
                 Money.fromString("50", "USD").unwrap(),
                 Numeric.fromNumber(2)
             ),
             lineItem2: LineItem.create(
-                "Product A",
+                UnitDescription.fromString("Product A"),
                 Money.fromString("50", "USD").unwrap(),
                 Numeric.fromNumber(2)
             ),
@@ -56,12 +56,12 @@ describe("LineItem", () => {
         },
         {
             lineItem1: LineItem.create(
-                "Product A",
+                UnitDescription.fromString("Product A"),
                 Money.fromString("60", "USD").unwrap(),
                 Numeric.fromNumber(2)
             ),
             lineItem2: LineItem.create(
-                "Product A",
+                UnitDescription.fromString("Product A"),
                 Money.fromString("50", "USD").unwrap(),
                 Numeric.fromNumber(2)
             ),
@@ -69,12 +69,12 @@ describe("LineItem", () => {
         },
         {
             lineItem1: LineItem.create(
-                "Product A",
+                UnitDescription.fromString("Product A"),
                 Money.fromString("50", "USD").unwrap(),
                 Numeric.fromNumber(2)
             ),
             lineItem2: LineItem.create(
-                "Product A",
+                UnitDescription.fromString("Product A"),
                 Money.fromString("50", "USD").unwrap(),
                 Numeric.fromNumber(3)
             ),
