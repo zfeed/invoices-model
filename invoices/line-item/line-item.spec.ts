@@ -7,11 +7,14 @@ import { Numeric } from "../numeric/numeric";
 describe("LineItem", () => {
     it("should create a line item", () => {
         const price = Money.create("100", "USD").unwrap();
-        const lineItem = LineItem.create(
-            UnitDescription.create("Product 1"),
-            price,
-            Numeric.create('4')
-        ).unwrap();
+        const lineItem = LineItem.create({
+            description: "Product 1",
+            price: {
+                amount: "100",
+                currency: "USD"
+            },
+            quantity: '4'
+        }).unwrap();
 
         expect(lineItem.price.equals(price)).toBe(true);
         expect(
@@ -19,7 +22,7 @@ describe("LineItem", () => {
         ).toBe(true);
         expect(
             lineItem.quantity.equals(
-                UnitQuantity.create(Numeric.create('4')).unwrap()
+                UnitQuantity.create('4').unwrap()
             )
         ).toBe(true);
         expect(lineItem.total.equals(Money.create("400", "USD").unwrap())).toBe(
@@ -29,68 +32,98 @@ describe("LineItem", () => {
 
     it.each([
         {
-            lineItem1: LineItem.create(
-                UnitDescription.create("Product A"),
-                Money.create("50", "USD").unwrap(),
-                Numeric.create('2')
-            ),
-            lineItem2: LineItem.create(
-                UnitDescription.create("Product A"),
-                Money.create("50", "USD").unwrap(),
-                Numeric.create('2')
-            ),
+            lineItem1: LineItem.create({
+                description: "Product A",
+                price: {
+                    amount: "50",
+                    currency: "USD"
+                },
+                quantity: '2'
+            }),
+            lineItem2: LineItem.create({
+                description: "Product A",
+                price: {
+                    amount: "50",
+                    currency: "USD"
+                },
+                quantity: '2'
+            }),
             expected: true,
         },
         {
-            lineItem1: LineItem.create(
-                UnitDescription.create("Product B"),
-                Money.create("50", "USD").unwrap(),
-                Numeric.create('2')
-            ),
-            lineItem2: LineItem.create(
-                UnitDescription.create("Product A"),
-                Money.create("50", "USD").unwrap(),
-                Numeric.create('2')
-            ),
+            lineItem1: LineItem.create({
+                description: "Product B",
+                price: {
+                    amount: "50",
+                    currency: "USD"
+                },
+                quantity: '2'
+            }),
+            lineItem2: LineItem.create({
+                description: "Product A",
+                price: {
+                    amount: "50",
+                    currency: "USD"
+                },
+                quantity: '2'
+            }),
             expected: false,
         },
         {
-            lineItem1: LineItem.create(
-                UnitDescription.create("Product A"),
-                Money.create("60", "USD").unwrap(),
-                Numeric.create('2')
-            ),
-            lineItem2: LineItem.create(
-                UnitDescription.create("Product A"),
-                Money.create("50", "USD").unwrap(),
-                Numeric.create('2')
-            ),
+            lineItem1: LineItem.create({
+                description: "Product A",
+                price: {
+                    amount: "60",
+                    currency: "USD"
+                },
+                quantity: '2'
+            }),
+            lineItem2: LineItem.create({
+                description: "Product A",
+                price: {
+                    amount: "50",
+                    currency: "USD"
+                },
+                quantity: '2'
+            }),
             expected: false,
         },
         {
-            lineItem1: LineItem.create(
-                UnitDescription.create("Product A"),
-                Money.create("60", "USD").unwrap(),
-                Numeric.create('2')
-            ),
-            lineItem2: LineItem.create(
-                UnitDescription.create("Product A"),
-                Money.create("50", "USD").unwrap(),
-                Numeric.create('2')
-            ),
+            lineItem1: LineItem.create({
+                description: "Product A",
+                price: {
+                    amount: "60",
+                    currency: "USD"
+                },
+                quantity: '2'
+            }),
+            lineItem2: LineItem.create({
+                description: "Product A",
+                price: {
+                    amount: "50",
+                    currency: "USD"
+                },
+                quantity: '2'
+            }),
             expected: false,
         },
         {
-            lineItem1: LineItem.create(
-                UnitDescription.create("Product A"),
-                Money.create("50", "USD").unwrap(),
-                Numeric.create('2')
-            ),
-            lineItem2: LineItem.create(
-                UnitDescription.create("Product A"),
-                Money.create("50", "USD").unwrap(),
-                Numeric.create('3')
-            ),
+            lineItem1: LineItem.create({
+                description: "Product A",
+                price: {
+                    amount: "50",
+                    currency: "USD"
+                },
+                quantity: '2'
+            }),
+            lineItem2: LineItem.create({
+                description: "Product A",
+                price: {
+                    amount: "50",
+                    currency: "USD"
+                },
+                quantity: '3'
+            }),
             expected: false,
         },
     ])(
