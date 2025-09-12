@@ -5,7 +5,7 @@ export class UnitDescription {
         this.#value = value;
     }
 
-    static fromString(value: string) {
+    static create(value: string) {
         return new this(value);
     }
 

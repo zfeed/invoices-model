@@ -46,30 +46,22 @@ export class Money {
         return new Money(value, this.#currency);
     }
 
-    static fromString(amount: string, currency: string){
-        const numericValue = Numeric.fromString(amount);
+
+    static create(amount: string, currency: string) {
+       const error = assertMinorUnits(amount);
+
+       if (error) {
+           return left(error);
+       }
+
+         const numericValue = Numeric.create(amount);
+
         const currencyResult = Currency.create(currency);
         
         if (currencyResult.isLeft()) {
             return left(currencyResult.value);
         }
 
-        const moneyResult = Money.fromNumeric(numericValue, currencyResult.unwrap());
-    
-        if (moneyResult.isLeft()) {
-            return left(moneyResult.value);
-        }
-
-        return right(moneyResult.unwrap());
-    }
-
-    static fromNumeric(amount: Numeric, currency: Currency) {
-       const error = assertMinorUnits(amount);
-    
-       if (error) {
-           return left(error);
-       }
-
-        return right(new Money(amount, currency));
+        return right(new Money(numericValue, currencyResult.unwrap()));
     }
 }

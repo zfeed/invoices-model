@@ -9,14 +9,14 @@ import { IssueDate } from "../calendar-date/calendar-date";
 describe("Invoice", () => {
     it("should create an Invoice instance", () => {
         const lineItem1 = LineItem.create(
-            UnitDescription.fromString("Item 1"),
-            Money.fromString("50", "USD").unwrap(),
-            Numeric.fromString("2")
+            UnitDescription.create("Item 1"),
+            Money.create("50", "USD").unwrap(),
+            Numeric.create("2")
         ).unwrap();
         const lineItem2 = LineItem.create(
-            UnitDescription.fromString("Item 2"),
-            Money.fromString("30", "USD").unwrap(),
-            Numeric.fromString("1")
+            UnitDescription.create("Item 2"),
+            Money.create("30", "USD").unwrap(),
+            Numeric.create("1")
         ).unwrap();
         const issueDate = IssueDate.create("2023-01-01").unwrap();
         const dueDate = IssueDate.create("2028-01-01").unwrap();
@@ -27,8 +27,8 @@ describe("Invoice", () => {
             lineItems: [lineItem1, lineItem2],
         }).unwrap();
 
-        expect(invoice.total.equals(Money.fromString("130", "USD").unwrap())).toBe(true);
-        expect(invoice.vat.equals(Vat.fromPercent("0"))).toBe(true);
+        expect(invoice.total.equals(Money.create("130", "USD").unwrap())).toBe(true);
+        expect(invoice.vat.equals(Vat.create("0"))).toBe(true);
         expect(invoice.lineItems).toHaveLength(2);
         expect(
             invoice.lineItems.find((lineItem) => lineItem.equals(lineItem1))
@@ -42,14 +42,14 @@ describe("Invoice", () => {
 
     it("should apply VAT to invoice total", () => {
         const lineItem1 = LineItem.create(
-            UnitDescription.fromString("Item 1"),
-            Money.fromString("50", "USD").unwrap(),
-            Numeric.fromString("2")
+            UnitDescription.create("Item 1"),
+            Money.create("50", "USD").unwrap(),
+            Numeric.create("2")
         ).unwrap();
         const lineItem2 = LineItem.create(
-            UnitDescription.fromString("Item 2"),
-            Money.fromString("30", "USD").unwrap(),
-            Numeric.fromString("1")
+            UnitDescription.create("Item 2"),
+            Money.create("30", "USD").unwrap(),
+            Numeric.create("1")
         ).unwrap();
 
         const invoice = Invoice.create({
@@ -57,25 +57,25 @@ describe("Invoice", () => {
             dueDate: IssueDate.create("2023-02-01").unwrap(),
             lineItems: [lineItem1, lineItem2],
         }).unwrap();
-        const vat = Vat.fromPercent("20");
+        const vat = Vat.create("20");
 
         const result = invoice.applyVat(vat);
 
-        expect(invoice.total.equals(Money.fromString("156", "USD").unwrap())).toBe(true);
-        expect(invoice.vat.equals(Vat.fromPercent("20"))).toBe(true);
+        expect(invoice.total.equals(Money.create("156", "USD").unwrap())).toBe(true);
+        expect(invoice.vat.equals(Vat.create("20"))).toBe(true);
         expect(result.isRight()).toBe(true);
     });
 
     it("should reapply VAT to invoice total", () => {
         const lineItem1 = LineItem.create(
-            UnitDescription.fromString("Item 1"),
-            Money.fromString("50", "USD").unwrap(),
-            Numeric.fromString("2")
+            UnitDescription.create("Item 1"),
+            Money.create("50", "USD").unwrap(),
+            Numeric.create("2")
         ).unwrap();
         const lineItem2 = LineItem.create(
-            UnitDescription.fromString("Item 2"),
-            Money.fromString("30", "USD").unwrap(),
-            Numeric.fromString("1")
+            UnitDescription.create("Item 2"),
+            Money.create("30", "USD").unwrap(),
+            Numeric.create("1")
         ).unwrap();
 
         const invoice = Invoice.create({
@@ -83,14 +83,14 @@ describe("Invoice", () => {
             dueDate: IssueDate.create("2023-02-01").unwrap(),
             lineItems: [lineItem1, lineItem2],
         }).unwrap();
-        const vat1 = Vat.fromPercent("20");
-        const vat2 = Vat.fromPercent("10");
+        const vat1 = Vat.create("20");
+        const vat2 = Vat.create("10");
 
         invoice.applyVat(vat1);
         invoice.applyVat(vat2);
 
-        expect(invoice.total.equals(Money.fromString("143", "USD").unwrap())).toBe(true);
-        expect(invoice.vat.equals(Vat.fromPercent("10"))).toBe(true);
+        expect(invoice.total.equals(Money.create("143", "USD").unwrap())).toBe(true);
+        expect(invoice.vat.equals(Vat.create("10"))).toBe(true);
     });
 
     it("should not create an invoice with no line items", () => {
@@ -113,14 +113,14 @@ describe("Invoice", () => {
             dueDate: IssueDate.create("2023-02-01").unwrap(),
             lineItems: [
                 LineItem.create(
-                    UnitDescription.fromString("Item 1"),
-                    Money.fromString("50", "USD").unwrap(),
-                    Numeric.fromString("2")
+                    UnitDescription.create("Item 1"),
+                    Money.create("50", "USD").unwrap(),
+                    Numeric.create("2")
                 ).unwrap(),
                 LineItem.create(
-                    UnitDescription.fromString("Item 2"),
-                    Money.fromString("30", "EUR").unwrap(),
-                    Numeric.fromString("1")
+                    UnitDescription.create("Item 2"),
+                    Money.create("30", "EUR").unwrap(),
+                    Numeric.create("1")
                 ).unwrap(),
             ],
         });
@@ -134,9 +134,9 @@ describe("Invoice", () => {
 
     it("should add a line item", () => {
         const lineItem1 = LineItem.create(
-            UnitDescription.fromString("Item 1"),
-            Money.fromString("50", "USD").unwrap(),
-            Numeric.fromString("2")
+            UnitDescription.create("Item 1"),
+            Money.create("50", "USD").unwrap(),
+            Numeric.create("2")
         ).unwrap();
         const invoice = Invoice.create({
             issueDate: IssueDate.create("2023-01-01").unwrap(),
@@ -144,9 +144,9 @@ describe("Invoice", () => {
             lineItems: [lineItem1],
         }).unwrap();
         const lineItem2 = LineItem.create(
-            UnitDescription.fromString("Item 2"),
-            Money.fromString("30", "USD").unwrap(),
-            Numeric.fromString("4")
+            UnitDescription.create("Item 2"),
+            Money.create("30", "USD").unwrap(),
+            Numeric.create("4")
         ).unwrap();
 
         invoice.addLineItem(lineItem2);
@@ -158,14 +158,14 @@ describe("Invoice", () => {
         expect(
             invoice.lineItems.find((lineItem) => lineItem.equals(lineItem2))
         ).toBeDefined();
-        expect(invoice.total.equals(Money.fromString("220", "USD").unwrap())).toBe(true);
+        expect(invoice.total.equals(Money.create("220", "USD").unwrap())).toBe(true);
     });
 
     it("should add respect applied vat when a line item added", () => {
         const lineItem1 = LineItem.create(
-            UnitDescription.fromString("Item 1"),
-            Money.fromString("50", "USD").unwrap(),
-            Numeric.fromString("2")
+            UnitDescription.create("Item 1"),
+            Money.create("50", "USD").unwrap(),
+            Numeric.create("2")
         ).unwrap();
         const invoice = Invoice.create({
             issueDate: IssueDate.create("2023-01-01").unwrap(),
@@ -173,24 +173,24 @@ describe("Invoice", () => {
             lineItems: [lineItem1],
         }).unwrap();
 
-        invoice.applyVat(Vat.fromPercent("10"));
+        invoice.applyVat(Vat.create("10"));
 
         const lineItem2 = LineItem.create(
-            UnitDescription.fromString("Item 2"),
-            Money.fromString("30", "USD").unwrap(),
-            Numeric.fromString("4")
+            UnitDescription.create("Item 2"),
+            Money.create("30", "USD").unwrap(),
+            Numeric.create("4")
         ).unwrap();
 
         invoice.addLineItem(lineItem2);
 
-        expect(invoice.total.equals(Money.fromString("242", "USD").unwrap())).toBe(true);
+        expect(invoice.total.equals(Money.create("242", "USD").unwrap())).toBe(true);
     });
 
     it("should not add a duplicate line item", () => {
         const lineItem1 = LineItem.create(
-            UnitDescription.fromString("Item 1"),
-            Money.fromString("50", "USD").unwrap(),
-            Numeric.fromString("2")
+            UnitDescription.create("Item 1"),
+            Money.create("50", "USD").unwrap(),
+            Numeric.create("2")
         ).unwrap();
         const invoice = Invoice.create({
             issueDate: IssueDate.create("2023-01-01").unwrap(),
@@ -209,14 +209,14 @@ describe("Invoice", () => {
 
     it("should remove a line item", () => {
         const lineItem1 = LineItem.create(
-            UnitDescription.fromString("Item 1"),
-            Money.fromString("50", "USD").unwrap(),
-            Numeric.fromString("2")
+            UnitDescription.create("Item 1"),
+            Money.create("50", "USD").unwrap(),
+            Numeric.create("2")
         ).unwrap();
         const lineItem2 = LineItem.create(
-            UnitDescription.fromString("Item 2"),
-            Money.fromString("40", "USD").unwrap(),
-            Numeric.fromString("5")
+            UnitDescription.create("Item 2"),
+            Money.create("40", "USD").unwrap(),
+            Numeric.create("5")
         ).unwrap();
         const invoice = Invoice.create({
             issueDate: IssueDate.create("2023-01-01").unwrap(),
@@ -226,9 +226,9 @@ describe("Invoice", () => {
 
         const removedItem = invoice.removeLineItem(
             LineItem.create(
-                UnitDescription.fromString("Item 1"),
-                Money.fromString("50", "USD").unwrap(),
-                Numeric.fromString("2")
+                UnitDescription.create("Item 1"),
+                Money.create("50", "USD").unwrap(),
+                Numeric.create("2")
             ).unwrap()
         ).unwrap();
 
@@ -242,14 +242,14 @@ describe("Invoice", () => {
 
     it("should change total when a line item is removed", () => {
         const lineItem1 = LineItem.create(
-            UnitDescription.fromString("Item 1"),
-            Money.fromString("50", "USD").unwrap(),
-            Numeric.fromString("2")
+            UnitDescription.create("Item 1"),
+            Money.create("50", "USD").unwrap(),
+            Numeric.create("2")
         ).unwrap();
         const lineItem2 = LineItem.create(
-            UnitDescription.fromString("Item 2"),
-            Money.fromString("40", "USD").unwrap(),
-            Numeric.fromString("5")
+            UnitDescription.create("Item 2"),
+            Money.create("40", "USD").unwrap(),
+            Numeric.create("5")
         ).unwrap();
         const invoice = Invoice.create({
             issueDate: IssueDate.create("2023-01-01").unwrap(),
@@ -259,25 +259,25 @@ describe("Invoice", () => {
 
         invoice.removeLineItem(
             LineItem.create(
-                UnitDescription.fromString("Item 1"),
-                Money.fromString("50", "USD").unwrap(),
-                Numeric.fromString("2")
+                UnitDescription.create("Item 1"),
+                Money.create("50", "USD").unwrap(),
+                Numeric.create("2")
             ).unwrap()
         );
 
-        expect(invoice.total.equals(Money.fromString("200", "USD").unwrap())).toBe(true);
+        expect(invoice.total.equals(Money.create("200", "USD").unwrap())).toBe(true);
     });
 
     it("should change total according to applied vat when a line item is removed", () => {
         const lineItem1 = LineItem.create(
-            UnitDescription.fromString("Item 1"),
-            Money.fromString("50", "USD").unwrap(),
-            Numeric.fromString("2")
+            UnitDescription.create("Item 1"),
+            Money.create("50", "USD").unwrap(),
+            Numeric.create("2")
         ).unwrap();
         const lineItem2 = LineItem.create(
-            UnitDescription.fromString("Item 2"),
-            Money.fromString("40", "USD").unwrap(),
-            Numeric.fromString("5")
+            UnitDescription.create("Item 2"),
+            Money.create("40", "USD").unwrap(),
+            Numeric.create("5")
         ).unwrap();
         const invoice = Invoice.create({
             issueDate: IssueDate.create("2023-01-01").unwrap(),
@@ -285,16 +285,16 @@ describe("Invoice", () => {
             lineItems: [lineItem1, lineItem2],
         }).unwrap();
 
-        invoice.applyVat(Vat.fromPercent("10"));
+        invoice.applyVat(Vat.create("10"));
 
         invoice.removeLineItem(
             LineItem.create(
-                UnitDescription.fromString("Item 1"),
-                Money.fromString("50", "USD").unwrap(),
-                Numeric.fromString("2")
+                UnitDescription.create("Item 1"),
+                Money.create("50", "USD").unwrap(),
+                Numeric.create("2")
             ).unwrap()
         );
 
-        expect(invoice.total.equals(Money.fromString("220", "USD").unwrap())).toBe(true);
+        expect(invoice.total.equals(Money.create("220", "USD").unwrap())).toBe(true);
     });
 });

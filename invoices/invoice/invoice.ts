@@ -57,7 +57,7 @@ export class Invoice {
 
         const issueDate = options.issueDate;
         const dueDate = options.dueDate;
-        const invoice = new Invoice(options.lineItems, total, Vat.fromPercent("0"), issueDate, dueDate);
+        const invoice = new Invoice(options.lineItems, total, Vat.create("0"), issueDate, dueDate);
 
         return right(invoice);
     }
