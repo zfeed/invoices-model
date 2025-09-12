@@ -101,7 +101,7 @@ describe("Invoice", () => {
 
         expect(result.value).toEqual(
             expect.objectContaining({
-                code: 0,
+                code: '1000',
             })
         );
     });
@@ -126,7 +126,7 @@ describe("Invoice", () => {
 
         expect(result.value).toEqual(
             expect.objectContaining({
-                code: 1,
+                code: '1001',
             })
         );
     });
@@ -201,7 +201,7 @@ describe("Invoice", () => {
 
         expect(result.value).toEqual(
             expect.objectContaining({
-                code: 2,
+                code: '1002',
             })
         );
     });

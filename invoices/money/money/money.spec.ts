@@ -78,7 +78,7 @@ describe("Money", () => {
 
         expect(result.value).toEqual(
             expect.objectContaining({
-                code: 7,
+                code: '3001',
             })
         );
     });
@@ -91,7 +91,7 @@ describe("Money", () => {
 
         expect(result.value).toEqual(
             expect.objectContaining({
-                code: 6,
+                code: '3000',
             })
         );
     });

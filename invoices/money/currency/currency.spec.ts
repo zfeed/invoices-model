@@ -31,7 +31,7 @@ describe("Currency", () => {
 
             expect(result.value).toEqual(
                 expect.objectContaining({
-                    code: 8,
+                    code: '4000',
                 })
             );
         }

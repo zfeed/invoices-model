@@ -11,7 +11,7 @@ describe("UnitQuantity", () => {
         const result = UnitQuantity.fromNumeric(Numeric.fromNumber(invalidQuantity));
 
         expect(result.value).toEqual(expect.objectContaining({
-            code: 4
+            code: '1004'
         }));
     });
 
@@ -19,7 +19,7 @@ describe("UnitQuantity", () => {
         const result = UnitQuantity.fromNumeric(Numeric.fromNumber(invalidQuantity));
 
         expect(result.value).toEqual(expect.objectContaining({
-            code: 3
+            code: '1003'
         }));
     });
 });
