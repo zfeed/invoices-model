@@ -59,13 +59,13 @@ export class LineItem {
         const unitQuantityResult = UnitQuantity.create(quantity);
 
         if (unitQuantityResult.isError()) {
-            return Result.error(unitQuantityResult.value);
+            return unitQuantityResult.error();
         }
 
         const moneyResult = Money.create(price.amount, price.currency);
 
         if (moneyResult.isError()) {
-            return Result.error(moneyResult.value);
+            return moneyResult.error();
         }
 
         const unitPrice = moneyResult.unwrap();

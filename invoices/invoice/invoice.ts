@@ -50,7 +50,7 @@ export class Invoice {
         for (let i = 1; i < options.lineItems.length; i++) {
             const result = total.add(options.lineItems[i].total);
             if (result.isError()) {
-                return Result.error(result.value);
+                return result.error();
             }
             total = result.unwrap();
         }
@@ -67,14 +67,14 @@ export class Invoice {
         for (let i = 1; i < this.#lineItems.length; i++) {
             const result = baseTotal.add(this.#lineItems[i].total);
             if (result.isError()) {
-                return Result.error(result.value);
+                return result.error();
             }
             baseTotal = result.unwrap();
         }
         const vatResult = vat.applyTo(baseTotal);
 
         if (vatResult.isError()) {
-            return Result.error(vatResult.value);
+            return vatResult.error();
         }
 
         this.#total = vatResult.unwrap();
@@ -92,12 +92,12 @@ export class Invoice {
         this.#lineItems.push(lineItem);
         const vatResult = this.#vat.applyTo(lineItem.total);
         if (vatResult.isError()) {
-            return Result.error(vatResult.value);
+            return vatResult.error();
         }
 
         const result = this.#total.add(vatResult.unwrap());
         if (result.isError()) {
-            return Result.error(result.value);
+            return result.error();
         }
         this.#total = result.unwrap();
 
@@ -128,14 +128,14 @@ export class Invoice {
         for (let i = 1; i < newItems.length; i++) {
             const result = baseTotal.add(newItems[i].total);
             if (result.isError()) {
-                return Result.error(result.value);
+                return result.error();
             }
             baseTotal = result.unwrap();
         }
 
         const result = this.#vat.applyTo(baseTotal);
         if (result.isError()) {
-            return Result.error(result.value);
+            return result.error();
         }
         this.#total = result.unwrap();
 

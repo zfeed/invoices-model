@@ -29,7 +29,7 @@ describe("Currency", () => {
         ({ currency }) => {
             const result = Currency.create(currency);
 
-            expect(result.value).toEqual(
+            expect(result.unwrapError()).toEqual(
                 expect.objectContaining({
                     code: '5000',
                 })

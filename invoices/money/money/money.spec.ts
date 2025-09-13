@@ -76,7 +76,7 @@ describe("Money", () => {
             "USD"
         );
 
-        expect(result.value).toEqual(
+        expect(result.unwrapError()).toEqual(
             expect.objectContaining({
                 code: '4001',
             })
@@ -89,7 +89,7 @@ describe("Money", () => {
             "USD"
         );
 
-        expect(result.value).toEqual(
+        expect(result.unwrapError()).toEqual(
             expect.objectContaining({
                 code: '4000',
             })
@@ -102,7 +102,7 @@ describe("Money", () => {
 
         const result = money1.add(money2);
 
-        expect(result.value).toEqual(
+        expect(result.unwrapError()).toEqual(
             expect.objectContaining({
                 code: '4002',
             })

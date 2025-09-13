@@ -116,7 +116,7 @@ describe("Invoice", () => {
             lineItems: [],
         });
 
-        expect(result.value).toEqual(
+        expect(result.unwrapError()).toEqual(
             expect.objectContaining({
                 code: '1000',
             })
@@ -147,7 +147,7 @@ describe("Invoice", () => {
             ],
         });
 
-        expect(result.value).toEqual(
+        expect(result.unwrapError()).toEqual(
             expect.objectContaining({
                 code: '1001',
             })
@@ -237,7 +237,7 @@ describe("Invoice", () => {
 
         const result = invoice.addLineItem(lineItem1);
 
-        expect(result.value).toEqual(
+        expect(result.unwrapError()).toEqual(
             expect.objectContaining({
                 code: '1002',
             })

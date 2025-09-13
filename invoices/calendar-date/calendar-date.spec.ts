@@ -10,7 +10,7 @@ describe("CalendarDate", () => {
     it("should not create issue date if it's not a valid date", () => {
         const result = IssueDate.create("invalid-date");
 
-        expect(result.value).toEqual(expect.objectContaining({
+        expect(result.unwrapError()).toEqual(expect.objectContaining({
             code: '3000',
         }));
     });
