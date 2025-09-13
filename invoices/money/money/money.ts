@@ -59,7 +59,7 @@ export class Money {
         const currencyResult = Currency.create(currency);
 
         if (currencyResult.isError()) {
-            return Result.error(currencyResult.value);
+            return currencyResult.error();
         }
 
         return Result.ok(new Money(numericValue, currencyResult.unwrap()));
