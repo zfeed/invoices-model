@@ -7,17 +7,20 @@ export class LineItem {
     #price: Money;
     #description: UnitDescription;
     #quantity: UnitQuantity;
+    #total: Money;
 
     private constructor(
         description: UnitDescription,
         price: Money,
-        quantity: UnitQuantity
+        quantity: UnitQuantity,
+        total: Money
     ) {
         this.#description = description;
         this.#price = price;
         this.#quantity = quantity;
+        this.#total = total;
     }
-
+    
     get price(): Money {
         return this.#price;
     }
@@ -31,7 +34,7 @@ export class LineItem {
     }
 
     get total(): Money {
-        return this.#price.multiplyBy(this.#quantity.value);
+        return this.#total;
     }
 
     equals(other: LineItem): boolean {
@@ -72,11 +75,14 @@ export class LineItem {
 
         const unitQuantity = unitQuantityResult.unwrap();
 
+        const unitTotal = unitPrice.multiplyBy(unitQuantity.value);
+
         return Result.ok(
             new this(
                 unitDescription,
                 unitPrice,
-                unitQuantity
+                unitQuantity,
+                unitTotal
             )
         );
     }

@@ -3,6 +3,7 @@ import { Vat } from "../vat/vat";
 import { LineItem } from "../line-item/line-item";
 import { assertLineItems } from "./asserts/assert-line-items";
 import { Result } from "../../building-blocks";
+import { Issuer } from "../issuer/issuer";
 
 import { IssueDate } from "../calendar-date/calendar-date";
 export class Invoice {
@@ -11,6 +12,7 @@ export class Invoice {
     #lineItems: LineItem[];
     #issueDate: IssueDate;
     #dueDate: IssueDate;
+    #issuer: Issuer;
 
     public get total(): Money {
         return this.#total;
@@ -32,15 +34,20 @@ export class Invoice {
         return this.#dueDate;
     }
 
-    private constructor(lineItems: LineItem[], total: Money, vat: Vat, issueDate: IssueDate, dueDate: IssueDate) {
+    public get issuer(): Issuer {
+        return this.#issuer;
+    }
+
+    private constructor(lineItems: LineItem[], total: Money, vat: Vat, issueDate: IssueDate, dueDate: IssueDate, issuer: Issuer) {
         this.#lineItems = lineItems;
         this.#total = total;
         this.#vat = vat;
         this.#issueDate = issueDate;
         this.#dueDate = dueDate;
+        this.#issuer = issuer;
     }
 
-    static create(options: { lineItems: LineItem[]; issueDate: IssueDate; dueDate: IssueDate }) {
+    static create(options: { lineItems: LineItem[]; issueDate: IssueDate; dueDate: IssueDate; issuer: Issuer }) {
         const error = assertLineItems(options.lineItems);
         if (error) {
             return Result.error(error);
@@ -57,7 +64,8 @@ export class Invoice {
 
         const issueDate = options.issueDate;
         const dueDate = options.dueDate;
-        const invoice = new Invoice(options.lineItems, total, Vat.create("0"), issueDate, dueDate);
+        const issuer = options.issuer;
+        const invoice = new Invoice(options.lineItems, total, Vat.create("0"), issueDate, dueDate, issuer);
 
         return Result.ok(invoice);
     }

@@ -3,6 +3,7 @@ import { Invoice } from "./invoice";
 import { Vat } from "../vat/vat";
 import { LineItem } from "../line-item/line-item";
 import { IssueDate } from "../calendar-date/calendar-date";
+import { Issuer } from '../issuer/issuer';
 
 describe("Invoice", () => {
     it("should create an Invoice instance", () => {
@@ -24,11 +25,18 @@ describe("Invoice", () => {
         }).unwrap();
         const issueDate = IssueDate.create("2023-01-01").unwrap();
         const dueDate = IssueDate.create("2028-01-01").unwrap();
+        const issuer = Issuer.create({
+            name: "Company Inc.",
+            address: "123 Main St, City, Country",
+            taxId: "TAX123456",
+            email: 'info@company.com',
+        }).unwrap();
 
         const invoice = Invoice.create({
             issueDate: issueDate,
             dueDate: dueDate,
             lineItems: [lineItem1, lineItem2],
+            issuer: issuer
         }).unwrap();
 
         expect(invoice.total.equals(Money.create("130", "USD").unwrap())).toBe(true);
@@ -42,6 +50,7 @@ describe("Invoice", () => {
         ).toBeDefined();
         expect(invoice.issueDate.equals(issueDate)).toBe(true);
         expect(invoice.dueDate.equals(dueDate)).toBe(true);
+        expect(issuer.equals(invoice.issuer)).toBe(true);
     });
 
     it("should apply VAT to invoice total", () => {
@@ -66,6 +75,12 @@ describe("Invoice", () => {
             issueDate: IssueDate.create("2023-01-01").unwrap(),
             dueDate: IssueDate.create("2023-02-01").unwrap(),
             lineItems: [lineItem1, lineItem2],
+            issuer: Issuer.create({
+                name: "Test Company",
+                address: "123 Test St",
+                taxId: "TEST123",
+                email: "test@company.com"
+            }).unwrap()
         }).unwrap();
         const vat = Vat.create("20");
 
@@ -98,6 +113,12 @@ describe("Invoice", () => {
             issueDate: IssueDate.create("2023-01-01").unwrap(),
             dueDate: IssueDate.create("2023-02-01").unwrap(),
             lineItems: [lineItem1, lineItem2],
+            issuer: Issuer.create({
+                name: "Test Company",
+                address: "123 Test St",
+                taxId: "TEST123",
+                email: "test@company.com"
+            }).unwrap()
         }).unwrap();
         const vat1 = Vat.create("20");
         const vat2 = Vat.create("10");
@@ -114,6 +135,12 @@ describe("Invoice", () => {
             issueDate: IssueDate.create("2023-01-01").unwrap(),
             dueDate: IssueDate.create("2023-02-01").unwrap(),
             lineItems: [],
+            issuer: Issuer.create({
+                name: "Test Company",
+                address: "123 Test St",
+                taxId: "TEST123",
+                email: "test@company.com"
+            }).unwrap()
         });
 
         expect(result.unwrapError()).toEqual(
@@ -145,6 +172,12 @@ describe("Invoice", () => {
                     quantity: '1'
                 }).unwrap(),
             ],
+            issuer: Issuer.create({
+                name: "Test Company",
+                address: "123 Test St",
+                taxId: "TEST123",
+                email: "test@company.com"
+            }).unwrap()
         });
 
         expect(result.unwrapError()).toEqual(
@@ -167,6 +200,12 @@ describe("Invoice", () => {
             issueDate: IssueDate.create("2023-01-01").unwrap(),
             dueDate: IssueDate.create("2023-02-01").unwrap(),
             lineItems: [lineItem1],
+            issuer: Issuer.create({
+                name: "Test Company",
+                address: "123 Test St",
+                taxId: "TEST123",
+                email: "test@company.com"
+            }).unwrap()
         }).unwrap();
         const lineItem2 = LineItem.create({
             description: "Item 2",
@@ -198,10 +237,18 @@ describe("Invoice", () => {
             },
             quantity: '2'
         }).unwrap();
+        const issuer = Issuer.create({
+            name: "Test Company",
+            address: "123 Test St",
+            taxId: "TEST123",
+            email: "test@company.com"
+        }).unwrap();
+
         const invoice = Invoice.create({
             issueDate: IssueDate.create("2023-01-01").unwrap(),
             dueDate: IssueDate.create("2023-02-01").unwrap(),
             lineItems: [lineItem1],
+            issuer: issuer
         }).unwrap();
 
         invoice.applyVat(Vat.create("10"));
@@ -229,10 +276,19 @@ describe("Invoice", () => {
             },
             quantity: '2'
         }).unwrap();
+
+        const issuer = Issuer.create({
+            name: "Test Company",
+            address: "123 Test St",
+            taxId: "TEST123",
+            email: "test@company.com"
+        }).unwrap();
+
         const invoice = Invoice.create({
             issueDate: IssueDate.create("2023-01-01").unwrap(),
             dueDate: IssueDate.create("2023-02-01").unwrap(),
             lineItems: [lineItem1],
+            issuer: issuer
         }).unwrap();
 
         const result = invoice.addLineItem(lineItem1);
@@ -261,10 +317,19 @@ describe("Invoice", () => {
             },
             quantity: '5'
         }).unwrap();
+
+        const issuer = Issuer.create({
+            name: "Test Company",
+            address: "123 Test St",
+            taxId: "TEST123",
+            email: "test@company.com"
+        }).unwrap();
+
         const invoice = Invoice.create({
             issueDate: IssueDate.create("2023-01-01").unwrap(),
             dueDate: IssueDate.create("2023-02-01").unwrap(),
             lineItems: [lineItem1, lineItem2],
+            issuer: issuer
         }).unwrap();
 
         const removedItem = invoice.removeLineItem(
@@ -303,10 +368,19 @@ describe("Invoice", () => {
             },
             quantity: '5'
         }).unwrap();
+
+        const issuer = Issuer.create({
+            name: "Test Company",
+            address: "123 Test St",
+            taxId: "TEST123",
+            email: "test@company.com"
+        }).unwrap();
+
         const invoice = Invoice.create({
             issueDate: IssueDate.create("2023-01-01").unwrap(),
             dueDate: IssueDate.create("2023-02-01").unwrap(),
             lineItems: [lineItem1, lineItem2],
+            issuer: issuer
         }).unwrap();
 
         invoice.removeLineItem(
@@ -340,10 +414,20 @@ describe("Invoice", () => {
             },
             quantity: '5'
         }).unwrap();
+
+
+        const issuer = Issuer.create({
+            name: "Test Company",
+            address: "123 Test St",
+            taxId: "TEST123",
+            email: "test@company.com"
+        }).unwrap();
+
         const invoice = Invoice.create({
             issueDate: IssueDate.create("2023-01-01").unwrap(),
             dueDate: IssueDate.create("2023-02-01").unwrap(),
             lineItems: [lineItem1, lineItem2],
+            issuer: issuer
         }).unwrap();
 
         invoice.applyVat(Vat.create("10"));
