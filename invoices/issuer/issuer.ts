@@ -1,23 +1,35 @@
 import { Result } from "../../building-blocks";
 import { Email } from "../email/email";
 
+export enum ISSUER_TYPE {
+    INDIVIDUAL = "INDIVIDUAL",
+    COMPANY = "COMPANY"
+}
+
 export class Issuer {
+    #type: ISSUER_TYPE;
     #name: string;
     #address: string;
     #taxId: string;
     #email: Email;
 
     private constructor(
+        type: ISSUER_TYPE,
         name: string,
         address: string,
         taxId: string,
         email: Email
     ) {
+        this.#type = type;
         this.#name = name;
         this.#address = address;
         this.#taxId = taxId;
         this.#email = email;
     }
+
+    get type(): ISSUER_TYPE {
+        return this.#type; 
+        }
 
     get name(): string {
         return this.#name;
@@ -37,6 +49,7 @@ export class Issuer {
 
     equals(other: Issuer): boolean {
         return (
+                this.#type === other.#type &&
             this.#name === other.#name &&
             this.#address === other.#address &&
             this.#taxId === other.#taxId &&
@@ -45,11 +58,13 @@ export class Issuer {
     }
 
     static create({
+        type,
         name,
         address,
         taxId,
         email
     }: {
+        type: ISSUER_TYPE;
         name: string;
         address: string;
         taxId: string;
@@ -67,6 +82,7 @@ export class Issuer {
 
         return Result.ok(
             new this(
+                type,
                 name,
                 address,
                 taxId,

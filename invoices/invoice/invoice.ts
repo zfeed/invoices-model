@@ -4,15 +4,19 @@ import { LineItem } from "../line-item/line-item";
 import { assertLineItems } from "./asserts/assert-line-items";
 import { Result } from "../../building-blocks";
 import { Issuer } from "../issuer/issuer";
+import { Recipient } from "../recipient/recipient";
 
 import { IssueDate } from "../calendar-date/calendar-date";
-export class Invoice {
+import { IBilling } from "../recipient/billing/billing.interface";
+
+export class Invoice<T, D, B extends IBilling<T, D>> {
     #vat: Vat;
     #total: Money;
     #lineItems: LineItem[];
     #issueDate: IssueDate;
     #dueDate: IssueDate;
     #issuer: Issuer;
+    #recipient: Recipient<T, D, B>;
 
     public get total(): Money {
         return this.#total;
@@ -38,16 +42,35 @@ export class Invoice {
         return this.#issuer;
     }
 
-    private constructor(lineItems: LineItem[], total: Money, vat: Vat, issueDate: IssueDate, dueDate: IssueDate, issuer: Issuer) {
+    public get recipient(): Recipient<T, D, B> {
+        return this.#recipient;
+    }
+
+    private constructor(
+        lineItems: LineItem[],
+        total: Money,
+        vat: Vat,
+        issueDate: IssueDate,
+        dueDate: IssueDate,
+        issuer: Issuer,
+        recipient: Recipient<T, D, B>
+    ) {
         this.#lineItems = lineItems;
         this.#total = total;
         this.#vat = vat;
         this.#issueDate = issueDate;
         this.#dueDate = dueDate;
+        this.#recipient = recipient;
         this.#issuer = issuer;
     }
 
-    static create(options: { lineItems: LineItem[]; issueDate: IssueDate; dueDate: IssueDate; issuer: Issuer }) {
+    static create<T, D, B extends IBilling<T, D>>(options: {
+        lineItems: LineItem[];
+        issueDate: IssueDate;
+        dueDate: IssueDate;
+        issuer: Issuer;
+        recipient: Recipient<T, D, B>;
+    }) {
         const error = assertLineItems(options.lineItems);
         if (error) {
             return Result.error(error);
@@ -65,7 +88,16 @@ export class Invoice {
         const issueDate = options.issueDate;
         const dueDate = options.dueDate;
         const issuer = options.issuer;
-        const invoice = new Invoice(options.lineItems, total, Vat.create("0"), issueDate, dueDate, issuer);
+        const recipient = options.recipient;
+        const invoice = new Invoice(
+            options.lineItems,
+            total,
+            Vat.create("0"),
+            issueDate,
+            dueDate,
+            issuer,
+            recipient
+        );
 
         return Result.ok(invoice);
     }
@@ -113,17 +145,19 @@ export class Invoice {
     }
 
     removeLineItem(lineItem: LineItem) {
-        const index = this.#lineItems.findIndex(item => item.equals(lineItem));
+        const index = this.#lineItems.findIndex((item) =>
+            item.equals(lineItem)
+        );
 
         if (index === -1) {
             return Result.ok(undefined);
         }
-    
+
         const removed = this.#lineItems[index];
         const newItems = [...this.#lineItems];
 
         newItems.splice(index, 1);
-    
+
         const error = assertLineItems(newItems);
 
         if (error) {
@@ -131,7 +165,7 @@ export class Invoice {
         }
 
         this.#lineItems = newItems;
-    
+
         let baseTotal = newItems[0].total;
         for (let i = 1; i < newItems.length; i++) {
             const result = baseTotal.add(newItems[i].total);
