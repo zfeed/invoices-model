@@ -12,6 +12,7 @@ import { IBilling } from "../recipient/billing/billing.interface";
 export class Invoice<T, D, B extends IBilling<T, D>> {
     #vat: Vat;
     #total: Money;
+    #subtotal: Money;
     #lineItems: LineItem[];
     #issueDate: IssueDate;
     #dueDate: IssueDate;
@@ -20,6 +21,10 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
 
     public get total(): Money {
         return this.#total;
+    }
+
+    public get subtotal(): Money {
+        return this.#subtotal;
     }
 
     public get vat(): Vat {
@@ -49,6 +54,7 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
     private constructor(
         lineItems: LineItem[],
         total: Money,
+        subtotal: Money,
         vat: Vat,
         issueDate: IssueDate,
         dueDate: IssueDate,
@@ -57,6 +63,7 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
     ) {
         this.#lineItems = lineItems;
         this.#total = total;
+        this.#subtotal = subtotal;
         this.#vat = vat;
         this.#issueDate = issueDate;
         this.#dueDate = dueDate;
@@ -72,6 +79,7 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         recipient: Recipient<T, D, B>;
     }) {
         const error = assertLineItems(options.lineItems);
+    
         if (error) {
             return Result.error(error);
         }
@@ -85,6 +93,8 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
             total = result.unwrap();
         }
 
+        const subtotal = total;
+
         const issueDate = options.issueDate;
         const dueDate = options.dueDate;
         const issuer = options.issuer;
@@ -92,6 +102,7 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         const invoice = new Invoice(
             options.lineItems,
             total,
+            subtotal,
             Vat.create("0"),
             issueDate,
             dueDate,
@@ -141,6 +152,8 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         }
         this.#total = result.unwrap();
 
+        this.#subtotal = this.#subtotal.add(lineItem.total).unwrap();
+
         return Result.ok(this);
     }
 
@@ -166,20 +179,21 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
 
         this.#lineItems = newItems;
 
-        let baseTotal = newItems[0].total;
+        let subtotal = newItems[0].total;
         for (let i = 1; i < newItems.length; i++) {
-            const result = baseTotal.add(newItems[i].total);
+            const result = subtotal.add(newItems[i].total);
             if (result.isError()) {
                 return result.error();
             }
-            baseTotal = result.unwrap();
+            subtotal = result.unwrap();
         }
 
-        const result = this.#vat.applyTo(baseTotal);
+        const result = this.#vat.applyTo(subtotal);
         if (result.isError()) {
             return result.error();
         }
         this.#total = result.unwrap();
+        this.#subtotal = subtotal;
 
         return Result.ok(removed);
     }

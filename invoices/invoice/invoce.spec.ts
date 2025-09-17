@@ -55,6 +55,7 @@ describe("Invoice", () => {
         }).unwrap();
 
         expect(invoice.total.equals(Money.create("130", "USD").unwrap())).toBe(true);
+        expect(invoice.subtotal.equals(Money.create("130", "USD").unwrap())).toBe(true);
         expect(invoice.vat.equals(Vat.create("0"))).toBe(true);
         expect(invoice.lineItems).toHaveLength(2);
         expect(
@@ -116,6 +117,7 @@ describe("Invoice", () => {
         const result = invoice.applyVat(vat);
 
         expect(invoice.total.equals(Money.create("156", "USD").unwrap())).toBe(true);
+        expect(invoice.subtotal.equals(Money.create("130", "USD").unwrap())).toBe(true);
         expect(invoice.vat.equals(Vat.create("20"))).toBe(true);
         expect(result.isOk()).toBe(true);
     });
@@ -169,6 +171,7 @@ describe("Invoice", () => {
         invoice.applyVat(vat2);
 
         expect(invoice.total.equals(Money.create("143", "USD").unwrap())).toBe(true);
+        expect(invoice.subtotal.equals(Money.create("130", "USD").unwrap())).toBe(true);
         expect(invoice.vat.equals(Vat.create("10"))).toBe(true);
     });
 
@@ -307,7 +310,7 @@ describe("Invoice", () => {
         expect(
             invoice.lineItems.find((lineItem) => lineItem.equals(lineItem2))
         ).toBeDefined();
-        expect(invoice.total.equals(Money.create("220", "USD").unwrap())).toBe(true);
+        expect(invoice.subtotal.equals(Money.create("220", "USD").unwrap())).toBe(true);
     });
 
     it("should add respect applied vat when a line item added", () => {
@@ -360,6 +363,7 @@ describe("Invoice", () => {
         invoice.addLineItem(lineItem2);
 
         expect(invoice.total.equals(Money.create("242", "USD").unwrap())).toBe(true);
+        expect(invoice.subtotal.equals(Money.create("220", "USD").unwrap())).toBe(true);
     });
 
     it("should not add a duplicate line item", () => {
@@ -467,6 +471,7 @@ describe("Invoice", () => {
         expect(removedItem).toBeDefined();
         expect(removedItem?.equals(lineItem1)).toBe(true);
         expect(invoice.lineItems).toHaveLength(1);
+        expect(invoice.subtotal.equals(Money.create("200", "USD").unwrap())).toBe(true);
         expect(
             invoice.lineItems.find((lineItem) => lineItem.equals(lineItem2))
         ).toBeDefined();
