@@ -30,6 +30,6 @@ export class Vat {
     applyTo(money: Money) {
         const vat = money.multiplyBy(this.rate);
 
-        return money.add(vat);
+        return money.add(vat).unwrap();
     }
 }

@@ -57,7 +57,8 @@ describe("Invoice", () => {
 
         expect(invoice.total.equals(Money.create("130", "USD").unwrap())).toBe(true);
         expect(invoice.lineItems.subtotal.equals(Money.create("130", "USD").unwrap())).toBe(true);
-        expect(invoice.vat.equals(Vat.create("0"))).toBe(true);
+        expect(invoice.vatRate.equals(Vat.create("0"))).toBe(true);
+        expect(invoice.vatAmount.equals(Money.create("0", "USD").unwrap())).toBe(true);
         expect(invoice.lineItems).toHaveLength(2);
         expect(
             invoice.lineItems.find((lineItem) => lineItem.equals(lineItem1))
@@ -119,7 +120,8 @@ describe("Invoice", () => {
 
         expect(invoice.total.equals(Money.create("156", "USD").unwrap())).toBe(true);
         expect(invoice.lineItems.subtotal.equals(Money.create("130", "USD").unwrap())).toBe(true);
-        expect(invoice.vat.equals(Vat.create("20"))).toBe(true);
+        expect(invoice.vatRate.equals(Vat.create("20"))).toBe(true);
+        expect(invoice.vatAmount.equals(Money.create("26", "USD").unwrap())).toBe(true);
         expect(result.isOk()).toBe(true);
     });
 
@@ -173,7 +175,8 @@ describe("Invoice", () => {
 
         expect(invoice.total.equals(Money.create("143", "USD").unwrap())).toBe(true);
         expect(invoice.lineItems.subtotal.equals(Money.create("130", "USD").unwrap())).toBe(true);
-        expect(invoice.vat.equals(Vat.create("10"))).toBe(true);
+        expect(invoice.vatRate.equals(Vat.create("10"))).toBe(true);
+        expect(invoice.vatAmount.equals(Money.create("13", "USD").unwrap())).toBe(true);
     });
 
     it("should add a line item", () => {
