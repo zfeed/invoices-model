@@ -1,19 +1,18 @@
 import { Money } from "../money/money/money";
 import { Vat } from "../vat/vat";
 import { LineItem } from "../line-item/line-item";
-import { assertLineItems } from "./asserts/assert-line-items";
 import { Result } from "../../building-blocks";
 import { Issuer } from "../issuer/issuer";
 import { Recipient } from "../recipient/recipient";
 
 import { IssueDate } from "../calendar-date/calendar-date";
 import { IBilling } from "../recipient/billing/billing.interface";
+import { LineItems, ReadOnlyLineItems } from '../line-items/line-items';
 
 export class Invoice<T, D, B extends IBilling<T, D>> {
     #vat: Vat;
     #total: Money;
-    #subtotal: Money;
-    #lineItems: LineItem[];
+    #lineItems: LineItems;
     #issueDate: IssueDate;
     #dueDate: IssueDate;
     #issuer: Issuer;
@@ -23,15 +22,11 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         return this.#total;
     }
 
-    public get subtotal(): Money {
-        return this.#subtotal;
-    }
-
     public get vat(): Vat {
         return this.#vat;
     }
 
-    public get lineItems(): ReadonlyArray<LineItem> {
+    public get lineItems(): ReadOnlyLineItems {
         return this.#lineItems;
     }
 
@@ -52,9 +47,8 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
     }
 
     private constructor(
-        lineItems: LineItem[],
+        lineItems: LineItems,
         total: Money,
-        subtotal: Money,
         vat: Vat,
         issueDate: IssueDate,
         dueDate: IssueDate,
@@ -63,7 +57,6 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
     ) {
         this.#lineItems = lineItems;
         this.#total = total;
-        this.#subtotal = subtotal;
         this.#vat = vat;
         this.#issueDate = issueDate;
         this.#dueDate = dueDate;
@@ -72,28 +65,14 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
     }
 
     static create<T, D, B extends IBilling<T, D>>(options: {
-        lineItems: LineItem[];
+        lineItems: LineItems;
         issueDate: IssueDate;
         dueDate: IssueDate;
         issuer: Issuer;
         recipient: Recipient<T, D, B>;
     }) {
-        const error = assertLineItems(options.lineItems);
-    
-        if (error) {
-            return Result.error(error);
-        }
-
-        let total = options.lineItems[0].total;
-        for (let i = 1; i < options.lineItems.length; i++) {
-            const result = total.add(options.lineItems[i].total);
-            if (result.isError()) {
-                return result.error();
-            }
-            total = result.unwrap();
-        }
-
-        const subtotal = total;
+        const subtotal = options.lineItems.subtotal;
+        const total = options.lineItems.subtotal;
 
         const issueDate = options.issueDate;
         const dueDate = options.dueDate;
@@ -102,7 +81,6 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         const invoice = new Invoice(
             options.lineItems,
             total,
-            subtotal,
             Vat.create("0"),
             issueDate,
             dueDate,
@@ -114,15 +92,7 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
     }
 
     applyVat(vat: Vat) {
-        let baseTotal = this.#lineItems[0].total;
-        for (let i = 1; i < this.#lineItems.length; i++) {
-            const result = baseTotal.add(this.#lineItems[i].total);
-            if (result.isError()) {
-                return result.error();
-            }
-            baseTotal = result.unwrap();
-        }
-        const vatResult = vat.applyTo(baseTotal);
+        const vatResult = vat.applyTo(this.lineItems.subtotal);
 
         if (vatResult.isError()) {
             return vatResult.error();
@@ -135,66 +105,50 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
     }
 
     addLineItem(lineItem: LineItem) {
-        const error = assertLineItems([...this.#lineItems, lineItem]);
-        if (error) {
-            return Result.error(error);
+        const lineItems = this.#lineItems.add(lineItem);
+
+        if (lineItems.isError()) {
+            return lineItems.error();
         }
 
-        this.#lineItems.push(lineItem);
-        const vatResult = this.#vat.applyTo(lineItem.total);
+        this.#lineItems = lineItems.unwrap();
+    
+        const vatResult = this.#vat.applyTo(this.#lineItems.subtotal);
+
+    
         if (vatResult.isError()) {
             return vatResult.error();
         }
 
-        const result = this.#total.add(vatResult.unwrap());
-        if (result.isError()) {
-            return result.error();
-        }
-        this.#total = result.unwrap();
-
-        this.#subtotal = this.#subtotal.add(lineItem.total).unwrap();
+        this.#total = vatResult.unwrap();
 
         return Result.ok(this);
     }
 
     removeLineItem(lineItem: LineItem) {
-        const index = this.#lineItems.findIndex((item) =>
-            item.equals(lineItem)
-        );
+        const lineItemsResult = this.#lineItems.remove(lineItem);
 
-        if (index === -1) {
+        if (lineItemsResult.isError()) {
+            return lineItemsResult.error();
+        }
+
+        const lineItems = lineItemsResult.unwrap();
+        
+        const isRemoved = lineItems.length !== this.#lineItems.length;
+
+        if (!isRemoved) {
             return Result.ok(undefined);
         }
 
-        const removed = this.#lineItems[index];
-        const newItems = [...this.#lineItems];
+        this.#lineItems = lineItems;
 
-        newItems.splice(index, 1);
-
-        const error = assertLineItems(newItems);
-
-        if (error) {
-            return Result.error(error);
-        }
-
-        this.#lineItems = newItems;
-
-        let subtotal = newItems[0].total;
-        for (let i = 1; i < newItems.length; i++) {
-            const result = subtotal.add(newItems[i].total);
-            if (result.isError()) {
-                return result.error();
-            }
-            subtotal = result.unwrap();
-        }
-
-        const result = this.#vat.applyTo(subtotal);
+        const result = this.#vat.applyTo(lineItems.subtotal);
         if (result.isError()) {
             return result.error();
         }
         this.#total = result.unwrap();
-        this.#subtotal = subtotal;
 
-        return Result.ok(removed);
+        return Result.ok(lineItem);
     }
+    
 }

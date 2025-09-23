@@ -6,6 +6,7 @@ import { IssueDate } from "../calendar-date/calendar-date";
 import { Recipient, RECIPIENT_TYPE } from "../recipient/recipient";
 import { Paypal } from "../recipient/billing/paypal";
 import { Issuer, ISSUER_TYPE } from '../issuer/issuer';
+import { LineItems } from "../line-items/line-items";
 
 describe("Invoice", () => {    
     it("should create an invoice instance", () => {
@@ -49,13 +50,13 @@ describe("Invoice", () => {
         const invoice = Invoice.create({
             issueDate: issueDate,
             dueDate: dueDate,
-            lineItems: [lineItem1, lineItem2],
+            lineItems: LineItems.create({ items: [lineItem1, lineItem2] }).unwrap(),
             issuer: issuer,
             recipient: recipient
         }).unwrap();
 
         expect(invoice.total.equals(Money.create("130", "USD").unwrap())).toBe(true);
-        expect(invoice.subtotal.equals(Money.create("130", "USD").unwrap())).toBe(true);
+        expect(invoice.lineItems.subtotal.equals(Money.create("130", "USD").unwrap())).toBe(true);
         expect(invoice.vat.equals(Vat.create("0"))).toBe(true);
         expect(invoice.lineItems).toHaveLength(2);
         expect(
@@ -102,7 +103,7 @@ describe("Invoice", () => {
         const invoice = Invoice.create({
             issueDate: IssueDate.create("2023-01-01").unwrap(),
             dueDate: IssueDate.create("2023-02-01").unwrap(),
-            lineItems: [lineItem1, lineItem2],
+            lineItems: LineItems.create({ items: [lineItem1, lineItem2] }).unwrap(),
             issuer: Issuer.create({
                 type: ISSUER_TYPE.COMPANY,
                 name: "Test Company",
@@ -117,7 +118,7 @@ describe("Invoice", () => {
         const result = invoice.applyVat(vat);
 
         expect(invoice.total.equals(Money.create("156", "USD").unwrap())).toBe(true);
-        expect(invoice.subtotal.equals(Money.create("130", "USD").unwrap())).toBe(true);
+        expect(invoice.lineItems.subtotal.equals(Money.create("130", "USD").unwrap())).toBe(true);
         expect(invoice.vat.equals(Vat.create("20"))).toBe(true);
         expect(result.isOk()).toBe(true);
     });
@@ -154,7 +155,7 @@ describe("Invoice", () => {
         const invoice = Invoice.create({
             issueDate: IssueDate.create("2023-01-01").unwrap(),
             dueDate: IssueDate.create("2023-02-01").unwrap(),
-            lineItems: [lineItem1, lineItem2],
+            lineItems: LineItems.create({ items: [lineItem1, lineItem2] }).unwrap(),
             issuer: Issuer.create({
                 type: ISSUER_TYPE.COMPANY,
                 name: "Test Company",
@@ -171,91 +172,8 @@ describe("Invoice", () => {
         invoice.applyVat(vat2);
 
         expect(invoice.total.equals(Money.create("143", "USD").unwrap())).toBe(true);
-        expect(invoice.subtotal.equals(Money.create("130", "USD").unwrap())).toBe(true);
+        expect(invoice.lineItems.subtotal.equals(Money.create("130", "USD").unwrap())).toBe(true);
         expect(invoice.vat.equals(Vat.create("10"))).toBe(true);
-    });
-
-    it("should not create an invoice with no line items", () => {
-        const recipientBilling = Paypal.create({ email: "customer@example.com" }).unwrap();
-        const recipient = Recipient.create({
-            type: RECIPIENT_TYPE.INDIVIDUAL,
-            name: "Jane Smith",
-            address: "456 Another St, City, Country",
-            taxId: "TAX654321",
-            email: 'jane.smith@example.com',
-            taxResidenceCountry: "US",
-            billing: recipientBilling
-        }).unwrap();
-
-        const result = Invoice.create({
-            issueDate: IssueDate.create("2023-01-01").unwrap(),
-            dueDate: IssueDate.create("2023-02-01").unwrap(),
-            lineItems: [],
-            issuer: Issuer.create({
-                type: ISSUER_TYPE.COMPANY,
-                name: "Test Company",
-                address: "123 Test St",
-                taxId: "TEST123",
-                email: "test@company.com"
-            }).unwrap(),
-            recipient: recipient
-        });
-
-        expect(result.unwrapError()).toEqual(
-            expect.objectContaining({
-                code: '1000',
-            })
-        );
-    });
-
-    it("should not create an invoice with line items that have different currency", () => {
-        const recipientBilling = Paypal.create({ email: "customer@example.com" }).unwrap();
-        const recipient = Recipient.create({
-            type: RECIPIENT_TYPE.INDIVIDUAL,
-            name: "Jane Smith",
-            address: "456 Another St, City, Country",
-            taxId: "TAX654321",
-            email: 'jane.smith@example.com',
-            taxResidenceCountry: "US",
-            billing: recipientBilling
-        }).unwrap();
-
-        const result = Invoice.create({
-            issueDate: IssueDate.create("2023-01-01").unwrap(),
-            dueDate: IssueDate.create("2023-02-01").unwrap(),
-            lineItems: [
-                LineItem.create({
-                    description: "Item 1",
-                    price: {
-                amount: "50",
-                currency: "USD"
-            },
-                    quantity: '2'
-                }).unwrap(),
-                LineItem.create({
-                    description: "Item 2",
-                    price: {
-                amount: "30",
-                currency: "EUR"
-            },
-                    quantity: '1'
-                }).unwrap(),
-            ],
-            issuer: Issuer.create({
-                type: ISSUER_TYPE.COMPANY,
-                name: "Test Company",
-                address: "123 Test St",
-                taxId: "TEST123",
-                email: "test@company.com"
-            }).unwrap(),
-            recipient: recipient
-        });
-
-        expect(result.unwrapError()).toEqual(
-            expect.objectContaining({
-                code: '1001',
-            })
-        );
     });
 
     it("should add a line item", () => {
@@ -282,7 +200,7 @@ describe("Invoice", () => {
         const invoice = Invoice.create({
             issueDate: IssueDate.create("2023-01-01").unwrap(),
             dueDate: IssueDate.create("2023-02-01").unwrap(),
-            lineItems: [lineItem1],
+            lineItems: LineItems.create({ items: [lineItem1] }).unwrap(),
             issuer: Issuer.create({
                 type: ISSUER_TYPE.COMPANY,
                 name: "Test Company",
@@ -310,7 +228,7 @@ describe("Invoice", () => {
         expect(
             invoice.lineItems.find((lineItem) => lineItem.equals(lineItem2))
         ).toBeDefined();
-        expect(invoice.subtotal.equals(Money.create("220", "USD").unwrap())).toBe(true);
+        expect(invoice.lineItems.subtotal.equals(Money.create("220", "USD").unwrap())).toBe(true);
     });
 
     it("should add respect applied vat when a line item added", () => {
@@ -344,7 +262,7 @@ describe("Invoice", () => {
         const invoice = Invoice.create({
             issueDate: IssueDate.create("2023-01-01").unwrap(),
             dueDate: IssueDate.create("2023-02-01").unwrap(),
-            lineItems: [lineItem1],
+            lineItems: LineItems.create({ items: [lineItem1] }).unwrap(),
             issuer: issuer,
             recipient: recipient
         }).unwrap();
@@ -360,10 +278,10 @@ describe("Invoice", () => {
             quantity: '4'
         }).unwrap();
 
-        invoice.addLineItem(lineItem2);
+        invoice.addLineItem(lineItem2).unwrap();
 
+        expect(invoice.lineItems.subtotal.equals(Money.create("220", "USD").unwrap())).toBe(true);
         expect(invoice.total.equals(Money.create("242", "USD").unwrap())).toBe(true);
-        expect(invoice.subtotal.equals(Money.create("220", "USD").unwrap())).toBe(true);
     });
 
     it("should not add a duplicate line item", () => {
@@ -398,7 +316,7 @@ describe("Invoice", () => {
         const invoice = Invoice.create({
             issueDate: IssueDate.create("2023-01-01").unwrap(),
             dueDate: IssueDate.create("2023-02-01").unwrap(),
-            lineItems: [lineItem1],
+            lineItems: LineItems.create({ items: [lineItem1] }).unwrap(),
             issuer: issuer,
             recipient: recipient
         }).unwrap();
@@ -452,7 +370,7 @@ describe("Invoice", () => {
         const invoice = Invoice.create({
             issueDate: IssueDate.create("2023-01-01").unwrap(),
             dueDate: IssueDate.create("2023-02-01").unwrap(),
-            lineItems: [lineItem1, lineItem2],
+            lineItems: LineItems.create({ items: [lineItem1, lineItem2] }).unwrap(),
             issuer: issuer,
             recipient: recipient
         }).unwrap();
@@ -471,10 +389,10 @@ describe("Invoice", () => {
         expect(removedItem).toBeDefined();
         expect(removedItem?.equals(lineItem1)).toBe(true);
         expect(invoice.lineItems).toHaveLength(1);
-        expect(invoice.subtotal.equals(Money.create("200", "USD").unwrap())).toBe(true);
+        expect(invoice.lineItems.subtotal.equals(Money.create("200", "USD").unwrap())).toBe(true);
         expect(
-            invoice.lineItems.find((lineItem) => lineItem.equals(lineItem2))
-        ).toBeDefined();
+            invoice.lineItems.contains(lineItem2)
+        ).toBeTruthy();
     });
 
     it("should change total when a line item is removed", () => {
@@ -517,7 +435,7 @@ describe("Invoice", () => {
         const invoice = Invoice.create({
             issueDate: IssueDate.create("2023-01-01").unwrap(),
             dueDate: IssueDate.create("2023-02-01").unwrap(),
-            lineItems: [lineItem1, lineItem2],
+            lineItems: LineItems.create({ items: [lineItem1, lineItem2] }).unwrap(),
             issuer: issuer,
             recipient: recipient
         }).unwrap();
@@ -576,7 +494,7 @@ describe("Invoice", () => {
         const invoice = Invoice.create({
             issueDate: IssueDate.create("2023-01-01").unwrap(),
             dueDate: IssueDate.create("2023-02-01").unwrap(),
-            lineItems: [lineItem1, lineItem2],
+            lineItems: LineItems.create({ items: [lineItem1, lineItem2] }).unwrap(),
             issuer: issuer,
             recipient: recipient
         }).unwrap();

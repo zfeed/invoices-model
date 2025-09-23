@@ -20,5 +20,9 @@ export class Currency {
     equals(other: Currency): boolean {
         return this.#code === other.#code;
     }
+
+    toString(): string {
+        return this.#code;
+    }
 }
 

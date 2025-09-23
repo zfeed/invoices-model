@@ -64,4 +64,8 @@ export class Money {
 
         return Result.ok(new Money(numericValue, currencyResult.unwrap()));
     }
+
+    toString(): string {
+        return `${this.#amount.toString()} ${this.#currency.toString()}`;
+    }
 }
