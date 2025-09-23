@@ -67,7 +67,7 @@ describe("Invoice", () => {
         ).toBeDefined();
         expect(invoice.issueDate.equals(issueDate)).toBe(true);
         expect(invoice.dueDate.equals(dueDate)).toBe(true);
-        expect(issuer.equals(invoice.issuer)).toBe(true);
+        expect(invoice.issuer.equals(issuer)).toBe(true);
         expect(invoice.recipient.type).toBe('INDIVIDUAL');
     });
 
