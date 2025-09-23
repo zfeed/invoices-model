@@ -57,7 +57,7 @@ describe("Invoice", () => {
 
         expect(invoice.total.equals(Money.create("130", "USD").unwrap())).toBe(true);
         expect(invoice.lineItems.subtotal.equals(Money.create("130", "USD").unwrap())).toBe(true);
-        expect(invoice.vatRate.equals(Vat.create("0"))).toBe(true);
+        expect(invoice.vatRate.equals(Vat.create("0").unwrap())).toBe(true);
         expect(invoice.vatAmount.equals(Money.create("0", "USD").unwrap())).toBe(true);
         expect(invoice.lineItems).toHaveLength(2);
         expect(
@@ -116,11 +116,11 @@ describe("Invoice", () => {
         }).unwrap();
         const vat = Vat.create("20");
 
-        const result = invoice.applyVat(vat);
+        const result = invoice.applyVat(vat.unwrap());
 
         expect(invoice.total.equals(Money.create("156", "USD").unwrap())).toBe(true);
         expect(invoice.lineItems.subtotal.equals(Money.create("130", "USD").unwrap())).toBe(true);
-        expect(invoice.vatRate.equals(Vat.create("20"))).toBe(true);
+        expect(invoice.vatRate.equals(Vat.create("20").unwrap())).toBe(true);
         expect(invoice.vatAmount.equals(Money.create("26", "USD").unwrap())).toBe(true);
         expect(result.isOk()).toBe(true);
     });
@@ -170,12 +170,12 @@ describe("Invoice", () => {
         const vat1 = Vat.create("20");
         const vat2 = Vat.create("10");
 
-        invoice.applyVat(vat1);
-        invoice.applyVat(vat2);
+        invoice.applyVat(vat1.unwrap());
+        invoice.applyVat(vat2.unwrap());
 
         expect(invoice.total.equals(Money.create("143", "USD").unwrap())).toBe(true);
         expect(invoice.lineItems.subtotal.equals(Money.create("130", "USD").unwrap())).toBe(true);
-        expect(invoice.vatRate.equals(Vat.create("10"))).toBe(true);
+        expect(invoice.vatRate.equals(Vat.create("10").unwrap())).toBe(true);
         expect(invoice.vatAmount.equals(Money.create("13", "USD").unwrap())).toBe(true);
     });
 
@@ -270,7 +270,7 @@ describe("Invoice", () => {
             recipient: recipient
         }).unwrap();
 
-        invoice.applyVat(Vat.create("10"));
+        invoice.applyVat(Vat.create("10").unwrap());
 
         const lineItem2 = LineItem.create({
             description: "Item 2",
@@ -502,7 +502,7 @@ describe("Invoice", () => {
             recipient: recipient
         }).unwrap();
 
-        invoice.applyVat(Vat.create("10"));
+        invoice.applyVat(Vat.create("10").unwrap());
 
         invoice.removeLineItem(
             LineItem.create({

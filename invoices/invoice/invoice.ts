@@ -89,7 +89,7 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         const invoice = new Invoice(
             options.lineItems,
             total,
-            Vat.create("0"),
+            Vat.create("0").unwrap(),
             Money.create("0", subtotal.currency.toString()).unwrap(),
             issueDate,
             dueDate,

@@ -1,58 +1,79 @@
 import { Vat } from "./vat";
-import { InvalidPercentsError } from "./asserts/assert-percents";
 import { Numeric } from "../numeric/numeric";
 
 describe("Vat", () => {
     describe("create", () => {
-        it("creates Vat with correct rate from percent string", () => {
-            const vat = Vat.create("20");
+        it("should create vat from integer input", () => {
+            const vat = Vat.create("20").unwrap();
             expect(vat.rate.equals(Numeric.create("0.2"))).toBe(true);
         });
-        it("throws for invalid percent string", () => {
-            expect(() => Vat.create("abc")).toThrow();
-            expect(() => Vat.create("-5")).toThrow();
-            expect(() => Vat.create("101")).toThrow();
+
+        it("should create vat from decimal input", () => {
+            const vat = Vat.create("0.5").unwrap();
+            expect(vat.rate.equals(Numeric.create("0.005"))).toBe(true);
+        });
+
+        it("should not create vat when not numeric input", () => {
+            const result = Vat.create("abc");
+            expect(result.isError()).toBe(true);
+            expect(result.unwrapError()).toEqual(expect.objectContaining({
+                code: '9000',
+            }));
+        });
+
+        it("should not create vat when < 0 numeric input", () => {
+            const result = Vat.create("-5");
+            expect(result.isError()).toBe(true);
+            expect(result.unwrapError()).toEqual(expect.objectContaining({
+                code: '9001',
+            }));
+        });
+
+        it("should not create vat when > 100 numeric input", () => {
+            const result = Vat.create("101");
+            expect(result.isError()).toBe(true);
+            expect(result.unwrapError()).toEqual(expect.objectContaining({
+                code: '9001',
+            }));
+        });
+
+        it("should not create vat when more than two decimal places numeric input", () => {
+            const result = Vat.create("10.123");
+            expect(result.isError()).toBe(true);
+            expect(result.unwrapError()).toEqual(expect.objectContaining({
+                code: '9000',
+            }));
         });
     });
 
     describe("rate", () => {
         it("returns the correct rate", () => {
-            const vat = Vat.create("10");
+            const vat = Vat.create("10").unwrap();
             expect(vat.rate.equals(Numeric.create("0.1"))).toBe(true);
         });
     });
 
     describe("rate", () => {
         it("returns the correct rate", () => {
-            const vat = Vat.create("10");
+            const vat = Vat.create("10").unwrap();
             expect(vat.rate.equals(Numeric.create("0.1"))).toBe(true);
         });
 
         it("returns the correct rate", () => {
-            const vat = Vat.create("0");
+            const vat = Vat.create("0").unwrap();
             expect(vat.rate.equals(Numeric.create("0"))).toBe(true);
-        });
-
-        it("throws for invalid percent string", () => {
-            expect(() => Vat.create("-1")).toThrow(InvalidPercentsError);
-        });
-
-        it("throws for invalid percent string", () => {
-            expect(() => Vat.create("4.235")).toThrow(
-                InvalidPercentsError
-            );
         });
     });
 
     describe("equals", () => {
         it("returns true for same rate", () => {
-            const vat1 = Vat.create("15");
-            const vat2 = Vat.create("15");
+            const vat1 = Vat.create("15").unwrap();
+            const vat2 = Vat.create("15").unwrap();
             expect(vat1.equals(vat2)).toBe(true);
         });
         it("returns false for different rates", () => {
-            const vat1 = Vat.create("15");
-            const vat2 = Vat.create("20");
+            const vat1 = Vat.create("15").unwrap();
+            const vat2 = Vat.create("20").unwrap();
             expect(vat1.equals(vat2)).toBe(false);
         });
     });
