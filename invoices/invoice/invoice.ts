@@ -113,14 +113,7 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
 
         this.#lineItems = lineItems.unwrap();
     
-        const vatResult = this.#vat.applyTo(this.#lineItems.subtotal);
-
-    
-        if (vatResult.isError()) {
-            return vatResult.error();
-        }
-
-        this.#total = vatResult.unwrap();
+        this.#calculateTotal();
 
         return Result.ok(this);
     }
@@ -142,13 +135,17 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
 
         this.#lineItems = lineItems;
 
-        const result = this.#vat.applyTo(lineItems.subtotal);
-        if (result.isError()) {
-            return result.error();
-        }
-        this.#total = result.unwrap();
+        this.#calculateTotal();
 
         return Result.ok(lineItem);
+    }
+
+    #calculateTotal(): void {
+        const subtotal = this.#lineItems.subtotal;
+
+        const total = this.#vat ? this.#vat.applyTo(subtotal).unwrap() : subtotal;
+
+        this.#total = total;
     }
     
 }
