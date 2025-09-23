@@ -66,7 +66,6 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
     }
 
     public toInvoice(): Result<DomainError, Invoice<T, D, B>> {
-        // Check if all required fields are present
         const error = assertDraftInvoiceComplete(
             this.#total,
             this.#vat,
@@ -106,7 +105,6 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
         }
 
         this.#lineItems = lineItemsResult.unwrap();
-
 
         this.#calculateTotal();
     }
