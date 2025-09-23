@@ -68,7 +68,7 @@ describe("Invoice", () => {
         expect(invoice.issueDate.equals(issueDate)).toBe(true);
         expect(invoice.dueDate.equals(dueDate)).toBe(true);
         expect(issuer.equals(invoice.issuer)).toBe(true);
-        expect(recipient.type).toBe('INDIVIDUAL');
+        expect(invoice.recipient.type).toBe('INDIVIDUAL');
     });
 
     it("should apply VAT to invoice total", () => {
