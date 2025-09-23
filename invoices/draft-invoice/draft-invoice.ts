@@ -117,7 +117,7 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
 
         const subtotal = this.#lineItems.subtotal;
 
-        const total = this.#vat ? this.#vat.applyTo(subtotal).unwrap() : subtotal;
+        const total = this.#vat ? this.#vat.applyTo(subtotal) : subtotal;
 
         this.#total = total;
     }

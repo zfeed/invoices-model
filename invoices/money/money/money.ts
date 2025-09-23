@@ -41,6 +41,18 @@ export class Money {
         return Result.ok(new Money(value, this.#currency));
     }
 
+    subtract(other: Money) {
+        const error = assertEqualCurrencies(this.#currency, other.currency);
+
+        if (error) {
+            return Result.error(error);
+        }
+
+        const value = this.#amount.subtract(other.amount);
+
+        return Result.ok(new Money(value, this.#currency));
+    }
+
     multiplyBy(factor: Numeric, rounding: ROUNDING = ROUNDING.UP): Money {
         const value = this.#amount.multiplyBy(factor).toDecimalPlaces(0, rounding);
         return new Money(value, this.#currency);

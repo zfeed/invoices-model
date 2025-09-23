@@ -10,7 +10,8 @@ import { IBilling } from "../recipient/billing/billing.interface";
 import { LineItems, ReadOnlyLineItems } from '../line-items/line-items';
 
 export class Invoice<T, D, B extends IBilling<T, D>> {
-    #vat: Vat;
+    #vatRate: Vat;
+    #vatAmount: Money;
     #total: Money;
     #lineItems: LineItems;
     #issueDate: IssueDate;
@@ -22,8 +23,13 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         return this.#total;
     }
 
-    public get vat(): Vat {
-        return this.#vat;
+
+    public get vatRate(): Vat {
+        return this.#vatRate;
+    }
+
+    public get vatAmount(): Money {
+        return this.#vatAmount;
     }
 
     public get lineItems(): ReadOnlyLineItems {
@@ -49,7 +55,8 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
     private constructor(
         lineItems: LineItems,
         total: Money,
-        vat: Vat,
+        vatRate: Vat,
+        vatAmount: Money,
         issueDate: IssueDate,
         dueDate: IssueDate,
         issuer: Issuer,
@@ -57,7 +64,8 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
     ) {
         this.#lineItems = lineItems;
         this.#total = total;
-        this.#vat = vat;
+        this.#vatRate = vatRate;
+        this.#vatAmount = vatAmount;
         this.#issueDate = issueDate;
         this.#dueDate = dueDate;
         this.#recipient = recipient;
@@ -82,6 +90,7 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
             options.lineItems,
             total,
             Vat.create("0"),
+            Money.create("0", subtotal.currency.toString()).unwrap(),
             issueDate,
             dueDate,
             issuer,
@@ -91,15 +100,10 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         return Result.ok(invoice);
     }
 
-    applyVat(vat: Vat) {
-        const vatResult = vat.applyTo(this.lineItems.subtotal);
+    applyVat(vatRate: Vat) {
+        this.#vatRate = vatRate;
 
-        if (vatResult.isError()) {
-            return vatResult.error();
-        }
-
-        this.#total = vatResult.unwrap();
-        this.#vat = vat;
+        this.#calculateTotal();
 
         return Result.ok(this);
     }
@@ -143,8 +147,10 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
     #calculateTotal(): void {
         const subtotal = this.#lineItems.subtotal;
 
-        const total = this.#vat ? this.#vat.applyTo(subtotal).unwrap() : subtotal;
-
+        const total = this.#vatRate.applyTo(subtotal);
+        const vatAmount = total.subtract(subtotal).unwrap();
+    
+        this.#vatAmount = vatAmount;
         this.#total = total;
     }
     
