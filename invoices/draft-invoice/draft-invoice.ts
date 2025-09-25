@@ -9,9 +9,11 @@ import { IBilling } from "../recipient/billing/billing.interface";
 import { Invoice } from "../invoice/invoice";
 import { assertDraftInvoiceComplete } from "./asserts/assert-draft-invoice-complete";
 import { LineItem } from "../line-item/line-item";
+import { assertLineItemsNotEmpty } from "./asserts/assert-line-items-not-empty";
 
 export class DraftInvoice<T, D, B extends IBilling<T, D>> {
-    #vat: Vat | null;
+    #vatRate: Vat | null;
+    #vatAmount: Money | null;
     #total: Money | null;
     #lineItems: LineItems | null;
     #issueDate: IssueDate | null;
@@ -23,8 +25,12 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
         return this.#total;
     }
 
-    public get vat(): Vat | null {
-        return this.#vat;
+    public get vatRate(): Vat | null {
+        return this.#vatRate;
+    }
+
+    public get vatAmount(): Money | null {
+        return this.#vatAmount;
     }
 
     public get lineItems(): ReadOnlyLineItems | null {
@@ -50,7 +56,8 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
     private constructor(
         lineItems: LineItems | null = null,
         total: Money | null = null,
-        vat: Vat | null = null,
+        vatRate: Vat | null = null,
+        vatAmount: Money | null = null,
         issueDate: IssueDate | null = null,
         dueDate: IssueDate | null = null,
         issuer: Issuer | null = null,
@@ -58,7 +65,8 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
     ) {
         this.#lineItems = lineItems;
         this.#total = total;
-        this.#vat = vat;
+        this.#vatRate = vatRate;
+        this.#vatAmount = vatAmount;
         this.#issueDate = issueDate;
         this.#dueDate = dueDate;
         this.#recipient = recipient;
@@ -68,7 +76,7 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
     public toInvoice(): Result<DomainError, Invoice<T, D, B>> {
         const error = assertDraftInvoiceComplete(
             this.#total,
-            this.#vat,
+            this.#vatRate,
             this.#lineItems,
             this.#issueDate,
             this.#dueDate,
@@ -107,6 +115,21 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
         this.#lineItems = lineItemsResult.unwrap();
 
         this.#calculateTotal();
+
+        return Result.ok(undefined);
+    }
+
+    public applyVat(vatRate: Vat): Result<DomainError, void> {
+        const error = assertLineItemsNotEmpty(this.#lineItems);
+
+        if (error) {
+            return Result.error(error);
+        }
+
+        this.#vatRate = vatRate;
+        this.#calculateTotal();
+
+        return Result.ok(undefined);
     }
 
     #calculateTotal(): void {
@@ -117,9 +140,11 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
 
         const subtotal = this.#lineItems.subtotal;
 
-        const total = this.#vat ? this.#vat.applyTo(subtotal) : subtotal;
+        const total = this.#vatRate ? this.#vatRate.applyTo(subtotal) : subtotal;
+        const vatAmount = this.#vatRate ? total.subtract(subtotal).unwrap() : null;
 
         this.#total = total;
+        this.#vatAmount = vatAmount;
     }
 
     static create<T, D, B extends IBilling<T, D>>() {

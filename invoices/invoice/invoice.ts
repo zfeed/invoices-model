@@ -153,5 +153,4 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         this.#vatAmount = vatAmount;
         this.#total = total;
     }
-    
 }
