@@ -1,7 +1,7 @@
 import { Result } from '../../building-blocks';
 import { Money } from '../money/money/money';
 import { Numeric } from '../numeric/numeric';
-import { assertPercents } from './asserts/assert-percents'
+import { assertPercents } from './asserts/assert-percents';
 export class Vat {
     #value: Numeric;
 
@@ -29,7 +29,7 @@ export class Vat {
 
         const numericValue = percents.divideBy(oneHundred);
 
-        return  Result.ok(new Vat(numericValue));
+        return Result.ok(new Vat(numericValue));
     }
 
     applyTo(money: Money) {

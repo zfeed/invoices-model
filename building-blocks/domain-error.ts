@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE } from "./codes";
+import { DOMAIN_ERROR_CODE } from './codes';
 
 export class DomainError extends Error {
     code: DOMAIN_ERROR_CODE;

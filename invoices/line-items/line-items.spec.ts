@@ -1,16 +1,16 @@
-import { LineItem } from "../line-item/line-item";
-import { LineItems } from "./line-items";
-import { Money } from "../money/money/money";
+import { LineItem } from '../line-item/line-item';
+import { LineItems } from './line-items';
+import { Money } from '../money/money/money';
 
-describe("LineItems", () => {
-    it("should create line items", () => {
+describe('LineItems', () => {
+    it('should create line items', () => {
         const lineItem = LineItem.create({
-            description: "Product 1",
+            description: 'Product 1',
             price: {
-                amount: "100",
-                currency: "USD",
+                amount: '100',
+                currency: 'USD',
             },
-            quantity: "4",
+            quantity: '4',
         }).unwrap();
 
         const lineItems = LineItems.create({
@@ -19,39 +19,39 @@ describe("LineItems", () => {
 
         expect(lineItems.length).toBe(1);
         expect(
-            lineItems.subtotal.equals(Money.create("400", "USD").unwrap())
+            lineItems.subtotal.equals(Money.create('400', 'USD').unwrap())
         ).toBe(true);
         expect(
             lineItems.contains(
                 LineItem.create({
-                    description: "Product 1",
+                    description: 'Product 1',
                     price: {
-                        amount: "100",
-                        currency: "USD",
+                        amount: '100',
+                        currency: 'USD',
                     },
-                    quantity: "4",
+                    quantity: '4',
                 }).unwrap()
             )
         ).toBe(true);
     });
 
-    it("should add a line item", () => {
+    it('should add a line item', () => {
         const lineItem1 = LineItem.create({
-            description: "Product 1",
+            description: 'Product 1',
             price: {
-                amount: "100",
-                currency: "USD",
+                amount: '100',
+                currency: 'USD',
             },
-            quantity: "4",
+            quantity: '4',
         }).unwrap();
 
         const lineItem2 = LineItem.create({
-            description: "Product 2",
+            description: 'Product 2',
             price: {
-                amount: "200",
-                currency: "USD",
+                amount: '200',
+                currency: 'USD',
             },
-            quantity: "2",
+            quantity: '2',
         }).unwrap();
 
         const lineItems = LineItems.create({
@@ -62,29 +62,31 @@ describe("LineItems", () => {
 
         expect(updatedLineItems.length).toBe(2);
         expect(
-            updatedLineItems.subtotal.equals(Money.create("800", "USD").unwrap())
+            updatedLineItems.subtotal.equals(
+                Money.create('800', 'USD').unwrap()
+            )
         ).toBe(true);
         expect(updatedLineItems.contains(lineItem1)).toBe(true);
         expect(updatedLineItems.contains(lineItem2)).toBe(true);
     });
 
-    it("should remove a line item", () => {
+    it('should remove a line item', () => {
         const lineItem1 = LineItem.create({
-            description: "Product 1",
+            description: 'Product 1',
             price: {
-                amount: "100",
-                currency: "USD",
+                amount: '100',
+                currency: 'USD',
             },
-            quantity: "4",
+            quantity: '4',
         }).unwrap();
 
         const lineItem2 = LineItem.create({
-            description: "Product 2",
+            description: 'Product 2',
             price: {
-                amount: "200",
-                currency: "USD",
+                amount: '200',
+                currency: 'USD',
             },
-            quantity: "2",
+            quantity: '2',
         }).unwrap();
 
         const lineItems = LineItems.create({
@@ -95,13 +97,15 @@ describe("LineItems", () => {
 
         expect(updatedLineItems.length).toBe(1);
         expect(
-            updatedLineItems.subtotal.equals(Money.create("400", "USD").unwrap())
+            updatedLineItems.subtotal.equals(
+                Money.create('400', 'USD').unwrap()
+            )
         ).toBe(true);
         expect(updatedLineItems.contains(lineItem1)).toBe(true);
         expect(updatedLineItems.contains(lineItem2)).toBe(false);
     });
 
-    it("should not create empty line items", () => {
+    it('should not create empty line items', () => {
         const result = LineItems.create({ items: [] });
 
         expect(result.unwrapError()).toEqual(
@@ -111,23 +115,23 @@ describe("LineItems", () => {
         );
     });
 
-    it("should not create line items with different currencies", () => {
+    it('should not create line items with different currencies', () => {
         const lineItem1 = LineItem.create({
-            description: "Product 1",
+            description: 'Product 1',
             price: {
-                amount: "100",
-                currency: "USD",
+                amount: '100',
+                currency: 'USD',
             },
-            quantity: "4",
+            quantity: '4',
         }).unwrap();
 
         const lineItem2 = LineItem.create({
-            description: "Product 2",
+            description: 'Product 2',
             price: {
-                amount: "200",
-                currency: "EUR",
+                amount: '200',
+                currency: 'EUR',
             },
-            quantity: "2",
+            quantity: '2',
         }).unwrap();
 
         const result = LineItems.create({
@@ -141,14 +145,14 @@ describe("LineItems", () => {
         );
     });
 
-    it("should not add a duplicate line item", () => {
+    it('should not add a duplicate line item', () => {
         const lineItem1 = LineItem.create({
-            description: "Product 1",
+            description: 'Product 1',
             price: {
-                amount: "100",
-                currency: "USD",
+                amount: '100',
+                currency: 'USD',
             },
-            quantity: "4",
+            quantity: '4',
         }).unwrap();
 
         const lineItems = LineItems.create({
@@ -164,14 +168,14 @@ describe("LineItems", () => {
         );
     });
 
-    it("should leave line items empty when the last item is removed", () => {
+    it('should leave line items empty when the last item is removed', () => {
         const lineItem1 = LineItem.create({
-            description: "Product 1",
+            description: 'Product 1',
             price: {
-                amount: "100",
-                currency: "USD",
+                amount: '100',
+                currency: 'USD',
             },
-            quantity: "4",
+            quantity: '4',
         }).unwrap();
 
         const lineItems = LineItems.create({

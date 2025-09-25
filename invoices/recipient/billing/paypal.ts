@@ -12,7 +12,7 @@ export class Paypal implements IBilling<'PAYPAL', { email: Email }> {
 
     static create(data: { email: string }) {
         const emailResult = Email.create(data.email);
-    
+
         if (emailResult.isError()) {
             return emailResult;
         }

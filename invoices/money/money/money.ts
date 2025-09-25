@@ -3,13 +3,13 @@ import { Currency } from '../currency/currency';
 import { ROUNDING } from '../../numeric/rounding';
 import { assertMinorUnits } from './asserts/assert-minor-units';
 import { assertEqualCurrencies } from './asserts/assert-equal-currencies';
-import { Result } from "../../../building-blocks";
+import { Result } from '../../../building-blocks';
 
 export class Money {
     #amount: Numeric;
     #currency: Currency;
 
-    private constructor( amount: Numeric,  currency: Currency) {
+    private constructor(amount: Numeric, currency: Currency) {
         this.#amount = amount;
         this.#currency = currency;
     }
@@ -54,19 +54,20 @@ export class Money {
     }
 
     multiplyBy(factor: Numeric, rounding: ROUNDING = ROUNDING.UP): Money {
-        const value = this.#amount.multiplyBy(factor).toDecimalPlaces(0, rounding);
+        const value = this.#amount
+            .multiplyBy(factor)
+            .toDecimalPlaces(0, rounding);
         return new Money(value, this.#currency);
     }
 
-
     static create(amount: string, currency: string) {
-       const error = assertMinorUnits(amount);
+        const error = assertMinorUnits(amount);
 
-       if (error) {
-           return Result.error(error);
-       }
+        if (error) {
+            return Result.error(error);
+        }
 
-         const numericValue = Numeric.create(amount);
+        const numericValue = Numeric.create(amount);
 
         const currencyResult = Currency.create(currency);
 

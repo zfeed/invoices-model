@@ -1,5 +1,5 @@
-import { Decimal } from "decimal.js";
-import { ROUNDING } from "./rounding";
+import { Decimal } from 'decimal.js';
+import { ROUNDING } from './rounding';
 
 export class Numeric {
     #value: Decimal;
