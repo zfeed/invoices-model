@@ -1,10 +1,10 @@
-import { IBilling } from "./billing.interface";
-import { Result } from "../../../building-blocks";
+import { IBilling } from './billing.interface';
+import { Result } from '../../../building-blocks';
 
 export class Wire
     implements
         IBilling<
-            "WIRE",
+            'WIRE',
             {
                 swift: string;
                 accountNumber: string;
@@ -15,7 +15,7 @@ export class Wire
             }
         >
 {
-    public readonly type = "WIRE" as const;
+    public readonly type = 'WIRE' as const;
     public readonly data: {
         swift: string;
         accountNumber: string;

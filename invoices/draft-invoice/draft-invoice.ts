@@ -1,15 +1,15 @@
-import { Money } from "../money/money/money";
-import { Vat } from "../vat/vat";
-import { LineItems, ReadOnlyLineItems } from "../line-items/line-items";
-import { Result, DomainError, DOMAIN_ERROR_CODE } from "../../building-blocks";
-import { Issuer } from "../issuer/issuer";
-import { Recipient } from "../recipient/recipient";
-import { IssueDate } from "../calendar-date/calendar-date";
-import { IBilling } from "../recipient/billing/billing.interface";
-import { Invoice } from "../invoice/invoice";
-import { assertDraftInvoiceComplete } from "./asserts/assert-draft-invoice-complete";
-import { LineItem } from "../line-item/line-item";
-import { assertLineItemsNotEmpty } from "./asserts/assert-line-items-not-empty";
+import { DomainError, Result } from '../../building-blocks';
+import { IssueDate } from '../calendar-date/calendar-date';
+import { Invoice } from '../invoice/invoice';
+import { Issuer } from '../issuer/issuer';
+import { LineItem } from '../line-item/line-item';
+import { LineItems, ReadOnlyLineItems } from '../line-items/line-items';
+import { Money } from '../money/money/money';
+import { IBilling } from '../recipient/billing/billing.interface';
+import { Recipient } from '../recipient/recipient';
+import { Vat } from '../vat/vat';
+import { assertDraftInvoiceComplete } from './asserts/assert-draft-invoice-complete';
+import { assertLineItemsNotEmpty } from './asserts/assert-line-items-not-empty';
 
 export class DraftInvoice<T, D, B extends IBilling<T, D>> {
     #vatRate: Vat | null;
@@ -83,7 +83,7 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
             this.#issuer,
             this.#recipient
         );
-        
+
         if (error) {
             return Result.error(error);
         }
@@ -93,8 +93,8 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
             issueDate: this.#issueDate!,
             dueDate: this.#dueDate!,
             issuer: this.#issuer!,
-            recipient: this.#recipient!
-        })
+            recipient: this.#recipient!,
+        });
 
         return result;
     }
@@ -107,6 +107,26 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
         } else {
             lineItemsResult = this.#lineItems.add(lineItem);
         }
+
+        if (lineItemsResult.isError()) {
+            return lineItemsResult.error();
+        }
+
+        this.#lineItems = lineItemsResult.unwrap();
+
+        this.#calculateTotal();
+
+        return Result.ok(undefined);
+    }
+
+    public removeLineItem(lineItem: LineItem) {
+        const error = assertLineItemsNotEmpty(this.#lineItems);
+
+        if (error) {
+            return Result.error(error);
+        }
+
+        const lineItemsResult = this.#lineItems!.remove(lineItem);
 
         if (lineItemsResult.isError()) {
             return lineItemsResult.error();
@@ -140,8 +160,12 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
 
         const subtotal = this.#lineItems.subtotal;
 
-        const total = this.#vatRate ? this.#vatRate.applyTo(subtotal) : subtotal;
-        const vatAmount = this.#vatRate ? total.subtract(subtotal).unwrap() : null;
+        const total = this.#vatRate
+            ? this.#vatRate.applyTo(subtotal)
+            : subtotal;
+        const vatAmount = this.#vatRate
+            ? total.subtract(subtotal).unwrap()
+            : null;
 
         this.#total = total;
         this.#vatAmount = vatAmount;

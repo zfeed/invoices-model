@@ -1,6 +1,6 @@
-import { assertUnitQuantity } from "./asserts/assert-unit-quantity";
-import { Numeric } from "../numeric/numeric";
-import {Result} from "../../building-blocks";
+import { assertUnitQuantity } from './asserts/assert-unit-quantity';
+import { Numeric } from '../numeric/numeric';
+import { Result } from '../../building-blocks';
 
 export class UnitQuantity {
     #value: Numeric;

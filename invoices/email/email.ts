@@ -1,4 +1,4 @@
-import { Result } from "../../building-blocks";
+import { Result } from '../../building-blocks';
 import { assertEmailFormat } from './asserts/assert-email-format';
 
 export class Email {
@@ -10,11 +10,11 @@ export class Email {
 
     static create(value: string) {
         const error = assertEmailFormat(value);
-        
+
         if (error) {
             return Result.error(error);
         }
-        
+
         return Result.ok(new Email(value));
     }
 

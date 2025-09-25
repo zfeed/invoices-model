@@ -1,11 +1,11 @@
-import { Result } from "../../building-blocks";
-import { Email } from "../email/email";
-import { Country } from "../country/country";
-import { IBilling } from "./billing/billing.interface";
+import { Result } from '../../building-blocks';
+import { Email } from '../email/email';
+import { Country } from '../country/country';
+import { IBilling } from './billing/billing.interface';
 
 export enum RECIPIENT_TYPE {
-    INDIVIDUAL = "INDIVIDUAL",  
-    COMPANY = "COMPANY"
+    INDIVIDUAL = 'INDIVIDUAL',
+    COMPANY = 'COMPANY',
 }
 
 export class Recipient<T, D, B extends IBilling<T, D>> {
@@ -36,7 +36,7 @@ export class Recipient<T, D, B extends IBilling<T, D>> {
     }
 
     get type(): RECIPIENT_TYPE {
-        return this.#type; 
+        return this.#type;
     }
 
     get name(): string {
@@ -70,7 +70,7 @@ export class Recipient<T, D, B extends IBilling<T, D>> {
         taxId,
         email,
         taxResidenceCountry,
-        billing
+        billing,
     }: {
         type: RECIPIENT_TYPE;
         name: string;
@@ -80,15 +80,14 @@ export class Recipient<T, D, B extends IBilling<T, D>> {
         taxResidenceCountry: string;
         billing: B;
     }) {
-
         const emailResult = Email.create(email);
-    
+
         if (emailResult.isError()) {
             return emailResult.error();
         }
 
         const countryResult = Country.create({ code: taxResidenceCountry });
-    
+
         if (countryResult.isError()) {
             return countryResult.error();
         }

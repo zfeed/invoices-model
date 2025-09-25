@@ -1,7 +1,7 @@
-import { Currency } from "../../currency/currency";
-import { DomainError, DOMAIN_ERROR_CODE } from "../../../../building-blocks";
+import { Currency } from '../../currency/currency';
+import { DomainError, DOMAIN_ERROR_CODE } from '../../../../building-blocks';
 
-export  function assertEqualCurrencies(
+export function assertEqualCurrencies(
     currencyA: Currency,
     currencyB: Currency
 ): DomainError | null {

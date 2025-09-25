@@ -1,7 +1,7 @@
-import { UnitDescription } from "./unit-description";
-import { UnitQuantity } from "./unit-quantity";
-import { Money } from "../money/money/money";
-import { Result } from "../../building-blocks";
+import { UnitDescription } from './unit-description';
+import { UnitQuantity } from './unit-quantity';
+import { Money } from '../money/money/money';
+import { Result } from '../../building-blocks';
 
 export class LineItem {
     #price: Money;
@@ -20,7 +20,7 @@ export class LineItem {
         this.#quantity = quantity;
         this.#total = total;
     }
-    
+
     get price(): Money {
         return this.#price;
     }
@@ -48,14 +48,14 @@ export class LineItem {
     static create({
         description,
         price,
-        quantity
+        quantity,
     }: {
-        description: string,
+        description: string;
         price: {
-            amount: string,
-            currency: string
-        },
-        quantity: string
+            amount: string;
+            currency: string;
+        };
+        quantity: string;
     }) {
         const unitDescription = UnitDescription.create(description);
 
@@ -78,12 +78,7 @@ export class LineItem {
         const unitTotal = unitPrice.multiplyBy(unitQuantity.value);
 
         return Result.ok(
-            new this(
-                unitDescription,
-                unitPrice,
-                unitQuantity,
-                unitTotal
-            )
+            new this(unitDescription, unitPrice, unitQuantity, unitTotal)
         );
     }
 }

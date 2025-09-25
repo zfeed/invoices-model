@@ -1,9 +1,9 @@
-import { LineItem } from "../line-item/line-item";
-import { Money } from "../money/money/money";
-import { Result, DomainError } from "../../building-blocks";
-import { assertNonEmpty } from "./asserts/assert-non-empty";
-import { assertSameCurrency } from "./asserts/assert-same-currency";
-import { assertNoDuplicate } from "./asserts/assert-no-duplicate";
+import { LineItem } from '../line-item/line-item';
+import { Money } from '../money/money/money';
+import { Result, DomainError } from '../../building-blocks';
+import { assertNonEmpty } from './asserts/assert-non-empty';
+import { assertSameCurrency } from './asserts/assert-same-currency';
+import { assertNoDuplicate } from './asserts/assert-no-duplicate';
 
 export class LineItems {
     #items: LineItem[];
@@ -31,13 +31,13 @@ export class LineItems {
 
         return total;
     }
-        
+
     get subtotal(): Money {
         return this.#subtotal;
     }
 
     contains(lineItem: LineItem): boolean {
-        return this.#items.some(item => item.equals(lineItem));
+        return this.#items.some((item) => item.equals(lineItem));
     }
 
     add(lineItem: LineItem) {
@@ -45,7 +45,7 @@ export class LineItems {
     }
 
     remove(lineItem: LineItem) {
-        const lineItems = this.#items.filter(item => !item.equals(lineItem));
+        const lineItems = this.#items.filter((item) => !item.equals(lineItem));
 
         return LineItems.create({ items: lineItems });
     }
@@ -56,27 +56,30 @@ export class LineItems {
 
     static create({ items }: { items: LineItem[] }) {
         const duplicateError = assertNoDuplicate(items);
-    
+
         if (duplicateError) {
             return Result.error(duplicateError);
         }
 
         const emptyError = assertNonEmpty(items);
-    
+
         if (emptyError) {
             return Result.error(emptyError);
         }
 
         const currencyError = assertSameCurrency(items);
-    
+
         if (currencyError) {
             return Result.error(currencyError);
         }
-        
+
         const subtotal = this.calculateSubtotal(items);
-    
+
         return Result.ok(new LineItems(items, subtotal));
     }
 }
 
-export type ReadOnlyLineItems = Pick<LineItems, 'length' | 'subtotal' | 'contains' | 'find'>;
+export type ReadOnlyLineItems = Pick<
+    LineItems,
+    'length' | 'subtotal' | 'contains' | 'find'
+>;

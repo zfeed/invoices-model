@@ -1,5 +1,5 @@
-import { assertIsISO8601Date } from "./asserts/assert-isso8601-date";
-import { Result } from "../../building-blocks";
+import { assertIsISO8601Date } from './asserts/assert-isso8601-date';
+import { Result } from '../../building-blocks';
 
 export class IssueDate {
     #value: string;

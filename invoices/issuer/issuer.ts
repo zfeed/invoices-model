@@ -1,9 +1,9 @@
-import { Result } from "../../building-blocks";
-import { Email } from "../email/email";
+import { Result } from '../../building-blocks';
+import { Email } from '../email/email';
 
 export enum ISSUER_TYPE {
-    INDIVIDUAL = "INDIVIDUAL",
-    COMPANY = "COMPANY"
+    INDIVIDUAL = 'INDIVIDUAL',
+    COMPANY = 'COMPANY',
 }
 
 export class Issuer {
@@ -28,8 +28,8 @@ export class Issuer {
     }
 
     get type(): ISSUER_TYPE {
-        return this.#type; 
-        }
+        return this.#type;
+    }
 
     get name(): string {
         return this.#name;
@@ -49,7 +49,7 @@ export class Issuer {
 
     equals(other: Issuer): boolean {
         return (
-                this.#type === other.#type &&
+            this.#type === other.#type &&
             this.#name === other.#name &&
             this.#address === other.#address &&
             this.#taxId === other.#taxId &&
@@ -62,7 +62,7 @@ export class Issuer {
         name,
         address,
         taxId,
-        email
+        email,
     }: {
         type: ISSUER_TYPE;
         name: string;
@@ -70,24 +70,14 @@ export class Issuer {
         taxId: string;
         email: string;
     }) {
-
         const emailResult = Email.create(email);
-    
+
         if (emailResult.isError()) {
             return emailResult.error();
         }
 
         const issueEmail = emailResult.unwrap();
 
-
-        return Result.ok(
-            new this(
-                type,
-                name,
-                address,
-                taxId,
-                issueEmail
-            )
-        );
+        return Result.ok(new this(type, name, address, taxId, issueEmail));
     }
 }
