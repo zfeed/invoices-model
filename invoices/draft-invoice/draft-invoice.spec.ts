@@ -197,4 +197,113 @@ describe('DraftInvoice', () => {
         expect(draftInvoice.issueDate).toBeDefined();
         expect(draftInvoice.issueDate?.equals(issueDate)).toBe(true);
     });
+
+    it('should mark draft invoice as valid when all fields are filled in', () => {
+        const draftInvoice = DraftInvoice.create().unwrap();
+
+        const issueDate = CalendarDate.create('2023-01-01').unwrap();
+
+        const dueDate = CalendarDate.create('2023-01-01').unwrap();
+        const issuer = Issuer.create({
+            type: ISSUER_TYPE.COMPANY,
+            name: 'Company Inc.',
+            address: '123 Main St, City, Country',
+            taxId: 'TAX123456',
+            email: 'info@company.com',
+        }).unwrap();
+
+        const recipientBilling = Paypal.create({
+            email: 'customer@example.com',
+        }).unwrap();
+
+        const lineItem1 = LineItem.create({
+            description: 'Item 1',
+            price: {
+                amount: '50',
+                currency: 'USD',
+            },
+            quantity: '2',
+        }).unwrap();
+
+        const vat = Vat.create('20').unwrap();
+
+        const recipient = Recipient.create({
+            type: RECIPIENT_TYPE.INDIVIDUAL,
+            name: 'Jane Smith',
+            address: '456 Another St, City, Country',
+            taxId: 'TAX654321',
+            email: 'jane.smith@example.com',
+            taxResidenceCountry: 'US',
+            billing: recipientBilling,
+        }).unwrap();
+
+        draftInvoice.addDueDate(dueDate).unwrap();
+        draftInvoice.addRecipient(recipient).unwrap();
+        draftInvoice.addIssuer(issuer).unwrap();
+        draftInvoice.addLineItem(lineItem1).unwrap();
+        draftInvoice.applyVat(vat).unwrap();
+        draftInvoice.addDueDate(dueDate).unwrap();
+        draftInvoice.addIssueDate(issueDate).unwrap();
+
+        expect(draftInvoice.isValid()).toBe(true);
+    });
+
+    it('should create invoice from draft valid invoice', () => {
+        const draftInvoice = DraftInvoice.create().unwrap();
+
+        const issueDate = CalendarDate.create('2023-01-01').unwrap();
+
+        const dueDate = CalendarDate.create('2023-01-01').unwrap();
+        const issuer = Issuer.create({
+            type: ISSUER_TYPE.COMPANY,
+            name: 'Company Inc.',
+            address: '123 Main St, City, Country',
+            taxId: 'TAX123456',
+            email: 'info@company.com',
+        }).unwrap();
+
+        const recipientBilling = Paypal.create({
+            email: 'customer@example.com',
+        }).unwrap();
+
+        const lineItem1 = LineItem.create({
+            description: 'Item 1',
+            price: {
+                amount: '50',
+                currency: 'USD',
+            },
+            quantity: '2',
+        }).unwrap();
+
+        const vat = Vat.create('20').unwrap();
+
+        const recipient = Recipient.create({
+            type: RECIPIENT_TYPE.INDIVIDUAL,
+            name: 'Jane Smith',
+            address: '456 Another St, City, Country',
+            taxId: 'TAX654321',
+            email: 'jane.smith@example.com',
+            taxResidenceCountry: 'US',
+            billing: recipientBilling,
+        }).unwrap();
+
+        draftInvoice.addDueDate(dueDate).unwrap();
+        draftInvoice.addRecipient(recipient).unwrap();
+        draftInvoice.addIssuer(issuer).unwrap();
+        draftInvoice.addLineItem(lineItem1).unwrap();
+        draftInvoice.applyVat(vat).unwrap();
+        draftInvoice.addDueDate(dueDate).unwrap();
+        draftInvoice.addIssueDate(issueDate).unwrap();
+
+        const invoice = draftInvoice.toInvoice().unwrap();
+
+        expect(invoice.dueDate.equals(draftInvoice.dueDate!));
+        expect(invoice.issueDate.equals(draftInvoice.issueDate!));
+        expect(invoice.issuer.equals(draftInvoice.issuer!));
+        expect(invoice.recipient.equals(draftInvoice.recipient!));
+        expect(invoice.vatRate.equals(draftInvoice.vatRate!));
+        expect(invoice.lineItems.equals(draftInvoice.lineItems!));
+        expect(invoice.vatAmount.equals(draftInvoice.vatAmount!));
+        expect(invoice.total.equals(draftInvoice.total!));
+    });
 });
