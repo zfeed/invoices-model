@@ -54,6 +54,16 @@ export class LineItems {
         return this.#items.find(predicate);
     }
 
+    equals(other: ReadOnlyLineItems): boolean {
+        if (other instanceof LineItems === false) {
+            throw new Error('Invalid argument type');
+        }
+
+        return this.#items.every((item, index) =>
+            item.equals(other.#items[index])
+        );
+    }
+
     static create({ items }: { items: LineItem[] }) {
         const duplicateError = assertNoDuplicate(items);
 
@@ -81,5 +91,5 @@ export class LineItems {
 
 export type ReadOnlyLineItems = Pick<
     LineItems,
-    'length' | 'subtotal' | 'contains' | 'find'
+    'length' | 'subtotal' | 'contains' | 'find' | 'equals'
 >;

@@ -174,6 +174,18 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
         return Result.ok(undefined);
     }
 
+    public isValid(): boolean {
+        return (
+            this.#issuer !== null &&
+            this.#recipient !== null &&
+            this.#dueDate !== null &&
+            this.#issueDate !== null &&
+            this.#lineItems !== null &&
+            this.#total !== null &&
+            this.#vatAmount !== null
+        );
+    }
+
     #calculateTotal(): void {
         if (this.#lineItems === null) {
             this.#total = null;
