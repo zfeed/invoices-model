@@ -76,20 +76,21 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         issueDate: CalendarDate;
         dueDate: CalendarDate;
         issuer: Issuer;
+        vatRate: Vat;
         recipient: Recipient<T, D, B>;
     }) {
-        const subtotal = options.lineItems.subtotal;
-        const total = options.lineItems.subtotal;
-
         const issueDate = options.issueDate;
         const dueDate = options.dueDate;
         const issuer = options.issuer;
         const recipient = options.recipient;
+        const vatRate = options.vatRate;
+        const total = vatRate.applyTo(options.lineItems.subtotal);
+        const vatAmount = total.subtract(options.lineItems.subtotal).unwrap();
         const invoice = new Invoice(
             options.lineItems,
             total,
-            Vat.create('0').unwrap(),
-            Money.create('0', subtotal.currency.toString()).unwrap(),
+            vatRate,
+            vatAmount,
             issueDate,
             dueDate,
             issuer,
@@ -97,59 +98,5 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         );
 
         return Result.ok(invoice);
-    }
-
-    applyVat(vatRate: Vat) {
-        this.#vatRate = vatRate;
-
-        this.#calculateTotal();
-
-        return Result.ok(this);
-    }
-
-    addLineItem(lineItem: LineItem) {
-        const lineItems = this.#lineItems.add(lineItem);
-
-        if (lineItems.isError()) {
-            return lineItems.error();
-        }
-
-        this.#lineItems = lineItems.unwrap();
-
-        this.#calculateTotal();
-
-        return Result.ok(this);
-    }
-
-    removeLineItem(lineItem: LineItem) {
-        const lineItemsResult = this.#lineItems.remove(lineItem);
-
-        if (lineItemsResult.isError()) {
-            return lineItemsResult.error();
-        }
-
-        const lineItems = lineItemsResult.unwrap();
-
-        const isRemoved = lineItems.length !== this.#lineItems.length;
-
-        if (!isRemoved) {
-            return Result.ok(undefined);
-        }
-
-        this.#lineItems = lineItems;
-
-        this.#calculateTotal();
-
-        return Result.ok(lineItem);
-    }
-
-    #calculateTotal(): void {
-        const subtotal = this.#lineItems.subtotal;
-
-        const total = this.#vatRate.applyTo(subtotal);
-        const vatAmount = total.subtract(subtotal).unwrap();
-
-        this.#vatAmount = vatAmount;
-        this.#total = total;
     }
 }
