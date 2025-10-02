@@ -1,7 +1,7 @@
 import { assertIsISO8601Date } from './asserts/assert-isso8601-date';
 import { Result } from '../../building-blocks';
 
-export class IssueDate {
+export class CalendarDate {
     #value: string;
 
     private constructor(value: string) {
@@ -15,10 +15,10 @@ export class IssueDate {
             return Result.error(error);
         }
 
-        return Result.ok(new IssueDate(date));
+        return Result.ok(new CalendarDate(date));
     }
 
-    public equals(other: IssueDate): boolean {
+    public equals(other: CalendarDate): boolean {
         return this.#value === other.#value;
     }
 }
