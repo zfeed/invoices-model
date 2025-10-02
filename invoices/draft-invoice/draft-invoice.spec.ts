@@ -3,6 +3,8 @@ import { Money } from '../money/money/money';
 import { Vat } from '../vat/vat';
 import { DraftInvoice } from './draft-invoice';
 import { Issuer, ISSUER_TYPE } from '../issuer/issuer';
+import { Recipient, RECIPIENT_TYPE } from '../recipient/recipient';
+import { Paypal } from '../recipient/billing/paypal';
 
 describe('DraftInvoice', () => {
     it('should create a draft invoice instance with missing data', () => {
