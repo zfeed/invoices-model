@@ -91,6 +91,7 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
         const result = Invoice.create({
             lineItems: this.#lineItems!,
             issueDate: this.#issueDate!,
+            vatRate: this.#vatRate!,
             dueDate: this.#dueDate!,
             issuer: this.#issuer!,
             recipient: this.#recipient!,
