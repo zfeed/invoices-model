@@ -5,6 +5,7 @@ import { DraftInvoice } from './draft-invoice';
 import { Issuer, ISSUER_TYPE } from '../issuer/issuer';
 import { Recipient, RECIPIENT_TYPE } from '../recipient/recipient';
 import { Paypal } from '../recipient/billing/paypal';
+import { CalendarDate } from '../calendar-date/calendar-date';
 
 describe('DraftInvoice', () => {
     it('should create a draft invoice instance with missing data', () => {
@@ -173,5 +174,27 @@ describe('DraftInvoice', () => {
 
         expect(draftInvoice.recipient).toBeDefined();
         expect(draftInvoice.recipient?.equals(recipient)).toBe(true);
+    });
+
+    it('should add due date to draft invoice', () => {
+        const draftInvoice = DraftInvoice.create().unwrap();
+
+        const dueDate = CalendarDate.create('2023-01-01').unwrap();
+
+        draftInvoice.addDueDate(dueDate).unwrap();
+
+        expect(draftInvoice.dueDate).toBeDefined();
+        expect(draftInvoice.dueDate?.equals(dueDate)).toBe(true);
+    });
+
+    it('should add issue date to draft invoice', () => {
+        const draftInvoice = DraftInvoice.create().unwrap();
+
+        const issueDate = CalendarDate.create('2023-01-01').unwrap();
+
+        draftInvoice.addIssueDate(issueDate).unwrap();
+
+        expect(draftInvoice.issueDate).toBeDefined();
+        expect(draftInvoice.issueDate?.equals(issueDate)).toBe(true);
     });
 });
