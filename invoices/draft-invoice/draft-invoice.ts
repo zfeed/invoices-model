@@ -164,6 +164,16 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
         return Result.ok(undefined);
     }
 
+    public addDueDate(dueDate: CalendarDate): Result<DomainError, void> {
+        this.#dueDate = dueDate;
+        return Result.ok(undefined);
+    }
+
+    public addIssueDate(issueDate: CalendarDate): Result<DomainError, void> {
+        this.#issueDate = issueDate;
+        return Result.ok(undefined);
+    }
+
     #calculateTotal(): void {
         if (this.#lineItems === null) {
             this.#total = null;
