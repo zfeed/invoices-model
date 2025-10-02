@@ -63,6 +63,18 @@ export class Recipient<T, D, B extends IBilling<T, D>> {
         return this.#billing;
     }
 
+    equals(other: Recipient<T, D, B>): boolean {
+        return (
+            this.#type === other.#type &&
+            this.#name === other.#name &&
+            this.#address === other.#address &&
+            this.#taxId === other.#taxId &&
+            this.#email.equals(other.#email) &&
+            this.#taxResidenceCountry.equals(other.#taxResidenceCountry) &&
+            this.#billing === other.#billing
+        );
+    }
+
     static create<T, D, B extends IBilling<T, D>>({
         type,
         name,
