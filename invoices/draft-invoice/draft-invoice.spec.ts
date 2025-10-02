@@ -149,4 +149,27 @@ describe('DraftInvoice', () => {
         expect(draftInvoice.issuer).toBeDefined();
         expect(draftInvoice.issuer?.equals(issuer)).toBe(true);
     });
+
+    it('should add recipient to draft invoice', () => {
+        const draftInvoice = DraftInvoice.create().unwrap();
+
+        const recipientBilling = Paypal.create({
+            email: 'customer@example.com',
+        }).unwrap();
+
+        const recipient = Recipient.create({
+            type: RECIPIENT_TYPE.INDIVIDUAL,
+            name: 'Jane Smith',
+            address: '456 Another St, City, Country',
+            taxId: 'TAX654321',
+            email: 'jane.smith@example.com',
+            taxResidenceCountry: 'US',
+            billing: recipientBilling,
+        }).unwrap();
+
+        draftInvoice.addRecipient(recipient).unwrap();
+
+        expect(draftInvoice.recipient).toBeDefined();
+        expect(draftInvoice.recipient?.equals(recipient)).toBe(true);
+    });
 });
