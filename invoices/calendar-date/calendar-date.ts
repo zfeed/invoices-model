@@ -21,4 +21,10 @@ export class CalendarDate {
     public equals(other: CalendarDate): boolean {
         return this.#value === other.#value;
     }
+
+    public lessThan(other: CalendarDate): boolean {
+        return (
+            new Date(this.#value).getTime() < new Date(other.#value).getTime()
+        );
+    }
 }

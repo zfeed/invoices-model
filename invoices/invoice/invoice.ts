@@ -1,13 +1,13 @@
-import { Money } from '../money/money/money';
-import { Vat } from '../vat/vat';
-import { LineItem } from '../line-item/line-item';
 import { Result } from '../../building-blocks';
 import { Issuer } from '../issuer/issuer';
+import { Money } from '../money/money/money';
 import { Recipient } from '../recipient/recipient';
+import { Vat } from '../vat/vat';
 
 import { CalendarDate } from '../calendar-date/calendar-date';
-import { IBilling } from '../recipient/billing/billing.interface';
 import { LineItems, ReadOnlyLineItems } from '../line-items/line-items';
+import { IBilling } from '../recipient/billing/billing.interface';
+import { assertDates } from './asserts/assert-dates';
 
 export class Invoice<T, D, B extends IBilling<T, D>> {
     #vatRate: Vat;
@@ -84,6 +84,11 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         const issuer = options.issuer;
         const recipient = options.recipient;
         const vatRate = options.vatRate;
+        const dateError = assertDates({ issueDate, dueDate });
+        if (dateError) {
+            return Result.error(dateError);
+        }
+
         const total = vatRate.applyTo(options.lineItems.subtotal);
         const vatAmount = total.subtract(options.lineItems.subtotal).unwrap();
         const invoice = new Invoice(
