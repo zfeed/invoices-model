@@ -2,7 +2,7 @@ import { Money } from '../money/money/money';
 import { Invoice } from './invoice';
 import { Vat } from '../vat/vat';
 import { LineItem } from '../line-item/line-item';
-import { IssueDate } from '../calendar-date/calendar-date';
+import { CalendarDate } from '../calendar-date/calendar-date';
 import { Recipient, RECIPIENT_TYPE } from '../recipient/recipient';
 import { Paypal } from '../recipient/billing/paypal';
 import { Issuer, ISSUER_TYPE } from '../issuer/issuer';
@@ -26,8 +26,8 @@ describe('Invoice', () => {
             },
             quantity: '1',
         }).unwrap();
-        const issueDate = IssueDate.create('2023-01-01').unwrap();
-        const dueDate = IssueDate.create('2028-01-01').unwrap();
+        const issueDate = CalendarDate.create('2023-01-01').unwrap();
+        const dueDate = CalendarDate.create('2028-01-01').unwrap();
         const issuer = Issuer.create({
             type: ISSUER_TYPE.COMPANY,
             name: 'Company Inc.',
@@ -116,8 +116,8 @@ describe('Invoice', () => {
         }).unwrap();
 
         const invoice = Invoice.create({
-            issueDate: IssueDate.create('2023-01-01').unwrap(),
-            dueDate: IssueDate.create('2023-02-01').unwrap(),
+            issueDate: CalendarDate.create('2023-01-01').unwrap(),
+            dueDate: CalendarDate.create('2023-02-01').unwrap(),
             lineItems: LineItems.create({
                 items: [lineItem1, lineItem2],
             }).unwrap(),
@@ -181,8 +181,8 @@ describe('Invoice', () => {
         }).unwrap();
 
         const invoice = Invoice.create({
-            issueDate: IssueDate.create('2023-01-01').unwrap(),
-            dueDate: IssueDate.create('2023-02-01').unwrap(),
+            issueDate: CalendarDate.create('2023-01-01').unwrap(),
+            dueDate: CalendarDate.create('2023-02-01').unwrap(),
             lineItems: LineItems.create({
                 items: [lineItem1, lineItem2],
             }).unwrap(),
@@ -239,8 +239,8 @@ describe('Invoice', () => {
         }).unwrap();
 
         const invoice = Invoice.create({
-            issueDate: IssueDate.create('2023-01-01').unwrap(),
-            dueDate: IssueDate.create('2023-02-01').unwrap(),
+            issueDate: CalendarDate.create('2023-01-01').unwrap(),
+            dueDate: CalendarDate.create('2023-02-01').unwrap(),
             lineItems: LineItems.create({ items: [lineItem1] }).unwrap(),
             issuer: Issuer.create({
                 type: ISSUER_TYPE.COMPANY,
@@ -307,8 +307,8 @@ describe('Invoice', () => {
         }).unwrap();
 
         const invoice = Invoice.create({
-            issueDate: IssueDate.create('2023-01-01').unwrap(),
-            dueDate: IssueDate.create('2023-02-01').unwrap(),
+            issueDate: CalendarDate.create('2023-01-01').unwrap(),
+            dueDate: CalendarDate.create('2023-02-01').unwrap(),
             lineItems: LineItems.create({ items: [lineItem1] }).unwrap(),
             issuer: issuer,
             recipient: recipient,
@@ -369,8 +369,8 @@ describe('Invoice', () => {
         }).unwrap();
 
         const invoice = Invoice.create({
-            issueDate: IssueDate.create('2023-01-01').unwrap(),
-            dueDate: IssueDate.create('2023-02-01').unwrap(),
+            issueDate: CalendarDate.create('2023-01-01').unwrap(),
+            dueDate: CalendarDate.create('2023-02-01').unwrap(),
             lineItems: LineItems.create({ items: [lineItem1] }).unwrap(),
             issuer: issuer,
             recipient: recipient,
@@ -425,8 +425,8 @@ describe('Invoice', () => {
         }).unwrap();
 
         const invoice = Invoice.create({
-            issueDate: IssueDate.create('2023-01-01').unwrap(),
-            dueDate: IssueDate.create('2023-02-01').unwrap(),
+            issueDate: CalendarDate.create('2023-01-01').unwrap(),
+            dueDate: CalendarDate.create('2023-02-01').unwrap(),
             lineItems: LineItems.create({
                 items: [lineItem1, lineItem2],
             }).unwrap(),
@@ -498,8 +498,8 @@ describe('Invoice', () => {
         }).unwrap();
 
         const invoice = Invoice.create({
-            issueDate: IssueDate.create('2023-01-01').unwrap(),
-            dueDate: IssueDate.create('2023-02-01').unwrap(),
+            issueDate: CalendarDate.create('2023-01-01').unwrap(),
+            dueDate: CalendarDate.create('2023-02-01').unwrap(),
             lineItems: LineItems.create({
                 items: [lineItem1, lineItem2],
             }).unwrap(),
@@ -563,8 +563,8 @@ describe('Invoice', () => {
         }).unwrap();
 
         const invoice = Invoice.create({
-            issueDate: IssueDate.create('2023-01-01').unwrap(),
-            dueDate: IssueDate.create('2023-02-01').unwrap(),
+            issueDate: CalendarDate.create('2023-01-01').unwrap(),
+            dueDate: CalendarDate.create('2023-02-01').unwrap(),
             lineItems: LineItems.create({
                 items: [lineItem1, lineItem2],
             }).unwrap(),

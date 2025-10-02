@@ -5,7 +5,7 @@ import { Result } from '../../building-blocks';
 import { Issuer } from '../issuer/issuer';
 import { Recipient } from '../recipient/recipient';
 
-import { IssueDate } from '../calendar-date/calendar-date';
+import { CalendarDate } from '../calendar-date/calendar-date';
 import { IBilling } from '../recipient/billing/billing.interface';
 import { LineItems, ReadOnlyLineItems } from '../line-items/line-items';
 
@@ -14,8 +14,8 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
     #vatAmount: Money;
     #total: Money;
     #lineItems: LineItems;
-    #issueDate: IssueDate;
-    #dueDate: IssueDate;
+    #issueDate: CalendarDate;
+    #dueDate: CalendarDate;
     #issuer: Issuer;
     #recipient: Recipient<T, D, B>;
 
@@ -35,11 +35,11 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         return this.#lineItems;
     }
 
-    public get issueDate(): IssueDate {
+    public get issueDate(): CalendarDate {
         return this.#issueDate;
     }
 
-    public get dueDate(): IssueDate {
+    public get dueDate(): CalendarDate {
         return this.#dueDate;
     }
 
@@ -56,8 +56,8 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         total: Money,
         vatRate: Vat,
         vatAmount: Money,
-        issueDate: IssueDate,
-        dueDate: IssueDate,
+        issueDate: CalendarDate,
+        dueDate: CalendarDate,
         issuer: Issuer,
         recipient: Recipient<T, D, B>
     ) {
@@ -73,8 +73,8 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
 
     static create<T, D, B extends IBilling<T, D>>(options: {
         lineItems: LineItems;
-        issueDate: IssueDate;
-        dueDate: IssueDate;
+        issueDate: CalendarDate;
+        dueDate: CalendarDate;
         issuer: Issuer;
         recipient: Recipient<T, D, B>;
     }) {

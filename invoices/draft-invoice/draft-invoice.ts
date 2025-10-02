@@ -1,5 +1,5 @@
 import { DomainError, Result } from '../../building-blocks';
-import { IssueDate } from '../calendar-date/calendar-date';
+import { CalendarDate } from '../calendar-date/calendar-date';
 import { Invoice } from '../invoice/invoice';
 import { Issuer } from '../issuer/issuer';
 import { LineItem } from '../line-item/line-item';
@@ -16,8 +16,8 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
     #vatAmount: Money | null;
     #total: Money | null;
     #lineItems: LineItems | null;
-    #issueDate: IssueDate | null;
-    #dueDate: IssueDate | null;
+    #issueDate: CalendarDate | null;
+    #dueDate: CalendarDate | null;
     #issuer: Issuer | null;
     #recipient: Recipient<T, D, B> | null;
 
@@ -37,11 +37,11 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
         return this.#lineItems;
     }
 
-    public get issueDate(): IssueDate | null {
+    public get issueDate(): CalendarDate | null {
         return this.#issueDate;
     }
 
-    public get dueDate(): IssueDate | null {
+    public get dueDate(): CalendarDate | null {
         return this.#dueDate;
     }
 
@@ -58,8 +58,8 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
         total: Money | null = null,
         vatRate: Vat | null = null,
         vatAmount: Money | null = null,
-        issueDate: IssueDate | null = null,
-        dueDate: IssueDate | null = null,
+        issueDate: CalendarDate | null = null,
+        dueDate: CalendarDate | null = null,
         issuer: Issuer | null = null,
         recipient: Recipient<T, D, B> | null = null
     ) {
