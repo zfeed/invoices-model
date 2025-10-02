@@ -1,5 +1,6 @@
 import { DomainError, Result } from '../../building-blocks';
 import { CalendarDate } from '../calendar-date/calendar-date';
+import { assertDates } from '../invoice/asserts/assert-dates';
 import { Invoice } from '../invoice/invoice';
 import { Issuer } from '../issuer/issuer';
 import { LineItem } from '../line-item/line-item';
@@ -166,11 +167,33 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
     }
 
     public addDueDate(dueDate: CalendarDate): Result<DomainError, void> {
+        // Validate dates if issue date is already set
+        if (this.#issueDate !== null) {
+            const dateError = assertDates({
+                issueDate: this.#issueDate,
+                dueDate,
+            });
+            if (dateError) {
+                return Result.error(dateError);
+            }
+        }
+
         this.#dueDate = dueDate;
         return Result.ok(undefined);
     }
 
     public addIssueDate(issueDate: CalendarDate): Result<DomainError, void> {
+        // Validate dates if due date is already set
+        if (this.#dueDate !== null) {
+            const dateError = assertDates({
+                issueDate,
+                dueDate: this.#dueDate,
+            });
+            if (dateError) {
+                return Result.error(dateError);
+            }
+        }
+
         this.#issueDate = issueDate;
         return Result.ok(undefined);
     }

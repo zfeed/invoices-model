@@ -1,11 +1,11 @@
+import { CalendarDate } from '../calendar-date/calendar-date';
+import { Issuer, ISSUER_TYPE } from '../issuer/issuer';
 import { LineItem } from '../line-item/line-item';
 import { Money } from '../money/money/money';
+import { Paypal } from '../recipient/billing/paypal';
+import { Recipient, RECIPIENT_TYPE } from '../recipient/recipient';
 import { Vat } from '../vat/vat';
 import { DraftInvoice } from './draft-invoice';
-import { Issuer, ISSUER_TYPE } from '../issuer/issuer';
-import { Recipient, RECIPIENT_TYPE } from '../recipient/recipient';
-import { Paypal } from '../recipient/billing/paypal';
-import { CalendarDate } from '../calendar-date/calendar-date';
 
 describe('DraftInvoice', () => {
     it('should create a draft invoice instance with missing data', () => {
@@ -305,5 +305,68 @@ describe('DraftInvoice', () => {
         expect(invoice.lineItems.equals(draftInvoice.lineItems!));
         expect(invoice.vatAmount.equals(draftInvoice.vatAmount!));
         expect(invoice.total.equals(draftInvoice.total!));
+    });
+
+    it('should not allow adding due date when issue date is already set and due date is before issue date', () => {
+        const draftInvoice = DraftInvoice.create().unwrap();
+
+        const issueDate = CalendarDate.create('2028-02-01').unwrap();
+        const dueDate = CalendarDate.create('2023-01-01').unwrap();
+
+        // First add issue date
+        const addIssueDateResult = draftInvoice.addIssueDate(issueDate);
+        expect(addIssueDateResult.isOk()).toBe(true);
+
+        // Then try to add due date that's before issue date
+        const addDueDateResult = draftInvoice.addDueDate(dueDate);
+        expect(addDueDateResult.isError()).toBe(true);
+        expect(addDueDateResult.unwrapError()).toEqual(
+            expect.objectContaining({
+                code: '10000',
+            })
+        );
+
+        // Due date should not be set
+        expect(draftInvoice.dueDate).toBeNull();
+    });
+
+    it('should not allow adding issue date when due date is already set and issue date is after due date', () => {
+        const draftInvoice = DraftInvoice.create().unwrap();
+
+        const issueDate = CalendarDate.create('2028-02-01').unwrap();
+        const dueDate = CalendarDate.create('2023-01-01').unwrap();
+
+        // First add due date
+        const addDueDateResult = draftInvoice.addDueDate(dueDate);
+        expect(addDueDateResult.isOk()).toBe(true);
+
+        // Then try to add issue date that's after due date
+        const addIssueDateResult = draftInvoice.addIssueDate(issueDate);
+        expect(addIssueDateResult.isError()).toBe(true);
+        expect(addIssueDateResult.unwrapError()).toEqual(
+            expect.objectContaining({
+                code: '10000',
+            })
+        );
+
+        // Issue date should not be set
+        expect(draftInvoice.issueDate).toBeNull();
+    });
+
+    it('should allow adding dates when they are equal', () => {
+        const draftInvoice = DraftInvoice.create().unwrap();
+
+        const date = CalendarDate.create('2024-01-01').unwrap();
+
+        // Add issue date first
+        const addIssueDateResult = draftInvoice.addIssueDate(date);
+        expect(addIssueDateResult.isOk()).toBe(true);
+
+        // Add same date as due date
+        const addDueDateResult = draftInvoice.addDueDate(date);
+        expect(addDueDateResult.isOk()).toBe(true);
+
+        expect(draftInvoice.issueDate?.equals(date)).toBe(true);
+        expect(draftInvoice.dueDate?.equals(date)).toBe(true);
     });
 });

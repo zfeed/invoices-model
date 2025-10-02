@@ -30,4 +30,18 @@ describe('CalendarDate', () => {
 
         expect(date1.equals(date2)).toBe(false);
     });
+
+    it('should compare date with another date', () => {
+        const date1 = CalendarDate.create('2023-01-01').unwrap();
+        const date2 = CalendarDate.create('2023-01-02').unwrap();
+
+        expect(date1.lessThan(date2)).toBe(true);
+    });
+
+    it('should compare date with another date', () => {
+        const date1 = CalendarDate.create('2023-01-01').unwrap();
+        const date2 = CalendarDate.create('2023-01-02').unwrap();
+
+        expect(date2.lessThan(date1)).toBe(false);
+    });
 });
