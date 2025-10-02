@@ -152,6 +152,11 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
         return Result.ok(undefined);
     }
 
+    public addIssuer(issuer: Issuer): Result<DomainError, void> {
+        this.#issuer = issuer;
+        return Result.ok(undefined);
+    }
+
     #calculateTotal(): void {
         if (this.#lineItems === null) {
             this.#total = null;

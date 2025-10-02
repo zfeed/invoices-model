@@ -2,6 +2,7 @@ import { LineItem } from '../line-item/line-item';
 import { Money } from '../money/money/money';
 import { Vat } from '../vat/vat';
 import { DraftInvoice } from './draft-invoice';
+import { Issuer, ISSUER_TYPE } from '../issuer/issuer';
 
 describe('DraftInvoice', () => {
     it('should create a draft invoice instance with missing data', () => {
@@ -130,5 +131,22 @@ describe('DraftInvoice', () => {
         expect(
             draftInvoice.total?.equals(Money.create('120', 'USD').unwrap())
         ).toBe(true);
+    });
+
+    it('should add issuer to draft invoice', () => {
+        const draftInvoice = DraftInvoice.create().unwrap();
+
+        const issuer = Issuer.create({
+            type: ISSUER_TYPE.COMPANY,
+            name: 'Company Inc.',
+            address: '123 Main St, City, Country',
+            taxId: 'TAX123456',
+            email: 'info@company.com',
+        }).unwrap();
+
+        draftInvoice.addIssuer(issuer).unwrap();
+
+        expect(draftInvoice.issuer).toBeDefined();
+        expect(draftInvoice.issuer?.equals(issuer)).toBe(true);
     });
 });
