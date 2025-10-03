@@ -301,9 +301,9 @@ describe('DraftInvoice', () => {
         expect(invoice.issueDate.equals(draftInvoice.issueDate!));
         expect(invoice.issuer.equals(draftInvoice.issuer!));
         expect(invoice.recipient.equals(draftInvoice.recipient!));
-        expect(invoice.vatRate.equals(draftInvoice.vatRate!));
+        expect(invoice.vatRate!.equals(draftInvoice.vatRate!));
         expect(invoice.lineItems.equals(draftInvoice.lineItems!));
-        expect(invoice.vatAmount.equals(draftInvoice.vatAmount!));
+        expect(invoice.vatAmount!.equals(draftInvoice.vatAmount!));
         expect(invoice.total.equals(draftInvoice.total!));
     });
 

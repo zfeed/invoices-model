@@ -75,15 +75,16 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
     }
 
     public toInvoice(): Result<DomainError, Invoice<T, D, B>> {
-        const error = checkDraftInvoiceComplete(
-            this.#total,
-            this.#vatRate,
-            this.#lineItems,
-            this.#issueDate,
-            this.#dueDate,
-            this.#issuer,
-            this.#recipient
-        );
+        const error = checkDraftInvoiceComplete({
+            total: this.#total,
+            vatRate: this.#vatRate,
+            vatAmount: this.#vatAmount,
+            issueDate: this.#issueDate,
+            dueDate: this.#dueDate,
+            recipient: this.#recipient,
+            issuer: this.#issuer,
+            lineItems: this.#lineItems,
+        });
 
         if (error) {
             return Result.error(error);
@@ -199,15 +200,22 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
     }
 
     public isValid(): boolean {
-        return (
-            this.#issuer !== null &&
-            this.#recipient !== null &&
-            this.#dueDate !== null &&
-            this.#issueDate !== null &&
-            this.#lineItems !== null &&
-            this.#total !== null &&
-            this.#vatAmount !== null
-        );
+        const error = checkDraftInvoiceComplete({
+            total: this.#total,
+            vatRate: this.#vatRate,
+            vatAmount: this.#vatAmount,
+            issueDate: this.#issueDate,
+            dueDate: this.#dueDate,
+            recipient: this.#recipient,
+            issuer: this.#issuer,
+            lineItems: this.#lineItems,
+        });
+
+        if (error) {
+            return false;
+        }
+
+        return true;
     }
 
     #calculateTotal(): void {
