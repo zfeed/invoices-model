@@ -1,6 +1,6 @@
 import { DomainError, Result } from '../../building-blocks';
 import { CalendarDate } from '../calendar-date/calendar-date';
-import { assertDates } from '../invoice/asserts/assert-dates';
+import { checkDates } from '../invoice/checks/check-dates';
 import { Invoice } from '../invoice/invoice';
 import { Issuer } from '../issuer/issuer';
 import { LineItem } from '../line-item/line-item';
@@ -9,8 +9,8 @@ import { Money } from '../money/money/money';
 import { IBilling } from '../recipient/billing/billing.interface';
 import { Recipient } from '../recipient/recipient';
 import { Vat } from '../vat/vat';
-import { assertDraftInvoiceComplete } from './asserts/assert-draft-invoice-complete';
-import { assertLineItemsNotEmpty } from './asserts/assert-line-items-not-empty';
+import { checkDraftInvoiceComplete } from './checks/check-draft-invoice-complete';
+import { checkLineItemsNotEmpty } from './checks/check-line-items-not-empty';
 
 export class DraftInvoice<T, D, B extends IBilling<T, D>> {
     #vatRate: Vat | null;
@@ -75,7 +75,7 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
     }
 
     public toInvoice(): Result<DomainError, Invoice<T, D, B>> {
-        const error = assertDraftInvoiceComplete(
+        const error = checkDraftInvoiceComplete(
             this.#total,
             this.#vatRate,
             this.#lineItems,
@@ -122,7 +122,7 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
     }
 
     public removeLineItem(lineItem: LineItem) {
-        const error = assertLineItemsNotEmpty(this.#lineItems);
+        const error = checkLineItemsNotEmpty(this.#lineItems);
 
         if (error) {
             return Result.error(error);
@@ -142,7 +142,7 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
     }
 
     public applyVat(vatRate: Vat): Result<DomainError, void> {
-        const error = assertLineItemsNotEmpty(this.#lineItems);
+        const error = checkLineItemsNotEmpty(this.#lineItems);
 
         if (error) {
             return Result.error(error);
@@ -169,7 +169,7 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
     public addDueDate(dueDate: CalendarDate): Result<DomainError, void> {
         // Validate dates if issue date is already set
         if (this.#issueDate !== null) {
-            const dateError = assertDates({
+            const dateError = checkDates({
                 issueDate: this.#issueDate,
                 dueDate,
             });
@@ -185,7 +185,7 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
     public addIssueDate(issueDate: CalendarDate): Result<DomainError, void> {
         // Validate dates if due date is already set
         if (this.#dueDate !== null) {
-            const dateError = assertDates({
+            const dateError = checkDates({
                 issueDate,
                 dueDate: this.#dueDate,
             });

@@ -1,4 +1,4 @@
-import { assertUnitQuantity } from './asserts/assert-unit-quantity';
+import { checkUnitQuantity } from './checks/check-unit-quantity';
 import { Numeric } from '../numeric/numeric';
 import { Result } from '../../building-blocks';
 
@@ -10,7 +10,7 @@ export class UnitQuantity {
     }
 
     static create(value: string) {
-        const error = assertUnitQuantity(value);
+        const error = checkUnitQuantity(value);
 
         if (error) {
             return Result.error(error);

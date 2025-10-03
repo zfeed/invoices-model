@@ -1,7 +1,7 @@
 import { Result } from '../../building-blocks';
 import { Money } from '../money/money/money';
 import { Numeric } from '../numeric/numeric';
-import { assertPercents } from './asserts/assert-percents';
+import { checkPercents } from './checks/check-percents';
 export class Vat {
     #value: Numeric;
 
@@ -18,7 +18,7 @@ export class Vat {
     }
 
     static create(value: string) {
-        const error = assertPercents(value);
+        const error = checkPercents(value);
 
         if (error) {
             return Result.error(error);

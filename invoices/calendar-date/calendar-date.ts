@@ -1,4 +1,4 @@
-import { assertIsISO8601Date } from './asserts/assert-isso8601-date';
+import { checkIsISO8601Date } from './checks/check-iso8601-date';
 import { Result } from '../../building-blocks';
 
 export class CalendarDate {
@@ -9,7 +9,7 @@ export class CalendarDate {
     }
 
     static create(date: string) {
-        const error = assertIsISO8601Date(date);
+        const error = checkIsISO8601Date(date);
 
         if (error) {
             return Result.error(error);

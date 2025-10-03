@@ -7,7 +7,7 @@ import { Vat } from '../vat/vat';
 import { CalendarDate } from '../calendar-date/calendar-date';
 import { LineItems, ReadOnlyLineItems } from '../line-items/line-items';
 import { IBilling } from '../recipient/billing/billing.interface';
-import { assertDates } from './asserts/assert-dates';
+import { checkDates } from './checks/check-dates';
 
 export class Invoice<T, D, B extends IBilling<T, D>> {
     #vatRate: Vat;
@@ -84,7 +84,7 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         const issuer = options.issuer;
         const recipient = options.recipient;
         const vatRate = options.vatRate;
-        const dateError = assertDates({ issueDate, dueDate });
+        const dateError = checkDates({ issueDate, dueDate });
         if (dateError) {
             return Result.error(dateError);
         }
