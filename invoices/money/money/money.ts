@@ -1,8 +1,8 @@
 import { Numeric } from '../../numeric/numeric';
 import { Currency } from '../currency/currency';
 import { ROUNDING } from '../../numeric/rounding';
-import { assertMinorUnits } from './asserts/assert-minor-units';
-import { assertEqualCurrencies } from './asserts/assert-equal-currencies';
+import { checkMinorUnits } from './checks/check-minor-units';
+import { checkEqualCurrencies } from './checks/check-equal-currencies';
 import { Result } from '../../../building-blocks';
 
 export class Money {
@@ -30,7 +30,7 @@ export class Money {
     }
 
     add(other: Money) {
-        const error = assertEqualCurrencies(this.#currency, other.currency);
+        const error = checkEqualCurrencies(this.#currency, other.currency);
 
         if (error) {
             return Result.error(error);
@@ -42,7 +42,7 @@ export class Money {
     }
 
     subtract(other: Money) {
-        const error = assertEqualCurrencies(this.#currency, other.currency);
+        const error = checkEqualCurrencies(this.#currency, other.currency);
 
         if (error) {
             return Result.error(error);
@@ -61,7 +61,7 @@ export class Money {
     }
 
     static create(amount: string, currency: string) {
-        const error = assertMinorUnits(amount);
+        const error = checkMinorUnits(amount);
 
         if (error) {
             return Result.error(error);

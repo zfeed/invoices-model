@@ -1,4 +1,4 @@
-import { assertCurrencyCode } from './asserts/assert-currency-code';
+import { checkCurrencyCode } from './checks/check-currency-code';
 import { Result } from '../../../building-blocks';
 
 export class Currency {
@@ -9,7 +9,7 @@ export class Currency {
     }
 
     static create(code: string) {
-        const error = assertCurrencyCode(code);
+        const error = checkCurrencyCode(code);
 
         if (error) {
             return Result.error(error);

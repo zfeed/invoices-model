@@ -1,9 +1,9 @@
 import { LineItem } from '../line-item/line-item';
 import { Money } from '../money/money/money';
 import { Result, DomainError } from '../../building-blocks';
-import { assertNonEmpty } from './asserts/assert-non-empty';
-import { assertSameCurrency } from './asserts/assert-same-currency';
-import { assertNoDuplicate } from './asserts/assert-no-duplicate';
+import { checkNonEmpty } from './checks/check-non-empty';
+import { checkSameCurrency } from './checks/check-same-currency';
+import { checkNoDuplicate } from './checks/check-no-duplicate';
 
 export class LineItems {
     #items: LineItem[];
@@ -65,19 +65,19 @@ export class LineItems {
     }
 
     static create({ items }: { items: LineItem[] }) {
-        const duplicateError = assertNoDuplicate(items);
+        const duplicateError = checkNoDuplicate(items);
 
         if (duplicateError) {
             return Result.error(duplicateError);
         }
 
-        const emptyError = assertNonEmpty(items);
+        const emptyError = checkNonEmpty(items);
 
         if (emptyError) {
             return Result.error(emptyError);
         }
 
-        const currencyError = assertSameCurrency(items);
+        const currencyError = checkSameCurrency(items);
 
         if (currencyError) {
             return Result.error(currencyError);

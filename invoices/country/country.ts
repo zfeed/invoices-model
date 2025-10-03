@@ -1,4 +1,4 @@
-import { assertCountryCode } from './asserts/assert-country-code';
+import { checkCountryCode } from './checks/check-country-code';
 import { Result } from '../../building-blocks';
 
 export class Country {
@@ -9,7 +9,7 @@ export class Country {
     }
 
     static create({ code }: { code: string }) {
-        const error = assertCountryCode(code);
+        const error = checkCountryCode(code);
 
         if (error) {
             return Result.error(error);
