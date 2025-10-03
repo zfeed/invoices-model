@@ -72,9 +72,9 @@ describe('Invoice', () => {
                 Money.create('200', 'USD').unwrap()
             )
         ).toBe(true);
-        expect(invoice.vatRate.equals(Vat.create('10').unwrap())).toBe(true);
+        expect(invoice.vatRate!.equals(Vat.create('10').unwrap())).toBe(true);
         expect(
-            invoice.vatAmount.equals(Money.create('20', 'USD').unwrap())
+            invoice.vatAmount!.equals(Money.create('20', 'USD').unwrap())
         ).toBe(true);
         expect(invoice.lineItems).toHaveLength(2);
         expect(
@@ -87,8 +87,8 @@ describe('Invoice', () => {
         expect(invoice.dueDate.equals(dueDate)).toBe(true);
         expect(invoice.issuer.equals(issuer)).toBe(true);
         expect(invoice.recipient.type).toBe('INDIVIDUAL');
-        expect(invoice.vatRate.equals(vatRate)).toBe(true);
-        expect(invoice.vatAmount.equals(vatAmount)).toBe(true);
+        expect(invoice.vatRate!.equals(vatRate)).toBe(true);
+        expect(invoice.vatAmount!.equals(vatAmount)).toBe(true);
     });
 
     it('should not create an invoice when due date is before issue date', () => {

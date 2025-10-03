@@ -10,8 +10,8 @@ import { IBilling } from '../recipient/billing/billing.interface';
 import { checkDates } from './checks/check-dates';
 
 export class Invoice<T, D, B extends IBilling<T, D>> {
-    #vatRate: Vat;
-    #vatAmount: Money;
+    #vatRate: Vat | null;
+    #vatAmount: Money | null;
     #total: Money;
     #lineItems: LineItems;
     #issueDate: CalendarDate;
@@ -23,11 +23,11 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         return this.#total;
     }
 
-    public get vatRate(): Vat {
+    public get vatRate(): Vat | null {
         return this.#vatRate;
     }
 
-    public get vatAmount(): Money {
+    public get vatAmount(): Money | null {
         return this.#vatAmount;
     }
 
@@ -54,8 +54,8 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
     private constructor(
         lineItems: LineItems,
         total: Money,
-        vatRate: Vat,
-        vatAmount: Money,
+        vatRate: Vat | null,
+        vatAmount: Money | null,
         issueDate: CalendarDate,
         dueDate: CalendarDate,
         issuer: Issuer,
@@ -76,7 +76,7 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         issueDate: CalendarDate;
         dueDate: CalendarDate;
         issuer: Issuer;
-        vatRate: Vat;
+        vatRate: Vat | null;
         recipient: Recipient<T, D, B>;
     }) {
         const issueDate = options.issueDate;
@@ -89,8 +89,12 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
             return Result.error(dateError);
         }
 
-        const total = vatRate.applyTo(options.lineItems.subtotal);
-        const vatAmount = total.subtract(options.lineItems.subtotal).unwrap();
+        const total = vatRate
+            ? vatRate.applyTo(options.lineItems.subtotal)
+            : options.lineItems.subtotal;
+        const vatAmount = vatRate
+            ? total.subtract(options.lineItems.subtotal).unwrap()
+            : null;
         const invoice = new Invoice(
             options.lineItems,
             total,
