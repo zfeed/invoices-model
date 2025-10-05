@@ -4,7 +4,7 @@ import { LineItem } from '../line-item/line-item';
 import { Money } from '../money/money/money';
 import { Paypal } from '../recipient/billing/paypal';
 import { Recipient, RECIPIENT_TYPE } from '../recipient/recipient';
-import { Vat } from '../vat/vat';
+import { VatRate } from '../vat-rate/vat-rate';
 import { DraftInvoice } from './draft-invoice';
 
 describe('DraftInvoice', () => {
@@ -98,7 +98,7 @@ describe('DraftInvoice', () => {
     it('should add not apply vat to invoice with no line items', () => {
         const draftInvoice = DraftInvoice.create().unwrap();
 
-        const vat = Vat.create('20').unwrap();
+        const vat = VatRate.create('20').unwrap();
 
         const result = draftInvoice.applyVat(vat);
 
@@ -123,7 +123,7 @@ describe('DraftInvoice', () => {
 
         draftInvoice.addLineItem(lineItem1).unwrap();
 
-        const vat = Vat.create('20').unwrap();
+        const vat = VatRate.create('20').unwrap();
 
         draftInvoice.applyVat(vat).unwrap();
 
@@ -225,7 +225,7 @@ describe('DraftInvoice', () => {
             quantity: '2',
         }).unwrap();
 
-        const vat = Vat.create('20').unwrap();
+        const vat = VatRate.create('20').unwrap();
 
         const recipient = Recipient.create({
             type: RECIPIENT_TYPE.INDIVIDUAL,
@@ -275,7 +275,7 @@ describe('DraftInvoice', () => {
             quantity: '2',
         }).unwrap();
 
-        const vat = Vat.create('20').unwrap();
+        const vat = VatRate.create('20').unwrap();
 
         const recipient = Recipient.create({
             type: RECIPIENT_TYPE.INDIVIDUAL,
