@@ -2,7 +2,7 @@ import { Result } from '../../building-blocks';
 import { Issuer } from '../issuer/issuer';
 import { Money } from '../money/money/money';
 import { Recipient } from '../recipient/recipient';
-import { Vat } from '../vat/vat';
+import { VatRate } from '../vat-rate/vat-rate';
 
 import { CalendarDate } from '../calendar-date/calendar-date';
 import { LineItems, ReadOnlyLineItems } from '../line-items/line-items';
@@ -10,7 +10,7 @@ import { IBilling } from '../recipient/billing/billing.interface';
 import { checkDates } from './checks/check-dates';
 
 export class Invoice<T, D, B extends IBilling<T, D>> {
-    #vatRate: Vat | null;
+    #vatRate: VatRate | null;
     #vatAmount: Money | null;
     #total: Money;
     #lineItems: LineItems;
@@ -23,7 +23,7 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         return this.#total;
     }
 
-    public get vatRate(): Vat | null {
+    public get vatRate(): VatRate | null {
         return this.#vatRate;
     }
 
@@ -54,7 +54,7 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
     private constructor(
         lineItems: LineItems,
         total: Money,
-        vatRate: Vat | null,
+        vatRate: VatRate | null,
         vatAmount: Money | null,
         issueDate: CalendarDate,
         dueDate: CalendarDate,
@@ -76,7 +76,7 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         issueDate: CalendarDate;
         dueDate: CalendarDate;
         issuer: Issuer;
-        vatRate: Vat | null;
+        vatRate: VatRate | null;
         recipient: Recipient<T, D, B>;
     }) {
         const issueDate = options.issueDate;

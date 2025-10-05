@@ -5,7 +5,7 @@ import { LineItems } from '../line-items/line-items';
 import { Money } from '../money/money/money';
 import { Paypal } from '../recipient/billing/paypal';
 import { Recipient, RECIPIENT_TYPE } from '../recipient/recipient';
-import { Vat } from '../vat/vat';
+import { VatRate } from '../vat-rate/vat-rate';
 import { Invoice } from './invoice';
 
 describe('Invoice', () => {
@@ -52,7 +52,7 @@ describe('Invoice', () => {
             items: [lineItem1, lineItem2],
         }).unwrap();
 
-        const vatRate = Vat.create('10').unwrap();
+        const vatRate = VatRate.create('10').unwrap();
         const vatAmount = Money.create('20', 'USD').unwrap();
 
         const invoice = Invoice.create({
@@ -72,7 +72,9 @@ describe('Invoice', () => {
                 Money.create('200', 'USD').unwrap()
             )
         ).toBe(true);
-        expect(invoice.vatRate!.equals(Vat.create('10').unwrap())).toBe(true);
+        expect(invoice.vatRate!.equals(VatRate.create('10').unwrap())).toBe(
+            true
+        );
         expect(
             invoice.vatAmount!.equals(Money.create('20', 'USD').unwrap())
         ).toBe(true);
@@ -134,7 +136,7 @@ describe('Invoice', () => {
             items: [lineItem1, lineItem2],
         }).unwrap();
 
-        const vatRate = Vat.create('10').unwrap();
+        const vatRate = VatRate.create('10').unwrap();
 
         const invoice = Invoice.create({
             issueDate: issueDate,

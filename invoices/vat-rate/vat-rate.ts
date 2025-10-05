@@ -2,7 +2,7 @@ import { Result } from '../../building-blocks';
 import { Money } from '../money/money/money';
 import { Numeric } from '../numeric/numeric';
 import { checkPercents } from './checks/check-percents';
-export class Vat {
+export class VatRate {
     #value: Numeric;
 
     public get rate(): Numeric {
@@ -13,7 +13,7 @@ export class Vat {
         this.#value = value;
     }
 
-    equals(other: Vat): boolean {
+    equals(other: VatRate): boolean {
         return this.#value.equals(other.rate);
     }
 
@@ -29,7 +29,7 @@ export class Vat {
 
         const numericValue = percents.divideBy(oneHundred);
 
-        return Result.ok(new Vat(numericValue));
+        return Result.ok(new VatRate(numericValue));
     }
 
     applyTo(money: Money) {

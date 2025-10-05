@@ -8,12 +8,12 @@ import { LineItems, ReadOnlyLineItems } from '../line-items/line-items';
 import { Money } from '../money/money/money';
 import { IBilling } from '../recipient/billing/billing.interface';
 import { Recipient } from '../recipient/recipient';
-import { Vat } from '../vat/vat';
+import { VatRate } from '../vat-rate/vat-rate';
 import { checkDraftInvoiceComplete } from './checks/check-draft-invoice-complete';
 import { checkLineItemsNotEmpty } from './checks/check-line-items-not-empty';
 
 export class DraftInvoice<T, D, B extends IBilling<T, D>> {
-    #vatRate: Vat | null;
+    #vatRate: VatRate | null;
     #vatAmount: Money | null;
     #total: Money | null;
     #lineItems: LineItems | null;
@@ -26,7 +26,7 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
         return this.#total;
     }
 
-    public get vatRate(): Vat | null {
+    public get vatRate(): VatRate | null {
         return this.#vatRate;
     }
 
@@ -57,7 +57,7 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
     private constructor(
         lineItems: LineItems | null = null,
         total: Money | null = null,
-        vatRate: Vat | null = null,
+        vatRate: VatRate | null = null,
         vatAmount: Money | null = null,
         issueDate: CalendarDate | null = null,
         dueDate: CalendarDate | null = null,
@@ -142,7 +142,7 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
         return Result.ok(undefined);
     }
 
-    public applyVat(vatRate: Vat): Result<DomainError, void> {
+    public applyVat(vatRate: VatRate): Result<DomainError, void> {
         const error = checkLineItemsNotEmpty(this.#lineItems);
 
         if (error) {

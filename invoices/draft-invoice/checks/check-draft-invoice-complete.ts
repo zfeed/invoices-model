@@ -1,5 +1,5 @@
 import { Money } from '../../money/money/money';
-import { Vat } from '../../vat/vat';
+import { VatRate } from '../../vat-rate/vat-rate';
 import { LineItems } from '../../line-items/line-items';
 import { Issuer } from '../../issuer/issuer';
 import { Recipient } from '../../recipient/recipient';
@@ -18,7 +18,7 @@ export function checkDraftInvoiceComplete<T, D, B extends IBilling<T, D>>({
     recipient,
 }: {
     total: Money | null;
-    vatRate: Vat | null;
+    vatRate: VatRate | null;
     vatAmount: Money | null;
     lineItems: LineItems | null;
     issueDate: CalendarDate | null;
