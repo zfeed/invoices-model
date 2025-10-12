@@ -1,21 +1,22 @@
 import { Result } from '../../building-blocks';
-import { Email } from '../email/email';
 import { Country } from '../country/country';
-import { IBilling } from './billing/billing.interface';
+import { Email } from '../email/email';
+import { Paypal } from './billing/paypal';
+import { Wire } from './billing/wire';
 
 export enum RECIPIENT_TYPE {
     INDIVIDUAL = 'INDIVIDUAL',
     COMPANY = 'COMPANY',
 }
 
-export class Recipient<T, D, B extends IBilling<T, D>> {
+export class Recipient {
     #type: RECIPIENT_TYPE;
     #name: string;
     #address: string;
     #taxId: string;
     #email: Email;
     #taxResidenceCountry: Country;
-    #billing: B;
+    #billing: Paypal | Wire;
 
     private constructor(
         type: RECIPIENT_TYPE,
@@ -24,7 +25,7 @@ export class Recipient<T, D, B extends IBilling<T, D>> {
         taxId: string,
         email: Email,
         taxResidenceCountry: Country,
-        billing: B
+        billing: Paypal | Wire
     ) {
         this.#type = type;
         this.#name = name;
@@ -59,11 +60,11 @@ export class Recipient<T, D, B extends IBilling<T, D>> {
         return this.#taxResidenceCountry;
     }
 
-    get billing(): B {
+    get billing(): Paypal | Wire {
         return this.#billing;
     }
 
-    equals(other: Recipient<T, D, B>): boolean {
+    equals(other: Recipient): boolean {
         return (
             this.#type === other.#type &&
             this.#name === other.#name &&
@@ -75,7 +76,19 @@ export class Recipient<T, D, B extends IBilling<T, D>> {
         );
     }
 
-    static create<T, D, B extends IBilling<T, D>>({
+    toPlain() {
+        return {
+            type: this.#type,
+            name: this.#name,
+            address: this.#address,
+            taxId: this.#taxId,
+            email: this.#email.toString(),
+            taxResidenceCountry: this.#taxResidenceCountry.toString(),
+            billing: this.#billing.toPlain(),
+        };
+    }
+
+    static create({
         type,
         name,
         address,
@@ -90,7 +103,7 @@ export class Recipient<T, D, B extends IBilling<T, D>> {
         taxId: string;
         email: string;
         taxResidenceCountry: string;
-        billing: B;
+        billing: Paypal | Wire;
     }) {
         const emailResult = Email.create(email);
 
@@ -108,7 +121,7 @@ export class Recipient<T, D, B extends IBilling<T, D>> {
         const recipientCountry = countryResult.unwrap();
 
         return Result.ok(
-            new this<T, D, B>(
+            new this(
                 type,
                 name,
                 address,

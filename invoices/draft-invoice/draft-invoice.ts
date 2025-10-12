@@ -20,7 +20,7 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
     #issueDate: CalendarDate | null;
     #dueDate: CalendarDate | null;
     #issuer: Issuer | null;
-    #recipient: Recipient<T, D, B> | null;
+    #recipient: Recipient | null;
 
     public get total(): Money | null {
         return this.#total;
@@ -50,7 +50,7 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
         return this.#issuer;
     }
 
-    public get recipient(): Recipient<T, D, B> | null {
+    public get recipient(): Recipient | null {
         return this.#recipient;
     }
 
@@ -62,7 +62,7 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
         issueDate: CalendarDate | null = null,
         dueDate: CalendarDate | null = null,
         issuer: Issuer | null = null,
-        recipient: Recipient<T, D, B> | null = null
+        recipient: Recipient | null = null
     ) {
         this.#lineItems = lineItems;
         this.#total = total;
@@ -74,7 +74,7 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
         this.#issuer = issuer;
     }
 
-    public toInvoice(): Result<DomainError, Invoice<T, D, B>> {
+    public toInvoice(): Result<DomainError, Invoice> {
         const error = checkDraftInvoiceComplete({
             total: this.#total,
             vatRate: this.#vatRate,
@@ -160,9 +160,7 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
         return Result.ok(undefined);
     }
 
-    public addRecipient(
-        recipient: Recipient<T, D, B>
-    ): Result<DomainError, void> {
+    public addRecipient(recipient: Recipient): Result<DomainError, void> {
         this.#recipient = recipient;
         return Result.ok(undefined);
     }

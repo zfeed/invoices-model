@@ -1,5 +1,5 @@
-import { IBilling } from './billing.interface';
 import { Result } from '../../../building-blocks';
+import { IBilling } from './billing.interface';
 
 export class Wire
     implements
@@ -45,5 +45,19 @@ export class Wire
         bankCountry: string;
     }) {
         return Result.ok(new Wire(data));
+    }
+
+    toPlain() {
+        return {
+            type: this.type,
+            data: {
+                swift: this.data.swift,
+                accountNumber: this.data.accountNumber,
+                accountHolderName: this.data.accountHolderName,
+                bankName: this.data.bankName,
+                bankAddress: this.data.bankAddress,
+                bankCountry: this.data.bankCountry,
+            },
+        };
     }
 }

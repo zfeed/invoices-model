@@ -91,6 +91,56 @@ describe('Invoice', () => {
         expect(invoice.recipient.type).toBe('INDIVIDUAL');
         expect(invoice.vatRate!.equals(vatRate)).toBe(true);
         expect(invoice.vatAmount!.equals(vatAmount)).toBe(true);
+        expect(invoice.events).toHaveLength(1);
+        expect(invoice.events[0]).toEqual(
+            expect.objectContaining({
+                name: 'invoice.created',
+                data: {
+                    id: expect.any(String),
+                    lineItems: {
+                        items: [
+                            {
+                                description: 'Item 1',
+                                price: { amount: '50', currency: 'USD' },
+                                quantity: '2',
+                                total: { amount: '100', currency: 'USD' },
+                            },
+                            {
+                                description: 'Item 2',
+                                price: { amount: '100', currency: 'USD' },
+                                quantity: '1',
+                                total: { amount: '100', currency: 'USD' },
+                            },
+                        ],
+                        subtotal: { amount: '200', currency: 'USD' },
+                    },
+                    total: { amount: '220', currency: 'USD' },
+                    vatRate: '10',
+                    vatAmount: { amount: '20', currency: 'USD' },
+                    issueDate: '2023-01-01',
+                    dueDate: '2028-01-01',
+                    issuer: {
+                        type: 'COMPANY',
+                        name: 'Company Inc.',
+                        address: '123 Main St, City, Country',
+                        taxId: 'TAX123456',
+                        email: 'info@company.com',
+                    },
+                    recipient: {
+                        type: 'INDIVIDUAL',
+                        name: 'Jane Smith',
+                        address: '456 Another St, City, Country',
+                        taxId: 'TAX654321',
+                        email: 'jane.smith@example.com',
+                        taxResidenceCountry: 'US',
+                        billing: {
+                            type: 'PAYPAL',
+                            data: { email: 'customer@example.com' },
+                        },
+                    },
+                },
+            })
+        );
     });
 
     it('should not create an invoice when due date is before issue date', () => {

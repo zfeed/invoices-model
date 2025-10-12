@@ -1,5 +1,5 @@
-import { checkCountryCode } from './checks/check-country-code';
 import { Result } from '../../building-blocks';
+import { checkCountryCode } from './checks/check-country-code';
 
 export class Country {
     #code: string;
@@ -18,6 +18,10 @@ export class Country {
     }
 
     get code(): string {
+        return this.#code;
+    }
+
+    toString(): string {
         return this.#code;
     }
 

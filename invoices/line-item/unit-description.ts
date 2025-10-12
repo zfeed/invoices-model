@@ -12,4 +12,8 @@ export class UnitDescription {
     equals(other: UnitDescription) {
         return this.#value === other.#value;
     }
+
+    toString(): string {
+        return this.#value;
+    }
 }

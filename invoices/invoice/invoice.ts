@@ -1,15 +1,18 @@
+import { randomUUID } from 'crypto';
 import { Result } from '../../building-blocks';
 import { Issuer } from '../issuer/issuer';
 import { Money } from '../money/money/money';
 import { Recipient } from '../recipient/recipient';
 import { VatRate } from '../vat-rate/vat-rate';
 
+import { PublishableEvents } from '../../building-blocks/events';
 import { CalendarDate } from '../calendar-date/calendar-date';
 import { LineItems, ReadOnlyLineItems } from '../line-items/line-items';
-import { IBilling } from '../recipient/billing/billing.interface';
 import { checkDates } from './checks/check-dates';
+import { InvoiceCreatedEvent } from './events/invoice-created.event';
 
-export class Invoice<T, D, B extends IBilling<T, D>> {
+export class Invoice implements PublishableEvents<InvoiceCreatedEvent> {
+    #id: string = randomUUID();
     #vatRate: VatRate | null;
     #vatAmount: Money | null;
     #total: Money;
@@ -17,7 +20,12 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
     #issueDate: CalendarDate;
     #dueDate: CalendarDate;
     #issuer: Issuer;
-    #recipient: Recipient<T, D, B>;
+    #recipient: Recipient;
+    #events: InvoiceCreatedEvent[] = [];
+
+    public get events(): ReadonlyArray<InvoiceCreatedEvent> {
+        return this.#events;
+    }
 
     public get total(): Money {
         return this.#total;
@@ -47,7 +55,7 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         return this.#issuer;
     }
 
-    public get recipient(): Recipient<T, D, B> {
+    public get recipient(): Recipient {
         return this.#recipient;
     }
 
@@ -59,7 +67,7 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         issueDate: CalendarDate,
         dueDate: CalendarDate,
         issuer: Issuer,
-        recipient: Recipient<T, D, B>
+        recipient: Recipient
     ) {
         this.#lineItems = lineItems;
         this.#total = total;
@@ -71,13 +79,13 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
         this.#issuer = issuer;
     }
 
-    static create<T, D, B extends IBilling<T, D>>(options: {
+    static create(options: {
         lineItems: LineItems;
         issueDate: CalendarDate;
         dueDate: CalendarDate;
         issuer: Issuer;
         vatRate: VatRate | null;
-        recipient: Recipient<T, D, B>;
+        recipient: Recipient;
     }) {
         const issueDate = options.issueDate;
         const dueDate = options.dueDate;
@@ -106,6 +114,24 @@ export class Invoice<T, D, B extends IBilling<T, D>> {
             recipient
         );
 
+        const event = new InvoiceCreatedEvent(invoice.toPlain());
+
+        invoice.#events.push(event);
+
         return Result.ok(invoice);
+    }
+
+    toPlain() {
+        return {
+            id: this.#id,
+            lineItems: this.#lineItems.toPlain(),
+            total: this.#total.toPlain(),
+            vatRate: this.#vatRate ? this.#vatRate.toPlain() : null,
+            vatAmount: this.#vatAmount ? this.#vatAmount.toPlain() : null,
+            issueDate: this.#issueDate.toString(),
+            dueDate: this.#dueDate.toString(),
+            issuer: this.#issuer.toPlain(),
+            recipient: this.#recipient.toPlain(),
+        };
     }
 }
