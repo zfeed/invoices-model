@@ -1,4 +1,6 @@
+import { randomUUID } from 'crypto';
 import { DomainError, Result } from '../../building-blocks';
+import { PublishableEvents } from '../../building-blocks/events';
 import { CalendarDate } from '../calendar-date/calendar-date';
 import { checkDates } from '../invoice/checks/check-dates';
 import { Invoice } from '../invoice/invoice';
@@ -6,13 +8,23 @@ import { Issuer } from '../issuer/issuer';
 import { LineItem } from '../line-item/line-item';
 import { LineItems, ReadOnlyLineItems } from '../line-items/line-items';
 import { Money } from '../money/money/money';
-import { IBilling } from '../recipient/billing/billing.interface';
 import { Recipient } from '../recipient/recipient';
 import { VatRate } from '../vat-rate/vat-rate';
 import { checkDraftInvoiceComplete } from './checks/check-draft-invoice-complete';
 import { checkLineItemsNotEmpty } from './checks/check-line-items-not-empty';
+import { DraftInvoiceCreatedEvent } from './events/draft-invoice-created.event';
+import { DraftInvoiceFinishedEvent } from './events/draft-invoice-finished.event';
+import { DraftInvoiceUpdatedEvent } from './events/draft-invoice-updated.event';
 
-export class DraftInvoice<T, D, B extends IBilling<T, D>> {
+export class DraftInvoice
+    implements
+        PublishableEvents<
+            | DraftInvoiceCreatedEvent
+            | DraftInvoiceUpdatedEvent
+            | DraftInvoiceFinishedEvent
+        >
+{
+    #id: string = randomUUID();
     #vatRate: VatRate | null;
     #vatAmount: Money | null;
     #total: Money | null;
@@ -21,6 +33,19 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
     #dueDate: CalendarDate | null;
     #issuer: Issuer | null;
     #recipient: Recipient | null;
+    #events: (
+        | DraftInvoiceCreatedEvent
+        | DraftInvoiceUpdatedEvent
+        | DraftInvoiceFinishedEvent
+    )[] = [];
+
+    public get events(): ReadonlyArray<
+        | DraftInvoiceCreatedEvent
+        | DraftInvoiceUpdatedEvent
+        | DraftInvoiceFinishedEvent
+    > {
+        return this.#events;
+    }
 
     public get total(): Money | null {
         return this.#total;
@@ -99,6 +124,8 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
             recipient: this.#recipient!,
         });
 
+        this.#events.push(new DraftInvoiceFinishedEvent(this.toPlain()));
+
         return result;
     }
 
@@ -118,6 +145,8 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
         this.#lineItems = lineItemsResult.unwrap();
 
         this.#calculateTotal();
+
+        this.#events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
 
         return Result.ok(undefined);
     }
@@ -139,6 +168,8 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
 
         this.#calculateTotal();
 
+        this.#events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
+
         return Result.ok(undefined);
     }
 
@@ -157,16 +188,19 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
 
     public addIssuer(issuer: Issuer): Result<DomainError, void> {
         this.#issuer = issuer;
+        this.#events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
+
         return Result.ok(undefined);
     }
 
     public addRecipient(recipient: Recipient): Result<DomainError, void> {
         this.#recipient = recipient;
+        this.#events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
+
         return Result.ok(undefined);
     }
 
     public addDueDate(dueDate: CalendarDate): Result<DomainError, void> {
-        // Validate dates if issue date is already set
         if (this.#issueDate !== null) {
             const dateError = checkDates({
                 issueDate: this.#issueDate,
@@ -178,11 +212,13 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
         }
 
         this.#dueDate = dueDate;
+
+        this.#events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
+
         return Result.ok(undefined);
     }
 
     public addIssueDate(issueDate: CalendarDate): Result<DomainError, void> {
-        // Validate dates if due date is already set
         if (this.#dueDate !== null) {
             const dateError = checkDates({
                 issueDate,
@@ -194,6 +230,9 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
         }
 
         this.#issueDate = issueDate;
+
+        this.#events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
+
         return Result.ok(undefined);
     }
 
@@ -235,8 +274,27 @@ export class DraftInvoice<T, D, B extends IBilling<T, D>> {
         this.#vatAmount = vatAmount;
     }
 
-    static create<T, D, B extends IBilling<T, D>>() {
-        const draftInvoice = new DraftInvoice<T, D, B>();
+    static create() {
+        const draftInvoice = new DraftInvoice();
+
+        draftInvoice.#events.push(
+            new DraftInvoiceCreatedEvent(draftInvoice.toPlain())
+        );
+
         return Result.ok(draftInvoice);
+    }
+
+    toPlain() {
+        return {
+            id: this.#id,
+            lineItems: this.#lineItems?.toPlain() ?? null,
+            total: this.#total?.toPlain() ?? null,
+            vatRate: this.#vatRate?.toPlain() ?? null,
+            vatAmount: this.#vatAmount?.toPlain() ?? null,
+            issueDate: this.#issueDate?.toString() ?? null,
+            dueDate: this.#dueDate?.toString() ?? null,
+            issuer: this.#issuer?.toPlain() ?? null,
+            recipient: this.#recipient?.toPlain() ?? null,
+        };
     }
 }
