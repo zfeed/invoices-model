@@ -19,6 +19,22 @@ describe('DraftInvoice', () => {
         expect(draftInvoice.dueDate).toBeNull();
         expect(draftInvoice.issuer).toBeNull();
         expect(draftInvoice.recipient).toBeNull();
+        expect(draftInvoice.events[0]).toEqual(
+            expect.objectContaining({
+                name: 'draft-invoice.created',
+                data: {
+                    id: expect.any(String),
+                    lineItems: null,
+                    total: null,
+                    vatRate: null,
+                    vatAmount: null,
+                    issueDate: null,
+                    dueDate: null,
+                    issuer: null,
+                    recipient: null,
+                },
+            })
+        );
     });
 
     it('should not create an invoice from draft invoice if draft is incomplete', () => {
