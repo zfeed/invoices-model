@@ -37,4 +37,8 @@ export class VatRate {
 
         return money.add(vat).unwrap();
     }
+
+    toPlain() {
+        return this.#value.multiplyBy(Numeric.create('100')).toString();
+    }
 }

@@ -24,4 +24,8 @@ export class Email {
         }
         return this.#value === other.#value;
     }
+
+    toString(): string {
+        return this.#value;
+    }
 }

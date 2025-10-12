@@ -1,9 +1,9 @@
+import { Result } from '../../building-blocks';
 import { LineItem } from '../line-item/line-item';
 import { Money } from '../money/money/money';
-import { Result, DomainError } from '../../building-blocks';
+import { checkNoDuplicate } from './checks/check-no-duplicate';
 import { checkNonEmpty } from './checks/check-non-empty';
 import { checkSameCurrency } from './checks/check-same-currency';
-import { checkNoDuplicate } from './checks/check-no-duplicate';
 
 export class LineItems {
     #items: LineItem[];
@@ -86,6 +86,13 @@ export class LineItems {
         const subtotal = this.calculateSubtotal(items);
 
         return Result.ok(new LineItems(items, subtotal));
+    }
+
+    toPlain() {
+        return {
+            items: this.#items.map((item) => item.toPlain()),
+            subtotal: this.#subtotal.toPlain(),
+        };
     }
 }
 

@@ -57,6 +57,16 @@ export class Issuer {
         );
     }
 
+    toPlain() {
+        return {
+            type: this.#type,
+            name: this.#name,
+            address: this.#address,
+            taxId: this.#taxId,
+            email: this.#email.toString(),
+        };
+    }
+
     static create({
         type,
         name,

@@ -1,7 +1,7 @@
+import { Result } from '../../building-blocks';
+import { Money } from '../money/money/money';
 import { UnitDescription } from './unit-description';
 import { UnitQuantity } from './unit-quantity';
-import { Money } from '../money/money/money';
-import { Result } from '../../building-blocks';
 
 export class LineItem {
     #price: Money;
@@ -43,6 +43,15 @@ export class LineItem {
             this.#price.equals(other.#price) &&
             this.#quantity.equals(other.#quantity)
         );
+    }
+
+    toPlain() {
+        return {
+            description: this.#description.toString(),
+            price: this.#price.toPlain(),
+            quantity: this.#quantity.value.toString(),
+            total: this.#total.toPlain(),
+        };
     }
 
     static create({

@@ -1,9 +1,9 @@
-import { Numeric } from '../../numeric/numeric';
-import { Currency } from '../currency/currency';
-import { ROUNDING } from '../../numeric/rounding';
-import { checkMinorUnits } from './checks/check-minor-units';
-import { checkEqualCurrencies } from './checks/check-equal-currencies';
 import { Result } from '../../../building-blocks';
+import { Numeric } from '../../numeric/numeric';
+import { ROUNDING } from '../../numeric/rounding';
+import { Currency } from '../currency/currency';
+import { checkEqualCurrencies } from './checks/check-equal-currencies';
+import { checkMinorUnits } from './checks/check-minor-units';
 
 export class Money {
     #amount: Numeric;
@@ -80,5 +80,12 @@ export class Money {
 
     toString(): string {
         return `${this.#amount.toString()} ${this.#currency.toString()}`;
+    }
+
+    toPlain() {
+        return {
+            amount: this.#amount.toString(),
+            currency: this.#currency.toString(),
+        };
     }
 }

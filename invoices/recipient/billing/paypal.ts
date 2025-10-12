@@ -1,6 +1,6 @@
-import { IBilling } from './billing.interface';
-import { Email } from '../../email/email';
 import { Result } from '../../../building-blocks';
+import { Email } from '../../email/email';
+import { IBilling } from './billing.interface';
 
 export class Paypal implements IBilling<'PAYPAL', { email: Email }> {
     public readonly type = 'PAYPAL' as const;
@@ -8,6 +8,10 @@ export class Paypal implements IBilling<'PAYPAL', { email: Email }> {
 
     private constructor(data: { email: Email }) {
         this.data = data;
+    }
+
+    toPlain() {
+        return { type: this.type, data: { email: this.data.email.toString() } };
     }
 
     static create(data: { email: string }) {

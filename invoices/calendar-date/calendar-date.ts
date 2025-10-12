@@ -1,5 +1,5 @@
-import { checkIsISO8601Date } from './checks/check-iso8601-date';
 import { Result } from '../../building-blocks';
+import { checkIsISO8601Date } from './checks/check-iso8601-date';
 
 export class CalendarDate {
     #value: string;
@@ -26,5 +26,9 @@ export class CalendarDate {
         return (
             new Date(this.#value).getTime() < new Date(other.#value).getTime()
         );
+    }
+
+    toString(): string {
+        return this.#value;
     }
 }
