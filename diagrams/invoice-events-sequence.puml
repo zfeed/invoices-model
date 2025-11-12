@@ -1,0 +1,101 @@
+@startuml Invoice Events Sequence
+!define RECTANGLE class
+
+title Invoice Events Sequence Diagram
+
+actor User
+participant DraftInvoice
+participant LineItems
+participant Money
+participant VatRate
+participant Invoice
+participant EventPublisher
+
+User -> DraftInvoice : create()
+activate DraftInvoice
+DraftInvoice -> EventPublisher : publish(DraftInvoiceCreatedEvent)
+DraftInvoice --> User : Result<DraftInvoice>
+deactivate DraftInvoice
+
+User -> DraftInvoice : addLineItem(lineItem)
+activate DraftInvoice
+DraftInvoice -> LineItems : create([...items, lineItem])
+activate LineItems
+LineItems --> DraftInvoice : Result<LineItems>
+deactivate LineItems
+DraftInvoice -> DraftInvoice : calculateTotal()
+DraftInvoice -> EventPublisher : publish(DraftInvoiceUpdatedEvent)
+DraftInvoice --> User : Result<void>
+deactivate DraftInvoice
+
+User -> DraftInvoice : applyVat(vatRate)
+activate DraftInvoice
+DraftInvoice -> VatRate : applyTo(subtotal)
+activate VatRate
+VatRate -> Money : multiplyBy(rate)
+activate Money
+Money --> VatRate : Money
+deactivate Money
+VatRate -> Money : add(vatAmount)
+activate Money
+Money --> VatRate : Money
+deactivate Money
+VatRate --> DraftInvoice : Money
+deactivate VatRate
+DraftInvoice -> DraftInvoice : calculateTotal()
+DraftInvoice -> EventPublisher : publish(DraftInvoiceUpdatedEvent)
+DraftInvoice --> User : Result<void>
+deactivate DraftInvoice
+
+User -> DraftInvoice : addIssuer(issuer)
+activate DraftInvoice
+DraftInvoice -> EventPublisher : publish(DraftInvoiceUpdatedEvent)
+DraftInvoice --> User : Result<void>
+deactivate DraftInvoice
+
+User -> DraftInvoice : addRecipient(recipient)
+activate DraftInvoice
+DraftInvoice -> EventPublisher : publish(DraftInvoiceUpdatedEvent)
+DraftInvoice --> User : Result<void>
+deactivate DraftInvoice
+
+User -> DraftInvoice : addIssueDate(date)
+activate DraftInvoice
+DraftInvoice -> EventPublisher : publish(DraftInvoiceUpdatedEvent)
+DraftInvoice --> User : Result<void>
+deactivate DraftInvoice
+
+User -> DraftInvoice : addDueDate(date)
+activate DraftInvoice
+DraftInvoice -> EventPublisher : publish(DraftInvoiceUpdatedEvent)
+DraftInvoice --> User : Result<void>
+deactivate DraftInvoice
+
+User -> DraftInvoice : toInvoice()
+activate DraftInvoice
+DraftInvoice -> DraftInvoice : isValid()
+alt all required fields present
+    DraftInvoice -> Invoice : create(options)
+    activate Invoice
+    Invoice -> EventPublisher : publish(InvoiceCreatedEvent)
+    Invoice --> DraftInvoice : Result<Invoice>
+    deactivate Invoice
+    DraftInvoice -> EventPublisher : publish(DraftInvoiceFinishedEvent)
+    DraftInvoice --> User : Result<Invoice>
+else missing required fields
+    DraftInvoice --> User : Result<DomainError>
+end
+deactivate DraftInvoice
+
+note right of DraftInvoice
+  Events are published for every
+  state change to enable audit
+  trail and external integrations
+end note
+
+note right of Invoice
+  Invoice is immutable once created.
+  Only publishes InvoiceCreatedEvent.
+end note
+
+@enduml

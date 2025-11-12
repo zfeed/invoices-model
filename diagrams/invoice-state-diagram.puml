@@ -1,0 +1,51 @@
+@startuml Invoice State Diagram
+!define RECTANGLE class
+
+title Invoice Lifecycle State Diagram
+
+[*] --> DraftInvoice : create()
+
+state DraftInvoice {
+  [*] --> Empty
+  Empty --> HasLineItems : addLineItem()
+  HasLineItems --> HasLineItems : addLineItem()\nremoveLineItem()
+  HasLineItems --> WithVAT : applyVat()
+  WithVAT --> WithVAT : addLineItem()\nremoveLineItem()
+  WithVAT --> HasLineItems : removeVat()
+  
+  Empty --> HasIssuer : addIssuer()
+  HasLineItems --> HasIssuer : addIssuer()
+  WithVAT --> HasIssuer : addIssuer()
+  
+  HasIssuer --> HasIssuer : addRecipient()\naddIssueDate()\naddDueDate()
+  
+  HasIssuer --> Complete : [all required fields present]
+  Complete --> HasIssuer : [missing required fields]
+}
+
+DraftInvoice --> Invoice : toInvoice()\n[isValid() == true]
+DraftInvoice --> [ValidationError] : toInvoice()\n[isValid() == false]
+
+state Invoice {
+  [*] --> Created
+  Created --> [*]
+}
+
+note right of DraftInvoice
+  Properties can be added in any order.
+  Total is automatically calculated
+  when line items or VAT changes.
+end note
+
+note right of Invoice
+  Immutable once created.
+  All properties are required
+  and validated.
+end note
+
+note on link
+  Conversion only succeeds
+  when draft is complete
+end note
+
+@enduml
