@@ -1,0 +1,225 @@
+@startuml Draft Invoice Class Diagram
+!define RECTANGLE class
+
+title Draft Invoice Domain Model
+
+class DraftInvoice {
+  -id: string
+  -vatRate: VatRate | null
+  -vatAmount: Money | null
+  -total: Money | null
+  -lineItems: LineItems | null
+  -issueDate: CalendarDate | null
+  -dueDate: CalendarDate | null
+  -issuer: Issuer | null
+  -recipient: Recipient | null
+  -events: (DraftInvoiceCreatedEvent | DraftInvoiceUpdatedEvent | DraftInvoiceFinishedEvent)[]
+  
+  +get events(): ReadonlyArray<Events>
+  +get total(): Money | null
+  +get vatRate(): VatRate | null
+  +get vatAmount(): Money | null
+  +get lineItems(): ReadOnlyLineItems | null
+  +get issueDate(): CalendarDate | null
+  +get dueDate(): CalendarDate | null
+  +get issuer(): Issuer | null
+  +get recipient(): Recipient | null
+  
+  +toInvoice(): Result<DomainError, Invoice>
+  +addLineItem(lineItem: LineItem): Result<DomainError, void>
+  +removeLineItem(lineItem: LineItem): Result<DomainError, void>
+  +applyVat(vatRate: VatRate): Result<DomainError, void>
+  +addIssuer(issuer: Issuer): Result<DomainError, void>
+  +addRecipient(recipient: Recipient): Result<DomainError, void>
+  +addDueDate(dueDate: CalendarDate): Result<DomainError, void>
+  +addIssueDate(issueDate: CalendarDate): Result<DomainError, void>
+  +isValid(): boolean
+  -calculateTotal(): void
+  +static create(): Result<DomainError, DraftInvoice>
+  +toPlain(): object
+}
+
+class LineItems {
+  -items: LineItem[]
+  -subtotal: Money
+  
+  +get length(): number
+  +get subtotal(): Money
+  
+  +contains(lineItem: LineItem): boolean
+  +add(lineItem: LineItem): Result<DomainError, LineItems>
+  +remove(lineItem: LineItem): Result<DomainError, LineItems>
+  +find(predicate): LineItem | undefined
+  +equals(other: ReadOnlyLineItems): boolean
+  +static create(items): Result<DomainError, LineItems>
+  +toPlain(): object
+}
+
+class LineItem {
+  -price: Money
+  -description: UnitDescription
+  -quantity: UnitQuantity
+  -total: Money
+  
+  +get price(): Money
+  +get description(): UnitDescription
+  +get quantity(): UnitQuantity
+  +get total(): Money
+  
+  +equals(other: LineItem): boolean
+  +static create(options): Result<DomainError, LineItem>
+  +toPlain(): object
+}
+
+class Money {
+  -amount: Numeric
+  -currency: Currency
+  
+  +get amount(): Numeric
+  +get currency(): Currency
+  
+  +equals(other: Money): boolean
+  +add(other: Money): Result<DomainError, Money>
+  +subtract(other: Money): Result<DomainError, Money>
+  +multiplyBy(factor: Numeric, rounding?): Money
+  +static create(amount: string, currency: string): Result<DomainError, Money>
+  +toString(): string
+  +toPlain(): object
+}
+
+class VatRate {
+  -value: Numeric
+  
+  +get rate(): Numeric
+  
+  +equals(other: VatRate): boolean
+  +static create(value: string): Result<DomainError, VatRate>
+  +applyTo(money: Money): Money
+  +toPlain(): string
+}
+
+class Issuer {
+  -type: ISSUER_TYPE
+  -name: string
+  -address: string
+  -taxId: string
+  -email: Email
+  
+  +get type(): ISSUER_TYPE
+  +get name(): string
+  +get address(): string
+  +get taxId(): string
+  +get email(): Email
+  
+  +equals(other: Issuer): boolean
+  +static create(options): Result<DomainError, Issuer>
+  +toPlain(): object
+}
+
+class Recipient {
+  -type: RECIPIENT_TYPE
+  -name: string
+  -address: string
+  -taxId: string
+  -email: Email
+  -taxResidenceCountry: Country
+  -billing: Paypal | Wire
+  
+  +get type(): RECIPIENT_TYPE
+  +get name(): string
+  +get address(): string
+  +get taxId(): string
+  +get email(): Email
+  +get taxResidenceCountry(): Country
+  +get billing(): Paypal | Wire
+  
+  +equals(other: Recipient): boolean
+  +static create(options): Result<DomainError, Recipient>
+  +toPlain(): object
+}
+
+class CalendarDate {
+  +toString(): string
+}
+
+class Invoice {
+  +static create(options): Result<DomainError, Invoice>
+}
+
+abstract class DomainEvent {
+  +name: string
+  +data: any
+}
+
+class DraftInvoiceCreatedEvent extends DomainEvent {
+  +constructor(data): DraftInvoiceCreatedEvent
+}
+
+class DraftInvoiceUpdatedEvent extends DomainEvent {
+  +constructor(data): DraftInvoiceUpdatedEvent
+}
+
+class DraftInvoiceFinishedEvent extends DomainEvent {
+  +constructor(data): DraftInvoiceFinishedEvent
+}
+
+enum ISSUER_TYPE {
+  INDIVIDUAL
+  COMPANY
+}
+
+enum RECIPIENT_TYPE {
+  INDIVIDUAL
+  COMPANY
+}
+
+' Relationships
+DraftInvoice ||--o| LineItems : "may contain"
+DraftInvoice ||--o| Issuer : "may have"
+DraftInvoice ||--o| Recipient : "may have"
+DraftInvoice ||--o| VatRate : "may have"
+DraftInvoice ||--o| CalendarDate : "issue date (optional)"
+DraftInvoice ||--o| CalendarDate : "due date (optional)"
+DraftInvoice ||--o| Money : "total (calculated)"
+DraftInvoice ||--o| Money : "vat amount (calculated)"
+
+DraftInvoice ..> Invoice : "converts to"
+
+LineItems ||--o{ LineItem : contains
+LineItem ||--|| Money : price
+LineItem ||--|| Money : total
+
+Money ||--|| Currency : has
+Money ||--|| Numeric : amount
+
+VatRate ||--|| Numeric : value
+
+Issuer ||--|| Email : has
+Issuer ||--|| ISSUER_TYPE : type
+
+Recipient ||--|| Email : has
+Recipient ||--|| Country : "tax residence"
+Recipient ||--|| RECIPIENT_TYPE : type
+Recipient ||--|| Billing : "billing method"
+
+DraftInvoice ||--o{ DraftInvoiceCreatedEvent : publishes
+DraftInvoice ||--o{ DraftInvoiceUpdatedEvent : publishes
+DraftInvoice ||--o{ DraftInvoiceFinishedEvent : publishes
+
+note right of DraftInvoice::toInvoice
+  Validates completeness and
+  converts to immutable Invoice
+end note
+
+note right of DraftInvoice::calculateTotal
+  Automatically recalculates total
+  when line items or VAT changes
+end note
+
+note top of DraftInvoice
+  Mutable builder pattern for Invoice.
+  All properties are optional until
+  conversion to Invoice.
+end note
+
+@enduml

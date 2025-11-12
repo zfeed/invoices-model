@@ -1,0 +1,249 @@
+@startuml Invoice Class Diagram
+!define RECTANGLE class
+
+title Invoice Domain Model
+
+class Invoice {
+  -id: string
+  -vatRate: VatRate | null
+  -vatAmount: Money | null
+  -total: Money
+  -lineItems: LineItems
+  -issueDate: CalendarDate
+  -dueDate: CalendarDate
+  -issuer: Issuer
+  -recipient: Recipient
+  -events: InvoiceCreatedEvent[]
+  
+  +get events(): ReadonlyArray<InvoiceCreatedEvent>
+  +get total(): Money
+  +get vatRate(): VatRate | null
+  +get vatAmount(): Money | null
+  +get lineItems(): ReadOnlyLineItems
+  +get issueDate(): CalendarDate
+  +get dueDate(): CalendarDate
+  +get issuer(): Issuer
+  +get recipient(): Recipient
+  
+  +static create(options): Result<DomainError, Invoice>
+  +toPlain(): object
+}
+
+class LineItems {
+  -items: LineItem[]
+  -subtotal: Money
+  
+  +get length(): number
+  +get subtotal(): Money
+  
+  +contains(lineItem: LineItem): boolean
+  +add(lineItem: LineItem): Result<DomainError, LineItems>
+  +remove(lineItem: LineItem): Result<DomainError, LineItems>
+  +find(predicate): LineItem | undefined
+  +equals(other: ReadOnlyLineItems): boolean
+  +static create(items): Result<DomainError, LineItems>
+  +toPlain(): object
+}
+
+class LineItem {
+  -price: Money
+  -description: UnitDescription
+  -quantity: UnitQuantity
+  -total: Money
+  
+  +get price(): Money
+  +get description(): UnitDescription
+  +get quantity(): UnitQuantity
+  +get total(): Money
+  
+  +equals(other: LineItem): boolean
+  +static create(options): Result<DomainError, LineItem>
+  +toPlain(): object
+}
+
+class Money {
+  -amount: Numeric
+  -currency: Currency
+  
+  +get amount(): Numeric
+  +get currency(): Currency
+  
+  +equals(other: Money): boolean
+  +add(other: Money): Result<DomainError, Money>
+  +subtract(other: Money): Result<DomainError, Money>
+  +multiplyBy(factor: Numeric, rounding?): Money
+  +static create(amount: string, currency: string): Result<DomainError, Money>
+  +toString(): string
+  +toPlain(): object
+}
+
+class VatRate {
+  -value: Numeric
+  
+  +get rate(): Numeric
+  
+  +equals(other: VatRate): boolean
+  +static create(value: string): Result<DomainError, VatRate>
+  +applyTo(money: Money): Money
+  +toPlain(): string
+}
+
+class Issuer {
+  -type: ISSUER_TYPE
+  -name: string
+  -address: string
+  -taxId: string
+  -email: Email
+  
+  +get type(): ISSUER_TYPE
+  +get name(): string
+  +get address(): string
+  +get taxId(): string
+  +get email(): Email
+  
+  +equals(other: Issuer): boolean
+  +static create(options): Result<DomainError, Issuer>
+  +toPlain(): object
+}
+
+class Recipient {
+  -type: RECIPIENT_TYPE
+  -name: string
+  -address: string
+  -taxId: string
+  -email: Email
+  -taxResidenceCountry: Country
+  -billing: Paypal | Wire
+  
+  +get type(): RECIPIENT_TYPE
+  +get name(): string
+  +get address(): string
+  +get taxId(): string
+  +get email(): Email
+  +get taxResidenceCountry(): Country
+  +get billing(): Paypal | Wire
+  
+  +equals(other: Recipient): boolean
+  +static create(options): Result<DomainError, Recipient>
+  +toPlain(): object
+}
+
+class CalendarDate {
+  +toString(): string
+}
+
+class Currency {
+  +equals(other: Currency): boolean
+  +toString(): string
+  +static create(code: string): Result<DomainError, Currency>
+}
+
+class Numeric {
+  +equals(other: Numeric): boolean
+  +add(other: Numeric): Numeric
+  +subtract(other: Numeric): Numeric
+  +multiplyBy(other: Numeric): Numeric
+  +divideBy(other: Numeric): Numeric
+  +toString(): string
+  +static create(value: string): Numeric
+}
+
+class UnitDescription {
+  +equals(other: UnitDescription): boolean
+  +toString(): string
+  +static create(description: string): UnitDescription
+}
+
+class UnitQuantity {
+  -value: Numeric
+  
+  +get value(): Numeric
+  
+  +equals(other: UnitQuantity): boolean
+  +static create(quantity: string): Result<DomainError, UnitQuantity>
+}
+
+class Email {
+  +equals(other: Email): boolean
+  +toString(): string
+  +static create(email: string): Result<DomainError, Email>
+}
+
+class Country {
+  +equals(other: Country): boolean
+  +toString(): string
+  +static create(options): Result<DomainError, Country>
+}
+
+enum ISSUER_TYPE {
+  INDIVIDUAL
+  COMPANY
+}
+
+enum RECIPIENT_TYPE {
+  INDIVIDUAL
+  COMPANY
+}
+
+abstract class Billing {
+  +toPlain(): object
+}
+
+class Paypal extends Billing {
+  -email: Email
+  +toPlain(): object
+}
+
+class Wire extends Billing {
+  -swift: string
+  -accountNumber: string
+  -accountHolderName: string
+  -bankName: string
+  -bankAddress: string
+  -bankCountry: Country
+  +toPlain(): object
+}
+
+class InvoiceCreatedEvent {
+  +constructor(data): InvoiceCreatedEvent
+}
+
+' Relationships
+Invoice ||--|| LineItems : contains
+Invoice ||--|| Issuer : has
+Invoice ||--|| Recipient : has
+Invoice ||--o| VatRate : "may have"
+Invoice ||--|| CalendarDate : "issue date"
+Invoice ||--|| CalendarDate : "due date"
+Invoice ||--|| Money : total
+Invoice ||--o| Money : "vat amount"
+
+LineItems ||--o{ LineItem : contains
+LineItem ||--|| Money : price
+LineItem ||--|| Money : total
+LineItem ||--|| UnitDescription : has
+LineItem ||--|| UnitQuantity : has
+
+Money ||--|| Currency : has
+Money ||--|| Numeric : amount
+
+VatRate ||--|| Numeric : value
+
+UnitQuantity ||--|| Numeric : value
+
+Issuer ||--|| Email : has
+Issuer ||--|| ISSUER_TYPE : type
+
+Recipient ||--|| Email : has
+Recipient ||--|| Country : "tax residence"
+Recipient ||--|| RECIPIENT_TYPE : type
+Recipient ||--|| Billing : "billing method"
+
+Billing <|-- Paypal
+Billing <|-- Wire
+Paypal ||--|| Email : has
+Wire ||--|| Country : "bank country"
+
+Invoice ||--o{ InvoiceCreatedEvent : publishes
+
+@enduml
