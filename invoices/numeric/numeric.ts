@@ -1,8 +1,8 @@
 import { Decimal } from 'decimal.js';
-import { Equatable } from '../../building-blocks';
+import { Comparable, Equatable } from '../../building-blocks';
 import { ROUNDING } from './rounding';
 
-export class Numeric implements Equatable<Numeric> {
+export class Numeric implements Equatable<Numeric>, Comparable<Numeric> {
     #value: Decimal;
     private constructor(value: string) {
         this.#value = new Decimal(value);
