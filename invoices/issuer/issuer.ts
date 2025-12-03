@@ -1,4 +1,4 @@
-import { Result } from '../../building-blocks';
+import { Equatable, Result } from '../../building-blocks';
 import { Email } from '../email/email';
 
 export enum ISSUER_TYPE {
@@ -6,7 +6,7 @@ export enum ISSUER_TYPE {
     COMPANY = 'COMPANY',
 }
 
-export class Issuer {
+export class Issuer implements Equatable<Issuer> {
     #type: ISSUER_TYPE;
     #name: string;
     #address: string;

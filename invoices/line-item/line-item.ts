@@ -1,9 +1,9 @@
-import { Result } from '../../building-blocks';
+import { Equatable, Result } from '../../building-blocks';
 import { Money } from '../money/money/money';
 import { UnitDescription } from './unit-description';
 import { UnitQuantity } from './unit-quantity';
 
-export class LineItem {
+export class LineItem implements Equatable<LineItem> {
     #price: Money;
     #description: UnitDescription;
     #quantity: UnitQuantity;

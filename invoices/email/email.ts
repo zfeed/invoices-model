@@ -1,7 +1,7 @@
-import { Result } from '../../building-blocks';
+import { Equatable, Result } from '../../building-blocks';
 import { checkEmailFormat } from './checks/check-email-format';
 
-export class Email {
+export class Email implements Equatable<Email | string> {
     #value: string;
 
     private constructor(value: string) {

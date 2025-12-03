@@ -1,7 +1,7 @@
-import { Result } from '../../building-blocks';
+import { Equatable, Result } from '../../building-blocks';
 import { checkCountryCode } from './checks/check-country-code';
 
-export class Country {
+export class Country implements Equatable<Country> {
     #code: string;
 
     private constructor(code: string) {

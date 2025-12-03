@@ -1,8 +1,8 @@
 import { checkUnitQuantity } from './checks/check-unit-quantity';
 import { Numeric } from '../numeric/numeric';
-import { Result } from '../../building-blocks';
+import { Equatable, Result } from '../../building-blocks';
 
-export class UnitQuantity {
+export class UnitQuantity implements Equatable<UnitQuantity> {
     #value: Numeric;
 
     private constructor(value: Numeric) {

@@ -1,4 +1,6 @@
-export class UnitDescription {
+import { Equatable } from '../../building-blocks';
+
+export class UnitDescription implements Equatable<UnitDescription> {
     #value: string;
 
     private constructor(value: string) {
