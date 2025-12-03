@@ -1,9 +1,43 @@
+import { testEquatable } from '../../building-blocks/equatable.test-helper';
+import { Money } from '../money/money/money';
 import { LineItem } from './line-item';
 import { UnitDescription } from './unit-description';
 import { UnitQuantity } from './unit-quantity';
-import { Money } from '../money/money/money';
 
 describe('LineItem', () => {
+    testEquatable({
+        typeName: 'LineItem',
+        createEqual: () => [
+            LineItem.create({
+                description: 'Product A',
+                price: { amount: '100', currency: 'USD' },
+                quantity: '2',
+            }).unwrap(),
+            LineItem.create({
+                description: 'Product A',
+                price: { amount: '100', currency: 'USD' },
+                quantity: '2',
+            }).unwrap(),
+            LineItem.create({
+                description: 'Product A',
+                price: { amount: '100', currency: 'USD' },
+                quantity: '2',
+            }).unwrap(),
+        ],
+        createDifferent: () => [
+            LineItem.create({
+                description: 'Product A',
+                price: { amount: '100', currency: 'USD' },
+                quantity: '2',
+            }).unwrap(),
+            LineItem.create({
+                description: 'Product B',
+                price: { amount: '200', currency: 'USD' },
+                quantity: '3',
+            }).unwrap(),
+        ],
+    });
+
     it('should create a line item', () => {
         const price = Money.create('100', 'USD').unwrap();
         const lineItem = LineItem.create({
@@ -26,109 +60,4 @@ describe('LineItem', () => {
             true
         );
     });
-
-    it.each([
-        {
-            lineItem1: LineItem.create({
-                description: 'Product A',
-                price: {
-                    amount: '50',
-                    currency: 'USD',
-                },
-                quantity: '2',
-            }),
-            lineItem2: LineItem.create({
-                description: 'Product A',
-                price: {
-                    amount: '50',
-                    currency: 'USD',
-                },
-                quantity: '2',
-            }),
-            expected: true,
-        },
-        {
-            lineItem1: LineItem.create({
-                description: 'Product B',
-                price: {
-                    amount: '50',
-                    currency: 'USD',
-                },
-                quantity: '2',
-            }),
-            lineItem2: LineItem.create({
-                description: 'Product A',
-                price: {
-                    amount: '50',
-                    currency: 'USD',
-                },
-                quantity: '2',
-            }),
-            expected: false,
-        },
-        {
-            lineItem1: LineItem.create({
-                description: 'Product A',
-                price: {
-                    amount: '60',
-                    currency: 'USD',
-                },
-                quantity: '2',
-            }),
-            lineItem2: LineItem.create({
-                description: 'Product A',
-                price: {
-                    amount: '50',
-                    currency: 'USD',
-                },
-                quantity: '2',
-            }),
-            expected: false,
-        },
-        {
-            lineItem1: LineItem.create({
-                description: 'Product A',
-                price: {
-                    amount: '60',
-                    currency: 'USD',
-                },
-                quantity: '2',
-            }),
-            lineItem2: LineItem.create({
-                description: 'Product A',
-                price: {
-                    amount: '50',
-                    currency: 'USD',
-                },
-                quantity: '2',
-            }),
-            expected: false,
-        },
-        {
-            lineItem1: LineItem.create({
-                description: 'Product A',
-                price: {
-                    amount: '50',
-                    currency: 'USD',
-                },
-                quantity: '2',
-            }),
-            lineItem2: LineItem.create({
-                description: 'Product A',
-                price: {
-                    amount: '50',
-                    currency: 'USD',
-                },
-                quantity: '3',
-            }),
-            expected: false,
-        },
-    ])(
-        'should compare line items: %p',
-        ({ lineItem1, lineItem2, expected }) => {
-            expect(lineItem1.unwrap().equals(lineItem2.unwrap())).toBe(
-                expected
-            );
-        }
-    );
 });

@@ -1,6 +1,20 @@
+import { testEquatable } from '../../building-blocks/equatable.test-helper';
 import { Country } from './country';
 
 describe('Country', () => {
+    testEquatable({
+        typeName: 'Country',
+        createEqual: () => [
+            Country.create({ code: 'US' }).unwrap(),
+            Country.create({ code: 'US' }).unwrap(),
+            Country.create({ code: 'US' }).unwrap(),
+        ],
+        createDifferent: () => [
+            Country.create({ code: 'US' }).unwrap(),
+            Country.create({ code: 'CA' }).unwrap(),
+        ],
+    });
+
     it('should create a country', () => {
         const result = Country.create({
             code: 'US',
@@ -22,29 +36,5 @@ describe('Country', () => {
                 code: '7000',
             })
         );
-    });
-
-    it('should compare two equal countries', () => {
-        const result1 = Country.create({
-            code: 'US',
-        }).unwrap();
-
-        const result2 = Country.create({
-            code: 'US',
-        }).unwrap();
-
-        expect(result1.equals(result2)).toBe(true);
-    });
-
-    it('should compare two different countries', () => {
-        const result1 = Country.create({
-            code: 'US',
-        }).unwrap();
-
-        const result2 = Country.create({
-            code: 'CA',
-        }).unwrap();
-
-        expect(result1.equals(result2)).toBe(false);
     });
 });

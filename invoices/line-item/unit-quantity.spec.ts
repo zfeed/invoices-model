@@ -1,7 +1,21 @@
+import { testEquatable } from '../../building-blocks/equatable.test-helper';
 import { UnitQuantity } from './unit-quantity';
 import { Numeric } from '../numeric/numeric';
 
 describe('UnitQuantity', () => {
+    testEquatable({
+        typeName: 'UnitQuantity',
+        createEqual: () => [
+            UnitQuantity.create('5').unwrap(),
+            UnitQuantity.create('5').unwrap(),
+            UnitQuantity.create('5').unwrap(),
+        ],
+        createDifferent: () => [
+            UnitQuantity.create('5').unwrap(),
+            UnitQuantity.create('10').unwrap(),
+        ],
+    });
+
     it('should create a unit quantity', () => {
         const quantity = UnitQuantity.create('4').unwrap();
         expect(quantity.value.equals(Numeric.create('4'))).toBe(true);

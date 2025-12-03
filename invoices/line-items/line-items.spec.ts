@@ -1,8 +1,41 @@
+import { testEquatable } from '../../building-blocks/equatable.test-helper';
 import { LineItem } from '../line-item/line-item';
 import { LineItems } from './line-items';
 import { Money } from '../money/money/money';
 
 describe('LineItems', () => {
+    testEquatable({
+        typeName: 'LineItems',
+        createEqual: () => {
+            const lineItem = LineItem.create({
+                description: 'Product 1',
+                price: { amount: '100', currency: 'USD' },
+                quantity: '2',
+            }).unwrap();
+            return [
+                LineItems.create({ items: [lineItem] }).unwrap(),
+                LineItems.create({ items: [lineItem] }).unwrap(),
+                LineItems.create({ items: [lineItem] }).unwrap(),
+            ];
+        },
+        createDifferent: () => {
+            const lineItem1 = LineItem.create({
+                description: 'Product 1',
+                price: { amount: '100', currency: 'USD' },
+                quantity: '2',
+            }).unwrap();
+            const lineItem2 = LineItem.create({
+                description: 'Product 2',
+                price: { amount: '200', currency: 'USD' },
+                quantity: '3',
+            }).unwrap();
+            return [
+                LineItems.create({ items: [lineItem1] }).unwrap(),
+                LineItems.create({ items: [lineItem2] }).unwrap(),
+            ];
+        },
+    });
+
     it('should create line items', () => {
         const lineItem = LineItem.create({
             description: 'Product 1',

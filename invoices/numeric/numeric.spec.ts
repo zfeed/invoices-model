@@ -1,7 +1,20 @@
+import { testEquatable } from '../../building-blocks/equatable.test-helper';
 import { Numeric } from './numeric';
-import { ROUNDING } from './rounding';
 
 describe('Numeric', () => {
+    testEquatable({
+        typeName: 'Numeric',
+        createEqual: () => [
+            Numeric.create('123.45'),
+            Numeric.create('123.45'),
+            Numeric.create('123.45'),
+        ],
+        createDifferent: () => [
+            Numeric.create('123.45'),
+            Numeric.create('678.90'),
+        ],
+    });
+
     test.each([
         ['123.45', '123.45'],
         ['67.89', '67.89'],
