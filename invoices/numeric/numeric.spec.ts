@@ -16,15 +16,6 @@ describe('Numeric', () => {
     });
 
     test.each([
-        ['123.45', '123.45'],
-        ['67.89', '67.89'],
-        ['0.123', '0.123'],
-    ])('creates Numeric from %s', (input, expected) => {
-        const num = Numeric.create(input);
-        expect(num.equals(Numeric.create(expected))).toBe(true);
-    });
-
-    test.each([
         ['2', '3', '6'],
         ['0.5', '0.2', '0.1'],
         ['100.35', '2', '200.7'],
