@@ -1,6 +1,20 @@
+import { testEquatable } from '../../building-blocks/equatable.test-helper';
 import { CalendarDate } from './calendar-date';
 
 describe('CalendarDate', () => {
+    testEquatable({
+        typeName: 'CalendarDate',
+        createEqual: () => [
+            CalendarDate.create('2023-01-01').unwrap(),
+            CalendarDate.create('2023-01-01').unwrap(),
+            CalendarDate.create('2023-01-01').unwrap(),
+        ],
+        createDifferent: () => [
+            CalendarDate.create('2023-01-01').unwrap(),
+            CalendarDate.create('2023-01-02').unwrap(),
+        ],
+    });
+
     it('should create issue date', () => {
         const issueDate = CalendarDate.create('2023-01-01').unwrap();
 
@@ -15,20 +29,6 @@ describe('CalendarDate', () => {
                 code: '3000',
             })
         );
-    });
-
-    it('should compare equal dates', () => {
-        const date1 = CalendarDate.create('2023-01-01').unwrap();
-        const date2 = CalendarDate.create('2023-01-01').unwrap();
-
-        expect(date1.equals(date2)).toBe(true);
-    });
-
-    it('should compare different dates', () => {
-        const date1 = CalendarDate.create('2023-01-01').unwrap();
-        const date2 = CalendarDate.create('2023-01-02').unwrap();
-
-        expect(date1.equals(date2)).toBe(false);
     });
 
     it('should compare date with another date', () => {

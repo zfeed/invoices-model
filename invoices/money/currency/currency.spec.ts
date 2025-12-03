@@ -1,24 +1,24 @@
+import { testEquatable } from '../../../building-blocks/equatable.test-helper';
 import { Currency } from './currency';
 
 describe('Currency', () => {
+    testEquatable({
+        typeName: 'Currency',
+        createEqual: () => [
+            Currency.create('USD').unwrap(),
+            Currency.create('USD').unwrap(),
+            Currency.create('USD').unwrap(),
+        ],
+        createDifferent: () => [
+            Currency.create('USD').unwrap(),
+            Currency.create('EUR').unwrap(),
+        ],
+    });
+
     test('should create currency', () => {
         const result = Currency.create('USD').unwrap();
 
         expect(result).toBeDefined();
-    });
-
-    test('should compare the same currencies as equal', () => {
-        const currency1 = Currency.create('USD').unwrap();
-        const currency2 = Currency.create('USD').unwrap();
-
-        expect(currency1.equals(currency2)).toBe(true);
-    });
-
-    test('should compare different currencies as not equal', () => {
-        const currency1 = Currency.create('USD').unwrap();
-        const currency2 = Currency.create('JPY').unwrap();
-
-        expect(currency1.equals(currency2)).toBe(false);
     });
 
     test.each([{ currency: 'ABC' }, { currency: 'XYZ' }])(

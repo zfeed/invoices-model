@@ -1,7 +1,21 @@
-import { VatRate } from './vat-rate';
+import { testEquatable } from '../../building-blocks/equatable.test-helper';
 import { Numeric } from '../numeric/numeric';
+import { VatRate } from './vat-rate';
 
 describe('VatRate', () => {
+    testEquatable({
+        typeName: 'VatRate',
+        createEqual: () => [
+            VatRate.create('20').unwrap(),
+            VatRate.create('20').unwrap(),
+            VatRate.create('20').unwrap(),
+        ],
+        createDifferent: () => [
+            VatRate.create('20').unwrap(),
+            VatRate.create('15').unwrap(),
+        ],
+    });
+
     describe('create', () => {
         it('should create vat from integer input', () => {
             const vat = VatRate.create('20').unwrap();
@@ -70,19 +84,6 @@ describe('VatRate', () => {
         it('returns the correct rate', () => {
             const vat = VatRate.create('0').unwrap();
             expect(vat.rate.equals(Numeric.create('0'))).toBe(true);
-        });
-    });
-
-    describe('equals', () => {
-        it('returns true for same rate', () => {
-            const vat1 = VatRate.create('15').unwrap();
-            const vat2 = VatRate.create('15').unwrap();
-            expect(vat1.equals(vat2)).toBe(true);
-        });
-        it('returns false for different rates', () => {
-            const vat1 = VatRate.create('15').unwrap();
-            const vat2 = VatRate.create('20').unwrap();
-            expect(vat1.equals(vat2)).toBe(false);
         });
     });
 });

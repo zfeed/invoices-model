@@ -1,6 +1,20 @@
+import { testEquatable } from '../../building-blocks/equatable.test-helper';
 import { Email } from './email';
 
 describe('Email', () => {
+    testEquatable({
+        typeName: 'Email',
+        createEqual: () => [
+            Email.create('test@example.com').unwrap(),
+            Email.create('test@example.com').unwrap(),
+            Email.create('test@example.com').unwrap(),
+        ],
+        createDifferent: () => [
+            Email.create('test1@example.com').unwrap(),
+            Email.create('test2@example.com').unwrap(),
+        ],
+    });
+
     it('should create an email', () => {
         const result = Email.create('recipient@example.com');
         const email = result.unwrap();

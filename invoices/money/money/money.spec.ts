@@ -1,8 +1,22 @@
+import { testEquatable } from '../../../building-blocks/equatable.test-helper';
 import { Money } from './money';
 import { Numeric } from '../../numeric/numeric';
 import { Currency } from '../currency/currency';
 
 describe('Money', () => {
+    testEquatable({
+        typeName: 'Money',
+        createEqual: () => [
+            Money.create('100', 'USD').unwrap(),
+            Money.create('100', 'USD').unwrap(),
+            Money.create('100', 'USD').unwrap(),
+        ],
+        createDifferent: () => [
+            Money.create('100', 'USD').unwrap(),
+            Money.create('200', 'USD').unwrap(),
+        ],
+    });
+
     test.each([
         {
             amount: '100',
@@ -23,37 +37,6 @@ describe('Money', () => {
         expect(money.amount.equals(expectedAmount)).toBe(true);
         expect(money.currency.equals(expectedCurrency)).toBe(true);
     });
-
-    test.each([
-        {
-            amount1: '50',
-            currency1: 'USD',
-            amount2: '50',
-            currency2: 'USD',
-            expected: true,
-        },
-        {
-            amount1: '150',
-            currency1: 'USD',
-            amount2: '50',
-            currency2: 'USD',
-            expected: false,
-        },
-        {
-            amount1: '50',
-            currency1: 'USD',
-            amount2: '50',
-            currency2: 'JPY',
-            expected: false,
-        },
-    ])(
-        'should return $expected for $amount1 $currency1 === $amount2 $currency2',
-        ({ amount1, currency1, amount2, currency2, expected }) => {
-            const money1 = Money.create(amount1, currency1).unwrap();
-            const money2 = Money.create(amount2, currency2).unwrap();
-            expect(money1.equals(money2)).toBe(expected);
-        }
-    );
 
     test('should create Money from string using create', () => {
         const money = Money.create('355435', 'USD').unwrap();

@@ -1,9 +1,76 @@
-import { Recipient, RECIPIENT_TYPE } from './recipient';
-import { Email } from '../email/email';
+import { testEquatable } from '../../building-blocks/equatable.test-helper';
 import { Country } from '../country/country';
+import { Email } from '../email/email';
 import { Paypal } from './billing/paypal';
+import { Recipient, RECIPIENT_TYPE } from './recipient';
 
 describe('Recipient', () => {
+    testEquatable({
+        typeName: 'Recipient',
+        createEqual: () => {
+            const billing = Paypal.create({
+                email: 'billing@company.com',
+            }).unwrap();
+            return [
+                Recipient.create({
+                    type: RECIPIENT_TYPE.INDIVIDUAL,
+                    name: 'John Doe',
+                    taxResidenceCountry: 'US',
+                    address: '123 Main St',
+                    taxId: 'TAX123',
+                    email: 'info@company.com',
+                    billing: billing,
+                }).unwrap(),
+                Recipient.create({
+                    type: RECIPIENT_TYPE.INDIVIDUAL,
+                    name: 'John Doe',
+                    taxResidenceCountry: 'US',
+                    address: '123 Main St',
+                    taxId: 'TAX123',
+                    email: 'info@company.com',
+                    billing: billing,
+                }).unwrap(),
+                Recipient.create({
+                    type: RECIPIENT_TYPE.INDIVIDUAL,
+                    name: 'John Doe',
+                    taxResidenceCountry: 'US',
+                    address: '123 Main St',
+                    taxId: 'TAX123',
+                    email: 'info@company.com',
+                    billing: billing,
+                }).unwrap(),
+            ];
+        },
+        createDifferent: () => {
+            const billing1 = Paypal.create({
+                email: 'billing1@company.com',
+            }).unwrap();
+            const billing2 = Paypal.create({
+                email: 'billing2@company.com',
+            }).unwrap();
+            return [
+                Recipient.create({
+                    type: RECIPIENT_TYPE.INDIVIDUAL,
+                    name: 'John Doe',
+                    taxResidenceCountry: 'US',
+                    address: '123 Main St',
+                    taxId: 'TAX123',
+                    email: 'info@company.com',
+                    billing: billing1,
+                }).unwrap(),
+                Recipient.create({
+                    type: RECIPIENT_TYPE.INDIVIDUAL,
+                    name: 'Jane Smith',
+                    taxResidenceCountry: 'CA',
+                    address: '456 Oak Ave',
+                    taxId: 'TAX456',
+                    email: 'jane@company.com',
+                    billing: billing2,
+                }).unwrap(),
+            ];
+        },
+    });
+
     it('should create an individual recipient', () => {
         const billingResult = Paypal.create({
             email: 'billing@company.com',
