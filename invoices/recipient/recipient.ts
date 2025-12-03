@@ -1,4 +1,4 @@
-import { Result } from '../../building-blocks';
+import { Equatable, Result } from '../../building-blocks';
 import { Country } from '../country/country';
 import { Email } from '../email/email';
 import { Paypal } from './billing/paypal';
@@ -9,7 +9,7 @@ export enum RECIPIENT_TYPE {
     COMPANY = 'COMPANY',
 }
 
-export class Recipient {
+export class Recipient implements Equatable<Recipient> {
     #type: RECIPIENT_TYPE;
     #name: string;
     #address: string;

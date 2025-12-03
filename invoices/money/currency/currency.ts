@@ -1,7 +1,7 @@
 import { checkCurrencyCode } from './checks/check-currency-code';
-import { Result } from '../../../building-blocks';
+import { Equatable, Result } from '../../../building-blocks';
 
-export class Currency {
+export class Currency implements Equatable<Currency> {
     #code: string;
 
     private constructor(code: string) {

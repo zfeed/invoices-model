@@ -1,7 +1,7 @@
-import { Result } from '../../building-blocks';
+import { Equatable, Result } from '../../building-blocks';
 import { checkIsISO8601Date } from './checks/check-iso8601-date';
 
-export class CalendarDate {
+export class CalendarDate implements Equatable<CalendarDate> {
     #value: string;
 
     private constructor(value: string) {
