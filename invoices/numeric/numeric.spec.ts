@@ -1,3 +1,4 @@
+import { testComparable } from '../../building-blocks/comparable.test-helper';
 import { testEquatable } from '../../building-blocks/equatable.test-helper';
 import { Numeric } from './numeric';
 
@@ -13,6 +14,16 @@ describe('Numeric', () => {
             Numeric.create('123.45'),
             Numeric.create('678.90'),
         ],
+    });
+
+    testComparable({
+        typeName: 'Numeric',
+        createAscending: () => [
+            Numeric.create('10.5'),
+            Numeric.create('50.25'),
+            Numeric.create('100.75'),
+        ],
+        createEqual: () => [Numeric.create('42.42'), Numeric.create('42.42')],
     });
 
     test.each([
@@ -35,16 +46,6 @@ describe('Numeric', () => {
         const numB = Numeric.create(b);
         const result = numA.add(numB);
         expect(result.equals(Numeric.create(expected))).toBe(true);
-    });
-
-    test.each([
-        ['10.00', '10.00', true],
-        ['10.00', '10.01', false],
-        ['10.01', '10.01', true],
-    ])('compares %s and %s', (a, b, expected) => {
-        const numA = Numeric.create(a);
-        const numB = Numeric.create(b);
-        expect(numA.equals(numB)).toBe(expected);
     });
 
     it('should handle multiplication with zero', () => {
@@ -88,39 +89,6 @@ describe('Numeric', () => {
         const numB = Numeric.create(b);
         const result = numA.divideBy(numB);
         expect(result.equals(Numeric.create(expected))).toBe(true);
-    });
-
-    describe('comparison methods', () => {
-        const a = Numeric.create('10.5');
-        const b = Numeric.create('10.5');
-        const c = Numeric.create('11.0');
-        const d = Numeric.create('9.99');
-
-        test('lessThanEqual', () => {
-            expect(a.lessThanEqual(b)).toBe(true);
-            expect(a.lessThanEqual(c)).toBe(true);
-            expect(c.lessThanEqual(a)).toBe(false);
-        });
-
-        test('greaterThanEqual', () => {
-            expect(a.greaterThanEqual(b)).toBe(true);
-            expect(c.greaterThanEqual(a)).toBe(true);
-            expect(a.greaterThanEqual(c)).toBe(false);
-        });
-
-        test('lessThan', () => {
-            expect(a.lessThan(c)).toBe(true);
-            expect(d.lessThan(a)).toBe(true);
-            expect(a.lessThan(d)).toBe(false);
-            expect(a.lessThan(b)).toBe(false);
-        });
-
-        test('greaterThan', () => {
-            expect(c.greaterThan(a)).toBe(true);
-            expect(a.greaterThan(d)).toBe(true);
-            expect(d.greaterThan(a)).toBe(false);
-            expect(a.greaterThan(b)).toBe(false);
-        });
     });
 
     describe('decimalPlaces', () => {
