@@ -30,6 +30,24 @@ export class CalendarDate
         );
     }
 
+    public lessThanEqual(other: CalendarDate): boolean {
+        return (
+            new Date(this.#value).getTime() <= new Date(other.#value).getTime()
+        );
+    }
+
+    public greaterThan(other: CalendarDate): boolean {
+        return (
+            new Date(this.#value).getTime() > new Date(other.#value).getTime()
+        );
+    }
+
+    public greaterThanEqual(other: CalendarDate): boolean {
+        return (
+            new Date(this.#value).getTime() >= new Date(other.#value).getTime()
+        );
+    }
+
     toString(): string {
         return this.#value;
     }
