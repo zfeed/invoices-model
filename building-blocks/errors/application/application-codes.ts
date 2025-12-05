@@ -1,0 +1,3 @@
+export enum APPLICATION_ERROR_CODE {
+    ITEM_NOT_FOUND = 'A1000',
+}

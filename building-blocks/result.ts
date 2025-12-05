@@ -1,4 +1,4 @@
-import { DomainError } from './domain-error';
+import { DomainError } from './errors/domain/domain.error';
 
 export enum RESULT_TYPE {
     ERROR,
