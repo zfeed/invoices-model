@@ -1,7 +1,7 @@
-import { randomUUID } from 'crypto';
 import { DomainError, Result } from '../../../building-blocks';
 import { PublishableEvents } from '../../../building-blocks/events';
 import { CalendarDate } from '../calendar-date/calendar-date';
+import { Id } from '../id/id';
 import { checkDates } from '../invoice/checks/check-dates';
 import { Invoice } from '../invoice/invoice';
 import { Issuer } from '../issuer/issuer';
@@ -24,7 +24,7 @@ export class DraftInvoice
             | DraftInvoiceFinishedEvent
         >
 {
-    #id: string = randomUUID();
+    #id: Id;
     #vatRate: VatRate | null;
     #vatAmount: Money | null;
     #total: Money | null;
@@ -45,6 +45,10 @@ export class DraftInvoice
         | DraftInvoiceFinishedEvent
     > {
         return this.#events;
+    }
+
+    public get id(): Id {
+        return this.#id;
     }
 
     public get total(): Money | null {
@@ -80,6 +84,7 @@ export class DraftInvoice
     }
 
     private constructor(
+        id: Id,
         lineItems: LineItems | null = null,
         total: Money | null = null,
         vatRate: VatRate | null = null,
@@ -89,6 +94,7 @@ export class DraftInvoice
         issuer: Issuer | null = null,
         recipient: Recipient | null = null
     ) {
+        this.#id = id;
         this.#lineItems = lineItems;
         this.#total = total;
         this.#vatRate = vatRate;
@@ -271,7 +277,7 @@ export class DraftInvoice
     }
 
     static create() {
-        const draftInvoice = new DraftInvoice();
+        const draftInvoice = new DraftInvoice(Id.create().unwrap());
 
         draftInvoice.#events.push(
             new DraftInvoiceCreatedEvent(draftInvoice.toPlain())
@@ -282,7 +288,7 @@ export class DraftInvoice
 
     toPlain() {
         return {
-            id: this.#id,
+            id: this.#id.toString(),
             lineItems: this.#lineItems?.toPlain() ?? null,
             total: this.#total?.toPlain() ?? null,
             vatRate: this.#vatRate?.toPlain() ?? null,
