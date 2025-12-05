@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import { Result } from '../../../building-blocks';
 import { Issuer } from '../issuer/issuer';
 import { Money } from '../money/money/money';
@@ -7,12 +6,13 @@ import { VatRate } from '../vat-rate/vat-rate';
 
 import { PublishableEvents } from '../../../building-blocks/events';
 import { CalendarDate } from '../calendar-date/calendar-date';
+import { Id } from '../id/id';
 import { LineItems, ReadOnlyLineItems } from '../line-items/line-items';
 import { checkDates } from './checks/check-dates';
 import { InvoiceCreatedEvent } from './events/invoice-created.event';
 
 export class Invoice implements PublishableEvents<InvoiceCreatedEvent> {
-    #id: string = randomUUID();
+    #id: Id;
     #vatRate: VatRate | null;
     #vatAmount: Money | null;
     #total: Money;
@@ -22,6 +22,10 @@ export class Invoice implements PublishableEvents<InvoiceCreatedEvent> {
     #issuer: Issuer;
     #recipient: Recipient;
     #events: InvoiceCreatedEvent[] = [];
+
+    public get id(): Id {
+        return this.#id;
+    }
 
     public get events(): ReadonlyArray<InvoiceCreatedEvent> {
         return this.#events;
@@ -60,6 +64,7 @@ export class Invoice implements PublishableEvents<InvoiceCreatedEvent> {
     }
 
     private constructor(
+        id: Id,
         lineItems: LineItems,
         total: Money,
         vatRate: VatRate | null,
@@ -69,6 +74,7 @@ export class Invoice implements PublishableEvents<InvoiceCreatedEvent> {
         issuer: Issuer,
         recipient: Recipient
     ) {
+        this.#id = id;
         this.#lineItems = lineItems;
         this.#total = total;
         this.#vatRate = vatRate;
@@ -104,6 +110,7 @@ export class Invoice implements PublishableEvents<InvoiceCreatedEvent> {
             ? total.subtract(options.lineItems.subtotal).unwrap()
             : null;
         const invoice = new Invoice(
+            Id.create().unwrap(),
             options.lineItems,
             total,
             vatRate,
@@ -123,7 +130,7 @@ export class Invoice implements PublishableEvents<InvoiceCreatedEvent> {
 
     toPlain() {
         return {
-            id: this.#id,
+            id: this.#id.toString(),
             lineItems: this.#lineItems.toPlain(),
             total: this.#total.toPlain(),
             vatRate: this.#vatRate ? this.#vatRate.toPlain() : null,

@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import { DomainEventsBus } from '../../../../building-blocks/domain-events-bus';
 import { APPLICATION_ERROR_CODE } from '../../../../building-blocks/errors/application/application-codes';
 import { ApplicationError } from '../../../../building-blocks/errors/application/application.error';
@@ -24,7 +23,7 @@ export class UpdateDraftInvoice {
 
         const invoice = draftInvoice.toInvoice().unwrap();
 
-        this.invoiceCollection.add(randomUUID(), invoice);
+        this.invoiceCollection.add(invoice.id.toString(), invoice);
 
         this.domainEventsBus.publishEvents(draftInvoice, invoice);
 

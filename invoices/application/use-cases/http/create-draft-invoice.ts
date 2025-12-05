@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import { DomainEventsBus } from '../../../../building-blocks/domain-events-bus';
 import { CalendarDate } from '../../../domain/calendar-date/calendar-date';
 import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
@@ -104,12 +103,13 @@ export class CreateDraftInvoice {
             draftInvoice.addRecipient(recipient).unwrap();
         }
 
-        const id = randomUUID();
-
-        this.draftInvoiceCollection.add(id, draftInvoice);
+        this.draftInvoiceCollection.add(
+            draftInvoice.id.toString(),
+            draftInvoice
+        );
 
         this.domainEventsBus.publishEvents(draftInvoice);
 
-        return { id, draftInvoice: draftInvoice.toPlain() };
+        return draftInvoice.toPlain();
     }
 }

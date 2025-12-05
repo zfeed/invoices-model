@@ -146,16 +146,17 @@ export function testComparable<T extends Comparable<T> & Equatable<T>>(
 
             it('should be consistent with greaterThan for unequal values', () => {
                 const [x, y] = config.createAscending();
-                expect(y.greaterThanEqual(x)).toBe(y.greaterThan(x) || y.equals(x));
+                expect(y.greaterThanEqual(x)).toBe(
+                    y.greaterThan(x) || y.equals(x)
+                );
             });
 
             it('should be consistent with greaterThan for equal values', () => {
                 const [x, y] = config.createEqual();
-                expect(x.greaterThanEqual(y)).toBe(x.greaterThan(y) || x.equals(y));
+                expect(x.greaterThanEqual(y)).toBe(
+                    x.greaterThan(y) || x.equals(y)
+                );
             });
         });
     });
 }
-
-
-
