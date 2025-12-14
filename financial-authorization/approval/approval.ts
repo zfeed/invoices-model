@@ -1,3 +1,5 @@
+import { applySpec, prop } from 'ramda';
+import { DomainError } from '../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../building-blocks/result';
 
 export type Approval = {
@@ -6,13 +8,18 @@ export type Approval = {
     comment: string | null;
 };
 
-export function createApproval(data: {
+type ApprovalInput = {
     approverId: string;
     comment: string | null;
-}): Result<never, Approval> {
-    return Result.ok({
-        approverId: data.approverId,
-        createdAt: new Date(),
-        comment: data.comment,
-    });
-}
+};
+
+const buildApproval = applySpec<Approval>({
+    approverId: prop('approverId'),
+    createdAt: () => new Date(),
+    comment: prop('comment'),
+});
+
+export const createApproval = (
+    data: ApprovalInput
+): Result<DomainError, Approval> =>
+    Result.ok<DomainError, ApprovalInput>(data).map(buildApproval);
