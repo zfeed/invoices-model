@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { applySpec, prop } from 'ramda';
+import { applySpec, find, prop, propEq, propOr } from 'ramda';
 import { DomainError } from '../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../building-blocks/result';
 import { Authflow } from '../authflow/authflow';
@@ -28,3 +28,13 @@ export const createDocument = (
     Result.ok<DomainError, DocumentInput>(data)
         .flatMap(noDuplicateAuthflowActions)
         .map(buildDocument);
+
+export const isActionApproved = (
+    document: FinancialDocument,
+    action: string
+): boolean =>
+    propOr(
+        false,
+        'isApproved',
+        find(propEq(action, 'action'), document.authflows)
+    );
