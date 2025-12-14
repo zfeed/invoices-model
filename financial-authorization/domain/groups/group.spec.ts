@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE } from '../../building-blocks/errors/domain/domain-codes';
+import { DOMAIN_ERROR_CODE } from '../../../building-blocks/errors/domain/domain-codes';
 import { Approval } from '../approval/approval';
 import { Approver } from '../approver/approver';
 import { createGroup } from './group';

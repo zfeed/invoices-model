@@ -8,9 +8,9 @@ import {
     pipe,
     prop,
 } from 'ramda';
-import { DOMAIN_ERROR_CODE } from '../../../building-blocks/errors/domain/domain-codes';
-import { DomainError } from '../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../building-blocks/result';
+import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
+import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
+import { Result } from '../../../../building-blocks/result';
 import { Approval } from '../../approval/approval';
 import { Approver } from '../../approver/approver';
 

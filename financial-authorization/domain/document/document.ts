@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { applySpec, prop } from 'ramda';
-import { DomainError } from '../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../building-blocks/result';
+import { DomainError } from '../../../building-blocks/errors/domain/domain.error';
+import { Result } from '../../../building-blocks/result';
 import { Authflow } from '../authflow/authflow';
 import { noDuplicateAuthflowActions } from './checks/check-no-duplicate-authflow-actions';
 

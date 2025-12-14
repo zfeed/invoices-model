@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE } from '../../building-blocks/errors/domain/domain-codes';
+import { DOMAIN_ERROR_CODE } from '../../../building-blocks/errors/domain/domain-codes';
 import { createApprover } from './approver';
 
 describe('createApprover', () => {

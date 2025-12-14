@@ -1,7 +1,7 @@
 import { ifElse } from 'ramda';
-import { DOMAIN_ERROR_CODE } from '../../../building-blocks/errors/domain/domain-codes';
-import { DomainError } from '../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../building-blocks/result';
+import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
+import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
+import { Result } from '../../../../building-blocks/result';
 import { Group } from '../../groups/group';
 
 type StepInput = {

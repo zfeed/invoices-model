@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { applySpec, prop } from 'ramda';
-import { DomainError } from '../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../building-blocks/result';
+import { DomainError } from '../../../building-blocks/errors/domain/domain.error';
+import { Result } from '../../../building-blocks/result';
 import { Group } from '../groups/group';
 import { orderNonNegative } from './checks/check-order-non-negative';
 

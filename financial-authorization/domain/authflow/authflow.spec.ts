@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE } from '../../building-blocks/errors/domain/domain-codes';
+import { DOMAIN_ERROR_CODE } from '../../../building-blocks/errors/domain/domain-codes';
 import { Step } from '../step/step';
 import { createAuthflow } from './authflow';
 
@@ -14,7 +14,11 @@ describe('createAuthflow', () => {
                         id: 'group-1',
                         isApproved: true,
                         approvers: [
-                            { id: '1', name: 'Alice', email: 'alice@example.com' },
+                            {
+                                id: '1',
+                                name: 'Alice',
+                                email: 'alice@example.com',
+                            },
                         ],
                         approvals: [
                             {
@@ -73,7 +77,11 @@ describe('createAuthflow', () => {
                         id: 'group-1',
                         isApproved: true,
                         approvers: [
-                            { id: '1', name: 'Alice', email: 'alice@example.com' },
+                            {
+                                id: '1',
+                                name: 'Alice',
+                                email: 'alice@example.com',
+                            },
                         ],
                         approvals: [
                             {
@@ -125,7 +133,11 @@ describe('createAuthflow', () => {
                         id: 'group-1',
                         isApproved: false,
                         approvers: [
-                            { id: '1', name: 'Alice', email: 'alice@example.com' },
+                            {
+                                id: '1',
+                                name: 'Alice',
+                                email: 'alice@example.com',
+                            },
                         ],
                         approvals: [],
                     },
@@ -186,7 +198,11 @@ describe('createAuthflow', () => {
                         id: 'group-1',
                         isApproved: true,
                         approvers: [
-                            { id: '1', name: 'Alice', email: 'alice@example.com' },
+                            {
+                                id: '1',
+                                name: 'Alice',
+                                email: 'alice@example.com',
+                            },
                         ],
                         approvals: [
                             {
@@ -383,7 +399,11 @@ describe('createAuthflow', () => {
                         id: 'group-1',
                         isApproved: true,
                         approvers: [
-                            { id: '1', name: 'Alice', email: 'alice@example.com' },
+                            {
+                                id: '1',
+                                name: 'Alice',
+                                email: 'alice@example.com',
+                            },
                         ],
                         approvals: [
                             {
@@ -421,7 +441,11 @@ describe('createAuthflow', () => {
                         id: 'group-1',
                         isApproved: false,
                         approvers: [
-                            { id: '1', name: 'Alice', email: 'alice@example.com' },
+                            {
+                                id: '1',
+                                name: 'Alice',
+                                email: 'alice@example.com',
+                            },
                         ],
                         approvals: [],
                     },
@@ -578,7 +602,11 @@ describe('createAuthflow', () => {
                         id: 'group-1',
                         isApproved: true,
                         approvers: [
-                            { id: '1', name: 'Alice', email: 'alice@example.com' },
+                            {
+                                id: '1',
+                                name: 'Alice',
+                                email: 'alice@example.com',
+                            },
                             { id: '2', name: 'Bob', email: 'bob@example.com' },
                         ],
                         approvals: [
@@ -666,4 +694,3 @@ describe('createAuthflow', () => {
         );
     });
 });
-

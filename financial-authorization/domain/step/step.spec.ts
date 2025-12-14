@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE } from '../../building-blocks/errors/domain/domain-codes';
+import { DOMAIN_ERROR_CODE } from '../../../building-blocks/errors/domain/domain-codes';
 import { Group } from '../groups/group';
 import { createStep } from './step';
 

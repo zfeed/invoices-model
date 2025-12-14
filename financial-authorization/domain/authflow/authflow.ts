@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { all, applySpec, prop } from 'ramda';
-import { DomainError } from '../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../building-blocks/result';
+import { DomainError } from '../../../building-blocks/errors/domain/domain.error';
+import { Result } from '../../../building-blocks/result';
 import { Step } from '../step/step';
 import { noDuplicateStepOrders } from './checks/check-no-duplicate-step-orders';
 

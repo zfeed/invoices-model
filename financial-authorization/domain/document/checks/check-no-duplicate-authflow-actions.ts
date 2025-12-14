@@ -1,7 +1,7 @@
 import { ifElse, length, map, pipe, prop, uniq } from 'ramda';
-import { DOMAIN_ERROR_CODE } from '../../../building-blocks/errors/domain/domain-codes';
-import { DomainError } from '../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../building-blocks/result';
+import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
+import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
+import { Result } from '../../../../building-blocks/result';
 import { Authflow } from '../../authflow/authflow';
 
 type DocumentInput = {

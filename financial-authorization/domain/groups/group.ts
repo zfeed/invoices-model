@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { applySpec, isNotEmpty, pipe, prop } from 'ramda';
-import { DomainError } from '../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../building-blocks/result';
+import { DomainError } from '../../../building-blocks/errors/domain/domain.error';
+import { Result } from '../../../building-blocks/result';
 import { Approval } from '../approval/approval';
 import { Approver } from '../approver/approver';
 import { approvalReferencesExistingApprover } from './checks/check-approver-exists';
