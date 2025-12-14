@@ -18,14 +18,9 @@ const createApproversEmptyError = () =>
             code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVERS_EMPTY,
         })
     );
-const createApproversNotEmptyResult = (data: GroupInput) => Result.ok(data);
 
 export function approversNotEmpty(data: GroupInput) {
     return Result.ok<DomainError, GroupInput>(data).flatMap(
-        ifElse(
-            approversEmpty,
-            createApproversEmptyError,
-            createApproversNotEmptyResult
-        )
+        ifElse(approversEmpty, createApproversEmptyError, Result.ok)
     );
 }

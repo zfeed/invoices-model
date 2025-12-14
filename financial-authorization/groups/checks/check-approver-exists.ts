@@ -40,14 +40,8 @@ const createApproverNotFoundError = (data: GroupInput) => {
     );
 };
 
-const createApproverExistsResult = (data: GroupInput) => Result.ok(data);
-
 export function approvalReferencesExistingApprover(data: GroupInput) {
     return Result.ok<DomainError, GroupInput>(data).flatMap(
-        ifElse(
-            hasInvalidApproval,
-            createApproverNotFoundError,
-            createApproverExistsResult
-        )
+        ifElse(hasInvalidApproval, createApproverNotFoundError, Result.ok)
     );
 }
