@@ -1,9 +1,8 @@
 import { randomUUID } from 'crypto';
-import { ifElse } from 'ramda';
-import { isEmail } from 'validator';
-import { DOMAIN_ERROR_CODE } from '../../building-blocks/errors/domain/domain-codes';
+import { applySpec, prop } from 'ramda';
 import { DomainError } from '../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../building-blocks/result';
+import { emailHasValidFormat } from './checks/check-email-format';
 
 export type Approver = {
     id: string;
@@ -11,26 +10,20 @@ export type Approver = {
     email: string;
 };
 
-export function createApprover(data: {
+type ApproverInput = {
     name: string;
     email: string;
-}): Result<DomainError, Approver> {
-    const isValidEmail = () => isEmail(data.email);
+};
 
-    const createApprover = () =>
-        Result.ok({
-            id: randomUUID(),
-            name: data.name,
-            email: data.email,
-        });
+const buildApprover = applySpec<Approver>({
+    id: () => randomUUID(),
+    name: prop('name'),
+    email: prop('email'),
+});
 
-    const createErrorResult = () =>
-        Result.error(
-            new DomainError({
-                message: 'Invalid email',
-                code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_EMAIL_INVALID_FORMAT,
-            })
-        );
-
-    return ifElse(isValidEmail, createApprover, createErrorResult)();
-}
+export const createApprover = (
+    data: ApproverInput
+): Result<DomainError, Approver> =>
+    Result.ok<DomainError, ApproverInput>(data)
+        .flatMap(emailHasValidFormat)
+        .map(buildApprover);
