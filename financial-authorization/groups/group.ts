@@ -4,11 +4,11 @@ import { DomainError } from '../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../building-blocks/result';
 import { Approval } from '../approval/approval';
 import { Approver } from '../approver/approver';
-import { checkApproverExists } from './checks/check-approver-exists';
+import { approvalReferencesExistingApprover } from './checks/check-approver-exists';
 import { approversNotEmpty } from './checks/check-approvers-not-empty';
 import { checkNoDuplicateApprovals } from './checks/check-no-duplicate-approvals';
 import { checkNoDuplicateApprovers } from './checks/check-no-duplicate-approvers';
-
+approvalReferencesExistingApprover;
 export type Group = {
     id: string;
     isApproved: boolean;
@@ -37,10 +37,6 @@ const approversNotDuplicated = liftCheck<GroupInput>(({ approvers }) =>
 
 const approvalsNotDuplicated = liftCheck<GroupInput>(({ approvals }) =>
     checkNoDuplicateApprovals(approvals)
-);
-
-const approvalReferencesExistingApprover = liftCheck<GroupInput>(
-    ({ approvers, approvals }) => checkApproverExists(approvers, approvals)
 );
 
 // Build Group using applySpec for declarative object construction
