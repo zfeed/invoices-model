@@ -6,7 +6,7 @@ import { Approval } from '../approval/approval';
 import { Approver } from '../approver/approver';
 import { approvalReferencesExistingApprover } from './checks/check-approver-exists';
 import { approversNotEmpty } from './checks/check-approvers-not-empty';
-import { checkNoDuplicateApprovals } from './checks/check-no-duplicate-approvals';
+import { noDuplicateApprovals } from './checks/check-no-duplicate-approvals';
 import { checkNoDuplicateApprovers } from './checks/check-no-duplicate-approvers';
 approvalReferencesExistingApprover;
 export type Group = {
@@ -35,10 +35,6 @@ const approversNotDuplicated = liftCheck<GroupInput>(({ approvers }) =>
     checkNoDuplicateApprovers(approvers)
 );
 
-const approvalsNotDuplicated = liftCheck<GroupInput>(({ approvals }) =>
-    checkNoDuplicateApprovals(approvals)
-);
-
 // Build Group using applySpec for declarative object construction
 const buildGroup = applySpec<Group>({
     id: always(randomUUID()),
@@ -53,5 +49,5 @@ export const createGroup = (data: GroupInput): Result<DomainError, Group> =>
         .flatMap(approversNotEmpty)
         .flatMap(approversNotDuplicated)
         .flatMap(approvalReferencesExistingApprover)
-        .flatMap(approvalsNotDuplicated)
+        .flatMap(noDuplicateApprovals)
         .map(buildGroup);
