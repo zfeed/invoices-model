@@ -23,7 +23,7 @@ const createDuplicateApprovalsError = () =>
         })
     );
 
-export function noDuplicateApprovals(data: GroupInput) {
+export function approvalsNotDuplicated(data: GroupInput) {
     return Result.ok<DomainError, GroupInput>(data).flatMap(
         ifElse(hasDuplicateApprovals, createDuplicateApprovalsError, Result.ok)
     );

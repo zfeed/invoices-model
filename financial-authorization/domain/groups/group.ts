@@ -6,7 +6,7 @@ import { Approval } from '../approval/approval';
 import { Approver } from '../approver/approver';
 import { approvalReferencesExistingApprover } from './checks/check-approver-exists';
 import { approversNotEmpty } from './checks/check-approvers-not-empty';
-import { noDuplicateApprovals } from './checks/check-no-duplicate-approvals';
+import { approvalsNotDuplicated } from './checks/check-no-duplicate-approvals';
 import { approversNotDuplicated } from './checks/check-no-duplicate-approvers';
 export type Group = {
     id: string;
@@ -32,5 +32,5 @@ export const createGroup = (data: GroupInput): Result<DomainError, Group> =>
         .flatMap(approversNotEmpty)
         .flatMap(approversNotDuplicated)
         .flatMap(approvalReferencesExistingApprover)
-        .flatMap(noDuplicateApprovals)
+        .flatMap(approvalsNotDuplicated)
         .map(buildGroup);
