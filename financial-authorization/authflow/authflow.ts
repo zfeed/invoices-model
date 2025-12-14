@@ -1,9 +1,9 @@
 import { randomUUID } from 'crypto';
-import { all, prop } from 'ramda';
+import { all, applySpec, prop } from 'ramda';
 import { DomainError } from '../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../building-blocks/result';
 import { Step } from '../step/step';
-import { checkNoDuplicateStepOrders } from './checks/check-no-duplicate-step-orders';
+import { noDuplicateStepOrders } from './checks/check-no-duplicate-step-orders';
 
 export type Authflow = {
     id: string;
@@ -12,21 +12,24 @@ export type Authflow = {
     steps: Step[];
 };
 
-export function createAuthflow(data: {
+export type AuthflowInput = {
     action: string;
     steps: Step[];
-}): Result<DomainError, Authflow> {
-    const duplicateStepOrdersError = checkNoDuplicateStepOrders(data.steps);
-    if (duplicateStepOrdersError) {
-        return Result.error(duplicateStepOrdersError);
-    }
+};
 
-    const isApproved = all(prop('isApproved'), data.steps);
+const allStepsApproved = (data: AuthflowInput): boolean =>
+    all(prop('isApproved'), data.steps);
 
-    return Result.ok({
-        id: randomUUID(),
-        action: data.action,
-        isApproved,
-        steps: data.steps,
-    });
-}
+const buildAuthflow = applySpec<Authflow>({
+    id: () => randomUUID(),
+    action: prop('action'),
+    isApproved: allStepsApproved,
+    steps: prop('steps'),
+});
+
+export const createAuthflow = (
+    data: AuthflowInput
+): Result<DomainError, Authflow> =>
+    Result.ok<DomainError, AuthflowInput>(data)
+        .flatMap(noDuplicateStepOrders)
+        .map(buildAuthflow);
