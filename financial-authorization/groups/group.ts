@@ -1,14 +1,13 @@
 import { randomUUID } from 'crypto';
-import { isNotEmpty } from 'ramda';
+import { always, applySpec, isNotEmpty, pipe, prop } from 'ramda';
 import { DomainError } from '../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../building-blocks/result';
 import { Approval } from '../approval/approval';
 import { Approver } from '../approver/approver';
 import { checkApproverExists } from './checks/check-approver-exists';
-import { checkApproversNotEmpty } from './checks/check-approvers-not-empty';
+import { approversNotEmpty } from './checks/check-approvers-not-empty';
 import { checkNoDuplicateApprovals } from './checks/check-no-duplicate-approvals';
 import { checkNoDuplicateApprovers } from './checks/check-no-duplicate-approvers';
-``;
 
 export type Group = {
     id: string;
@@ -17,43 +16,46 @@ export type Group = {
     approvals: Approval[];
 };
 
-export function createGroup(data: {
+type GroupInput = {
     approvers: Approver[];
     approvals: Approval[];
-}): Result<DomainError, Group> {
-    const approversNotEmptyError = checkApproversNotEmpty(data.approvers);
+};
 
-    if (approversNotEmptyError) {
-        return Result.error(approversNotEmptyError);
-    }
+// Lift check function into Result monad: error → Left, null → Right (pass-through)
+const liftCheck =
+    <T>(check: (data: T) => DomainError | null) =>
+    (data: T): Result<DomainError, T> => {
+        const error = check(data);
+        return error ? Result.error(error) : Result.ok(data);
+    };
 
-    const duplicateApproversError = checkNoDuplicateApprovers(data.approvers);
+// Validators lifted into Result
 
-    if (duplicateApproversError) {
-        return Result.error(duplicateApproversError);
-    }
+const approversNotDuplicated = liftCheck<GroupInput>(({ approvers }) =>
+    checkNoDuplicateApprovers(approvers)
+);
 
-    const duplicateApprovalsError = checkNoDuplicateApprovals(data.approvals);
+const approvalsNotDuplicated = liftCheck<GroupInput>(({ approvals }) =>
+    checkNoDuplicateApprovals(approvals)
+);
 
-    if (duplicateApprovalsError) {
-        return Result.error(duplicateApprovalsError);
-    }
+const approvalReferencesExistingApprover = liftCheck<GroupInput>(
+    ({ approvers, approvals }) => checkApproverExists(approvers, approvals)
+);
 
-    const approverExistsError = checkApproverExists(
-        data.approvers,
-        data.approvals
-    );
+// Build Group using applySpec for declarative object construction
+const buildGroup = applySpec<Group>({
+    id: always(randomUUID()),
+    isApproved: pipe(prop('approvals'), isNotEmpty),
+    approvers: prop('approvers'),
+    approvals: prop('approvals'),
+});
 
-    if (approverExistsError) {
-        return Result.error(approverExistsError);
-    }
-
-    const isApproved = isNotEmpty(data.approvals);
-
-    return Result.ok({
-        id: randomUUID(),
-        isApproved,
-        approvers: data.approvers,
-        approvals: data.approvals,
-    });
-}
+// Factory: monadic validation chain → map to Group
+export const createGroup = (data: GroupInput): Result<DomainError, Group> =>
+    Result.ok<DomainError, GroupInput>(data)
+        .flatMap(approversNotEmpty)
+        .flatMap(approversNotDuplicated)
+        .flatMap(approvalReferencesExistingApprover)
+        .flatMap(approvalsNotDuplicated)
+        .map(buildGroup);

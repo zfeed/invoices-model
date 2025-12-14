@@ -57,4 +57,18 @@ export class Result<
             'Tried to unwrapError on a Result that is not an Error'
         );
     }
+
+    map<U>(fn: (value: R) => U): Result<L, U> {
+        if (this.isOk()) {
+            return Result.ok(fn(this.value));
+        }
+        return Result.error(this.value as L);
+    }
+
+    flatMap<U>(fn: (value: R) => Result<L, U>): Result<L, U> {
+        if (this.isOk()) {
+            return fn(this.value);
+        }
+        return Result.error(this.value as L);
+    }
 }
