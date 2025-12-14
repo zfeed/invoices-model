@@ -14,12 +14,15 @@
     "license": "ISC",
     "devDependencies": {
         "@types/jest": "^30.0.0",
+        "@types/ramda": "^0.31.1",
         "@types/validator": "^13.15.2",
         "prettier": "^3.6.2",
         "ts-jest": "^29.4.1"
     },
     "dependencies": {
         "decimal.js": "^10.6.0",
+        "rambda": "^10.3.4",
+        "ramda": "^0.32.0",
         "validator": "^13.15.15"
     }
 }
