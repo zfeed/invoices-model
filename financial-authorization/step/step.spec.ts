@@ -34,7 +34,6 @@ describe('createStep', () => {
         ];
 
         const result = createStep({
-            id: 'step-1',
             order: 1,
             groups,
         });
@@ -72,7 +71,6 @@ describe('createStep', () => {
         ];
 
         const result = createStep({
-            id: 'step-1',
             order: 0,
             groups,
         });
@@ -103,7 +101,6 @@ describe('createStep', () => {
         ];
 
         const result = createStep({
-            id: 'step-1',
             order: 2,
             groups,
         });
@@ -119,7 +116,6 @@ describe('createStep', () => {
         const groups: Group[] = [];
 
         const result = createStep({
-            id: 'step-1',
             order: 0,
             groups,
         });
@@ -150,7 +146,6 @@ describe('createStep', () => {
         ];
 
         const result = createStep({
-            id: 'step-1',
             order: -1,
             groups,
         });
@@ -167,7 +162,6 @@ describe('createStep', () => {
         const groups: Group[] = [];
 
         const result = createStep({
-            id: 'step-1',
             order: -999,
             groups,
         });
@@ -199,7 +193,6 @@ describe('createStep', () => {
         ];
 
         const result = createStep({
-            id: 'step-1',
             order: 0,
             groups,
         });
@@ -223,7 +216,6 @@ describe('createStep', () => {
         ];
 
         const result = createStep({
-            id: 'step-1',
             order: 9999,
             groups,
         });
@@ -253,7 +245,6 @@ describe('createStep', () => {
         ];
 
         const result = createStep({
-            id: 'step-1',
             order: 5,
             groups,
         });
@@ -279,7 +270,6 @@ describe('createStep', () => {
         ];
 
         const result = createStep({
-            id: 'step-1',
             order: 3,
             groups,
         });
@@ -330,7 +320,6 @@ describe('createStep', () => {
         ];
 
         const result = createStep({
-            id: 'step-1',
             order: 1,
             groups,
         });
@@ -361,13 +350,11 @@ describe('createStep', () => {
         ];
 
         const result1 = createStep({
-            id: 'step-1',
             order: 0,
             groups,
         });
 
         const result2 = createStep({
-            id: 'step-2',
             order: 1,
             groups,
         });
