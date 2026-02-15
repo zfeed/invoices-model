@@ -3,9 +3,9 @@ import {
     UnitOfWork,
     UnitOfWorkFactory,
 } from '../../invoices/application/unit-of-work/unit-of-work.interface';
-import { EntityClass, stores, mappers } from '../registry';
 import '../mappers/draft-invoice.mapper';
 import '../mappers/invoice.mapper';
+import { EntityClass, mappers, stores } from '../registry';
 import { Store } from '../store/store';
 
 export class InMemoryUnitOfWorkFactory implements UnitOfWorkFactory {
@@ -16,7 +16,8 @@ export class InMemoryUnitOfWorkFactory implements UnitOfWorkFactory {
 
 class InMemoryUnitOfWork implements UnitOfWork {
     private readonly stores: Map<EntityClass, Store<any>>;
-    private readonly identityMap: Map<string, any>;
+    private readonly identityMaps: Map<EntityClass, Map<string, any>>;
+    private readonly markedForDeletion: Map<EntityClass, Set<string>>;
     private readonly mappers: Map<
         EntityClass,
         { toDomain: (plain: any) => any; toPlain: (entity: any) => any }
@@ -30,7 +31,8 @@ class InMemoryUnitOfWork implements UnitOfWork {
         >
     ) {
         this.stores = stores;
-        this.identityMap = new Map();
+        this.identityMaps = new Map();
+        this.markedForDeletion = new Map();
         this.mappers = mappers;
     }
 
@@ -41,16 +43,45 @@ class InMemoryUnitOfWork implements UnitOfWork {
             throw new Error(`Store for ${entityClass.name} not found`);
         }
 
+        if (!this.identityMaps.has(entityClass)) {
+            this.identityMaps.set(entityClass, new Map());
+        }
+
+        if (!this.markedForDeletion.has(entityClass)) {
+            this.markedForDeletion.set(entityClass, new Set());
+        }
+
         return new InMemoryCollection(
             entityClass,
             store,
-            this.identityMap,
+            this.identityMaps.get(entityClass)!,
+            this.markedForDeletion.get(entityClass)!,
             this.mappers
         ) as Collection<T>;
     }
 
     async finish(): Promise<void> {
-        throw new Error('Not implemented');
+        for (const [entityClass, identityMap] of this.identityMaps) {
+            const store = this.stores.get(entityClass)!;
+            const mapper = this.mappers.get(entityClass)!;
+            const deletions = this.markedForDeletion.get(entityClass);
+
+            for (const [id, entity] of identityMap) {
+                if (deletions?.has(id)) {
+                    continue;
+                }
+
+                store.set(id, mapper.toPlain(entity));
+            }
+        }
+
+        for (const [entityClass, ids] of this.markedForDeletion) {
+            const store = this.stores.get(entityClass)!;
+
+            for (const id of ids) {
+                store.remove(id);
+            }
+        }
     }
 }
 
@@ -59,6 +90,7 @@ class InMemoryCollection {
         private readonly entityClass: EntityClass,
         private readonly store: Store<any>,
         private readonly identityMap: Map<string, any> = new Map(),
+        private readonly markedForDeletion: Set<string>,
         private mappers: Map<
             EntityClass,
             { toDomain: (plain: any) => any; toPlain: (entity: any) => any }
@@ -66,6 +98,10 @@ class InMemoryCollection {
     ) {}
 
     async get(id: string): Promise<any | null> {
+        if (this.markedForDeletion.has(id)) {
+            return null;
+        }
+
         const item = this.identityMap.get(id);
 
         if (item) {
@@ -92,20 +128,11 @@ class InMemoryCollection {
     }
 
     async add(id: string, object: any): Promise<void> {
-        const mapper = this.mappers.get(this.entityClass);
-
-        if (!mapper) {
-            throw new Error(`Mapper for ${this.entityClass.name} not found`);
-        }
-
-        const plain = mapper.toPlain(object);
-
-        this.store.set(id, plain);
         this.identityMap.set(id, object);
     }
 
     async remove(id: string): Promise<void> {
-        this.store.remove(id);
         this.identityMap.delete(id);
+        this.markedForDeletion.add(id);
     }
 }
