@@ -9,11 +9,9 @@ import { VatRate } from '../../../domain/vat-rate/vat-rate';
 import { UnitOfWorkFactory } from '../../unit-of-work/unit-of-work.interface';
 
 export class CreateDraftInvoice {
-    constructor(
-        private readonly unitOfWorkFactory: UnitOfWorkFactory
-    ) {}
+    constructor(private readonly unitOfWorkFactory: UnitOfWorkFactory) {}
 
-    public execute(request: {
+    public async execute(request: {
         lineItems?: {
             description: string;
             price: { amount: string; currency: string };
@@ -52,7 +50,7 @@ export class CreateDraftInvoice {
                   };
         };
     }) {
-        using unitOfWork = this.unitOfWorkFactory.create();
+        const unitOfWork = await this.unitOfWorkFactory.start();
 
         const draftInvoice = DraftInvoice.create().unwrap();
 
@@ -103,10 +101,11 @@ export class CreateDraftInvoice {
             draftInvoice.addRecipient(recipient).unwrap();
         }
 
-        unitOfWork.collection(DraftInvoice).add(
-            draftInvoice.id.toString(),
-            draftInvoice
-        );
+        unitOfWork
+            .collection(DraftInvoice)
+            .add(draftInvoice.id.toString(), draftInvoice);
+
+        await unitOfWork.finish();
 
         return draftInvoice.toPlain();
     }
