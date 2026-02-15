@@ -7,11 +7,11 @@ import { Paypal } from '../../../domain/recipient/billing/paypal';
 import { Wire } from '../../../domain/recipient/billing/wire';
 import { Recipient, RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
 import { VatRate } from '../../../domain/vat-rate/vat-rate';
-import { DraftInvoiceCollection } from '../../collections/draft-invoice.collection';
+import { UnitOfWorkFactory } from '../../unit-of-work/unit-of-work.interface';
 
 export class CreateDraftInvoice {
     constructor(
-        private readonly draftInvoiceCollection: DraftInvoiceCollection,
+        private readonly unitOfWorkFactory: UnitOfWorkFactory,
         private readonly domainEventsBus: DomainEventsBus
     ) {}
 
@@ -54,6 +54,8 @@ export class CreateDraftInvoice {
                   };
         };
     }) {
+        using unitOfWork = this.unitOfWorkFactory.create();
+
         const draftInvoice = DraftInvoice.create().unwrap();
 
         if (request.lineItems) {
@@ -103,7 +105,7 @@ export class CreateDraftInvoice {
             draftInvoice.addRecipient(recipient).unwrap();
         }
 
-        this.draftInvoiceCollection.add(
+        unitOfWork.collection(DraftInvoice).add(
             draftInvoice.id.toString(),
             draftInvoice
         );

@@ -2,17 +2,18 @@ import { DomainEventsBus } from '../../../../building-blocks/domain-events-bus';
 import { APPLICATION_ERROR_CODE } from '../../../../building-blocks/errors/application/application-codes';
 import { ApplicationError } from '../../../../building-blocks/errors/application/application.error';
 import { CalendarDate } from '../../../domain/calendar-date/calendar-date';
+import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
 import { Issuer, ISSUER_TYPE } from '../../../domain/issuer/issuer';
 import { LineItem } from '../../../domain/line-item/line-item';
 import { Paypal } from '../../../domain/recipient/billing/paypal';
 import { Wire } from '../../../domain/recipient/billing/wire';
 import { Recipient, RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
 import { VatRate } from '../../../domain/vat-rate/vat-rate';
-import { DraftInvoiceCollection } from '../../collections/draft-invoice.collection';
+import { UnitOfWorkFactory } from '../../unit-of-work/unit-of-work.interface';
 
 export class UpdateDraftInvoice {
     constructor(
-        private readonly draftInvoiceCollection: DraftInvoiceCollection,
+        private readonly unitOfWorkFactory: UnitOfWorkFactory,
         private readonly domainEventsBus: DomainEventsBus
     ) {}
 
@@ -58,7 +59,9 @@ export class UpdateDraftInvoice {
             };
         }
     ) {
-        const draftInvoice = this.draftInvoiceCollection.get(id);
+        using unitOfWork = this.unitOfWorkFactory.create();
+
+        const draftInvoice = unitOfWork.collection(DraftInvoice).get(id);
 
         if (!draftInvoice) {
             throw new ApplicationError({
