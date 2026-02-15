@@ -6,7 +6,7 @@ import {
 import '../mappers/draft-invoice.mapper';
 import '../mappers/invoice.mapper';
 import { EntityClass, mappers, stores } from '../registry';
-import { Store } from '../store/store';
+import { OptimisticConcurrencyError, Store } from '../store/store';
 
 export class InMemoryUnitOfWorkFactory implements UnitOfWorkFactory {
     async start(): Promise<UnitOfWork> {
@@ -15,8 +15,11 @@ export class InMemoryUnitOfWorkFactory implements UnitOfWorkFactory {
 }
 
 class InMemoryUnitOfWork implements UnitOfWork {
+    private static readonly MAX_RETRIES = 5;
+
     private readonly stores: Map<EntityClass, Store<any>>;
     private readonly identityMaps: Map<EntityClass, Map<string, any>>;
+    private readonly readVersions: Map<EntityClass, Map<string, number | null>>;
     private readonly markedForDeletion: Map<EntityClass, Set<string>>;
     private readonly mappers: Map<
         EntityClass,
@@ -32,6 +35,7 @@ class InMemoryUnitOfWork implements UnitOfWork {
     ) {
         this.stores = stores;
         this.identityMaps = new Map();
+        this.readVersions = new Map();
         this.markedForDeletion = new Map();
         this.mappers = mappers;
     }
@@ -47,6 +51,10 @@ class InMemoryUnitOfWork implements UnitOfWork {
             this.identityMaps.set(entityClass, new Map());
         }
 
+        if (!this.readVersions.has(entityClass)) {
+            this.readVersions.set(entityClass, new Map());
+        }
+
         if (!this.markedForDeletion.has(entityClass)) {
             this.markedForDeletion.set(entityClass, new Set());
         }
@@ -55,15 +63,35 @@ class InMemoryUnitOfWork implements UnitOfWork {
             entityClass,
             store,
             this.identityMaps.get(entityClass)!,
+            this.readVersions.get(entityClass)!,
             this.markedForDeletion.get(entityClass)!,
             this.mappers
         ) as Collection<T>;
     }
 
     async finish(): Promise<void> {
+        for (let attempt = 1; attempt <= InMemoryUnitOfWork.MAX_RETRIES; attempt++) {
+            try {
+                this.commit();
+                return;
+            } catch (error) {
+                if (
+                    error instanceof OptimisticConcurrencyError &&
+                    attempt < InMemoryUnitOfWork.MAX_RETRIES
+                ) {
+                    continue;
+                }
+
+                throw error;
+            }
+        }
+    }
+
+    private commit(): void {
         for (const [entityClass, identityMap] of this.identityMaps) {
             const store = this.stores.get(entityClass)!;
             const mapper = this.mappers.get(entityClass)!;
+            const versions = this.readVersions.get(entityClass)!;
             const deletions = this.markedForDeletion.get(entityClass);
 
             for (const [id, entity] of identityMap) {
@@ -71,15 +99,23 @@ class InMemoryUnitOfWork implements UnitOfWork {
                     continue;
                 }
 
-                store.set(id, mapper.toPlain(entity));
+                const expectedVersion = versions.get(id) ?? null;
+                store.setIfVersion(id, mapper.toPlain(entity), expectedVersion);
             }
         }
 
         for (const [entityClass, ids] of this.markedForDeletion) {
             const store = this.stores.get(entityClass)!;
+            const versions = this.readVersions.get(entityClass)!;
 
             for (const id of ids) {
-                store.remove(id);
+                const expectedVersion = versions.get(id);
+
+                if (expectedVersion == null) {
+                    continue;
+                }
+
+                store.removeIfVersion(id, expectedVersion);
             }
         }
     }
@@ -90,6 +126,7 @@ class InMemoryCollection {
         private readonly entityClass: EntityClass,
         private readonly store: Store<any>,
         private readonly identityMap: Map<string, any> = new Map(),
+        private readonly readVersions: Map<string, number | null>,
         private readonly markedForDeletion: Set<string>,
         private mappers: Map<
             EntityClass,
@@ -108,9 +145,9 @@ class InMemoryCollection {
             return item;
         }
 
-        const plain = this.store.get(id);
+        const record = this.store.get(id);
 
-        if (!plain) {
+        if (!record) {
             return null;
         }
 
@@ -120,15 +157,17 @@ class InMemoryCollection {
             throw new Error(`Mapper for ${this.entityClass.name} not found`);
         }
 
-        const entity = mapper.toDomain(plain.value);
+        const entity = mapper.toDomain(record.value);
 
         this.identityMap.set(id, entity);
+        this.readVersions.set(id, record.version);
 
         return entity;
     }
 
     async add(id: string, object: any): Promise<void> {
         this.identityMap.set(id, object);
+        this.readVersions.set(id, null);
     }
 
     async remove(id: string): Promise<void> {
