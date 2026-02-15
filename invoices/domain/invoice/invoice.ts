@@ -63,7 +63,7 @@ export class Invoice implements PublishableEvents<InvoiceCreatedEvent> {
         return this.#recipient;
     }
 
-    private constructor(
+    protected constructor(
         id: Id,
         lineItems: LineItems,
         total: Money,

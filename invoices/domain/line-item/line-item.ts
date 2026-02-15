@@ -9,7 +9,7 @@ export class LineItem implements Equatable<LineItem> {
     #quantity: UnitQuantity;
     #total: Money;
 
-    private constructor(
+    protected constructor(
         description: UnitDescription,
         price: Money,
         quantity: UnitQuantity,

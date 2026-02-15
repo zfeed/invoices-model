@@ -18,7 +18,7 @@ export class Recipient implements Equatable<Recipient> {
     #taxResidenceCountry: Country;
     #billing: Paypal | Wire;
 
-    private constructor(
+    protected constructor(
         type: RECIPIENT_TYPE,
         name: string,
         address: string,

@@ -6,7 +6,7 @@ export class Paypal implements IBilling<'PAYPAL', { email: Email }> {
     public readonly type = 'PAYPAL' as const;
     public readonly data: { email: Email };
 
-    private constructor(data: { email: Email }) {
+    protected constructor(data: { email: Email }) {
         this.data = data;
     }
 

@@ -9,7 +9,7 @@ export class LineItems implements Equatable<ReadOnlyLineItems> {
     #items: LineItem[];
     #subtotal: Money;
 
-    private constructor(items: LineItem[], subtotal: Money) {
+    protected constructor(items: LineItem[], subtotal: Money) {
         this.#items = items;
         this.#subtotal = subtotal;
     }

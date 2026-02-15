@@ -4,7 +4,7 @@ import { checkEmailFormat } from './checks/check-email-format';
 export class Email implements Equatable<Email | string> {
     #value: string;
 
-    private constructor(value: string) {
+    protected constructor(value: string) {
         this.#value = value;
     }
 

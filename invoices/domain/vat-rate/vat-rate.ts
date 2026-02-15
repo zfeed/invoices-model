@@ -9,7 +9,7 @@ export class VatRate implements Equatable<VatRate> {
         return this.#value;
     }
 
-    private constructor(value: Numeric) {
+    protected constructor(value: Numeric) {
         this.#value = value;
     }
 

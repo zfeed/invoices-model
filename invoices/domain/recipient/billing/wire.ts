@@ -25,7 +25,7 @@ export class Wire
         bankCountry: string;
     };
 
-    private constructor(data: {
+    protected constructor(data: {
         swift: string;
         accountNumber: string;
         accountHolderName: string;

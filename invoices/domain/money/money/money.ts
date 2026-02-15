@@ -9,7 +9,7 @@ export class Money implements Equatable<Money> {
     #amount: Numeric;
     #currency: Currency;
 
-    private constructor(amount: Numeric, currency: Currency) {
+    protected constructor(amount: Numeric, currency: Currency) {
         this.#amount = amount;
         this.#currency = currency;
     }

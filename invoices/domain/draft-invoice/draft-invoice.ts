@@ -83,7 +83,7 @@ export class DraftInvoice
         return this.#recipient;
     }
 
-    private constructor(
+    protected constructor(
         id: Id,
         lineItems: LineItems | null = null,
         total: Money | null = null,

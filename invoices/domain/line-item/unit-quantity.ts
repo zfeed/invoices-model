@@ -5,7 +5,7 @@ import { checkUnitQuantity } from './checks/check-unit-quantity';
 export class UnitQuantity implements Equatable<UnitQuantity> {
     #value: Numeric;
 
-    private constructor(value: Numeric) {
+    protected constructor(value: Numeric) {
         this.#value = value;
     }
 

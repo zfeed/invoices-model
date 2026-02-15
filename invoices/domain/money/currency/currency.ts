@@ -4,7 +4,7 @@ import { checkCurrencyCode } from './checks/check-currency-code';
 export class Currency implements Equatable<Currency> {
     #code: string;
 
-    private constructor(code: string) {
+    protected constructor(code: string) {
         this.#code = code;
     }
 

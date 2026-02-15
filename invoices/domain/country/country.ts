@@ -4,7 +4,7 @@ import { checkCountryCode } from './checks/check-country-code';
 export class Country implements Equatable<Country> {
     #code: string;
 
-    private constructor(code: string) {
+    protected constructor(code: string) {
         this.#code = code;
     }
 

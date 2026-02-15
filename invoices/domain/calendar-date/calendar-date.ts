@@ -6,7 +6,7 @@ export class CalendarDate
 {
     #value: string;
 
-    private constructor(value: string) {
+    protected constructor(value: string) {
         this.#value = value;
     }
 

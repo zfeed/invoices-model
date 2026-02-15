@@ -4,7 +4,7 @@ import { ROUNDING } from './rounding';
 
 export class Numeric implements Equatable<Numeric>, Comparable<Numeric> {
     #value: Decimal;
-    private constructor(value: string) {
+    protected constructor(value: string) {
         this.#value = new Decimal(value);
     }
 

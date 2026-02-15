@@ -4,7 +4,7 @@ import { Equatable, Result } from '../../../building-blocks';
 export class Id implements Equatable<Id> {
     #value: string;
 
-    private constructor(value: string) {
+    protected constructor(value: string) {
         this.#value = value;
     }
 

@@ -3,7 +3,7 @@ import { Equatable } from '../../../building-blocks';
 export class UnitDescription implements Equatable<UnitDescription> {
     #value: string;
 
-    private constructor(value: string) {
+    protected constructor(value: string) {
         this.#value = value;
     }
 

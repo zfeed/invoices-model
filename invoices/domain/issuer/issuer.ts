@@ -13,7 +13,7 @@ export class Issuer implements Equatable<Issuer> {
     #taxId: string;
     #email: Email;
 
-    private constructor(
+    protected constructor(
         type: ISSUER_TYPE,
         name: string,
         address: string,
