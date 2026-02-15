@@ -5,8 +5,6 @@ export interface UnitOfWork {
 }
 
 export interface UnitOfWorkFactory {
-    collection<T>(entityClass: { prototype: T }): Collection<T>;
-
     start(): Promise<UnitOfWork>;
 }
 

@@ -1,8 +1,10 @@
 export class Store<T> {
-    private readonly data: Map<string, T> = new Map();
+    private readonly data: Map<string, { value: T }> = new Map();
 
     public set(key: string, value: T) {
-        this.data.set(key, value);
+        this.data.set(key, {
+            value,
+        });
     }
 
     public get(key: string) {
