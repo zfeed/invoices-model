@@ -1,33 +1,12 @@
-import { Collection } from '../collections/collection.interface';
+import { Collection } from './collection.interface';
 import { UnitOfWork, UnitOfWorkFactory } from './unit-of-work.interface';
 
 export class InMemoryUnitOfWork implements UnitOfWork {
-    #collections = new Map<{ prototype: unknown }, Collection<unknown>>();
-
-    register<T>(
-        entityClass: { prototype: T },
-        collection: Collection<T>
-    ): this {
-        this.#collections.set(entityClass, collection as Collection<unknown>);
-        return this;
-    }
-
     collection<T>(entityClass: { prototype: T }): Collection<T> {
-        const collection = this.#collections.get(entityClass);
-
-        if (!collection) {
-            throw new Error(
-                `Collection not registered for the given entity class`
-            );
-        }
-
-        return collection as Collection<T>;
+        throw new Error('Not implemented');
     }
 
-    [Symbol.dispose](): void {
-        // No-op for in-memory implementation.
-        // Database-backed implementations would commit the transaction here.
-    }
+    [Symbol.dispose](): void {}
 }
 
 export class InMemoryUnitOfWorkFactory implements UnitOfWorkFactory {

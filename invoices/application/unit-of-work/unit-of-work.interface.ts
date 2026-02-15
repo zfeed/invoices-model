@@ -1,4 +1,4 @@
-import { Collection } from '../collections/collection.interface';
+import { Collection } from './collection.interface';
 
 export interface UnitOfWork extends Disposable {
     collection<T>(entityClass: { prototype: T }): Collection<T>;

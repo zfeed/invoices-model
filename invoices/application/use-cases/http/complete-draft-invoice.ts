@@ -1,4 +1,3 @@
-import { DomainEventsBus } from '../../../../building-blocks/domain-events-bus';
 import { APPLICATION_ERROR_CODE } from '../../../../building-blocks/errors/application/application-codes';
 import { ApplicationError } from '../../../../building-blocks/errors/application/application.error';
 import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
@@ -7,8 +6,7 @@ import { UnitOfWorkFactory } from '../../unit-of-work/unit-of-work.interface';
 
 export class CompleteDraftInvoice {
     constructor(
-        private readonly unitOfWorkFactory: UnitOfWorkFactory,
-        private readonly domainEventsBus: DomainEventsBus
+        private readonly unitOfWorkFactory: UnitOfWorkFactory
     ) {}
 
     public execute(id: string) {
@@ -26,8 +24,6 @@ export class CompleteDraftInvoice {
         const invoice = draftInvoice.toInvoice().unwrap();
 
         unitOfWork.collection(Invoice).add(invoice.id.toString(), invoice);
-
-        this.domainEventsBus.publishEvents(draftInvoice, invoice);
 
         return invoice.toPlain();
     }
