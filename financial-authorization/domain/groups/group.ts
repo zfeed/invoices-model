@@ -34,3 +34,12 @@ export const createGroup = (data: GroupInput): Result<DomainError, Group> =>
         .flatMap(approvalReferencesExistingApprover)
         .flatMap(approvalsNotDuplicated)
         .map(buildGroup);
+
+export const approveGroup = (
+    group: Group,
+    approver: Approver
+): Result<DomainError, Group> =>
+    createGroup({
+        approvers: [...group.approvers, approver],
+        approvals: group.approvals,
+    });
