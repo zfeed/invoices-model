@@ -6,13 +6,18 @@ import { Paypal } from '../../invoices/domain/recipient/billing/paypal';
 import { Wire } from '../../invoices/domain/recipient/billing/wire';
 import { Recipient } from '../../invoices/domain/recipient/recipient';
 import { VatRate } from '../../invoices/domain/vat-rate/vat-rate';
+import { Mapper } from './mapper';
 
-export type DraftInvoicePlain = ReturnType<DraftInvoice['toPlain']>;
+type DraftInvoicePlain = ReturnType<DraftInvoice['toPlain']>;
 
-export const DraftInvoiceMapper = {
+class DraftInvoiceMapper extends Mapper<DraftInvoice, DraftInvoicePlain> {
+    entityClass() {
+        return DraftInvoice;
+    }
+
     toPlain(draftInvoice: DraftInvoice): DraftInvoicePlain {
         return draftInvoice.toPlain();
-    },
+    }
 
     toDomain(plain: DraftInvoicePlain): DraftInvoice {
         const draft = DraftInvoice.create().unwrap();
@@ -56,5 +61,7 @@ export const DraftInvoiceMapper = {
         }
 
         return draft;
-    },
-};
+    }
+}
+
+new DraftInvoiceMapper();

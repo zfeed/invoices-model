@@ -3,13 +3,10 @@ import {
     UnitOfWork,
     UnitOfWorkFactory,
 } from '../../invoices/application/unit-of-work/unit-of-work.interface';
+import { EntityClass, stores, mappers } from '../registry';
+import '../mappers/draft-invoice.mapper';
+import '../mappers/invoice.mapper';
 import { Store } from '../store/store';
-
-const stores = new Map<new (...args: any[]) => any, Store<any>>();
-const mappers = new Map<
-    new (...args: any[]) => any,
-    { toDomain: (plain: any) => any; toPlain: (entity: any) => any }
->();
 
 export class InMemoryUnitOfWorkFactory implements UnitOfWorkFactory {
     async start(): Promise<UnitOfWork> {
@@ -18,17 +15,17 @@ export class InMemoryUnitOfWorkFactory implements UnitOfWorkFactory {
 }
 
 class InMemoryUnitOfWork implements UnitOfWork {
-    private readonly stores: Map<new (...args: any[]) => any, Store<any>>;
+    private readonly stores: Map<EntityClass, Store<any>>;
     private readonly identityMap: Map<string, any>;
     private readonly mappers: Map<
-        new (...args: any[]) => any,
+        EntityClass,
         { toDomain: (plain: any) => any; toPlain: (entity: any) => any }
     >;
 
     constructor(
-        stores: Map<new (...args: any[]) => any, Store<any>>,
+        stores: Map<EntityClass, Store<any>>,
         mappers: Map<
-            new (...args: any[]) => any,
+            EntityClass,
             { toDomain: (plain: any) => any; toPlain: (entity: any) => any }
         >
     ) {
@@ -37,7 +34,7 @@ class InMemoryUnitOfWork implements UnitOfWork {
         this.mappers = mappers;
     }
 
-    collection<T>(entityClass: new (...args: any[]) => any): Collection<T> {
+    collection<T>(entityClass: EntityClass): Collection<T> {
         const store = this.stores.get(entityClass);
 
         if (!store) {
@@ -59,11 +56,11 @@ class InMemoryUnitOfWork implements UnitOfWork {
 
 class InMemoryCollection {
     constructor(
-        private readonly entityClass: new (...args: any[]) => any,
+        private readonly entityClass: EntityClass,
         private readonly store: Store<any>,
         private readonly identityMap: Map<string, any> = new Map(),
         private mappers: Map<
-            new (...args: any[]) => any,
+            EntityClass,
             { toDomain: (plain: any) => any; toPlain: (entity: any) => any }
         >
     ) {}

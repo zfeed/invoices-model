@@ -7,13 +7,18 @@ import { Paypal } from '../../invoices/domain/recipient/billing/paypal';
 import { Wire } from '../../invoices/domain/recipient/billing/wire';
 import { Recipient } from '../../invoices/domain/recipient/recipient';
 import { VatRate } from '../../invoices/domain/vat-rate/vat-rate';
+import { Mapper } from './mapper';
 
-export type InvoicePlain = ReturnType<Invoice['toPlain']>;
+type InvoicePlain = ReturnType<Invoice['toPlain']>;
 
-export const InvoiceMapper = {
+class InvoiceMapper extends Mapper<Invoice, InvoicePlain> {
+    entityClass() {
+        return Invoice;
+    }
+
     toPlain(invoice: Invoice): InvoicePlain {
         return invoice.toPlain();
-    },
+    }
 
     toDomain(plain: InvoicePlain): Invoice {
         const items = plain.lineItems.items.map((item) =>
@@ -45,5 +50,7 @@ export const InvoiceMapper = {
             vatRate,
             recipient,
         }).unwrap();
-    },
-};
+    }
+}
+
+new InvoiceMapper();
