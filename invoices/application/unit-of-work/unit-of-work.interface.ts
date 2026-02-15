@@ -1,11 +1,9 @@
 export interface UnitOfWork {
     collection<T>(entityClass: { prototype: T }): Collection<T>;
-
-    finish(): Promise<void>;
 }
 
 export interface UnitOfWorkFactory {
-    start(): Promise<UnitOfWork>;
+    start(callback: (uow: UnitOfWork) => Promise<void>): Promise<void>;
 }
 
 export interface Collection<T> {

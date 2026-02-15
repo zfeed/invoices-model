@@ -9,8 +9,10 @@ import { EntityClass, mappers, stores } from '../registry';
 import { OptimisticConcurrencyError, Store } from '../store/store';
 
 export class InMemoryUnitOfWorkFactory implements UnitOfWorkFactory {
-    async start(): Promise<UnitOfWork> {
-        return new InMemoryUnitOfWork(stores, mappers);
+    async start(callback: (uow: UnitOfWork) => Promise<void>): Promise<void> {
+        const uow = new InMemoryUnitOfWork(stores, mappers);
+        await callback(uow);
+        await uow.finish();
     }
 }
 
