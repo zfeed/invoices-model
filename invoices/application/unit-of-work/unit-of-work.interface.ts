@@ -3,7 +3,7 @@ export interface UnitOfWork {
 }
 
 export interface UnitOfWorkFactory {
-    start(callback: (uow: UnitOfWork) => Promise<void>): Promise<void>;
+    start<T>(callback: (uow: UnitOfWork) => Promise<T>): Promise<T>;
 }
 
 export interface Collection<T> {

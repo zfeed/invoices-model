@@ -9,10 +9,11 @@ import { EntityClass, mappers, stores } from '../registry';
 import { OptimisticConcurrencyError, Store } from '../store/store';
 
 export class InMemoryUnitOfWorkFactory implements UnitOfWorkFactory {
-    async start(callback: (uow: UnitOfWork) => Promise<void>): Promise<void> {
+    async start<T>(callback: (uow: UnitOfWork) => Promise<T>): Promise<T> {
         const uow = new InMemoryUnitOfWork(stores, mappers);
-        await callback(uow);
+        const result = await callback(uow);
         await uow.finish();
+        return result;
     }
 }
 
@@ -72,7 +73,11 @@ class InMemoryUnitOfWork implements UnitOfWork {
     }
 
     async finish(): Promise<void> {
-        for (let attempt = 1; attempt <= InMemoryUnitOfWork.MAX_RETRIES; attempt++) {
+        for (
+            let attempt = 1;
+            attempt <= InMemoryUnitOfWork.MAX_RETRIES;
+            attempt++
+        ) {
             try {
                 this.commit();
                 return;
@@ -170,6 +175,7 @@ class InMemoryCollection {
     async add(id: string, object: any): Promise<void> {
         this.identityMap.set(id, object);
         this.readVersions.set(id, null);
+        this.markedForDeletion.delete(id);
     }
 
     async remove(id: string): Promise<void> {
