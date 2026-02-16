@@ -1,13 +1,13 @@
-import { Id } from '../../invoices/domain/id/id';
+import { Id } from '../../core/invoices/domain/id/id';
 import {
     Collection,
     UnitOfWork,
     UnitOfWorkFactory,
-} from '../../invoices/application/unit-of-work/unit-of-work.interface';
+} from '../../core/invoices/application/unit-of-work/unit-of-work.interface';
 import '../mappers/draft-invoice.mapper';
 import '../mappers/invoice.mapper';
 import { EntityClass, mappers, stores } from '../registry';
-import { OptimisticConcurrencyError } from '../../invoices/application/unit-of-work/optimistic-concurrency.error';
+import { OptimisticConcurrencyError } from '../../core/invoices/application/unit-of-work/optimistic-concurrency.error';
 import { Store } from '../store/store';
 
 export class InMemoryUnitOfWorkFactory implements UnitOfWorkFactory {

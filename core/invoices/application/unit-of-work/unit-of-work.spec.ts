@@ -87,7 +87,7 @@ describe('UnitOfWork contract (InMemory)', () => {
                 expect(result!.lineItems).not.toBeNull();
                 expect(result!.lineItems!.length).toBe(1);
                 expect(
-                    result!.lineItems!.find((item) =>
+                    result!.lineItems!.find((item: LineItem) =>
                         item.description.equals(
                             UnitDescription.create('Consulting')
                         )

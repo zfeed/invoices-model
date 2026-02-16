@@ -1,12 +1,12 @@
-import { CalendarDate } from '../../invoices/domain/calendar-date/calendar-date';
-import { DraftInvoice } from '../../invoices/domain/draft-invoice/draft-invoice';
-import { Id } from '../../invoices/domain/id/id';
-import { Issuer } from '../../invoices/domain/issuer/issuer';
-import { LineItem } from '../../invoices/domain/line-item/line-item';
-import { Paypal } from '../../invoices/domain/recipient/billing/paypal';
-import { Wire } from '../../invoices/domain/recipient/billing/wire';
-import { Recipient } from '../../invoices/domain/recipient/recipient';
-import { VatRate } from '../../invoices/domain/vat-rate/vat-rate';
+import { CalendarDate } from '../../core/invoices/domain/calendar-date/calendar-date';
+import { DraftInvoice } from '../../core/invoices/domain/draft-invoice/draft-invoice';
+import { Id } from '../../core/invoices/domain/id/id';
+import { Issuer } from '../../core/invoices/domain/issuer/issuer';
+import { LineItem } from '../../core/invoices/domain/line-item/line-item';
+import { Paypal } from '../../core/invoices/domain/recipient/billing/paypal';
+import { Wire } from '../../core/invoices/domain/recipient/billing/wire';
+import { Recipient } from '../../core/invoices/domain/recipient/recipient';
+import { VatRate } from '../../core/invoices/domain/vat-rate/vat-rate';
 import { Mapper } from './mapper';
 
 type DraftInvoicePlain = ReturnType<DraftInvoice['toPlain']>;

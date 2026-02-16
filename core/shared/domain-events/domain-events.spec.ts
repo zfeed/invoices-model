@@ -1,6 +1,6 @@
-import { DomainEvent } from '../../../../building-blocks/events/domain-event';
-import { PublishableEvents } from '../../../../building-blocks/events/event-publisher.interface';
-import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
+import { DomainEvent } from '../../../building-blocks/events/domain-event';
+import { PublishableEvents } from '../../../building-blocks/events/event-publisher.interface';
+import { InMemoryDomainEvents } from '../../../infrastructure/domain-events/in-memory-domain-events';
 
 class OrderPlacedEvent extends DomainEvent<{ orderId: string }> {
     constructor(orderId: string) {
@@ -30,12 +30,12 @@ describe('DomainEvents contract (InMemory)', () => {
 
             domainEvents.subscribeToEvent(OrderPlacedEvent, handler);
             domainEvents.publishEvents(
-                new FakePublisher(new OrderPlacedEvent('order-1')),
+                new FakePublisher(new OrderPlacedEvent('order-1'))
             );
 
             expect(handler).toHaveBeenCalledTimes(1);
             expect(handler).toHaveBeenCalledWith(
-                expect.objectContaining({ data: { orderId: 'order-1' } }),
+                expect.objectContaining({ data: { orderId: 'order-1' } })
             );
         });
 
@@ -45,7 +45,7 @@ describe('DomainEvents contract (InMemory)', () => {
 
             domainEvents.subscribeToEvent(OrderPlacedEvent, handler);
             domainEvents.publishEvents(
-                new FakePublisher(new OrderCancelledEvent('order-1')),
+                new FakePublisher(new OrderCancelledEvent('order-1'))
             );
 
             expect(handler).not.toHaveBeenCalled();
@@ -59,7 +59,7 @@ describe('DomainEvents contract (InMemory)', () => {
             domainEvents.subscribeToEvent(OrderPlacedEvent, handler1);
             domainEvents.subscribeToEvent(OrderPlacedEvent, handler2);
             domainEvents.publishEvents(
-                new FakePublisher(new OrderPlacedEvent('order-1')),
+                new FakePublisher(new OrderPlacedEvent('order-1'))
             );
 
             expect(handler1).toHaveBeenCalledTimes(1);
@@ -74,8 +74,8 @@ describe('DomainEvents contract (InMemory)', () => {
             domainEvents.publishEvents(
                 new FakePublisher(
                     new OrderPlacedEvent('order-1'),
-                    new OrderPlacedEvent('order-2'),
-                ),
+                    new OrderPlacedEvent('order-2')
+                )
             );
 
             expect(handler).toHaveBeenCalledTimes(2);
@@ -88,7 +88,7 @@ describe('DomainEvents contract (InMemory)', () => {
             domainEvents.subscribeToEvent(OrderPlacedEvent, handler);
             domainEvents.publishEvents(
                 new FakePublisher(new OrderPlacedEvent('order-1')),
-                new FakePublisher(new OrderPlacedEvent('order-2')),
+                new FakePublisher(new OrderPlacedEvent('order-2'))
             );
 
             expect(handler).toHaveBeenCalledTimes(2);
@@ -100,21 +100,24 @@ describe('DomainEvents contract (InMemory)', () => {
             const cancelledHandler = jest.fn();
 
             domainEvents.subscribeToEvent(OrderPlacedEvent, placedHandler);
-            domainEvents.subscribeToEvent(OrderCancelledEvent, cancelledHandler);
+            domainEvents.subscribeToEvent(
+                OrderCancelledEvent,
+                cancelledHandler
+            );
             domainEvents.publishEvents(
                 new FakePublisher(
                     new OrderPlacedEvent('order-1'),
-                    new OrderCancelledEvent('order-2'),
-                ),
+                    new OrderCancelledEvent('order-2')
+                )
             );
 
             expect(placedHandler).toHaveBeenCalledTimes(1);
             expect(placedHandler).toHaveBeenCalledWith(
-                expect.objectContaining({ data: { orderId: 'order-1' } }),
+                expect.objectContaining({ data: { orderId: 'order-1' } })
             );
             expect(cancelledHandler).toHaveBeenCalledTimes(1);
             expect(cancelledHandler).toHaveBeenCalledWith(
-                expect.objectContaining({ data: { orderId: 'order-2' } }),
+                expect.objectContaining({ data: { orderId: 'order-2' } })
             );
         });
 
@@ -123,8 +126,8 @@ describe('DomainEvents contract (InMemory)', () => {
 
             expect(() =>
                 domainEvents.publishEvents(
-                    new FakePublisher(new OrderPlacedEvent('order-1')),
-                ),
+                    new FakePublisher(new OrderPlacedEvent('order-1'))
+                )
             ).not.toThrow();
         });
 

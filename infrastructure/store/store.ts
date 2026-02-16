@@ -1,4 +1,4 @@
-import { OptimisticConcurrencyError } from '../../invoices/application/unit-of-work/optimistic-concurrency.error';
+import { OptimisticConcurrencyError } from '../../core/invoices/application/unit-of-work/optimistic-concurrency.error';
 
 export { OptimisticConcurrencyError };
 
