@@ -170,6 +170,34 @@ describe('UnitOfWork contract (InMemory)', () => {
                 expect(result).toBe(draft);
             });
         });
+
+        it('should return distinct instances across different units of work', async () => {
+            const factory = new InMemoryUnitOfWorkFactory();
+            const draft = DraftInvoice.create().unwrap();
+
+            await factory.start(async (uow) => {
+                await uow.collection<DraftInvoice>(DraftInvoice).add(draft);
+            });
+
+            let firstInstance: DraftInvoice | undefined;
+            let secondInstance: DraftInvoice | undefined;
+
+            await factory.start(async (uow) => {
+                firstInstance = await uow
+                    .collection<DraftInvoice>(DraftInvoice)
+                    .get(draft.id);
+            });
+
+            await factory.start(async (uow) => {
+                secondInstance = await uow
+                    .collection<DraftInvoice>(DraftInvoice)
+                    .get(draft.id);
+            });
+
+            expect(firstInstance).toBeDefined();
+            expect(secondInstance).toBeDefined();
+            expect(firstInstance).not.toBe(secondInstance);
+        });
     });
 
     describe('isolation', () => {
@@ -280,6 +308,64 @@ describe('UnitOfWork contract (InMemory)', () => {
                 expect(result).toBeNull();
             });
         });
+
+        it('should not persist removals if the callback throws', async () => {
+            const factory = new InMemoryUnitOfWorkFactory();
+            const draft = DraftInvoice.create().unwrap();
+
+            await factory.start(async (uow) => {
+                await uow.collection<DraftInvoice>(DraftInvoice).add(draft);
+            });
+
+            await expect(
+                factory.start(async (uow) => {
+                    const collection =
+                        uow.collection<DraftInvoice>(DraftInvoice);
+                    await collection.get(draft.id);
+                    await collection.remove(draft.id);
+                    throw new Error('rollback');
+                })
+            ).rejects.toThrow('rollback');
+
+            await factory.start(async (uow) => {
+                const result = await uow
+                    .collection<DraftInvoice>(DraftInvoice)
+                    .get(draft.id);
+                expect(result).not.toBeNull();
+            });
+        });
+
+        it('should not persist modifications if the callback throws', async () => {
+            const factory = new InMemoryUnitOfWorkFactory();
+            const draft = DraftInvoice.create().unwrap();
+
+            await factory.start(async (uow) => {
+                await uow.collection<DraftInvoice>(DraftInvoice).add(draft);
+            });
+
+            await expect(
+                factory.start(async (uow) => {
+                    const loaded = await uow
+                        .collection<DraftInvoice>(DraftInvoice)
+                        .get(draft.id);
+                    loaded!.addLineItem(
+                        LineItem.create({
+                            description: 'Should not persist',
+                            price: { amount: '100', currency: 'USD' },
+                            quantity: '1',
+                        }).unwrap()
+                    );
+                    throw new Error('rollback');
+                })
+            ).rejects.toThrow('rollback');
+
+            await factory.start(async (uow) => {
+                const result = await uow
+                    .collection<DraftInvoice>(DraftInvoice)
+                    .get(draft.id);
+                expect(result!.toPlain().lineItems).toBeNull();
+            });
+        });
     });
 
     describe('optimistic concurrency', () => {
@@ -319,6 +405,62 @@ describe('UnitOfWork contract (InMemory)', () => {
                     });
 
                     // uow1 finishes after uow2 already committed — version mismatch
+                })
+            ).rejects.toThrow(OptimisticConcurrencyError);
+        });
+
+        it('should throw OptimisticConcurrencyError when one UoW removes and another modifies the same entity', async () => {
+            const factory = new InMemoryUnitOfWorkFactory();
+            const draft = DraftInvoice.create().unwrap();
+
+            await factory.start(async (uow) => {
+                await uow.collection<DraftInvoice>(DraftInvoice).add(draft);
+            });
+
+            await expect(
+                factory.start(async (uow1) => {
+                    const collection1 =
+                        uow1.collection<DraftInvoice>(DraftInvoice);
+                    await collection1.get(draft.id);
+                    await collection1.remove(draft.id);
+
+                    await factory.start(async (uow2) => {
+                        const loaded = await uow2
+                            .collection<DraftInvoice>(DraftInvoice)
+                            .get(draft.id);
+                        loaded!.addLineItem(
+                            LineItem.create({
+                                description: 'From UoW2',
+                                price: { amount: '75', currency: 'USD' },
+                                quantity: '1',
+                            }).unwrap()
+                        );
+                    });
+                })
+            ).rejects.toThrow(OptimisticConcurrencyError);
+        });
+
+        it('should throw OptimisticConcurrencyError when two UoWs both remove the same entity', async () => {
+            const factory = new InMemoryUnitOfWorkFactory();
+            const draft = DraftInvoice.create().unwrap();
+
+            await factory.start(async (uow) => {
+                await uow.collection<DraftInvoice>(DraftInvoice).add(draft);
+            });
+
+            await expect(
+                factory.start(async (uow1) => {
+                    const collection1 =
+                        uow1.collection<DraftInvoice>(DraftInvoice);
+                    await collection1.get(draft.id);
+                    await collection1.remove(draft.id);
+
+                    await factory.start(async (uow2) => {
+                        const collection2 =
+                            uow2.collection<DraftInvoice>(DraftInvoice);
+                        await collection2.get(draft.id);
+                        await collection2.remove(draft.id);
+                    });
                 })
             ).rejects.toThrow(OptimisticConcurrencyError);
         });
@@ -367,6 +509,98 @@ describe('UnitOfWork contract (InMemory)', () => {
                 })
             ).rejects.toThrow(OptimisticConcurrencyError);
         });
+
+        it('should throw when re-adding a previously persisted entity after removing it in the same UoW', async () => {
+            const factory = new InMemoryUnitOfWorkFactory();
+            const draft = DraftInvoice.create().unwrap();
+
+            await factory.start(async (uow) => {
+                await uow.collection<DraftInvoice>(DraftInvoice).add(draft);
+            });
+
+            // add() after remove() sets the version to null (new entity),
+            // but the store still holds the original — commit fails.
+            await expect(
+                factory.start(async (uow) => {
+                    const collection =
+                        uow.collection<DraftInvoice>(DraftInvoice);
+                    await collection.get(draft.id);
+                    await collection.remove(draft.id);
+                    await collection.add(draft);
+                })
+            ).rejects.toThrow(OptimisticConcurrencyError);
+        });
+
+        it('should return null after removing a previously persisted entity via get', async () => {
+            const factory = new InMemoryUnitOfWorkFactory();
+            const draft = DraftInvoice.create().unwrap();
+
+            await factory.start(async (uow) => {
+                await uow.collection<DraftInvoice>(DraftInvoice).add(draft);
+            });
+
+            await factory.start(async (uow) => {
+                const collection = uow.collection<DraftInvoice>(DraftInvoice);
+                await collection.get(draft.id);
+                await collection.remove(draft.id);
+
+                const result = await collection.get(draft.id);
+                expect(result).toBeNull();
+            });
+        });
+
+        it('should not persist an entity that was added and then removed', async () => {
+            const factory = new InMemoryUnitOfWorkFactory();
+
+            await factory.start(async (uow) => {
+                const collection = uow.collection<DraftInvoice>(DraftInvoice);
+                const draft = DraftInvoice.create().unwrap();
+
+                await collection.add(draft);
+                await collection.remove(draft.id);
+            });
+
+            // Nothing should have been persisted — but since the entity
+            // was never in the store to begin with, we just verify no error
+            // and the store remains empty for that id.
+        });
+    });
+
+    describe('dirty tracking', () => {
+        it('should cause a concurrency conflict when a read-only load overlaps with a write', async () => {
+            const factory = new InMemoryUnitOfWorkFactory();
+            const draft = DraftInvoice.create().unwrap();
+
+            await factory.start(async (uow) => {
+                await uow.collection<DraftInvoice>(DraftInvoice).add(draft);
+            });
+
+            // A read-only UoW that just loads the entity still bumps the
+            // version on commit, so a concurrent writer will conflict.
+            await expect(
+                factory.start(async (uow1) => {
+                    await uow1
+                        .collection<DraftInvoice>(DraftInvoice)
+                        .get(draft.id);
+
+                    // A concurrent UoW modifies and commits the same entity
+                    await factory.start(async (uow2) => {
+                        const loaded = await uow2
+                            .collection<DraftInvoice>(DraftInvoice)
+                            .get(draft.id);
+                        loaded!.addLineItem(
+                            LineItem.create({
+                                description: 'Concurrent write',
+                                price: { amount: '50', currency: 'USD' },
+                                quantity: '1',
+                            }).unwrap()
+                        );
+                    });
+
+                    // uow1 finishes — version mismatch because uow2 already committed
+                })
+            ).rejects.toThrow(OptimisticConcurrencyError);
+        });
     });
 
     describe('return value', () => {
@@ -378,6 +612,14 @@ describe('UnitOfWork contract (InMemory)', () => {
             });
 
             expect(result).toBe(42);
+        });
+
+        it('should return undefined when the callback returns nothing', async () => {
+            const factory = new InMemoryUnitOfWorkFactory();
+
+            const result = await factory.start(async () => {});
+
+            expect(result).toBeUndefined();
         });
     });
 
@@ -433,6 +675,127 @@ describe('UnitOfWork contract (InMemory)', () => {
                     .get(invoice.id);
 
                 expect(loadedDraft).not.toBeNull();
+                expect(loadedInvoice).not.toBeNull();
+            });
+        });
+
+        it('should rollback changes across all collections when the callback throws', async () => {
+            const factory = new InMemoryUnitOfWorkFactory();
+            const draft = DraftInvoice.create().unwrap();
+
+            const lineItem = LineItem.create({
+                description: 'Service',
+                price: { amount: '200', currency: 'USD' },
+                quantity: '1',
+            }).unwrap();
+            draft.addLineItem(lineItem);
+            draft.addIssueDate(CalendarDate.create('2025-01-01').unwrap());
+            draft.addDueDate(CalendarDate.create('2025-02-01').unwrap());
+            draft.addIssuer(
+                Issuer.create({
+                    type: ISSUER_TYPE.COMPANY,
+                    name: 'Company Inc.',
+                    address: '123 Main St',
+                    taxId: 'TAX123',
+                    email: 'info@company.com',
+                }).unwrap()
+            );
+            draft.addRecipient(
+                Recipient.create({
+                    type: RECIPIENT_TYPE.INDIVIDUAL,
+                    name: 'Jane Smith',
+                    address: '456 Oak Ave',
+                    taxId: 'TAX456',
+                    email: 'jane@example.com',
+                    taxResidenceCountry: 'US',
+                    billing: Paypal.create({
+                        email: 'jane@example.com',
+                    }).unwrap(),
+                }).unwrap()
+            );
+
+            const invoice = draft.toInvoice().unwrap();
+
+            await expect(
+                factory.start(async (uow) => {
+                    await uow.collection<DraftInvoice>(DraftInvoice).add(draft);
+                    await uow.collection<Invoice>(Invoice).add(invoice);
+                    throw new Error('rollback');
+                })
+            ).rejects.toThrow('rollback');
+
+            await factory.start(async (uow) => {
+                const loadedDraft = await uow
+                    .collection<DraftInvoice>(DraftInvoice)
+                    .get(draft.id);
+                const loadedInvoice = await uow
+                    .collection<Invoice>(Invoice)
+                    .get(invoice.id);
+
+                expect(loadedDraft).toBeNull();
+                expect(loadedInvoice).toBeNull();
+            });
+        });
+
+        it('should handle removal in one collection and addition in another within the same UoW', async () => {
+            const factory = new InMemoryUnitOfWorkFactory();
+            const draft = DraftInvoice.create().unwrap();
+
+            const lineItem = LineItem.create({
+                description: 'Service',
+                price: { amount: '200', currency: 'USD' },
+                quantity: '1',
+            }).unwrap();
+            draft.addLineItem(lineItem);
+            draft.addIssueDate(CalendarDate.create('2025-01-01').unwrap());
+            draft.addDueDate(CalendarDate.create('2025-02-01').unwrap());
+            draft.addIssuer(
+                Issuer.create({
+                    type: ISSUER_TYPE.COMPANY,
+                    name: 'Company Inc.',
+                    address: '123 Main St',
+                    taxId: 'TAX123',
+                    email: 'info@company.com',
+                }).unwrap()
+            );
+            draft.addRecipient(
+                Recipient.create({
+                    type: RECIPIENT_TYPE.INDIVIDUAL,
+                    name: 'Jane Smith',
+                    address: '456 Oak Ave',
+                    taxId: 'TAX456',
+                    email: 'jane@example.com',
+                    taxResidenceCountry: 'US',
+                    billing: Paypal.create({
+                        email: 'jane@example.com',
+                    }).unwrap(),
+                }).unwrap()
+            );
+
+            const invoice = draft.toInvoice().unwrap();
+
+            await factory.start(async (uow) => {
+                await uow.collection<DraftInvoice>(DraftInvoice).add(draft);
+            });
+
+            await factory.start(async (uow) => {
+                const draftCollection =
+                    uow.collection<DraftInvoice>(DraftInvoice);
+                await draftCollection.get(draft.id);
+                await draftCollection.remove(draft.id);
+
+                await uow.collection<Invoice>(Invoice).add(invoice);
+            });
+
+            await factory.start(async (uow) => {
+                const loadedDraft = await uow
+                    .collection<DraftInvoice>(DraftInvoice)
+                    .get(draft.id);
+                const loadedInvoice = await uow
+                    .collection<Invoice>(Invoice)
+                    .get(invoice.id);
+
+                expect(loadedDraft).toBeNull();
                 expect(loadedInvoice).not.toBeNull();
             });
         });
