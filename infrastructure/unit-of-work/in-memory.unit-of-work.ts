@@ -182,8 +182,8 @@ class InMemoryCollection {
         this.markedForDeletion.delete(key);
     }
 
-    async remove(id: Id): Promise<void> {
-        const key = id.toString();
+    async remove(entity: { id: Id }): Promise<void> {
+        const key = entity.id.toString();
         this.identityMap.delete(key);
         this.markedForDeletion.add(key);
     }

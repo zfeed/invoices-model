@@ -86,6 +86,7 @@ export class Invoice implements PublishableEvents<InvoiceCreatedEvent> {
     }
 
     static create(options: {
+        id: Id;
         lineItems: LineItems;
         issueDate: CalendarDate;
         dueDate: CalendarDate;
@@ -110,7 +111,7 @@ export class Invoice implements PublishableEvents<InvoiceCreatedEvent> {
             ? total.subtract(options.lineItems.subtotal).unwrap()
             : null;
         const invoice = new Invoice(
-            Id.create().unwrap(),
+            options.id,
             options.lineItems,
             total,
             vatRate,

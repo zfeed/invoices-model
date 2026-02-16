@@ -1,4 +1,5 @@
 import { CalendarDate } from '../calendar-date/calendar-date';
+import { Id } from '../id/id';
 import { Issuer, ISSUER_TYPE } from '../issuer/issuer';
 import { LineItem } from '../line-item/line-item';
 import { LineItems } from '../line-items/line-items';
@@ -56,6 +57,7 @@ describe('Invoice', () => {
         const vatAmount = Money.create('20', 'USD').unwrap();
 
         const invoice = Invoice.create({
+            id: Id.create().unwrap(),
             issueDate: issueDate,
             dueDate: dueDate,
             lineItems: lineItems,
@@ -189,6 +191,7 @@ describe('Invoice', () => {
         const vatRate = VatRate.create('10').unwrap();
 
         const invoice = Invoice.create({
+            id: Id.create().unwrap(),
             issueDate: issueDate,
             dueDate: dueDate,
             lineItems: lineItems,

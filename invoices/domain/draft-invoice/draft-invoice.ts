@@ -122,6 +122,7 @@ export class DraftInvoice
         }
 
         const result = Invoice.create({
+            id: Id.create().unwrap(),
             lineItems: this.#lineItems!,
             issueDate: this.#issueDate!,
             vatRate: this.#vatRate!,
@@ -276,8 +277,8 @@ export class DraftInvoice
         this.#vatAmount = vatAmount;
     }
 
-    static create() {
-        const draftInvoice = new DraftInvoice(Id.create().unwrap());
+    static create(id: Id) {
+        const draftInvoice = new DraftInvoice(id);
 
         draftInvoice.#events.push(
             new DraftInvoiceCreatedEvent(draftInvoice.toPlain())

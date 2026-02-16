@@ -1,5 +1,6 @@
 import { CalendarDate } from '../../../domain/calendar-date/calendar-date';
 import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
+import { Id } from '../../../domain/id/id';
 import { Issuer, ISSUER_TYPE } from '../../../domain/issuer/issuer';
 import { LineItem } from '../../../domain/line-item/line-item';
 import { Paypal } from '../../../domain/recipient/billing/paypal';
@@ -47,7 +48,7 @@ export class CalculateDraftInvoice {
                   };
         };
     }) {
-        const draftInvoice = DraftInvoice.create().unwrap();
+        const draftInvoice = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
         if (request.lineItems) {
             request.lineItems

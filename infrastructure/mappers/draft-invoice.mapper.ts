@@ -1,5 +1,6 @@
 import { CalendarDate } from '../../invoices/domain/calendar-date/calendar-date';
 import { DraftInvoice } from '../../invoices/domain/draft-invoice/draft-invoice';
+import { Id } from '../../invoices/domain/id/id';
 import { Issuer } from '../../invoices/domain/issuer/issuer';
 import { LineItem } from '../../invoices/domain/line-item/line-item';
 import { Paypal } from '../../invoices/domain/recipient/billing/paypal';
@@ -20,7 +21,7 @@ class DraftInvoiceMapper extends Mapper<DraftInvoice, DraftInvoicePlain> {
     }
 
     toDomain(plain: DraftInvoicePlain): DraftInvoice {
-        const draft = DraftInvoice.create().unwrap();
+        const draft = DraftInvoice.create(Id.fromString(plain.id)).unwrap();
 
         if (plain.lineItems) {
             for (const item of plain.lineItems.items) {
@@ -45,7 +46,9 @@ class DraftInvoiceMapper extends Mapper<DraftInvoice, DraftInvoicePlain> {
         if (plain.recipient) {
             const billing =
                 plain.recipient.billing.type === 'PAYPAL'
-                    ? Paypal.create({ email: plain.recipient.billing.data.email }).unwrap()
+                    ? Paypal.create({
+                          email: plain.recipient.billing.data.email,
+                      }).unwrap()
                     : Wire.create(plain.recipient.billing.data).unwrap();
             draft.addRecipient(
                 Recipient.create({ ...plain.recipient, billing }).unwrap()

@@ -1,4 +1,5 @@
 import { CalendarDate } from '../../invoices/domain/calendar-date/calendar-date';
+import { Id } from '../../invoices/domain/id/id';
 import { Invoice } from '../../invoices/domain/invoice/invoice';
 import { Issuer } from '../../invoices/domain/issuer/issuer';
 import { LineItem } from '../../invoices/domain/line-item/line-item';
@@ -29,13 +30,17 @@ class InvoiceMapper extends Mapper<Invoice, InvoicePlain> {
             }).unwrap()
         );
         const lineItems = LineItems.create({ items }).unwrap();
-        const vatRate = plain.vatRate ? VatRate.create(plain.vatRate).unwrap() : null;
+        const vatRate = plain.vatRate
+            ? VatRate.create(plain.vatRate).unwrap()
+            : null;
         const issueDate = CalendarDate.create(plain.issueDate).unwrap();
         const dueDate = CalendarDate.create(plain.dueDate).unwrap();
         const issuer = Issuer.create(plain.issuer).unwrap();
         const billing =
             plain.recipient.billing.type === 'PAYPAL'
-                ? Paypal.create({ email: plain.recipient.billing.data.email }).unwrap()
+                ? Paypal.create({
+                      email: plain.recipient.billing.data.email,
+                  }).unwrap()
                 : Wire.create(plain.recipient.billing.data).unwrap();
         const recipient = Recipient.create({
             ...plain.recipient,
@@ -43,6 +48,7 @@ class InvoiceMapper extends Mapper<Invoice, InvoicePlain> {
         }).unwrap();
 
         return Invoice.create({
+            id: Id.fromString(plain.id),
             lineItems,
             issueDate,
             dueDate,

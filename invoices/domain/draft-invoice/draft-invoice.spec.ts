@@ -1,4 +1,5 @@
 import { CalendarDate } from '../calendar-date/calendar-date';
+import { Id } from '../id/id';
 import { Issuer, ISSUER_TYPE } from '../issuer/issuer';
 import { LineItem } from '../line-item/line-item';
 import { Money } from '../money/money/money';
@@ -9,7 +10,7 @@ import { DraftInvoice } from './draft-invoice';
 
 describe('DraftInvoice', () => {
     it('should create a draft invoice instance with missing data', () => {
-        const draftInvoice = DraftInvoice.create().unwrap();
+        const draftInvoice = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
         expect(draftInvoice.total).toBeNull();
         expect(draftInvoice.vatRate).toBeNull();
@@ -38,7 +39,7 @@ describe('DraftInvoice', () => {
     });
 
     it('should not create an invoice from draft invoice if draft is incomplete', () => {
-        const draftInvoice = DraftInvoice.create().unwrap();
+        const draftInvoice = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
         const result = draftInvoice.toInvoice();
 
@@ -50,7 +51,7 @@ describe('DraftInvoice', () => {
     });
 
     it('should add line item to draft invoice', () => {
-        const draftInvoice = DraftInvoice.create().unwrap();
+        const draftInvoice = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
         const lineItem1 = LineItem.create({
             description: 'Item 1',
@@ -76,7 +77,7 @@ describe('DraftInvoice', () => {
     });
 
     it('should remove line item from draft invoice', () => {
-        const draftInvoice = DraftInvoice.create().unwrap();
+        const draftInvoice = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
         const lineItem1 = LineItem.create({
             description: 'Item 1',
@@ -112,7 +113,7 @@ describe('DraftInvoice', () => {
     });
 
     it('should add not apply vat to invoice with no line items', () => {
-        const draftInvoice = DraftInvoice.create().unwrap();
+        const draftInvoice = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
         const vat = VatRate.create('20').unwrap();
 
@@ -126,7 +127,7 @@ describe('DraftInvoice', () => {
     });
 
     it('should apply vat to draft invoice with line items', () => {
-        const draftInvoice = DraftInvoice.create().unwrap();
+        const draftInvoice = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
         const lineItem1 = LineItem.create({
             description: 'Item 1',
@@ -153,7 +154,7 @@ describe('DraftInvoice', () => {
     });
 
     it('should add issuer to draft invoice', () => {
-        const draftInvoice = DraftInvoice.create().unwrap();
+        const draftInvoice = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
         const issuer = Issuer.create({
             type: ISSUER_TYPE.COMPANY,
@@ -170,7 +171,7 @@ describe('DraftInvoice', () => {
     });
 
     it('should add recipient to draft invoice', () => {
-        const draftInvoice = DraftInvoice.create().unwrap();
+        const draftInvoice = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
         const recipientBilling = Paypal.create({
             email: 'customer@example.com',
@@ -193,7 +194,7 @@ describe('DraftInvoice', () => {
     });
 
     it('should add due date to draft invoice', () => {
-        const draftInvoice = DraftInvoice.create().unwrap();
+        const draftInvoice = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
         const dueDate = CalendarDate.create('2023-01-01').unwrap();
 
@@ -204,7 +205,7 @@ describe('DraftInvoice', () => {
     });
 
     it('should add issue date to draft invoice', () => {
-        const draftInvoice = DraftInvoice.create().unwrap();
+        const draftInvoice = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
         const issueDate = CalendarDate.create('2023-01-01').unwrap();
 
@@ -215,7 +216,7 @@ describe('DraftInvoice', () => {
     });
 
     it('should mark draft invoice as valid when all fields are filled in', () => {
-        const draftInvoice = DraftInvoice.create().unwrap();
+        const draftInvoice = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
         const issueDate = CalendarDate.create('2023-01-01').unwrap();
 
@@ -265,7 +266,7 @@ describe('DraftInvoice', () => {
     });
 
     it('should create invoice from draft valid invoice', () => {
-        const draftInvoice = DraftInvoice.create().unwrap();
+        const draftInvoice = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
         const issueDate = CalendarDate.create('2023-01-01').unwrap();
 
@@ -324,7 +325,7 @@ describe('DraftInvoice', () => {
     });
 
     it('should not allow adding due date when issue date is already set and due date is before issue date', () => {
-        const draftInvoice = DraftInvoice.create().unwrap();
+        const draftInvoice = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
         const issueDate = CalendarDate.create('2028-02-01').unwrap();
         const dueDate = CalendarDate.create('2023-01-01').unwrap();
@@ -347,7 +348,7 @@ describe('DraftInvoice', () => {
     });
 
     it('should not allow adding issue date when due date is already set and issue date is after due date', () => {
-        const draftInvoice = DraftInvoice.create().unwrap();
+        const draftInvoice = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
         const issueDate = CalendarDate.create('2028-02-01').unwrap();
         const dueDate = CalendarDate.create('2023-01-01').unwrap();
@@ -370,7 +371,7 @@ describe('DraftInvoice', () => {
     });
 
     it('should allow adding dates when they are equal', () => {
-        const draftInvoice = DraftInvoice.create().unwrap();
+        const draftInvoice = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
         const date = CalendarDate.create('2024-01-01').unwrap();
 

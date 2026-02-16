@@ -12,6 +12,6 @@ export interface UnitOfWorkFactory {
 
 export interface Collection<T> {
     add(item: T): Promise<void>;
-    remove(id: Id): Promise<void>;
+    remove(entity: T): Promise<void>;
     get(id: Id): Promise<T | undefined>;
 }
