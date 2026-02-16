@@ -9,25 +9,23 @@ export class CompleteDraftInvoice {
     constructor(private readonly unitOfWorkFactory: UnitOfWorkFactory) {}
 
     public async execute(id: string) {
-        const unitOfWork = await this.unitOfWorkFactory.start();
+        return this.unitOfWorkFactory.start(async (unitOfWork) => {
+            const draftInvoice = await unitOfWork
+                .collection(DraftInvoice)
+                .get(Id.fromString(id));
 
-        const draftInvoice = await unitOfWork
-            .collection(DraftInvoice)
-            .get(Id.fromString(id));
+            if (!draftInvoice) {
+                throw new ApplicationError({
+                    message: 'Draft invoice not found',
+                    code: APPLICATION_ERROR_CODE.ITEM_NOT_FOUND,
+                });
+            }
 
-        if (!draftInvoice) {
-            throw new ApplicationError({
-                message: 'Draft invoice not found',
-                code: APPLICATION_ERROR_CODE.ITEM_NOT_FOUND,
-            });
-        }
+            const invoice = draftInvoice.toInvoice().unwrap();
 
-        const invoice = draftInvoice.toInvoice().unwrap();
+            await unitOfWork.collection(Invoice).add(invoice);
 
-        unitOfWork.collection(Invoice).add(invoice);
-
-        await unitOfWork.finish();
-
-        return invoice.toPlain();
+            return invoice.toPlain();
+        });
     }
 }
