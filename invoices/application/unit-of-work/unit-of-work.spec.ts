@@ -45,25 +45,6 @@ describe('UnitOfWork contract (InMemory)', () => {
         });
     });
 
-    describe('Collection.remove', () => {
-        it('should make entity unavailable via get within the same unit of work', async () => {
-            const factory = new InMemoryUnitOfWorkFactory();
-
-            await factory.start(async (uow) => {
-                const collection = uow.collection(DraftInvoice);
-                const draft = DraftInvoice.create(
-                    Id.create().unwrap()
-                ).unwrap();
-
-                await collection.add(draft);
-                await collection.remove(draft);
-
-                const result = await collection.get(draft.id);
-                expect(result).toBeNull();
-            });
-        });
-    });
-
     describe('finish', () => {
         it('should persist a newly added entity', async () => {
             const factory = new InMemoryUnitOfWorkFactory();
@@ -78,26 +59,6 @@ describe('UnitOfWork contract (InMemory)', () => {
 
                 expect(result).not.toBeNull();
                 expect(result?.id.equals(draft.id)).toBe(true);
-            });
-        });
-
-        it('should persist entity removal', async () => {
-            const factory = new InMemoryUnitOfWorkFactory();
-            const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
-
-            await factory.start(async (uow) => {
-                await uow.collection(DraftInvoice).add(draft);
-            });
-
-            await factory.start(async (uow) => {
-                const collection = uow.collection(DraftInvoice);
-                await collection.get(draft.id);
-                await collection.remove(draft);
-            });
-
-            await factory.start(async (uow) => {
-                const result = await uow.collection(DraftInvoice).get(draft.id);
-                expect(result).toBeNull();
             });
         });
 
@@ -217,38 +178,6 @@ describe('UnitOfWork contract (InMemory)', () => {
             });
         });
 
-        it('should not expose uncommitted removals to other units of work', async () => {
-            const factory = new InMemoryUnitOfWorkFactory();
-            const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
-
-            await factory.start(async (uow) => {
-                await uow.collection(DraftInvoice).add(draft);
-            });
-
-            let visibleInOtherUow: boolean | null = null;
-
-            const uow1Promise = factory.start(async (uow1) => {
-                const collection = uow1.collection(DraftInvoice);
-                await collection.get(draft.id);
-                await collection.remove(draft);
-
-                await factory.start(async (uow2) => {
-                    const result = await uow2
-                        .collection(DraftInvoice)
-                        .get(draft.id);
-                    visibleInOtherUow = result !== null;
-                });
-            });
-
-            try {
-                await uow1Promise;
-            } catch {
-                // expected: uow1 may fail with OptimisticConcurrencyError
-            }
-
-            expect(visibleInOtherUow).toBe(true);
-        });
-
         it('should not expose uncommitted modifications to other units of work', async () => {
             const factory = new InMemoryUnitOfWorkFactory();
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
@@ -304,29 +233,6 @@ describe('UnitOfWork contract (InMemory)', () => {
             await factory.start(async (uow) => {
                 const result = await uow.collection(DraftInvoice).get(draft.id);
                 expect(result).toBeNull();
-            });
-        });
-
-        it('should not persist removals if the callback throws', async () => {
-            const factory = new InMemoryUnitOfWorkFactory();
-            const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
-
-            await factory.start(async (uow) => {
-                await uow.collection(DraftInvoice).add(draft);
-            });
-
-            await expect(
-                factory.start(async (uow) => {
-                    const collection = uow.collection(DraftInvoice);
-                    await collection.get(draft.id);
-                    await collection.remove(draft);
-                    throw new Error('rollback');
-                })
-            ).rejects.toThrow('rollback');
-
-            await factory.start(async (uow) => {
-                const result = await uow.collection(DraftInvoice).get(draft.id);
-                expect(result).not.toBeNull();
             });
         });
 
@@ -401,94 +307,9 @@ describe('UnitOfWork contract (InMemory)', () => {
                 })
             ).rejects.toThrow(OptimisticConcurrencyError);
         });
-
-        it('should throw OptimisticConcurrencyError when one UoW removes and another modifies the same entity', async () => {
-            const factory = new InMemoryUnitOfWorkFactory();
-            const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
-
-            await factory.start(async (uow) => {
-                await uow.collection(DraftInvoice).add(draft);
-            });
-
-            await expect(
-                factory.start(async (uow1) => {
-                    const collection1 = uow1.collection(DraftInvoice);
-                    await collection1.get(draft.id);
-                    await collection1.remove(draft);
-
-                    await factory.start(async (uow2) => {
-                        const loaded = await uow2
-                            .collection(DraftInvoice)
-                            .get(draft.id);
-                        loaded!.addLineItem(
-                            LineItem.create({
-                                description: 'From UoW2',
-                                price: { amount: '75', currency: 'USD' },
-                                quantity: '1',
-                            }).unwrap()
-                        );
-                    });
-                })
-            ).rejects.toThrow(OptimisticConcurrencyError);
-        });
-
-        it('should throw OptimisticConcurrencyError when two UoWs both remove the same entity', async () => {
-            const factory = new InMemoryUnitOfWorkFactory();
-            const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
-
-            await factory.start(async (uow) => {
-                await uow.collection(DraftInvoice).add(draft);
-            });
-
-            await expect(
-                factory.start(async (uow1) => {
-                    const collection1 = uow1.collection(DraftInvoice);
-                    await collection1.get(draft.id);
-                    await collection1.remove(draft);
-
-                    await factory.start(async (uow2) => {
-                        const collection2 = uow2.collection(DraftInvoice);
-                        await collection2.get(draft.id);
-                        await collection2.remove(draft);
-                    });
-                })
-            ).rejects.toThrow(OptimisticConcurrencyError);
-        });
     });
 
     describe('Collection edge cases', () => {
-        it('should allow re-adding an entity after removing it in the same unit of work', async () => {
-            const factory = new InMemoryUnitOfWorkFactory();
-
-            await factory.start(async (uow) => {
-                const collection = uow.collection(DraftInvoice);
-                const draft = DraftInvoice.create(
-                    Id.create().unwrap()
-                ).unwrap();
-
-                await collection.add(draft);
-                await collection.remove(draft);
-                await collection.add(draft);
-
-                const result = await collection.get(draft.id);
-                expect(result).toBe(draft);
-            });
-        });
-
-        it('should not throw when removing a non-existing entity', async () => {
-            const factory = new InMemoryUnitOfWorkFactory();
-
-            await factory.start(async (uow) => {
-                const collection = uow.collection(DraftInvoice);
-
-                await expect(
-                    collection.remove({
-                        id: Id.fromString('non-existing-id'),
-                    } as DraftInvoice)
-                ).resolves.not.toThrow();
-            });
-        });
-
         it('should throw OptimisticConcurrencyError when adding an entity with an id that already exists in the store', async () => {
             const factory = new InMemoryUnitOfWorkFactory();
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
@@ -502,62 +323,6 @@ describe('UnitOfWork contract (InMemory)', () => {
                     await uow.collection(DraftInvoice).add(draft);
                 })
             ).rejects.toThrow(OptimisticConcurrencyError);
-        });
-
-        it('should throw when re-adding a previously persisted entity after removing it in the same UoW', async () => {
-            const factory = new InMemoryUnitOfWorkFactory();
-            const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
-
-            await factory.start(async (uow) => {
-                await uow.collection(DraftInvoice).add(draft);
-            });
-
-            // add() after remove() sets the version to null (new entity),
-            // but the store still holds the original — commit fails.
-            await expect(
-                factory.start(async (uow) => {
-                    const collection = uow.collection(DraftInvoice);
-                    await collection.get(draft.id);
-                    await collection.remove(draft);
-                    await collection.add(draft);
-                })
-            ).rejects.toThrow(OptimisticConcurrencyError);
-        });
-
-        it('should return null after removing a previously persisted entity via get', async () => {
-            const factory = new InMemoryUnitOfWorkFactory();
-            const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
-
-            await factory.start(async (uow) => {
-                await uow.collection(DraftInvoice).add(draft);
-            });
-
-            await factory.start(async (uow) => {
-                const collection = uow.collection(DraftInvoice);
-                await collection.get(draft.id);
-                await collection.remove(draft);
-
-                const result = await collection.get(draft.id);
-                expect(result).toBeNull();
-            });
-        });
-
-        it('should not persist an entity that was added and then removed', async () => {
-            const factory = new InMemoryUnitOfWorkFactory();
-
-            await factory.start(async (uow) => {
-                const collection = uow.collection(DraftInvoice);
-                const draft = DraftInvoice.create(
-                    Id.create().unwrap()
-                ).unwrap();
-
-                await collection.add(draft);
-                await collection.remove(draft);
-            });
-
-            // Nothing should have been persisted — but since the entity
-            // was never in the store to begin with, we just verify no error
-            // and the store remains empty for that id.
         });
     });
 
@@ -727,68 +492,6 @@ describe('UnitOfWork contract (InMemory)', () => {
 
                 expect(loadedDraft).toBeNull();
                 expect(loadedInvoice).toBeNull();
-            });
-        });
-
-        it('should handle removal in one collection and addition in another within the same UoW', async () => {
-            const factory = new InMemoryUnitOfWorkFactory();
-            const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
-
-            const lineItem = LineItem.create({
-                description: 'Service',
-                price: { amount: '200', currency: 'USD' },
-                quantity: '1',
-            }).unwrap();
-            draft.addLineItem(lineItem);
-            draft.addIssueDate(CalendarDate.create('2025-01-01').unwrap());
-            draft.addDueDate(CalendarDate.create('2025-02-01').unwrap());
-            draft.addIssuer(
-                Issuer.create({
-                    type: ISSUER_TYPE.COMPANY,
-                    name: 'Company Inc.',
-                    address: '123 Main St',
-                    taxId: 'TAX123',
-                    email: 'info@company.com',
-                }).unwrap()
-            );
-            draft.addRecipient(
-                Recipient.create({
-                    type: RECIPIENT_TYPE.INDIVIDUAL,
-                    name: 'Jane Smith',
-                    address: '456 Oak Ave',
-                    taxId: 'TAX456',
-                    email: 'jane@example.com',
-                    taxResidenceCountry: 'US',
-                    billing: Paypal.create({
-                        email: 'jane@example.com',
-                    }).unwrap(),
-                }).unwrap()
-            );
-
-            const invoice = draft.toInvoice().unwrap();
-
-            await factory.start(async (uow) => {
-                await uow.collection(DraftInvoice).add(draft);
-            });
-
-            await factory.start(async (uow) => {
-                const draftCollection = uow.collection(DraftInvoice);
-                await draftCollection.get(draft.id);
-                await draftCollection.remove(draft);
-
-                await uow.collection(Invoice).add(invoice);
-            });
-
-            await factory.start(async (uow) => {
-                const loadedDraft = await uow
-                    .collection(DraftInvoice)
-                    .get(draft.id);
-                const loadedInvoice = await uow
-                    .collection(Invoice)
-                    .get(invoice.id);
-
-                expect(loadedDraft).toBeNull();
-                expect(loadedInvoice).not.toBeNull();
             });
         });
     });

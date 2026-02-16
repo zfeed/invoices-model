@@ -18,10 +18,6 @@ export class Store<T> {
         return this.data.get(key);
     }
 
-    public remove(key: string) {
-        this.data.delete(key);
-    }
-
     public setIfVersion(
         key: string,
         value: T,
@@ -49,17 +45,5 @@ export class Store<T> {
         const newVersion = existing.version + 1;
         this.data.set(key, { value, version: newVersion });
         return newVersion;
-    }
-
-    public removeIfVersion(key: string, expectedVersion: number) {
-        const existing = this.data.get(key);
-
-        if (!existing || existing.version !== expectedVersion) {
-            throw new OptimisticConcurrencyError(
-                `Optimistic concurrency conflict on key "${key}"`
-            );
-        }
-
-        this.data.delete(key);
     }
 }
