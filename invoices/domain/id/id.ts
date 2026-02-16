@@ -12,6 +12,10 @@ export class Id implements Equatable<Id> {
         return Result.ok(new Id(randomUUID()));
     }
 
+    static fromString(value: string) {
+        return new Id(value);
+    }
+
     equals(other: Id): boolean {
         return this.#value === other.#value;
     }
@@ -20,7 +24,3 @@ export class Id implements Equatable<Id> {
         return this.#value;
     }
 }
-
-
-
-

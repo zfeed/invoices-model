@@ -101,9 +101,7 @@ export class CreateDraftInvoice {
             draftInvoice.addRecipient(recipient).unwrap();
         }
 
-        unitOfWork
-            .collection(DraftInvoice)
-            .add(draftInvoice.id.toString(), draftInvoice);
+        unitOfWork.collection(DraftInvoice).add(draftInvoice);
 
         await unitOfWork.finish();
 

@@ -1,6 +1,7 @@
 import { APPLICATION_ERROR_CODE } from '../../../../building-blocks/errors/application/application-codes';
 import { ApplicationError } from '../../../../building-blocks/errors/application/application.error';
 import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
+import { Id } from '../../../domain/id/id';
 import { Invoice } from '../../../domain/invoice/invoice';
 import { UnitOfWorkFactory } from '../../unit-of-work/unit-of-work.interface';
 
@@ -10,7 +11,9 @@ export class CompleteDraftInvoice {
     public async execute(id: string) {
         const unitOfWork = await this.unitOfWorkFactory.start();
 
-        const draftInvoice = await unitOfWork.collection(DraftInvoice).get(id);
+        const draftInvoice = await unitOfWork
+            .collection(DraftInvoice)
+            .get(Id.fromString(id));
 
         if (!draftInvoice) {
             throw new ApplicationError({
@@ -21,7 +24,7 @@ export class CompleteDraftInvoice {
 
         const invoice = draftInvoice.toInvoice().unwrap();
 
-        unitOfWork.collection(Invoice).add(invoice.id.toString(), invoice);
+        unitOfWork.collection(Invoice).add(invoice);
 
         await unitOfWork.finish();
 

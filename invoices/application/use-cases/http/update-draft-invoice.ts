@@ -2,6 +2,7 @@ import { APPLICATION_ERROR_CODE } from '../../../../building-blocks/errors/appli
 import { ApplicationError } from '../../../../building-blocks/errors/application/application.error';
 import { CalendarDate } from '../../../domain/calendar-date/calendar-date';
 import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
+import { Id } from '../../../domain/id/id';
 import { Issuer, ISSUER_TYPE } from '../../../domain/issuer/issuer';
 import { LineItem } from '../../../domain/line-item/line-item';
 import { Paypal } from '../../../domain/recipient/billing/paypal';
@@ -57,7 +58,9 @@ export class UpdateDraftInvoice {
     ) {
         const unitOfWork = await this.unitOfWorkFactory.start();
 
-        const draftInvoice = await unitOfWork.collection(DraftInvoice).get(id);
+        const draftInvoice = await unitOfWork
+            .collection(DraftInvoice)
+            .get(Id.fromString(id));
 
         if (!draftInvoice) {
             throw new ApplicationError({

@@ -1,5 +1,9 @@
+import { Id } from '../../domain/id/id';
+
 export interface UnitOfWork {
-    collection<T>(entityClass: { prototype: T }): Collection<T>;
+    collection<T extends { id: Id }>(entityClass: {
+        prototype: T;
+    }): Collection<T>;
 }
 
 export interface UnitOfWorkFactory {
@@ -7,7 +11,7 @@ export interface UnitOfWorkFactory {
 }
 
 export interface Collection<T> {
-    add(id: string, item: T): Promise<void>;
-    remove(id: string): Promise<void>;
-    get(id: string): Promise<T | undefined>;
+    add(item: T): Promise<void>;
+    remove(id: Id): Promise<void>;
+    get(id: Id): Promise<T | undefined>;
 }

@@ -1,4 +1,5 @@
 import { DraftInvoice } from '../../domain/draft-invoice/draft-invoice';
+import { Id } from '../../domain/id/id';
 import { LineItem } from '../../domain/line-item/line-item';
 import { LineItems } from '../../domain/line-items/line-items';
 import { InMemoryUnitOfWorkFactory } from '../../../infrastructure/unit-of-work/in-memory.unit-of-work';
@@ -17,7 +18,9 @@ describe('UnitOfWork contract (InMemory)', () => {
             await factory.start(async (uow) => {
                 const collection = uow.collection<DraftInvoice>(DraftInvoice);
 
-                const result = await collection.get('non-existing-id');
+                const result = await collection.get(
+                    Id.fromString('non-existing-id')
+                );
 
                 expect(result).toBeNull();
             });
@@ -31,11 +34,10 @@ describe('UnitOfWork contract (InMemory)', () => {
             await factory.start(async (uow) => {
                 const collection = uow.collection<DraftInvoice>(DraftInvoice);
                 const draft = DraftInvoice.create().unwrap();
-                const id = draft.id.toString();
 
-                await collection.add(id, draft);
+                await collection.add(draft);
 
-                const result = await collection.get(id);
+                const result = await collection.get(draft.id);
                 expect(result).toBe(draft);
             });
         });
@@ -48,12 +50,11 @@ describe('UnitOfWork contract (InMemory)', () => {
             await factory.start(async (uow) => {
                 const collection = uow.collection<DraftInvoice>(DraftInvoice);
                 const draft = DraftInvoice.create().unwrap();
-                const id = draft.id.toString();
 
-                await collection.add(id, draft);
-                await collection.remove(id);
+                await collection.add(draft);
+                await collection.remove(draft.id);
 
-                const result = await collection.get(id);
+                const result = await collection.get(draft.id);
                 expect(result).toBeNull();
             });
         });
@@ -63,16 +64,15 @@ describe('UnitOfWork contract (InMemory)', () => {
         it('should persist a newly added entity', async () => {
             const factory = new InMemoryUnitOfWorkFactory();
             const draft = DraftInvoice.create().unwrap();
-            const id = draft.id.toString();
 
             await factory.start(async (uow) => {
-                await uow.collection<DraftInvoice>(DraftInvoice).add(id, draft);
+                await uow.collection<DraftInvoice>(DraftInvoice).add(draft);
             });
 
             await factory.start(async (uow) => {
                 const result = await uow
                     .collection<DraftInvoice>(DraftInvoice)
-                    .get(id);
+                    .get(draft.id);
 
                 expect(result).not.toBeNull();
                 const { id: _resultId, ...resultProps } = result!.toPlain();
@@ -84,22 +84,21 @@ describe('UnitOfWork contract (InMemory)', () => {
         it('should persist entity removal', async () => {
             const factory = new InMemoryUnitOfWorkFactory();
             const draft = DraftInvoice.create().unwrap();
-            const id = draft.id.toString();
 
             await factory.start(async (uow) => {
-                await uow.collection<DraftInvoice>(DraftInvoice).add(id, draft);
+                await uow.collection<DraftInvoice>(DraftInvoice).add(draft);
             });
 
             await factory.start(async (uow) => {
                 const collection = uow.collection<DraftInvoice>(DraftInvoice);
-                await collection.get(id);
-                await collection.remove(id);
+                await collection.get(draft.id);
+                await collection.remove(draft.id);
             });
 
             await factory.start(async (uow) => {
                 const result = await uow
                     .collection<DraftInvoice>(DraftInvoice)
-                    .get(id);
+                    .get(draft.id);
                 expect(result).toBeNull();
             });
         });
@@ -107,16 +106,15 @@ describe('UnitOfWork contract (InMemory)', () => {
         it('should persist modifications made to a tracked entity', async () => {
             const factory = new InMemoryUnitOfWorkFactory();
             const draft = DraftInvoice.create().unwrap();
-            const id = draft.id.toString();
 
             await factory.start(async (uow) => {
-                await uow.collection<DraftInvoice>(DraftInvoice).add(id, draft);
+                await uow.collection<DraftInvoice>(DraftInvoice).add(draft);
             });
 
             await factory.start(async (uow) => {
                 const loaded = await uow
                     .collection<DraftInvoice>(DraftInvoice)
-                    .get(id);
+                    .get(draft.id);
 
                 const lineItem = LineItem.create({
                     description: 'Consulting',
@@ -129,7 +127,7 @@ describe('UnitOfWork contract (InMemory)', () => {
             await factory.start(async (uow) => {
                 const result = await uow
                     .collection<DraftInvoice>(DraftInvoice)
-                    .get(id);
+                    .get(draft.id);
 
                 expect(result!.toPlain().lineItems).not.toBeNull();
                 expect(result!.toPlain().lineItems!.items).toHaveLength(1);
@@ -144,17 +142,16 @@ describe('UnitOfWork contract (InMemory)', () => {
         it('should return the same reference when getting the same entity twice', async () => {
             const factory = new InMemoryUnitOfWorkFactory();
             const draft = DraftInvoice.create().unwrap();
-            const id = draft.id.toString();
 
             await factory.start(async (uow) => {
-                await uow.collection<DraftInvoice>(DraftInvoice).add(id, draft);
+                await uow.collection<DraftInvoice>(DraftInvoice).add(draft);
             });
 
             await factory.start(async (uow) => {
                 const collection = uow.collection<DraftInvoice>(DraftInvoice);
 
-                const first = await collection.get(id);
-                const second = await collection.get(id);
+                const first = await collection.get(draft.id);
+                const second = await collection.get(draft.id);
 
                 expect(first).toBe(second);
             });
@@ -166,11 +163,10 @@ describe('UnitOfWork contract (InMemory)', () => {
             await factory.start(async (uow) => {
                 const collection = uow.collection<DraftInvoice>(DraftInvoice);
                 const draft = DraftInvoice.create().unwrap();
-                const id = draft.id.toString();
 
-                await collection.add(id, draft);
+                await collection.add(draft);
 
-                const result = await collection.get(id);
+                const result = await collection.get(draft.id);
                 expect(result).toBe(draft);
             });
         });
@@ -180,17 +176,14 @@ describe('UnitOfWork contract (InMemory)', () => {
         it('should not expose uncommitted additions to other units of work', async () => {
             const factory = new InMemoryUnitOfWorkFactory();
             const draft = DraftInvoice.create().unwrap();
-            const id = draft.id.toString();
 
             await factory.start(async (uow1) => {
-                await uow1
-                    .collection<DraftInvoice>(DraftInvoice)
-                    .add(id, draft);
+                await uow1.collection<DraftInvoice>(DraftInvoice).add(draft);
 
                 await factory.start(async (uow2) => {
                     const result = await uow2
                         .collection<DraftInvoice>(DraftInvoice)
-                        .get(id);
+                        .get(draft.id);
                     expect(result).toBeNull();
                 });
             });
@@ -199,23 +192,22 @@ describe('UnitOfWork contract (InMemory)', () => {
         it('should not expose uncommitted removals to other units of work', async () => {
             const factory = new InMemoryUnitOfWorkFactory();
             const draft = DraftInvoice.create().unwrap();
-            const id = draft.id.toString();
 
             await factory.start(async (uow) => {
-                await uow.collection<DraftInvoice>(DraftInvoice).add(id, draft);
+                await uow.collection<DraftInvoice>(DraftInvoice).add(draft);
             });
 
             let visibleInOtherUow: boolean | null = null;
 
             const uow1Promise = factory.start(async (uow1) => {
                 const collection = uow1.collection<DraftInvoice>(DraftInvoice);
-                await collection.get(id);
-                await collection.remove(id);
+                await collection.get(draft.id);
+                await collection.remove(draft.id);
 
                 await factory.start(async (uow2) => {
                     const result = await uow2
                         .collection<DraftInvoice>(DraftInvoice)
-                        .get(id);
+                        .get(draft.id);
                     visibleInOtherUow = result !== null;
                 });
             });
@@ -232,10 +224,9 @@ describe('UnitOfWork contract (InMemory)', () => {
         it('should not expose uncommitted modifications to other units of work', async () => {
             const factory = new InMemoryUnitOfWorkFactory();
             const draft = DraftInvoice.create().unwrap();
-            const id = draft.id.toString();
 
             await factory.start(async (uow) => {
-                await uow.collection<DraftInvoice>(DraftInvoice).add(id, draft);
+                await uow.collection<DraftInvoice>(DraftInvoice).add(draft);
             });
 
             let lineItemsInOtherUow: unknown = 'not-checked';
@@ -243,7 +234,7 @@ describe('UnitOfWork contract (InMemory)', () => {
             const uow1Promise = factory.start(async (uow1) => {
                 const loaded = await uow1
                     .collection<DraftInvoice>(DraftInvoice)
-                    .get(id);
+                    .get(draft.id);
                 loaded!.addLineItem(
                     LineItem.create({
                         description: 'Consulting',
@@ -255,7 +246,7 @@ describe('UnitOfWork contract (InMemory)', () => {
                 await factory.start(async (uow2) => {
                     const result = await uow2
                         .collection<DraftInvoice>(DraftInvoice)
-                        .get(id);
+                        .get(draft.id);
                     lineItemsInOtherUow = result!.toPlain().lineItems;
                 });
             });
@@ -274,13 +265,10 @@ describe('UnitOfWork contract (InMemory)', () => {
         it('should not persist changes if the callback throws', async () => {
             const factory = new InMemoryUnitOfWorkFactory();
             const draft = DraftInvoice.create().unwrap();
-            const id = draft.id.toString();
 
             await expect(
                 factory.start(async (uow) => {
-                    await uow
-                        .collection<DraftInvoice>(DraftInvoice)
-                        .add(id, draft);
+                    await uow.collection<DraftInvoice>(DraftInvoice).add(draft);
                     throw new Error('rollback');
                 })
             ).rejects.toThrow('rollback');
@@ -288,7 +276,7 @@ describe('UnitOfWork contract (InMemory)', () => {
             await factory.start(async (uow) => {
                 const result = await uow
                     .collection<DraftInvoice>(DraftInvoice)
-                    .get(id);
+                    .get(draft.id);
                 expect(result).toBeNull();
             });
         });
@@ -298,17 +286,16 @@ describe('UnitOfWork contract (InMemory)', () => {
         it('should throw OptimisticConcurrencyError when two units of work modify the same entity', async () => {
             const factory = new InMemoryUnitOfWorkFactory();
             const draft = DraftInvoice.create().unwrap();
-            const id = draft.id.toString();
 
             await factory.start(async (uow) => {
-                await uow.collection<DraftInvoice>(DraftInvoice).add(id, draft);
+                await uow.collection<DraftInvoice>(DraftInvoice).add(draft);
             });
 
             await expect(
                 factory.start(async (uow1) => {
                     const loaded1 = await uow1
                         .collection<DraftInvoice>(DraftInvoice)
-                        .get(id);
+                        .get(draft.id);
                     loaded1!.addLineItem(
                         LineItem.create({
                             description: 'From UoW1',
@@ -321,7 +308,7 @@ describe('UnitOfWork contract (InMemory)', () => {
                     await factory.start(async (uow2) => {
                         const loaded2 = await uow2
                             .collection<DraftInvoice>(DraftInvoice)
-                            .get(id);
+                            .get(draft.id);
                         loaded2!.addLineItem(
                             LineItem.create({
                                 description: 'From UoW2',
@@ -344,13 +331,12 @@ describe('UnitOfWork contract (InMemory)', () => {
             await factory.start(async (uow) => {
                 const collection = uow.collection<DraftInvoice>(DraftInvoice);
                 const draft = DraftInvoice.create().unwrap();
-                const id = draft.id.toString();
 
-                await collection.add(id, draft);
-                await collection.remove(id);
-                await collection.add(id, draft);
+                await collection.add(draft);
+                await collection.remove(draft.id);
+                await collection.add(draft);
 
-                const result = await collection.get(id);
+                const result = await collection.get(draft.id);
                 expect(result).toBe(draft);
             });
         });
@@ -362,7 +348,7 @@ describe('UnitOfWork contract (InMemory)', () => {
                 const collection = uow.collection<DraftInvoice>(DraftInvoice);
 
                 await expect(
-                    collection.remove('non-existing-id')
+                    collection.remove(Id.fromString('non-existing-id'))
                 ).resolves.not.toThrow();
             });
         });
@@ -370,18 +356,14 @@ describe('UnitOfWork contract (InMemory)', () => {
         it('should throw OptimisticConcurrencyError when adding an entity with an id that already exists in the store', async () => {
             const factory = new InMemoryUnitOfWorkFactory();
             const draft = DraftInvoice.create().unwrap();
-            const id = draft.id.toString();
 
             await factory.start(async (uow) => {
-                await uow.collection<DraftInvoice>(DraftInvoice).add(id, draft);
+                await uow.collection<DraftInvoice>(DraftInvoice).add(draft);
             });
 
             await expect(
                 factory.start(async (uow) => {
-                    const duplicate = DraftInvoice.create().unwrap();
-                    await uow
-                        .collection<DraftInvoice>(DraftInvoice)
-                        .add(id, duplicate);
+                    await uow.collection<DraftInvoice>(DraftInvoice).add(draft);
                 })
             ).rejects.toThrow(OptimisticConcurrencyError);
         });
@@ -403,7 +385,6 @@ describe('UnitOfWork contract (InMemory)', () => {
         it('should persist changes to different entity types independently', async () => {
             const factory = new InMemoryUnitOfWorkFactory();
             const draft = DraftInvoice.create().unwrap();
-            const draftId = draft.id.toString();
 
             const lineItem = LineItem.create({
                 description: 'Service',
@@ -437,22 +418,19 @@ describe('UnitOfWork contract (InMemory)', () => {
             );
 
             const invoice = draft.toInvoice().unwrap();
-            const invoiceId = invoice.id.toString();
 
             await factory.start(async (uow) => {
-                await uow
-                    .collection<DraftInvoice>(DraftInvoice)
-                    .add(draftId, draft);
-                await uow.collection<Invoice>(Invoice).add(invoiceId, invoice);
+                await uow.collection<DraftInvoice>(DraftInvoice).add(draft);
+                await uow.collection<Invoice>(Invoice).add(invoice);
             });
 
             await factory.start(async (uow) => {
                 const loadedDraft = await uow
                     .collection<DraftInvoice>(DraftInvoice)
-                    .get(draftId);
+                    .get(draft.id);
                 const loadedInvoice = await uow
                     .collection<Invoice>(Invoice)
-                    .get(invoiceId);
+                    .get(invoice.id);
 
                 expect(loadedDraft).not.toBeNull();
                 expect(loadedInvoice).not.toBeNull();

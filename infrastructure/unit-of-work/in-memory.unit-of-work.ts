@@ -1,3 +1,4 @@
+import { Id } from '../../invoices/domain/id/id';
 import {
     Collection,
     UnitOfWork,
@@ -141,18 +142,20 @@ class InMemoryCollection {
         >
     ) {}
 
-    async get(id: string): Promise<any | null> {
-        if (this.markedForDeletion.has(id)) {
+    async get(id: Id): Promise<any | null> {
+        const key = id.toString();
+
+        if (this.markedForDeletion.has(key)) {
             return null;
         }
 
-        const item = this.identityMap.get(id);
+        const item = this.identityMap.get(key);
 
         if (item) {
             return item;
         }
 
-        const record = this.store.get(id);
+        const record = this.store.get(key);
 
         if (!record) {
             return null;
@@ -166,20 +169,22 @@ class InMemoryCollection {
 
         const entity = mapper.toDomain(record.value);
 
-        this.identityMap.set(id, entity);
-        this.readVersions.set(id, record.version);
+        this.identityMap.set(key, entity);
+        this.readVersions.set(key, record.version);
 
         return entity;
     }
 
-    async add(id: string, object: any): Promise<void> {
-        this.identityMap.set(id, object);
-        this.readVersions.set(id, null);
-        this.markedForDeletion.delete(id);
+    async add(object: any): Promise<void> {
+        const key = object.id.toString();
+        this.identityMap.set(key, object);
+        this.readVersions.set(key, null);
+        this.markedForDeletion.delete(key);
     }
 
-    async remove(id: string): Promise<void> {
-        this.identityMap.delete(id);
-        this.markedForDeletion.add(id);
+    async remove(id: Id): Promise<void> {
+        const key = id.toString();
+        this.identityMap.delete(key);
+        this.markedForDeletion.add(key);
     }
 }
