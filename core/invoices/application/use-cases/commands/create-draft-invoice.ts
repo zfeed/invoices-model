@@ -7,10 +7,14 @@ import { Paypal } from '../../../domain/recipient/billing/paypal';
 import { Wire } from '../../../domain/recipient/billing/wire';
 import { Recipient, RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
 import { VatRate } from '../../../domain/vat-rate/vat-rate';
+import { DomainEvents } from '../../../../shared/domain-events/domain-events.interface';
 import { UnitOfWorkFactory } from '../../unit-of-work/unit-of-work.interface';
 
 export class CreateDraftInvoice {
-    constructor(private readonly unitOfWorkFactory: UnitOfWorkFactory) {}
+    constructor(
+        private readonly unitOfWorkFactory: UnitOfWorkFactory,
+        private readonly domainEvents: DomainEvents
+    ) {}
 
     public async execute(request: {
         lineItems?: {
@@ -106,6 +110,8 @@ export class CreateDraftInvoice {
             }
 
             await unitOfWork.collection(DraftInvoice).add(draftInvoice);
+
+            this.domainEvents.publishEvents(draftInvoice);
 
             return draftInvoice.toPlain();
         });

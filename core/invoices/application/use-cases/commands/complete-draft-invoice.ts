@@ -3,10 +3,14 @@ import { ApplicationError } from '../../../../../building-blocks/errors/applicat
 import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
 import { Id } from '../../../domain/id/id';
 import { Invoice } from '../../../domain/invoice/invoice';
+import { DomainEvents } from '../../../../shared/domain-events/domain-events.interface';
 import { UnitOfWorkFactory } from '../../unit-of-work/unit-of-work.interface';
 
 export class CompleteDraftInvoice {
-    constructor(private readonly unitOfWorkFactory: UnitOfWorkFactory) {}
+    constructor(
+        private readonly unitOfWorkFactory: UnitOfWorkFactory,
+        private readonly domainEvents: DomainEvents
+    ) {}
 
     public async execute(id: string) {
         return this.unitOfWorkFactory.start(async (unitOfWork) => {
@@ -24,6 +28,8 @@ export class CompleteDraftInvoice {
             const invoice = draftInvoice.toInvoice().unwrap();
 
             await unitOfWork.collection(Invoice).add(invoice);
+
+            this.domainEvents.publishEvents(draftInvoice, invoice);
 
             return invoice.toPlain();
         });
