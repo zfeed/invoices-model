@@ -1,6 +1,6 @@
 import { DomainEvent } from '../../building-blocks/events/domain-event';
 import { PublishableEvents } from '../../building-blocks/events/event-publisher.interface';
-import { DomainEvents } from '../../core/invoices/application/domain-events/domain-events.interface';
+import { DomainEvents } from '../../core/shared/domain-events/domain-events.interface';
 
 type EventHandler<T = any> = (event: T) => void;
 
