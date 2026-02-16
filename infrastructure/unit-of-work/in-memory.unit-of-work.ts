@@ -7,7 +7,8 @@ import {
 import '../mappers/draft-invoice.mapper';
 import '../mappers/invoice.mapper';
 import { EntityClass, mappers, stores } from '../registry';
-import { OptimisticConcurrencyError, Store } from '../store/store';
+import { OptimisticConcurrencyError } from '../../invoices/application/unit-of-work/optimistic-concurrency.error';
+import { Store } from '../store/store';
 
 export class InMemoryUnitOfWorkFactory implements UnitOfWorkFactory {
     async start<T>(callback: (uow: UnitOfWork) => Promise<T>): Promise<T> {
