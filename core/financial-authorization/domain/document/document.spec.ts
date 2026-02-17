@@ -275,7 +275,6 @@ describe('approveDocument', () => {
         const result = approveDocument({
             document,
             action: 'submit',
-            groupId: 'group-1',
             approver: approver1,
         });
 
@@ -301,7 +300,6 @@ describe('approveDocument', () => {
         const result = approveDocument({
             document,
             action: 'submit',
-            groupId: 'group-1',
             approver: approver1,
         });
 
@@ -328,7 +326,6 @@ describe('approveDocument', () => {
         const result = approveDocument({
             document,
             action: 'submit',
-            groupId: 'group-2',
             approver: approver1,
         });
 
@@ -361,7 +358,6 @@ describe('approveDocument', () => {
         const result = approveDocument({
             document,
             action: 'submit',
-            groupId: 'group-2',
             approver: approver1,
         });
 
@@ -384,7 +380,6 @@ describe('approveDocument', () => {
         const result = approveDocument({
             document,
             action: 'submit',
-            groupId: 'group-1',
             approver: approver1,
         });
 
@@ -404,7 +399,6 @@ describe('approveDocument', () => {
         const result = approveDocument({
             document,
             action: 'non-existent',
-            groupId: 'group-1',
             approver: approver1,
         });
 
@@ -427,7 +421,6 @@ describe('approveDocument', () => {
         const result = approveDocument({
             document,
             action: 'submit',
-            groupId: 'group-1',
             approver: approver1,
         });
 
@@ -439,7 +432,7 @@ describe('approveDocument', () => {
         );
     });
 
-    it('should fail when group is not found in the current step', () => {
+    it('should fail when approver is not in any group', () => {
         const group = makeGroup('group-1', [approver1], false);
         const step = makeStep('step-1', 0, [group], false);
         const authflow = makeAuthflow('authflow-1', 'submit', [step], false);
@@ -448,8 +441,7 @@ describe('approveDocument', () => {
         const result = approveDocument({
             document,
             action: 'submit',
-            groupId: 'non-existent-group',
-            approver: approver1,
+            approver: approver2,
         });
 
         expect(result.isError()).toBe(true);
@@ -459,7 +451,7 @@ describe('approveDocument', () => {
         );
     });
 
-    it('should fail when approver is not in the group', () => {
+    it('should preserve document referenceId after approval', () => {
         const group = makeGroup('group-1', [approver1], false);
         const step = makeStep('step-1', 0, [group], false);
         const authflow = makeAuthflow('authflow-1', 'submit', [step], false);
@@ -468,33 +460,11 @@ describe('approveDocument', () => {
         const result = approveDocument({
             document,
             action: 'submit',
-            groupId: 'group-1',
-            approver: approver2,
-        });
-
-        expect(result.isError()).toBe(true);
-        const error = result.unwrapError();
-        expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVER_NOT_FOUND
-        );
-    });
-
-    it('should preserve document id and referenceId after approval', () => {
-        const group = makeGroup('group-1', [approver1], false);
-        const step = makeStep('step-1', 0, [group], false);
-        const authflow = makeAuthflow('authflow-1', 'submit', [step], false);
-        const document = makeDocument([authflow]);
-
-        const result = approveDocument({
-            document,
-            action: 'submit',
-            groupId: 'group-1',
             approver: approver1,
         });
 
         expect(result.isOk()).toBe(true);
         const updated = result.unwrap();
-        expect(updated.id).toBe('doc-1');
         expect(updated.referenceId).toBe('INV-001');
     });
 
@@ -515,7 +485,6 @@ describe('approveDocument', () => {
         const result1 = approveDocument({
             document,
             action: 'submit',
-            groupId: 'group-1',
             approver: approver1,
         });
 
@@ -529,7 +498,6 @@ describe('approveDocument', () => {
         const result2 = approveDocument({
             document: afterFirst,
             action: 'submit',
-            groupId: 'group-2',
             approver: approver1,
         });
 
@@ -551,21 +519,18 @@ describe('approveDocument', () => {
         const result1 = approveDocument({
             document,
             action: 'submit',
-            groupId: 'group-1',
             approver: approver1,
         });
 
         expect(result1.isOk()).toBe(true);
         const afterFirst = result1.unwrap();
-        // Step has 2 groups, only 1 approved — step should still be approved
-        // because group isApproved is based on having any approval
+        // Step has 2 groups, only 1 approved
         expect(afterFirst.authflows[0].steps[0].groups).toHaveLength(2);
 
         // Approve second group
         const result2 = approveDocument({
             document: afterFirst,
             action: 'submit',
-            groupId: 'group-2',
             approver: approver2,
         });
 

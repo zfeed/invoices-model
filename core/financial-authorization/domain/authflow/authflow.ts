@@ -83,7 +83,7 @@ const buildApprovedAuthflow = (
     createAuthflow({
         action: data.authflow.action,
         steps: data.authflow.steps.map((s) =>
-            s.id === data.updatedStep.id ? data.updatedStep : s
+            s.order === data.updatedStep.order ? data.updatedStep : s
         ),
     });
 

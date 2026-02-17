@@ -826,8 +826,8 @@ describe('approveAuthflow', () => {
         };
 
         const result = approveAuthflow({
-            authflow,
-            groupId: 'group-1',
+            authflows: [authflow],
+            action: 'submit',
             approver: approver1,
         });
 
@@ -850,8 +850,8 @@ describe('approveAuthflow', () => {
         };
 
         const result = approveAuthflow({
-            authflow,
-            groupId: 'group-1',
+            authflows: [authflow],
+            action: 'submit',
             approver: approver1,
         });
 
@@ -875,8 +875,8 @@ describe('approveAuthflow', () => {
         };
 
         const result = approveAuthflow({
-            authflow,
-            groupId: 'group-2',
+            authflows: [authflow],
+            action: 'submit',
             approver: approver1,
         });
 
@@ -896,8 +896,8 @@ describe('approveAuthflow', () => {
         };
 
         const result = approveAuthflow({
-            authflow,
-            groupId: 'group-1',
+            authflows: [authflow],
+            action: 'submit',
             approver: approver1,
         });
 
@@ -907,7 +907,7 @@ describe('approveAuthflow', () => {
         );
     });
 
-    it('should fail when group is not found in the current step', () => {
+    it('should fail when action is not found', () => {
         const group = makeGroup('group-1', [approver1], false);
         const step = makeStep('step-1', 0, [group], false);
         const authflow: Authflow = {
@@ -918,18 +918,18 @@ describe('approveAuthflow', () => {
         };
 
         const result = approveAuthflow({
-            authflow,
-            groupId: 'non-existent',
+            authflows: [authflow],
+            action: 'non-existent',
             approver: approver1,
         });
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError().code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND
+            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_NOT_FOUND
         );
     });
 
-    it('should fail when approver is not in the group', () => {
+    it('should fail when approver is not in any group', () => {
         const group = makeGroup('group-1', [approver1], false);
         const step = makeStep('step-1', 0, [group], false);
         const authflow: Authflow = {
@@ -940,14 +940,14 @@ describe('approveAuthflow', () => {
         };
 
         const result = approveAuthflow({
-            authflow,
-            groupId: 'group-1',
+            authflows: [authflow],
+            action: 'submit',
             approver: approver2,
         });
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError().code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVER_NOT_FOUND
+            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND
         );
     });
 
@@ -965,8 +965,8 @@ describe('approveAuthflow', () => {
 
         // First approval
         const result1 = approveAuthflow({
-            authflow,
-            groupId: 'group-1',
+            authflows: [authflow],
+            action: 'submit',
             approver: approver1,
         });
 
@@ -976,8 +976,8 @@ describe('approveAuthflow', () => {
 
         // Second approval
         const result2 = approveAuthflow({
-            authflow: afterFirst,
-            groupId: 'group-2',
+            authflows: [afterFirst],
+            action: 'submit',
             approver: approver1,
         });
 
@@ -997,8 +997,8 @@ describe('approveAuthflow', () => {
         };
 
         const result = approveAuthflow({
-            authflow,
-            groupId: 'group-1',
+            authflows: [authflow],
+            action: 'submit',
             approver: approver1,
         });
 

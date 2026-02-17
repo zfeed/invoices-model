@@ -416,18 +416,21 @@ describe('approveGroup', () => {
         email: 'charlie@example.com',
     };
 
-    it('should successfully add approval from existing approver without comment', () => {
+    it('should successfully add approval from existing approver', () => {
         const groupResult = createGroup({
             approvers: [approver1, approver2],
             approvals: [],
         });
         const group = groupResult.unwrap();
 
-        const result = approveGroup(group, approver1);
+        const result = approveGroup([group], approver1);
 
         expect(result.isOk()).toBe(true);
 
-        const approvedGroup = result.unwrap();
+        const approvedGroups = result.unwrap();
+        const approvedGroup = approvedGroups.find(
+            (g) => g.approvals.length > 0
+        )!;
         expect(approvedGroup.approvals).toHaveLength(1);
         expect(approvedGroup.approvals[0].approverId).toBe(approver1.id);
         expect(approvedGroup.approvals[0].comment).toBe(null);
@@ -436,25 +439,7 @@ describe('approveGroup', () => {
         expect(approvedGroup.approvers).toHaveLength(2); // Should not change
     });
 
-    it('should successfully add approval from existing approver with comment', () => {
-        const groupResult = createGroup({
-            approvers: [approver1, approver2],
-            approvals: [],
-        });
-        const group = groupResult.unwrap();
-
-        const result = approveGroup(group, approver1, 'Looks good to me!');
-
-        expect(result.isOk()).toBe(true);
-
-        const approvedGroup = result.unwrap();
-        expect(approvedGroup.approvals).toHaveLength(1);
-        expect(approvedGroup.approvals[0].approverId).toBe(approver1.id);
-        expect(approvedGroup.approvals[0].comment).toBe('Looks good to me!');
-        expect(approvedGroup.isApproved).toBe(true);
-    });
-
-    it('should preserve existing approvals when adding new one', () => {
+    it('should not approve a group that already has approvals (already approved)', () => {
         const existingApproval: Approval = {
             approverId: approver1.id,
             createdAt: new Date(),
@@ -467,17 +452,17 @@ describe('approveGroup', () => {
         });
         const group = groupResult.unwrap();
 
-        const result = approveGroup(group, approver2, 'Second approval');
+        // Group is already approved (has approvals), so findGroup skips it
+        const result = approveGroup([group], approver2);
 
-        expect(result.isOk()).toBe(true);
-
-        const approvedGroup = result.unwrap();
-        expect(approvedGroup.approvals).toHaveLength(2);
-        expect(approvedGroup.approvals[0].approverId).toBe(approver1.id);
-        expect(approvedGroup.approvals[0].comment).toBe('First approval');
-        expect(approvedGroup.approvals[1].approverId).toBe(approver2.id);
-        expect(approvedGroup.approvals[1].comment).toBe('Second approval');
-        expect(approvedGroup.isApproved).toBe(true);
+        expect(result.isError()).toBe(true);
+        const error = result.unwrapError();
+        expect(error.message).toBe(
+            `No eligible group found for approver ${approver2.id}`
+        );
+        expect(error.code).toBe(
+            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND
+        );
     });
 
     it('should fail when approver is not in the group', () => {
@@ -487,19 +472,19 @@ describe('approveGroup', () => {
         });
         const group = groupResult.unwrap();
 
-        const result = approveGroup(group, approver3, 'Should fail');
+        const result = approveGroup([group], approver3);
 
         expect(result.isError()).toBe(true);
         const error = result.unwrapError();
         expect(error.message).toBe(
-            `Approval references non-existent approver ID: ${approver3.id}`
+            `No eligible group found for approver ${approver3.id}`
         );
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVER_NOT_FOUND
+            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND
         );
     });
 
-    it('should fail when approver tries to approve twice', () => {
+    it('should fail when approver tries to approve an already-approved group', () => {
         const existingApproval: Approval = {
             approverId: approver1.id,
             createdAt: new Date(),
@@ -512,13 +497,16 @@ describe('approveGroup', () => {
         });
         const group = groupResult.unwrap();
 
-        const result = approveGroup(group, approver1, 'Duplicate approval');
+        // Group is already approved, so findGroup won't match it
+        const result = approveGroup([group], approver1);
 
         expect(result.isError()).toBe(true);
         const error = result.unwrapError();
-        expect(error.message).toBe('Duplicate approver IDs found in approvals');
+        expect(error.message).toBe(
+            `No eligible group found for approver ${approver1.id}`
+        );
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVALS_DUPLICATE
+            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND
         );
     });
 
@@ -532,7 +520,7 @@ describe('approveGroup', () => {
         const originalApproversLength = originalGroup.approvers.length;
         const originalIsApproved = originalGroup.isApproved;
 
-        approveGroup(originalGroup, approver1, 'Test approval');
+        approveGroup([originalGroup], approver1);
 
         // Original group should remain unchanged
         expect(originalGroup.approvals).toHaveLength(originalApprovalsLength);
@@ -548,13 +536,13 @@ describe('approveGroup', () => {
         const group = groupResult.unwrap();
 
         const beforeTime = new Date();
-        const result = approveGroup(group, approver1, 'Time test');
+        const result = approveGroup([group], approver1);
         const afterTime = new Date();
 
         expect(result.isOk()).toBe(true);
 
-        const approvedGroup = result.unwrap();
-        const approval = approvedGroup.approvals[0];
+        const approvedGroups = result.unwrap();
+        const approval = approvedGroups[0].approvals[0];
         expect(approval.createdAt).toBeInstanceOf(Date);
         expect(approval.createdAt.getTime()).toBeGreaterThanOrEqual(
             beforeTime.getTime()
@@ -571,11 +559,12 @@ describe('approveGroup', () => {
         });
         const group = groupResult.unwrap();
 
-        const result = approveGroup(group, approver1, 'Solo approval');
+        const result = approveGroup([group], approver1);
 
         expect(result.isOk()).toBe(true);
 
-        const approvedGroup = result.unwrap();
+        const approvedGroups = result.unwrap();
+        const approvedGroup = approvedGroups[0];
         expect(approvedGroup.approvals).toHaveLength(1);
         expect(approvedGroup.approvals[0].approverId).toBe(approver1.id);
         expect(approvedGroup.isApproved).toBe(true);
@@ -588,49 +577,20 @@ describe('approveGroup', () => {
             approvers: [approver1, approver2, approver3],
             approvals: [],
         });
-        let currentGroup = groupResult.unwrap();
-        expect(currentGroup.isApproved).toBe(false);
+        let currentGroups = [groupResult.unwrap()];
+        expect(currentGroups[0].isApproved).toBe(false);
 
         // First approval
-        const firstApprovalResult = approveGroup(
-            currentGroup,
-            approver1,
-            'First'
-        );
+        const firstApprovalResult = approveGroup(currentGroups, approver1);
         expect(firstApprovalResult.isOk()).toBe(true);
-        currentGroup = firstApprovalResult.unwrap();
-        expect(currentGroup.approvals).toHaveLength(1);
-        expect(currentGroup.isApproved).toBe(true);
+        currentGroups = firstApprovalResult.unwrap();
+        expect(currentGroups[0].approvals).toHaveLength(1);
+        expect(currentGroups[0].isApproved).toBe(true);
 
-        // Second approval
-        const secondApprovalResult = approveGroup(
-            currentGroup,
-            approver2,
-            'Second'
-        );
-        expect(secondApprovalResult.isOk()).toBe(true);
-        currentGroup = secondApprovalResult.unwrap();
-        expect(currentGroup.approvals).toHaveLength(2);
-        expect(currentGroup.isApproved).toBe(true);
-
-        // Third approval
-        const thirdApprovalResult = approveGroup(
-            currentGroup,
-            approver3,
-            'Third'
-        );
-        expect(thirdApprovalResult.isOk()).toBe(true);
-        currentGroup = thirdApprovalResult.unwrap();
-        expect(currentGroup.approvals).toHaveLength(3);
-        expect(currentGroup.isApproved).toBe(true);
-
-        // Verify all approvers are represented
-        const approverIds = currentGroup.approvals
-            .map((a) => a.approverId)
-            .sort();
-        expect(approverIds).toEqual(
-            [approver1.id, approver2.id, approver3.id].sort()
-        );
+        // Second approval — group is already approved, so approver2 won't find an eligible group
+        // The contract finds groups where !g.isApproved, so this should fail
+        const secondApprovalResult = approveGroup(currentGroups, approver2);
+        expect(secondApprovalResult.isError()).toBe(true);
     });
 
     it('should preserve approver order when adding approval', () => {
@@ -640,11 +600,12 @@ describe('approveGroup', () => {
         });
         const group = groupResult.unwrap();
 
-        const result = approveGroup(group, approver2, 'Middle approver');
+        const result = approveGroup([group], approver2);
 
         expect(result.isOk()).toBe(true);
 
-        const approvedGroup = result.unwrap();
+        const approvedGroups = result.unwrap();
+        const approvedGroup = approvedGroups[0];
         expect(approvedGroup.approvers[0].id).toBe(approver1.id);
         expect(approvedGroup.approvers[1].id).toBe(approver2.id);
         expect(approvedGroup.approvers[2].id).toBe(approver3.id);
