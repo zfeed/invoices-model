@@ -29,44 +29,12 @@ const buildStep = applySpec<Step>({
     groups: prop('groups'),
 });
 
-type ApproveInput = {
-    step: Step;
-    groupId: string;
-    approver: Approver;
-};
-
-type ApproveWithGroup = ApproveInput & { group: Group };
-
-const findGroup = (
-    data: ApproveInput
-): Result<DomainError, ApproveWithGroup> => {
-    const group = data.step.groups.find((g) => g.id === data.groupId);
-    return group
-        ? Result.ok({ ...data, group })
-        : Result.error(
-              new DomainError({
-                  code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND,
-                  message: `Group with id ${data.groupId} not found`,
-              })
-          );
-};
-
-const applyApproval = (
-    data: ApproveWithGroup
-): Result<DomainError, StepInput> =>
-    approveGroup(data.group, data.approver).map((updatedGroup) => ({
-        order: data.step.order,
-        groups: data.step.groups.map((g) =>
-            g.id === data.groupId ? updatedGroup : g
-        ),
-    }));
-
 export const createStep = (data: StepInput): Result<DomainError, Step> =>
     Result.ok<DomainError, StepInput>(data)
         .flatMap(orderNonNegative)
         .map(buildStep);
 
-export const findCurrentStep = (steps: Step[]): Result<DomainError, Step> => {
+const findCurrentStep = (steps: Step[]): Result<DomainError, Step> => {
     const step = steps
         .filter((s) => !s.isApproved)
         .sort((a, b) => a.order - b.order)[0];
@@ -80,8 +48,37 @@ export const findCurrentStep = (steps: Step[]): Result<DomainError, Step> => {
           );
 };
 
-export const approveStep = (data: ApproveInput): Result<DomainError, Step> =>
-    Result.ok<DomainError, ApproveInput>(data)
-        .flatMap(findGroup)
-        .flatMap(applyApproval)
-        .flatMap(createStep);
+type ApproveStepInput = {
+    steps: Step[];
+    approver: Approver;
+};
+
+type ApproveStepWithStep = ApproveStepInput & { step: Step };
+
+type ApproveStepWithGroups = ApproveStepWithStep & { updatedGroups: Group[] };
+
+const findStep = (
+    data: ApproveStepInput
+): Result<DomainError, ApproveStepWithStep> =>
+    findCurrentStep(data.steps).map((step) => ({ ...data, step }));
+
+const applyAproval = (
+    data: ApproveStepWithStep
+): Result<DomainError, ApproveStepWithGroups> =>
+    approveGroup(data.step.groups, data.approver).map((updatedGroups) => ({
+        ...data,
+        updatedGroups,
+    }));
+
+const buildApprovedStep = (
+    data: ApproveStepWithGroups
+): Result<DomainError, Step> =>
+    createStep({ order: data.step.order, groups: data.updatedGroups });
+
+export const approveStep = (
+    data: ApproveStepInput
+): Result<DomainError, Step> =>
+    Result.ok<DomainError, ApproveStepInput>(data)
+        .flatMap(findStep)
+        .flatMap(applyAproval)
+        .flatMap(buildApprovedStep);
