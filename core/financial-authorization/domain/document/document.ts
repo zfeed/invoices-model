@@ -48,21 +48,30 @@ type ApproveDocumentInput = {
 
 const applyAuthflowApproval = (
     data: ApproveDocumentInput
-): Result<DomainError, FinancialDocument> =>
+): Result<DomainError, Authflow> =>
     approveAuthflow({
         authflows: data.document.authflows,
         action: data.action,
         approver: data.approver,
-    }).map((updatedAuthflow) => ({
-        ...data.document,
-        authflows: data.document.authflows.map((a) =>
-            a.action === data.action ? updatedAuthflow : a
-        ),
-    }));
+    });
+
+const buildApprovedDocument =
+    (
+        data: ApproveDocumentInput
+    ): ((
+        updatedAuthflow: Authflow
+    ) => Result<DomainError, FinancialDocument>) =>
+    (updatedAuthflow) =>
+        createDocument({
+            referenceId: data.document.referenceId,
+            authflows: data.document.authflows.map((a) =>
+                a.action === data.action ? updatedAuthflow : a
+            ),
+        });
 
 export const approveDocument = (
     data: ApproveDocumentInput
 ): Result<DomainError, FinancialDocument> =>
-    Result.ok<DomainError, ApproveDocumentInput>(data).flatMap(
-        applyAuthflowApproval
-    );
+    Result.ok<DomainError, ApproveDocumentInput>(data)
+        .flatMap(applyAuthflowApproval)
+        .flatMap(buildApprovedDocument(data));
