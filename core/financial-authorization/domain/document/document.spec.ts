@@ -1,6 +1,9 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
+import { Approver } from '../approver/approver';
 import { Authflow } from '../authflow/authflow';
-import { createDocument } from './document';
+import { Group } from '../groups/group';
+import { Step } from '../step/step';
+import { approveDocument, createDocument, FinancialDocument } from './document';
 
 describe('createDocument', () => {
     it('should create a document successfully with unique authflow actions', () => {
@@ -200,5 +203,368 @@ describe('createDocument', () => {
             'invoice-2024-001-special-chars_test'
         );
         expect(result3.unwrap().referenceId).toBe('12345');
+    });
+});
+
+describe('approveDocument', () => {
+    const approver1: Approver = {
+        id: 'approver-1',
+        name: 'Alice',
+        email: 'alice@example.com',
+    };
+
+    const approver2: Approver = {
+        id: 'approver-2',
+        name: 'Bob',
+        email: 'bob@example.com',
+    };
+
+    const makeGroup = (
+        id: string,
+        approvers: Approver[],
+        isApproved: boolean
+    ): Group => ({
+        id,
+        isApproved,
+        approvers,
+        approvals: isApproved
+            ? approvers.map((a) => ({
+                  approverId: a.id,
+                  createdAt: new Date(),
+                  comment: null,
+              }))
+            : [],
+    });
+
+    const makeStep = (
+        id: string,
+        order: number,
+        groups: Group[],
+        isApproved: boolean
+    ): Step => ({
+        id,
+        order,
+        isApproved,
+        groups,
+    });
+
+    const makeAuthflow = (
+        id: string,
+        action: string,
+        steps: Step[],
+        isApproved: boolean
+    ): Authflow => ({
+        id,
+        action,
+        isApproved,
+        steps,
+    });
+
+    const makeDocument = (authflows: Authflow[]): FinancialDocument => ({
+        id: 'doc-1',
+        referenceId: 'INV-001',
+        authflows,
+    });
+
+    it('should approve a document with a single step and single group', () => {
+        const group = makeGroup('group-1', [approver1], false);
+        const step = makeStep('step-1', 0, [group], false);
+        const authflow = makeAuthflow('authflow-1', 'submit', [step], false);
+        const document = makeDocument([authflow]);
+
+        const result = approveDocument({
+            document,
+            action: 'submit',
+            groupId: 'group-1',
+            approver: approver1,
+        });
+
+        expect(result.isOk()).toBe(true);
+        const updated = result.unwrap();
+        expect(updated.authflows[0].isApproved).toBe(true);
+        expect(updated.authflows[0].steps[0].isApproved).toBe(true);
+    });
+
+    it('should approve only the first unapproved step by order', () => {
+        const group1 = makeGroup('group-1', [approver1], false);
+        const group2 = makeGroup('group-2', [approver1], false);
+        const step1 = makeStep('step-1', 0, [group1], false);
+        const step2 = makeStep('step-2', 1, [group2], false);
+        const authflow = makeAuthflow(
+            'authflow-1',
+            'submit',
+            [step1, step2],
+            false
+        );
+        const document = makeDocument([authflow]);
+
+        const result = approveDocument({
+            document,
+            action: 'submit',
+            groupId: 'group-1',
+            approver: approver1,
+        });
+
+        expect(result.isOk()).toBe(true);
+        const updated = result.unwrap();
+        expect(updated.authflows[0].steps[0].isApproved).toBe(true);
+        expect(updated.authflows[0].steps[1].isApproved).toBe(false);
+        expect(updated.authflows[0].isApproved).toBe(false);
+    });
+
+    it('should pick the lowest-order unapproved step regardless of array order', () => {
+        const group1 = makeGroup('group-1', [approver1], false);
+        const group2 = makeGroup('group-2', [approver1], false);
+        const step1 = makeStep('step-1', 5, [group1], false);
+        const step2 = makeStep('step-2', 2, [group2], false);
+        const authflow = makeAuthflow(
+            'authflow-1',
+            'submit',
+            [step1, step2],
+            false
+        );
+        const document = makeDocument([authflow]);
+
+        const result = approveDocument({
+            document,
+            action: 'submit',
+            groupId: 'group-2',
+            approver: approver1,
+        });
+
+        expect(result.isOk()).toBe(true);
+        const updated = result.unwrap();
+        // step2 (order 2) should be approved, step1 (order 5) should remain
+        const approvedStep = updated.authflows[0].steps.find(
+            (s) => s.order === 2
+        );
+        const unapprovedStep = updated.authflows[0].steps.find(
+            (s) => s.order === 5
+        );
+        expect(approvedStep!.isApproved).toBe(true);
+        expect(unapprovedStep!.isApproved).toBe(false);
+    });
+
+    it('should fully approve authflow when last step is approved', () => {
+        const group1 = makeGroup('group-1', [approver1], true);
+        const group2 = makeGroup('group-2', [approver1], false);
+        const step1 = makeStep('step-1', 0, [group1], true);
+        const step2 = makeStep('step-2', 1, [group2], false);
+        const authflow = makeAuthflow(
+            'authflow-1',
+            'submit',
+            [step1, step2],
+            false
+        );
+        const document = makeDocument([authflow]);
+
+        const result = approveDocument({
+            document,
+            action: 'submit',
+            groupId: 'group-2',
+            approver: approver1,
+        });
+
+        expect(result.isOk()).toBe(true);
+        const updated = result.unwrap();
+        expect(updated.authflows[0].isApproved).toBe(true);
+        expect(updated.authflows[0].steps[0].isApproved).toBe(true);
+        expect(updated.authflows[0].steps[1].isApproved).toBe(true);
+    });
+
+    it('should not affect other authflows when approving one', () => {
+        const group1 = makeGroup('group-1', [approver1], false);
+        const group2 = makeGroup('group-2', [approver1], false);
+        const step1 = makeStep('step-1', 0, [group1], false);
+        const step2 = makeStep('step-2', 0, [group2], false);
+        const authflow1 = makeAuthflow('authflow-1', 'submit', [step1], false);
+        const authflow2 = makeAuthflow('authflow-2', 'review', [step2], false);
+        const document = makeDocument([authflow1, authflow2]);
+
+        const result = approveDocument({
+            document,
+            action: 'submit',
+            groupId: 'group-1',
+            approver: approver1,
+        });
+
+        expect(result.isOk()).toBe(true);
+        const updated = result.unwrap();
+        expect(updated.authflows[0].isApproved).toBe(true);
+        expect(updated.authflows[1].isApproved).toBe(false);
+        expect(updated.authflows[1].steps[0].isApproved).toBe(false);
+    });
+
+    it('should fail when action is not found', () => {
+        const group = makeGroup('group-1', [approver1], false);
+        const step = makeStep('step-1', 0, [group], false);
+        const authflow = makeAuthflow('authflow-1', 'submit', [step], false);
+        const document = makeDocument([authflow]);
+
+        const result = approveDocument({
+            document,
+            action: 'non-existent',
+            groupId: 'group-1',
+            approver: approver1,
+        });
+
+        expect(result.isError()).toBe(true);
+        const error = result.unwrapError();
+        expect(error.message).toBe(
+            'Authflow with action non-existent not found'
+        );
+    });
+
+    it('should fail when all steps are already approved', () => {
+        const group = makeGroup('group-1', [approver1], true);
+        const step = makeStep('step-1', 0, [group], true);
+        const authflow = makeAuthflow('authflow-1', 'submit', [step], true);
+        const document = makeDocument([authflow]);
+
+        const result = approveDocument({
+            document,
+            action: 'submit',
+            groupId: 'group-1',
+            approver: approver1,
+        });
+
+        expect(result.isError()).toBe(true);
+        const error = result.unwrapError();
+        expect(error.message).toBe('No pending steps found for action submit');
+    });
+
+    it('should fail when group is not found in the current step', () => {
+        const group = makeGroup('group-1', [approver1], false);
+        const step = makeStep('step-1', 0, [group], false);
+        const authflow = makeAuthflow('authflow-1', 'submit', [step], false);
+        const document = makeDocument([authflow]);
+
+        const result = approveDocument({
+            document,
+            action: 'submit',
+            groupId: 'non-existent-group',
+            approver: approver1,
+        });
+
+        expect(result.isError()).toBe(true);
+        const error = result.unwrapError();
+        expect(error.code).toBe(
+            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND
+        );
+    });
+
+    it('should fail when approver is not in the group', () => {
+        const group = makeGroup('group-1', [approver1], false);
+        const step = makeStep('step-1', 0, [group], false);
+        const authflow = makeAuthflow('authflow-1', 'submit', [step], false);
+        const document = makeDocument([authflow]);
+
+        const result = approveDocument({
+            document,
+            action: 'submit',
+            groupId: 'group-1',
+            approver: approver2,
+        });
+
+        expect(result.isError()).toBe(true);
+        const error = result.unwrapError();
+        expect(error.code).toBe(
+            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVER_NOT_FOUND
+        );
+    });
+
+    it('should preserve document id and referenceId after approval', () => {
+        const group = makeGroup('group-1', [approver1], false);
+        const step = makeStep('step-1', 0, [group], false);
+        const authflow = makeAuthflow('authflow-1', 'submit', [step], false);
+        const document = makeDocument([authflow]);
+
+        const result = approveDocument({
+            document,
+            action: 'submit',
+            groupId: 'group-1',
+            approver: approver1,
+        });
+
+        expect(result.isOk()).toBe(true);
+        const updated = result.unwrap();
+        expect(updated.id).toBe('doc-1');
+        expect(updated.referenceId).toBe('INV-001');
+    });
+
+    it('should support sequential approvals across steps', () => {
+        const group1 = makeGroup('group-1', [approver1], false);
+        const group2 = makeGroup('group-2', [approver1], false);
+        const step1 = makeStep('step-1', 0, [group1], false);
+        const step2 = makeStep('step-2', 1, [group2], false);
+        const authflow = makeAuthflow(
+            'authflow-1',
+            'submit',
+            [step1, step2],
+            false
+        );
+        const document = makeDocument([authflow]);
+
+        // First approval — step 1
+        const result1 = approveDocument({
+            document,
+            action: 'submit',
+            groupId: 'group-1',
+            approver: approver1,
+        });
+
+        expect(result1.isOk()).toBe(true);
+        const afterFirst = result1.unwrap();
+        expect(afterFirst.authflows[0].steps[0].isApproved).toBe(true);
+        expect(afterFirst.authflows[0].steps[1].isApproved).toBe(false);
+        expect(afterFirst.authflows[0].isApproved).toBe(false);
+
+        // Second approval — step 2
+        const result2 = approveDocument({
+            document: afterFirst,
+            action: 'submit',
+            groupId: 'group-2',
+            approver: approver1,
+        });
+
+        expect(result2.isOk()).toBe(true);
+        const afterSecond = result2.unwrap();
+        expect(afterSecond.authflows[0].steps[0].isApproved).toBe(true);
+        expect(afterSecond.authflows[0].steps[1].isApproved).toBe(true);
+        expect(afterSecond.authflows[0].isApproved).toBe(true);
+    });
+
+    it('should handle multiple groups in a single step', () => {
+        const group1 = makeGroup('group-1', [approver1], false);
+        const group2 = makeGroup('group-2', [approver2], false);
+        const step = makeStep('step-1', 0, [group1, group2], false);
+        const authflow = makeAuthflow('authflow-1', 'submit', [step], false);
+        const document = makeDocument([authflow]);
+
+        // Approve first group
+        const result1 = approveDocument({
+            document,
+            action: 'submit',
+            groupId: 'group-1',
+            approver: approver1,
+        });
+
+        expect(result1.isOk()).toBe(true);
+        const afterFirst = result1.unwrap();
+        // Step has 2 groups, only 1 approved — step should still be approved
+        // because group isApproved is based on having any approval
+        expect(afterFirst.authflows[0].steps[0].groups).toHaveLength(2);
+
+        // Approve second group
+        const result2 = approveDocument({
+            document: afterFirst,
+            action: 'submit',
+            groupId: 'group-2',
+            approver: approver2,
+        });
+
+        expect(result2.isOk()).toBe(true);
+        const afterSecond = result2.unwrap();
+        expect(afterSecond.authflows[0].isApproved).toBe(true);
     });
 });
