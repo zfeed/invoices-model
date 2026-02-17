@@ -1,6 +1,6 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { Step } from '../step/step';
-import { createAuthflow } from './authflow';
+import { Authflow, createAuthflow, findAuthflowByAction } from './authflow';
 
 describe('createAuthflow', () => {
     it('should create an authflow successfully with all steps approved', () => {
@@ -692,5 +692,76 @@ describe('createAuthflow', () => {
         expect(error.code).toBe(
             DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_STEP_ORDER_DUPLICATE
         );
+    });
+});
+
+describe('findAuthflowByAction', () => {
+    const makeAuthflow = (id: string, action: string): Authflow => ({
+        id,
+        action,
+        isApproved: false,
+        steps: [],
+    });
+
+    it('should find an authflow by action', () => {
+        const authflows = [
+            makeAuthflow('1', 'submit'),
+            makeAuthflow('2', 'review'),
+        ];
+
+        const result = findAuthflowByAction(authflows, 'review');
+
+        expect(result.isOk()).toBe(true);
+        expect(result.unwrap().id).toBe('2');
+    });
+
+    it('should return the first matching authflow', () => {
+        const authflows = [
+            makeAuthflow('1', 'submit'),
+            makeAuthflow('2', 'review'),
+            makeAuthflow('3', 'approve'),
+        ];
+
+        const result = findAuthflowByAction(authflows, 'submit');
+
+        expect(result.isOk()).toBe(true);
+        expect(result.unwrap().id).toBe('1');
+    });
+
+    it('should return an error when action is not found', () => {
+        const authflows = [
+            makeAuthflow('1', 'submit'),
+            makeAuthflow('2', 'review'),
+        ];
+
+        const result = findAuthflowByAction(authflows, 'non-existent');
+
+        expect(result.isError()).toBe(true);
+        const error = result.unwrapError();
+        expect(error.message).toBe(
+            'Authflow with action non-existent not found'
+        );
+        expect(error.code).toBe(
+            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_NOT_FOUND
+        );
+    });
+
+    it('should return an error when authflows array is empty', () => {
+        const result = findAuthflowByAction([], 'submit');
+
+        expect(result.isError()).toBe(true);
+        const error = result.unwrapError();
+        expect(error.message).toBe('Authflow with action submit not found');
+        expect(error.code).toBe(
+            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_NOT_FOUND
+        );
+    });
+
+    it('should treat action names as case-sensitive', () => {
+        const authflows = [makeAuthflow('1', 'Submit')];
+
+        const result = findAuthflowByAction(authflows, 'submit');
+
+        expect(result.isError()).toBe(true);
     });
 });

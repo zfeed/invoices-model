@@ -413,6 +413,9 @@ describe('approveDocument', () => {
         expect(error.message).toBe(
             'Authflow with action non-existent not found'
         );
+        expect(error.code).toBe(
+            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_NOT_FOUND
+        );
     });
 
     it('should fail when all steps are already approved', () => {
@@ -430,7 +433,10 @@ describe('approveDocument', () => {
 
         expect(result.isError()).toBe(true);
         const error = result.unwrapError();
-        expect(error.message).toBe('No pending steps found for action submit');
+        expect(error.message).toBe('No pending steps found');
+        expect(error.code).toBe(
+            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NO_PENDING_STEPS
+        );
     });
 
     it('should fail when group is not found in the current step', () => {

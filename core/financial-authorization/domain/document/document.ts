@@ -1,11 +1,14 @@
 import { randomUUID } from 'crypto';
 import { applySpec, find, prop, propEq, propOr } from 'ramda';
-import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
 import { Approver } from '../approver/approver';
-import { Authflow, createAuthflow } from '../authflow/authflow';
-import { approveStep, Step } from '../step/step';
+import {
+    Authflow,
+    createAuthflow,
+    findAuthflowByAction,
+} from '../authflow/authflow';
+import { approveStep, findCurrentStep, Step } from '../step/step';
 import { noDuplicateAuthflowActions } from './checks/check-no-duplicate-authflow-actions';
 
 export type FinancialDocument = {
@@ -55,35 +58,15 @@ type ApproveWithStep = ApproveWithAuthflow & { step: Step };
 
 const findAuthflow = (
     data: ApproveDocumentInput
-): Result<DomainError, ApproveWithAuthflow> => {
-    const authflow = data.document.authflows.find(
-        (a) => a.action === data.action
+): Result<DomainError, ApproveWithAuthflow> =>
+    findAuthflowByAction(data.document.authflows, data.action).map(
+        (authflow) => ({ ...data, authflow })
     );
-    return authflow
-        ? Result.ok({ ...data, authflow })
-        : Result.error(
-              new DomainError({
-                  code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_ACTION_DUPLICATE,
-                  message: `Authflow with action ${data.action} not found`,
-              })
-          );
-};
 
-const findCurrentStep = (
+const findCurrentStepForAuthflow = (
     data: ApproveWithAuthflow
-): Result<DomainError, ApproveWithStep> => {
-    const step = data.authflow.steps
-        .filter((s) => !s.isApproved)
-        .sort((a, b) => a.order - b.order)[0];
-    return step
-        ? Result.ok({ ...data, step })
-        : Result.error(
-              new DomainError({
-                  code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_ACTION_DUPLICATE,
-                  message: `No pending steps found for action ${data.action}`,
-              })
-          );
-};
+): Result<DomainError, ApproveWithStep> =>
+    findCurrentStep(data.authflow.steps).map((step) => ({ ...data, step }));
 
 const applyStepApproval = (
     data: ApproveWithStep
@@ -113,5 +96,5 @@ export const approveDocument = (
 ): Result<DomainError, FinancialDocument> =>
     Result.ok<DomainError, ApproveDocumentInput>(data)
         .flatMap(findAuthflow)
-        .flatMap(findCurrentStep)
+        .flatMap(findCurrentStepForAuthflow)
         .flatMap(applyStepApproval);

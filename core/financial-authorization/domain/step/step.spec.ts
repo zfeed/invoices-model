@@ -1,6 +1,7 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { Group } from '../groups/group';
-import { createStep } from './step';
+import { Step } from '../step/step';
+import { createStep, findCurrentStep } from './step';
 
 describe('createStep', () => {
     it('should create a step successfully with all groups approved', () => {
@@ -368,5 +369,96 @@ describe('createStep', () => {
         expect(step1.id).toBeDefined();
         expect(step2.id).toBeDefined();
         expect(step1.id).not.toBe(step2.id);
+    });
+});
+
+describe('findCurrentStep', () => {
+    const makeStep = (
+        id: string,
+        order: number,
+        isApproved: boolean
+    ): Step => ({
+        id,
+        order,
+        isApproved,
+        groups: [],
+    });
+
+    it('should return the first unapproved step by order', () => {
+        const steps = [
+            makeStep('step-1', 0, false),
+            makeStep('step-2', 1, false),
+        ];
+
+        const result = findCurrentStep(steps);
+
+        expect(result.isOk()).toBe(true);
+        expect(result.unwrap().id).toBe('step-1');
+    });
+
+    it('should skip approved steps', () => {
+        const steps = [
+            makeStep('step-1', 0, true),
+            makeStep('step-2', 1, false),
+            makeStep('step-3', 2, false),
+        ];
+
+        const result = findCurrentStep(steps);
+
+        expect(result.isOk()).toBe(true);
+        expect(result.unwrap().id).toBe('step-2');
+    });
+
+    it('should pick the lowest-order unapproved step regardless of array order', () => {
+        const steps = [
+            makeStep('step-1', 5, false),
+            makeStep('step-2', 2, false),
+            makeStep('step-3', 8, false),
+        ];
+
+        const result = findCurrentStep(steps);
+
+        expect(result.isOk()).toBe(true);
+        expect(result.unwrap().id).toBe('step-2');
+    });
+
+    it('should return an error when all steps are approved', () => {
+        const steps = [
+            makeStep('step-1', 0, true),
+            makeStep('step-2', 1, true),
+        ];
+
+        const result = findCurrentStep(steps);
+
+        expect(result.isError()).toBe(true);
+        const error = result.unwrapError();
+        expect(error.message).toBe('No pending steps found');
+        expect(error.code).toBe(
+            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NO_PENDING_STEPS
+        );
+    });
+
+    it('should return an error when steps array is empty', () => {
+        const result = findCurrentStep([]);
+
+        expect(result.isError()).toBe(true);
+        const error = result.unwrapError();
+        expect(error.message).toBe('No pending steps found');
+        expect(error.code).toBe(
+            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NO_PENDING_STEPS
+        );
+    });
+
+    it('should return the only unapproved step', () => {
+        const steps = [
+            makeStep('step-1', 0, true),
+            makeStep('step-2', 1, true),
+            makeStep('step-3', 2, false),
+        ];
+
+        const result = findCurrentStep(steps);
+
+        expect(result.isOk()).toBe(true);
+        expect(result.unwrap().id).toBe('step-3');
     });
 });

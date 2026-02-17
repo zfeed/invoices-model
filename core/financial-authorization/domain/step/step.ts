@@ -66,6 +66,20 @@ export const createStep = (data: StepInput): Result<DomainError, Step> =>
         .flatMap(orderNonNegative)
         .map(buildStep);
 
+export const findCurrentStep = (steps: Step[]): Result<DomainError, Step> => {
+    const step = steps
+        .filter((s) => !s.isApproved)
+        .sort((a, b) => a.order - b.order)[0];
+    return step
+        ? Result.ok(step)
+        : Result.error(
+              new DomainError({
+                  code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NO_PENDING_STEPS,
+                  message: 'No pending steps found',
+              })
+          );
+};
+
 export const approveStep = (data: ApproveInput): Result<DomainError, Step> =>
     Result.ok<DomainError, ApproveInput>(data)
         .flatMap(findGroup)
