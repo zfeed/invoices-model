@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import { applySpec, isNotEmpty, pipe, prop } from 'ramda';
+import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
 import { Approval, createApproval } from '../approval/approval';
@@ -35,15 +36,56 @@ export const createGroup = (data: GroupInput): Result<DomainError, Group> =>
         .flatMap(approvalsNotDuplicated)
         .map(buildGroup);
 
-export const approveGroup = (
-    group: Group,
-    approver: Approver,
-    comment: string | null = null
-): Result<DomainError, Group> =>
-    createApproval({ approverId: approver.id, comment }).flatMap(
-        (newApproval) =>
-            createGroup({
-                approvers: group.approvers,
-                approvals: [...group.approvals, newApproval],
-            })
+type ApproveGroupInput = {
+    groups: Group[];
+    approver: Approver;
+};
+
+type ApproveGroupWithGroup = ApproveGroupInput & { group: Group };
+
+type ApproveGroupWithApproval = ApproveGroupWithGroup & {
+    approval: Approval;
+};
+
+const findGroup = (
+    data: ApproveGroupInput
+): Result<DomainError, ApproveGroupWithGroup> => {
+    const group = data.groups.find(
+        (g) =>
+            !g.isApproved && g.approvers.some((a) => a.id === data.approver.id)
     );
+    return group
+        ? Result.ok({ ...data, group })
+        : Result.error(
+              new DomainError({
+                  code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND,
+                  message: `No eligible group found for approver ${data.approver.id}`,
+              })
+          );
+};
+
+const addApproval = (
+    data: ApproveGroupWithGroup
+): Result<DomainError, ApproveGroupWithApproval> =>
+    createApproval({ approverId: data.approver.id, comment: null }).map(
+        (approval) => ({ ...data, approval })
+    );
+
+const buildUpdatedGroups = (
+    data: ApproveGroupWithApproval
+): Result<DomainError, Group[]> =>
+    createGroup({
+        approvers: data.group.approvers,
+        approvals: [...data.group.approvals, data.approval],
+    }).map((updatedGroup) =>
+        data.groups.map((g) => (g.id === data.group.id ? updatedGroup : g))
+    );
+
+export const approveGroup = (
+    groups: Group[],
+    approver: Approver
+): Result<DomainError, Group[]> =>
+    Result.ok<DomainError, ApproveGroupInput>({ groups, approver })
+        .flatMap(findGroup)
+        .flatMap(addApproval)
+        .flatMap(buildUpdatedGroups);
