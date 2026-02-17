@@ -5,10 +5,9 @@ import { Result } from '../../../../building-blocks/result';
 import { Approver } from '../approver/approver';
 import {
     Authflow,
-    createAuthflow,
+    approveAuthflow,
     findAuthflowByAction,
 } from '../authflow/authflow';
-import { approveStep, findCurrentStep, Step } from '../step/step';
 import { noDuplicateAuthflowActions } from './checks/check-no-duplicate-authflow-actions';
 
 export type FinancialDocument = {
@@ -54,8 +53,6 @@ type ApproveDocumentInput = {
 
 type ApproveWithAuthflow = ApproveDocumentInput & { authflow: Authflow };
 
-type ApproveWithStep = ApproveWithAuthflow & { step: Step };
-
 const findAuthflow = (
     data: ApproveDocumentInput
 ): Result<DomainError, ApproveWithAuthflow> =>
@@ -63,38 +60,23 @@ const findAuthflow = (
         (authflow) => ({ ...data, authflow })
     );
 
-const findCurrentStepForAuthflow = (
+const applyAuthflowApproval = (
     data: ApproveWithAuthflow
-): Result<DomainError, ApproveWithStep> =>
-    findCurrentStep(data.authflow.steps).map((step) => ({ ...data, step }));
-
-const applyStepApproval = (
-    data: ApproveWithStep
 ): Result<DomainError, FinancialDocument> =>
-    approveStep({
-        step: data.step,
+    approveAuthflow({
+        authflow: data.authflow,
         groupId: data.groupId,
         approver: data.approver,
-    })
-        .flatMap((updatedStep) =>
-            createAuthflow({
-                action: data.authflow.action,
-                steps: data.authflow.steps.map((s) =>
-                    s.id === data.step.id ? updatedStep : s
-                ),
-            })
-        )
-        .map((updatedAuthflow) => ({
-            ...data.document,
-            authflows: data.document.authflows.map((a) =>
-                a.id === data.authflow.id ? updatedAuthflow : a
-            ),
-        }));
+    }).map((updatedAuthflow) => ({
+        ...data.document,
+        authflows: data.document.authflows.map((a) =>
+            a.id === data.authflow.id ? updatedAuthflow : a
+        ),
+    }));
 
 export const approveDocument = (
     data: ApproveDocumentInput
 ): Result<DomainError, FinancialDocument> =>
     Result.ok<DomainError, ApproveDocumentInput>(data)
         .flatMap(findAuthflow)
-        .flatMap(findCurrentStepForAuthflow)
-        .flatMap(applyStepApproval);
+        .flatMap(applyAuthflowApproval);

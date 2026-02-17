@@ -3,7 +3,8 @@ import { all, applySpec, prop } from 'ramda';
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
-import { Step } from '../step/step';
+import { Approver } from '../approver/approver';
+import { approveStep, findCurrentStep, Step } from '../step/step';
 import { noDuplicateStepOrders } from './checks/check-no-duplicate-step-orders';
 
 export type Authflow = {
@@ -49,3 +50,27 @@ export const findAuthflowByAction = (
               })
           );
 };
+
+type ApproveAuthflowInput = {
+    authflow: Authflow;
+    groupId: string;
+    approver: Approver;
+};
+
+export const approveAuthflow = (
+    data: ApproveAuthflowInput
+): Result<DomainError, Authflow> =>
+    findCurrentStep(data.authflow.steps).flatMap((step) =>
+        approveStep({
+            step,
+            groupId: data.groupId,
+            approver: data.approver,
+        }).flatMap((updatedStep) =>
+            createAuthflow({
+                action: data.authflow.action,
+                steps: data.authflow.steps.map((s) =>
+                    s.id === step.id ? updatedStep : s
+                ),
+            })
+        )
+    );
