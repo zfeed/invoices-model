@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto';
 import { applySpec, isNotEmpty, pipe, prop } from 'ramda';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
-import { Approval } from '../approval/approval';
+import { Approval, createApproval } from '../approval/approval';
 import { Approver } from '../approver/approver';
 import { approvalReferencesExistingApprover } from './checks/check-approver-exists';
 import { approversNotEmpty } from './checks/check-approvers-not-empty';
@@ -37,9 +37,13 @@ export const createGroup = (data: GroupInput): Result<DomainError, Group> =>
 
 export const approveGroup = (
     group: Group,
-    approver: Approver
+    approver: Approver,
+    comment: string | null = null
 ): Result<DomainError, Group> =>
-    createGroup({
-        approvers: [...group.approvers, approver],
-        approvals: group.approvals,
-    });
+    createApproval({ approverId: approver.id, comment }).flatMap(
+        (newApproval) =>
+            createGroup({
+                approvers: group.approvers,
+                approvals: [...group.approvals, newApproval],
+            })
+    );
