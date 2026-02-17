@@ -3,10 +3,12 @@ import { isEmail } from 'validator';
 import { DOMAIN_ERROR_CODE } from '../../../../../building-blocks/errors/domain/domain-codes';
 import { DomainError } from '../../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../../building-blocks/result';
+import { Email } from '../../email/email';
+import { Name } from '../../name/name';
 
 type ApproverInput = {
-    name: string;
-    email: string;
+    name: Name;
+    email: Email;
 };
 
 const emailInvalid = (data: ApproverInput) => !isEmail(data.email);

@@ -3,9 +3,10 @@ import { DOMAIN_ERROR_CODE } from '../../../../../building-blocks/errors/domain/
 import { DomainError } from '../../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../../building-blocks/result';
 import { Group } from '../../groups/group';
+import { Order } from '../../order/order';
 
 type StepInput = {
-    order: number;
+    order: Order;
     groups: Group[];
 };
 

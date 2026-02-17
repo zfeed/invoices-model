@@ -1,18 +1,20 @@
 import { applySpec, prop } from 'ramda';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
+import { Email } from '../email/email';
+import { Name } from '../name/name';
 import { createId, Id } from '../id/id';
 import { emailHasValidFormat } from './checks/check-email-format';
 
 export type Approver = {
     id: Id;
-    name: string;
-    email: string;
+    name: Name;
+    email: Email;
 };
 
 type ApproverInput = {
-    name: string;
-    email: string;
+    name: Name;
+    email: Email;
 };
 
 const buildApprover = applySpec<Approver>({

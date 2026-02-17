@@ -5,17 +5,18 @@ import { Result } from '../../../../building-blocks/result';
 import { Approver } from '../approver/approver';
 import { approveGroup, Group } from '../groups/group';
 import { createId, Id } from '../id/id';
+import { Order } from '../order/order';
 import { orderNonNegative } from './checks/check-order-non-negative';
 
 export type Step = {
     id: Id;
-    order: number;
+    order: Order;
     isApproved: boolean;
     groups: Group[];
 };
 
 type StepInput = {
-    order: number;
+    order: Order;
     groups: Group[];
 };
 

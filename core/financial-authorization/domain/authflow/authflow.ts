@@ -3,19 +3,20 @@ import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/dom
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
 import { Approver } from '../approver/approver';
+import { Action } from '../action/action';
 import { createId, Id } from '../id/id';
 import { approveStep, Step } from '../step/step';
 import { noDuplicateStepOrders } from './checks/check-no-duplicate-step-orders';
 
 export type Authflow = {
     id: Id;
-    action: string;
+    action: Action;
     isApproved: boolean;
     steps: Step[];
 };
 
 export type AuthflowInput = {
-    action: string;
+    action: Action;
     steps: Step[];
 };
 
@@ -54,7 +55,7 @@ const recreateAuthflow = (
 
 export const findAuthflowByAction = (
     authflows: Authflow[],
-    action: string
+    action: Action
 ): Result<DomainError, Authflow> => {
     const authflow = authflows.find((a) => a.action === action);
     return authflow
@@ -69,7 +70,7 @@ export const findAuthflowByAction = (
 
 type ApproveAuthflowInput = {
     authflows: Authflow[];
-    action: string;
+    action: Action;
     approver: Approver;
 };
 

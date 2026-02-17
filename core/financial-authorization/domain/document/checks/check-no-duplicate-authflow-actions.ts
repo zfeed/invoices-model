@@ -3,9 +3,10 @@ import { DOMAIN_ERROR_CODE } from '../../../../../building-blocks/errors/domain/
 import { DomainError } from '../../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../../building-blocks/result';
 import { Authflow } from '../../authflow/authflow';
+import { ReferenceId } from '../../reference-id/reference-id';
 
 type DocumentInput = {
-    referenceId: string;
+    referenceId: ReferenceId;
     authflows: Authflow[];
 };
 

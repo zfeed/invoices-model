@@ -2,18 +2,20 @@ import { applySpec, find, prop, propEq, propOr } from 'ramda';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
 import { Approver } from '../approver/approver';
+import { Action } from '../action/action';
 import { Authflow, approveAuthflow } from '../authflow/authflow';
+import { ReferenceId } from '../reference-id/reference-id';
 import { createId, Id } from '../id/id';
 import { noDuplicateAuthflowActions } from './checks/check-no-duplicate-authflow-actions';
 
 export type FinancialDocument = {
     id: Id;
-    referenceId: string;
+    referenceId: ReferenceId;
     authflows: Authflow[];
 };
 
 type DocumentInput = {
-    referenceId: string;
+    referenceId: ReferenceId;
     authflows: Authflow[];
 };
 
@@ -47,7 +49,7 @@ const recreateDocument = (
 
 export const isActionApproved = (
     document: FinancialDocument,
-    action: string
+    action: Action
 ): boolean =>
     propOr(
         false,
@@ -57,7 +59,7 @@ export const isActionApproved = (
 
 type ApproveDocumentInput = {
     document: FinancialDocument;
-    action: string;
+    action: Action;
     approver: Approver;
 };
 
