@@ -1,13 +1,13 @@
-import { randomUUID } from 'crypto';
 import { applySpec, find, prop, propEq, propOr } from 'ramda';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
 import { Approver } from '../approver/approver';
 import { Authflow, approveAuthflow } from '../authflow/authflow';
+import { createId, Id } from '../id/id';
 import { noDuplicateAuthflowActions } from './checks/check-no-duplicate-authflow-actions';
 
 export type FinancialDocument = {
-    id: string;
+    id: Id;
     referenceId: string;
     authflows: Authflow[];
 };
@@ -17,8 +17,16 @@ type DocumentInput = {
     authflows: Authflow[];
 };
 
+type RebuildDocumentInput = DocumentInput & { id: Id };
+
 const buildDocument = applySpec<FinancialDocument>({
-    id: () => randomUUID(),
+    id: () => createId(),
+    referenceId: prop('referenceId'),
+    authflows: prop('authflows'),
+});
+
+const rebuildDocument = applySpec<FinancialDocument>({
+    id: prop('id'),
     referenceId: prop('referenceId'),
     authflows: prop('authflows'),
 });
@@ -29,6 +37,13 @@ export const createDocument = (
     Result.ok<DomainError, DocumentInput>(data)
         .flatMap(noDuplicateAuthflowActions)
         .map(buildDocument);
+
+const recreateDocument = (
+    data: RebuildDocumentInput
+): Result<DomainError, FinancialDocument> =>
+    Result.ok<DomainError, RebuildDocumentInput>(data)
+        .flatMap(noDuplicateAuthflowActions)
+        .map(rebuildDocument);
 
 export const isActionApproved = (
     document: FinancialDocument,
@@ -62,7 +77,8 @@ const buildApprovedDocument =
         updatedAuthflow: Authflow
     ) => Result<DomainError, FinancialDocument>) =>
     (updatedAuthflow) =>
-        createDocument({
+        recreateDocument({
+            id: data.document.id,
             referenceId: data.document.referenceId,
             authflows: data.document.authflows.map((a) =>
                 a.action === data.action ? updatedAuthflow : a

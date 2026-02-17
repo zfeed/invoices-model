@@ -1,14 +1,14 @@
-import { randomUUID } from 'crypto';
 import { applySpec, prop } from 'ramda';
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
 import { Approver } from '../approver/approver';
 import { approveGroup, Group } from '../groups/group';
+import { createId, Id } from '../id/id';
 import { orderNonNegative } from './checks/check-order-non-negative';
 
 export type Step = {
-    id: string;
+    id: Id;
     order: number;
     isApproved: boolean;
     groups: Group[];
@@ -19,11 +19,20 @@ type StepInput = {
     groups: Group[];
 };
 
+type RebuildStepInput = StepInput & { id: Id };
+
 const allGroupsApproved = (data: StepInput) =>
     data.groups.every((group) => group.isApproved);
 
 const buildStep = applySpec<Step>({
-    id: () => randomUUID(),
+    id: () => createId(),
+    order: prop('order'),
+    isApproved: allGroupsApproved,
+    groups: prop('groups'),
+});
+
+const rebuildStep = applySpec<Step>({
+    id: prop('id'),
     order: prop('order'),
     isApproved: allGroupsApproved,
     groups: prop('groups'),
@@ -68,12 +77,21 @@ const applyAproval = (
 const buildApprovedStep = (
     data: ApproveStepWithGroups
 ): Result<DomainError, Step> =>
-    createStep({ order: data.step.order, groups: data.updatedGroups });
+    recreateStep({
+        id: data.step.id,
+        order: data.step.order,
+        groups: data.updatedGroups,
+    });
 
 export const createStep = (data: StepInput): Result<DomainError, Step> =>
     Result.ok<DomainError, StepInput>(data)
         .flatMap(orderNonNegative)
         .map(buildStep);
+
+const recreateStep = (data: RebuildStepInput): Result<DomainError, Step> =>
+    Result.ok<DomainError, RebuildStepInput>(data)
+        .flatMap(orderNonNegative)
+        .map(rebuildStep);
 
 export const approveStep = (
     data: ApproveStepInput

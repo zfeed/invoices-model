@@ -1,4 +1,4 @@
-import { createId, createIdString } from './id';
+import { createId } from './id';
 
 describe('Id', () => {
     describe('createId', () => {
@@ -13,13 +13,6 @@ describe('Id', () => {
             const id1 = createId();
             const id2 = createId();
             expect(id1).not.toBe(id2);
-        });
-    });
-
-    describe('createIdString', () => {
-        it('should return the given string as Id', () => {
-            const id = createIdString('test-id');
-            expect(id).toBe('test-id');
         });
     });
 });

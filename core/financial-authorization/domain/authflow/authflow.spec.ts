@@ -986,6 +986,86 @@ describe('approveAuthflow', () => {
         expect(afterSecond.isApproved).toBe(true);
     });
 
+    it('should preserve authflow id after approval', () => {
+        const group = makeGroup('group-1', [approver1], false);
+        const step = makeStep('step-1', 0, [group], false);
+        const authflow: Authflow = {
+            id: 'authflow-1',
+            action: 'submit',
+            isApproved: false,
+            steps: [step],
+        };
+
+        const result = approveAuthflow({
+            authflows: [authflow],
+            action: 'submit',
+            approver: approver1,
+        });
+
+        expect(result.isOk()).toBe(true);
+        const updated = result.unwrap();
+        expect(updated.id).toBe('authflow-1');
+    });
+
+    it('should preserve step and group ids after approval', () => {
+        const group = makeGroup('group-1', [approver1], false);
+        const step = makeStep('step-1', 0, [group], false);
+        const authflow: Authflow = {
+            id: 'authflow-1',
+            action: 'submit',
+            isApproved: false,
+            steps: [step],
+        };
+
+        const result = approveAuthflow({
+            authflows: [authflow],
+            action: 'submit',
+            approver: approver1,
+        });
+
+        expect(result.isOk()).toBe(true);
+        const updated = result.unwrap();
+        expect(updated.steps[0].id).toBe('step-1');
+        expect(updated.steps[0].groups[0].id).toBe('group-1');
+    });
+
+    it('should preserve all ids across sequential approvals', () => {
+        const group1 = makeGroup('group-1', [approver1], false);
+        const group2 = makeGroup('group-2', [approver1], false);
+        const step1 = makeStep('step-1', 0, [group1], false);
+        const step2 = makeStep('step-2', 1, [group2], false);
+        const authflow: Authflow = {
+            id: 'authflow-1',
+            action: 'submit',
+            isApproved: false,
+            steps: [step1, step2],
+        };
+
+        const result1 = approveAuthflow({
+            authflows: [authflow],
+            action: 'submit',
+            approver: approver1,
+        });
+
+        expect(result1.isOk()).toBe(true);
+        const afterFirst = result1.unwrap();
+        expect(afterFirst.id).toBe('authflow-1');
+        expect(afterFirst.steps[0].id).toBe('step-1');
+        expect(afterFirst.steps[1].id).toBe('step-2');
+
+        const result2 = approveAuthflow({
+            authflows: [afterFirst],
+            action: 'submit',
+            approver: approver1,
+        });
+
+        expect(result2.isOk()).toBe(true);
+        const afterSecond = result2.unwrap();
+        expect(afterSecond.id).toBe('authflow-1');
+        expect(afterSecond.steps[0].id).toBe('step-1');
+        expect(afterSecond.steps[1].id).toBe('step-2');
+    });
+
     it('should preserve the action name after approval', () => {
         const group = makeGroup('group-1', [approver1], false);
         const step = makeStep('step-1', 0, [group], false);

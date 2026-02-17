@@ -1,11 +1,11 @@
-import { randomUUID } from 'crypto';
 import { applySpec, prop } from 'ramda';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
+import { createId, Id } from '../id/id';
 import { emailHasValidFormat } from './checks/check-email-format';
 
 export type Approver = {
-    id: string;
+    id: Id;
     name: string;
     email: string;
 };
@@ -16,7 +16,7 @@ type ApproverInput = {
 };
 
 const buildApprover = applySpec<Approver>({
-    id: () => randomUUID(),
+    id: () => createId(),
     name: prop('name'),
     email: prop('email'),
 });

@@ -1,14 +1,14 @@
-import { randomUUID } from 'crypto';
 import { all, applySpec, prop } from 'ramda';
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
 import { Approver } from '../approver/approver';
+import { createId, Id } from '../id/id';
 import { approveStep, Step } from '../step/step';
 import { noDuplicateStepOrders } from './checks/check-no-duplicate-step-orders';
 
 export type Authflow = {
-    id: string;
+    id: Id;
     action: string;
     isApproved: boolean;
     steps: Step[];
@@ -19,11 +19,20 @@ export type AuthflowInput = {
     steps: Step[];
 };
 
+type RebuildAuthflowInput = AuthflowInput & { id: Id };
+
 const allStepsApproved = (data: AuthflowInput): boolean =>
     all(prop('isApproved'), data.steps);
 
 const buildAuthflow = applySpec<Authflow>({
-    id: () => randomUUID(),
+    id: () => createId(),
+    action: prop('action'),
+    isApproved: allStepsApproved,
+    steps: prop('steps'),
+});
+
+const rebuildAuthflow = applySpec<Authflow>({
+    id: prop('id'),
     action: prop('action'),
     isApproved: allStepsApproved,
     steps: prop('steps'),
@@ -35,6 +44,13 @@ export const createAuthflow = (
     Result.ok<DomainError, AuthflowInput>(data)
         .flatMap(noDuplicateStepOrders)
         .map(buildAuthflow);
+
+const recreateAuthflow = (
+    data: RebuildAuthflowInput
+): Result<DomainError, Authflow> =>
+    Result.ok<DomainError, RebuildAuthflowInput>(data)
+        .flatMap(noDuplicateStepOrders)
+        .map(rebuildAuthflow);
 
 export const findAuthflowByAction = (
     authflows: Authflow[],
@@ -80,7 +96,8 @@ const applyApproval = (
 const buildApprovedAuthflow = (
     data: ApproveWithStep
 ): Result<DomainError, Authflow> =>
-    createAuthflow({
+    recreateAuthflow({
+        id: data.authflow.id,
         action: data.authflow.action,
         steps: data.authflow.steps.map((s) =>
             s.order === data.updatedStep.order ? data.updatedStep : s

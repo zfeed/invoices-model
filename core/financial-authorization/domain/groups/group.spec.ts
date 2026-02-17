@@ -593,6 +593,21 @@ describe('approveGroup', () => {
         expect(secondApprovalResult.isError()).toBe(true);
     });
 
+    it('should preserve group id after approval', () => {
+        const groupResult = createGroup({
+            approvers: [approver1, approver2],
+            approvals: [],
+        });
+        const group = groupResult.unwrap();
+        const originalId = group.id;
+
+        const result = approveGroup([group], approver1);
+
+        expect(result.isOk()).toBe(true);
+        const approvedGroups = result.unwrap();
+        expect(approvedGroups[0].id).toBe(originalId);
+    });
+
     it('should preserve approver order when adding approval', () => {
         const groupResult = createGroup({
             approvers: [approver1, approver2, approver3],

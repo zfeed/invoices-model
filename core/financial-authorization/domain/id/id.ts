@@ -5,7 +5,3 @@ export type Id = string;
 export function createId(): Id {
     return randomUUID();
 }
-
-export function createIdString(id: string): Id {
-    return id;
-}

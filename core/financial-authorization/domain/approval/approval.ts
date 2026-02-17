@@ -1,15 +1,16 @@
 import { applySpec, prop } from 'ramda';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
+import { Id } from '../id/id';
 
 export type Approval = {
-    approverId: string;
+    approverId: Id;
     createdAt: Date;
     comment: string | null;
 };
 
 type ApprovalInput = {
-    approverId: string;
+    approverId: Id;
     comment: string | null;
 };
 

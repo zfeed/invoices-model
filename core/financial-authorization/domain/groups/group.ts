@@ -1,16 +1,16 @@
-import { randomUUID } from 'crypto';
 import { applySpec, isNotEmpty, pipe, prop } from 'ramda';
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
 import { Approval, createApproval } from '../approval/approval';
 import { Approver } from '../approver/approver';
+import { createId, Id } from '../id/id';
 import { approvalReferencesExistingApprover } from './checks/check-approver-exists';
 import { approversNotEmpty } from './checks/check-approvers-not-empty';
 import { approvalsNotDuplicated } from './checks/check-no-duplicate-approvals';
 import { approversNotDuplicated } from './checks/check-no-duplicate-approvers';
 export type Group = {
-    id: string;
+    id: Id;
     isApproved: boolean;
     approvers: Approver[];
     approvals: Approval[];
@@ -21,8 +21,17 @@ type GroupInput = {
     approvals: Approval[];
 };
 
+type RebuildGroupInput = GroupInput & { id: Id };
+
 const buildGroup = applySpec<Group>({
-    id: () => randomUUID(),
+    id: () => createId(),
+    isApproved: pipe(prop('approvals'), isNotEmpty),
+    approvers: prop('approvers'),
+    approvals: prop('approvals'),
+});
+
+const rebuildGroup = applySpec<Group>({
+    id: prop('id'),
     isApproved: pipe(prop('approvals'), isNotEmpty),
     approvers: prop('approvers'),
     approvals: prop('approvals'),
@@ -35,6 +44,14 @@ export const createGroup = (data: GroupInput): Result<DomainError, Group> =>
         .flatMap(approvalReferencesExistingApprover)
         .flatMap(approvalsNotDuplicated)
         .map(buildGroup);
+
+const recreateGroup = (data: RebuildGroupInput): Result<DomainError, Group> =>
+    Result.ok<DomainError, RebuildGroupInput>(data)
+        .flatMap(approversNotEmpty)
+        .flatMap(approversNotDuplicated)
+        .flatMap(approvalReferencesExistingApprover)
+        .flatMap(approvalsNotDuplicated)
+        .map(rebuildGroup);
 
 type ApproveGroupInput = {
     groups: Group[];
@@ -74,7 +91,8 @@ const addApproval = (
 const buildUpdatedGroups = (
     data: ApproveGroupWithApproval
 ): Result<DomainError, Group[]> =>
-    createGroup({
+    recreateGroup({
+        id: data.group.id,
         approvers: data.group.approvers,
         approvals: [...data.group.approvals, data.approval],
     }).map((updatedGroup) =>
