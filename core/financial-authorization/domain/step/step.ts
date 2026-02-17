@@ -29,11 +29,6 @@ const buildStep = applySpec<Step>({
     groups: prop('groups'),
 });
 
-export const createStep = (data: StepInput): Result<DomainError, Step> =>
-    Result.ok<DomainError, StepInput>(data)
-        .flatMap(orderNonNegative)
-        .map(buildStep);
-
 const findCurrentStep = (steps: Step[]): Result<DomainError, Step> => {
     const step = steps
         .filter((s) => !s.isApproved)
@@ -74,6 +69,11 @@ const buildApprovedStep = (
     data: ApproveStepWithGroups
 ): Result<DomainError, Step> =>
     createStep({ order: data.step.order, groups: data.updatedGroups });
+
+export const createStep = (data: StepInput): Result<DomainError, Step> =>
+    Result.ok<DomainError, StepInput>(data)
+        .flatMap(orderNonNegative)
+        .map(buildStep);
 
 export const approveStep = (
     data: ApproveStepInput

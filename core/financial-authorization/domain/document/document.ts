@@ -3,11 +3,7 @@ import { applySpec, find, prop, propEq, propOr } from 'ramda';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
 import { Approver } from '../approver/approver';
-import {
-    Authflow,
-    approveAuthflow,
-    findAuthflowByAction,
-} from '../authflow/authflow';
+import { Authflow, approveAuthflow } from '../authflow/authflow';
 import { noDuplicateAuthflowActions } from './checks/check-no-duplicate-authflow-actions';
 
 export type FinancialDocument = {
@@ -47,36 +43,26 @@ export const isActionApproved = (
 type ApproveDocumentInput = {
     document: FinancialDocument;
     action: string;
-    groupId: string;
     approver: Approver;
 };
 
-type ApproveWithAuthflow = ApproveDocumentInput & { authflow: Authflow };
-
-const findAuthflow = (
-    data: ApproveDocumentInput
-): Result<DomainError, ApproveWithAuthflow> =>
-    findAuthflowByAction(data.document.authflows, data.action).map(
-        (authflow) => ({ ...data, authflow })
-    );
-
 const applyAuthflowApproval = (
-    data: ApproveWithAuthflow
+    data: ApproveDocumentInput
 ): Result<DomainError, FinancialDocument> =>
     approveAuthflow({
-        authflow: data.authflow,
-        groupId: data.groupId,
+        authflows: data.document.authflows,
+        action: data.action,
         approver: data.approver,
     }).map((updatedAuthflow) => ({
         ...data.document,
         authflows: data.document.authflows.map((a) =>
-            a.id === data.authflow.id ? updatedAuthflow : a
+            a.action === data.action ? updatedAuthflow : a
         ),
     }));
 
 export const approveDocument = (
     data: ApproveDocumentInput
 ): Result<DomainError, FinancialDocument> =>
-    Result.ok<DomainError, ApproveDocumentInput>(data)
-        .flatMap(findAuthflow)
-        .flatMap(applyAuthflowApproval);
+    Result.ok<DomainError, ApproveDocumentInput>(data).flatMap(
+        applyAuthflowApproval
+    );

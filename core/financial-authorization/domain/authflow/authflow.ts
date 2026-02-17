@@ -4,7 +4,7 @@ import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/dom
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
 import { Approver } from '../approver/approver';
-import { approveStep, findCurrentStep, Step } from '../step/step';
+import { approveStep, Step } from '../step/step';
 import { noDuplicateStepOrders } from './checks/check-no-duplicate-step-orders';
 
 export type Authflow = {
@@ -52,25 +52,45 @@ export const findAuthflowByAction = (
 };
 
 type ApproveAuthflowInput = {
-    authflow: Authflow;
-    groupId: string;
+    authflows: Authflow[];
+    action: string;
     approver: Approver;
 };
+
+type ApproveWithAuthflow = ApproveAuthflowInput & { authflow: Authflow };
+
+type ApproveWithStep = ApproveWithAuthflow & { updatedStep: Step };
+
+const findAuthflow = (
+    data: ApproveAuthflowInput
+): Result<DomainError, ApproveWithAuthflow> =>
+    findAuthflowByAction(data.authflows, data.action).map((authflow) => ({
+        ...data,
+        authflow,
+    }));
+
+const applyApproval = (
+    data: ApproveWithAuthflow
+): Result<DomainError, ApproveWithStep> =>
+    approveStep({
+        steps: data.authflow.steps,
+        approver: data.approver,
+    }).map((updatedStep) => ({ ...data, updatedStep }));
+
+const buildApprovedAuthflow = (
+    data: ApproveWithStep
+): Result<DomainError, Authflow> =>
+    createAuthflow({
+        action: data.authflow.action,
+        steps: data.authflow.steps.map((s) =>
+            s.id === data.updatedStep.id ? data.updatedStep : s
+        ),
+    });
 
 export const approveAuthflow = (
     data: ApproveAuthflowInput
 ): Result<DomainError, Authflow> =>
-    findCurrentStep(data.authflow.steps).flatMap((step) =>
-        approveStep({
-            step,
-            groupId: data.groupId,
-            approver: data.approver,
-        }).flatMap((updatedStep) =>
-            createAuthflow({
-                action: data.authflow.action,
-                steps: data.authflow.steps.map((s) =>
-                    s.id === step.id ? updatedStep : s
-                ),
-            })
-        )
-    );
+    Result.ok<DomainError, ApproveAuthflowInput>(data)
+        .flatMap(findAuthflow)
+        .flatMap(applyApproval)
+        .flatMap(buildApprovedAuthflow);
