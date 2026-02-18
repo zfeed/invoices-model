@@ -6,6 +6,6 @@ export interface DomainEvents {
 
     subscribeToEvent<T extends DomainEvent<D>, D>(
         eventClass: new (...args: any[]) => T,
-        handler: (event: T) => void
+        handler: (event: T) => void | Promise<void>
     ): void;
 }

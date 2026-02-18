@@ -1,20 +1,13 @@
-import { Id } from '../../domain/id/id';
+import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
+import { IO } from '../../../../building-blocks/io';
+import { Result } from '../../../../building-blocks/result';
+import { Some } from '../../../../building-blocks/some';
+import { FinancialDocument } from '../../domain/document/document';
+import { ReferenceId } from '../../domain/reference-id/reference-id';
 
-interface Either<L, R> {
-    map<U>(fn: (value: R) => U): Either<L, U>;
-    flatMap<U>(fn: (value: R) => Either<L, U>): Either<L, U>;
-}
-
-interface Some<T> {
-    map<U>(fn: (value: T) => U): Some<U>;
-    flatMap<U>(fn: (value: T) => Some<U>): Some<U>;
-    unwrap(): T | null;
-}
-
-export interface IO<T> {
-    findById(id: Id): IO<Some<T>>;
-    save(type: T): IO<Either<Error, T>>;
-    update(entity: T): IO<Either<Error, T>>;
-    map<U>(fn: (value: T) => U): IO<U>;
-    flatMap<U>(fn: (value: T) => IO<U>): IO<U>;
+export interface DocumentStorage {
+    findByReferenceId(referenceId: ReferenceId): IO<Some<FinancialDocument>>;
+    save(
+        document: FinancialDocument
+    ): IO<Result<DomainError, FinancialDocument>>;
 }
