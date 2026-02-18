@@ -6,12 +6,14 @@ import { Action } from '../action/action';
 import { Authflow, approveAuthflow } from '../authflow/authflow';
 import { ReferenceId } from '../reference-id/reference-id';
 import { createId, Id } from '../id/id';
+import { Version } from '../version/version';
 import { noDuplicateAuthflowActions } from './checks/check-no-duplicate-authflow-actions';
 
 export type FinancialDocument = {
     id: Id;
     referenceId: ReferenceId;
     authflows: Authflow[];
+    version: Version;
 };
 
 type DocumentInput = {
@@ -19,18 +21,20 @@ type DocumentInput = {
     authflows: Authflow[];
 };
 
-type RebuildDocumentInput = DocumentInput & { id: Id };
+type RebuildDocumentInput = DocumentInput & { id: Id; version: Version };
 
 const buildDocument = applySpec<FinancialDocument>({
     id: () => createId(),
     referenceId: prop('referenceId'),
     authflows: prop('authflows'),
+    version: () => 0,
 });
 
 const rebuildDocument = applySpec<FinancialDocument>({
     id: prop('id'),
     referenceId: prop('referenceId'),
     authflows: prop('authflows'),
+    version: prop('version'),
 });
 
 export const createDocument = (
@@ -85,6 +89,7 @@ const buildApprovedDocument =
             authflows: data.document.authflows.map((a) =>
                 a.action === data.action ? updatedAuthflow : a
             ),
+            version: data.document.version,
         });
 
 export const approveDocument = (

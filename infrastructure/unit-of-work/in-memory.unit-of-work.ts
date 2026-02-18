@@ -7,7 +7,7 @@ import {
 import '../mappers/draft-invoice.mapper';
 import '../mappers/invoice.mapper';
 import { EntityClass, mappers, stores } from '../registry';
-import { OptimisticConcurrencyError } from '../../core/invoices/application/unit-of-work/optimistic-concurrency.error';
+import { OptimisticConcurrencyError } from '../../core/shared/optimistic-concurrency.error';
 import { Store } from '../store/store';
 
 export class InMemoryUnitOfWorkFactory implements UnitOfWorkFactory {

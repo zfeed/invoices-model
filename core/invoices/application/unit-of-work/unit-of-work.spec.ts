@@ -2,7 +2,7 @@ import { DraftInvoice } from '../../domain/draft-invoice/draft-invoice';
 import { Id } from '../../domain/id/id';
 import { LineItem } from '../../domain/line-item/line-item';
 import { InMemoryUnitOfWorkFactory } from '../../../../infrastructure/unit-of-work/in-memory.unit-of-work';
-import { OptimisticConcurrencyError } from './optimistic-concurrency.error';
+import { OptimisticConcurrencyError } from '../../../shared/optimistic-concurrency.error';
 import { Invoice } from '../../domain/invoice/invoice';
 import { CalendarDate } from '../../domain/calendar-date/calendar-date';
 import { Issuer, ISSUER_TYPE } from '../../domain/issuer/issuer';

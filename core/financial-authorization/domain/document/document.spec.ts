@@ -264,6 +264,7 @@ describe('approveDocument', () => {
         id: 'doc-1',
         referenceId: 'INV-001',
         authflows,
+        version: 0,
     });
 
     it('should approve a document with a single step and single group', () => {
