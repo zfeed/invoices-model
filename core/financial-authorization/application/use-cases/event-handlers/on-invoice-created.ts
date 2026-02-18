@@ -14,17 +14,18 @@ const extractReferenceId = (data: { id: string }) => createReferenceId(data.id);
 const createNewDocument = (referenceId: string): FinancialDocument =>
     createDocument({ referenceId, authflows: [] }).unwrap();
 
-const saveIfMissing =
+const saveNewDocument =
+    (storage: DocumentStorage) =>
+    (referenceId: string): IO<FinancialDocument> =>
+        storage
+            .save(createNewDocument(referenceId))
+            .map((result) => result.unwrap());
+
+const orElseCreate =
     (storage: DocumentStorage) =>
     (referenceId: string) =>
     (found: Some<FinancialDocument>): IO<FinancialDocument> =>
-        found.fold(
-            () =>
-                storage
-                    .save(createNewDocument(referenceId))
-                    .map((result) => result.unwrap()),
-            (existing) => IO.of(existing)
-        );
+        found.fold(() => saveNewDocument(storage)(referenceId), IO.of);
 
 const handleEvent =
     (storage: DocumentStorage) =>
@@ -33,7 +34,7 @@ const handleEvent =
 
         await storage
             .findByReferenceId(referenceId)
-            .flatMap(saveIfMissing(storage)(referenceId))
+            .flatMap(orElseCreate(storage)(referenceId))
             .run();
     };
 
