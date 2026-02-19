@@ -4,6 +4,7 @@ import { Result } from '../../../../building-blocks/result';
 import { Action } from '../action/action';
 import { createId, Id } from '../id/id';
 import { Money } from '../money/money';
+import { Version } from '../version/version';
 import { Authflow } from './authflow';
 import { authflowFromTemplate } from './authflow-from-template';
 import { AuthflowTemplate } from './authflow-template';
@@ -14,6 +15,7 @@ export type AuthflowPolicy = {
     id: Id;
     action: Action;
     templates: AuthflowTemplate[];
+    version: Version;
 };
 
 export type AuthflowPolicyInput = {
@@ -21,18 +23,20 @@ export type AuthflowPolicyInput = {
     templates: AuthflowTemplate[];
 };
 
-type RebuildAuthflowPolicyInput = AuthflowPolicyInput & { id: Id };
+type RebuildAuthflowPolicyInput = AuthflowPolicyInput & { id: Id; version: Version };
 
 const buildAuthflowPolicy = applySpec<AuthflowPolicy>({
     id: () => createId(),
     action: prop('action'),
     templates: prop('templates'),
+    version: () => 0,
 });
 
 const rebuildAuthflowPolicy = applySpec<AuthflowPolicy>({
     id: prop('id'),
     action: prop('action'),
     templates: prop('templates'),
+    version: prop('version'),
 });
 
 export const createAuthflowPolicy = (
