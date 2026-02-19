@@ -12,7 +12,6 @@ describe('authflowFromTemplate', () => {
     it('should create an authflow instance from a template with empty approvals', () => {
         const template: AuthflowTemplate = {
             id: 'template-1',
-            action: 'approve-invoice',
             range: testRange,
             steps: [
                 {
@@ -34,7 +33,7 @@ describe('authflowFromTemplate', () => {
             ],
         };
 
-        const result = authflowFromTemplate(template);
+        const result = authflowFromTemplate('approve-invoice', template);
 
         expect(result.isOk()).toBe(true);
         const authflow = result.unwrap();
@@ -50,12 +49,11 @@ describe('authflowFromTemplate', () => {
     it('should create a new ID for the instance (not reuse template ID)', () => {
         const template: AuthflowTemplate = {
             id: 'template-1',
-            action: 'approve-invoice',
             range: testRange,
             steps: [],
         };
 
-        const result = authflowFromTemplate(template);
+        const result = authflowFromTemplate('approve-invoice', template);
 
         expect(result.isOk()).toBe(true);
         const authflow = result.unwrap();
@@ -66,7 +64,6 @@ describe('authflowFromTemplate', () => {
     it('should handle template with multiple steps and groups', () => {
         const template: AuthflowTemplate = {
             id: 'template-1',
-            action: 'approve-invoice',
             range: testRange,
             steps: [
                 {
@@ -114,7 +111,7 @@ describe('authflowFromTemplate', () => {
             ],
         };
 
-        const result = authflowFromTemplate(template);
+        const result = authflowFromTemplate('approve-invoice', template);
 
         expect(result.isOk()).toBe(true);
         const authflow = result.unwrap();
@@ -130,12 +127,11 @@ describe('authflowFromTemplate', () => {
     it('should handle template with empty steps', () => {
         const template: AuthflowTemplate = {
             id: 'template-1',
-            action: 'approve-invoice',
             range: testRange,
             steps: [],
         };
 
-        const result = authflowFromTemplate(template);
+        const result = authflowFromTemplate('approve-invoice', template);
 
         expect(result.isOk()).toBe(true);
         const authflow = result.unwrap();
@@ -146,7 +142,6 @@ describe('authflowFromTemplate', () => {
     it('should preserve approvers from the template', () => {
         const template: AuthflowTemplate = {
             id: 'template-1',
-            action: 'approve-invoice',
             range: testRange,
             steps: [
                 {
@@ -173,7 +168,7 @@ describe('authflowFromTemplate', () => {
             ],
         };
 
-        const result = authflowFromTemplate(template);
+        const result = authflowFromTemplate('approve-invoice', template);
 
         expect(result.isOk()).toBe(true);
         const authflow = result.unwrap();
@@ -188,7 +183,6 @@ describe('authflowFromTemplate', () => {
     it('should preserve step order from the template', () => {
         const template: AuthflowTemplate = {
             id: 'template-1',
-            action: 'approve-invoice',
             range: testRange,
             steps: [
                 { id: 'step-1', order: 5, groups: [] },
@@ -196,7 +190,7 @@ describe('authflowFromTemplate', () => {
             ],
         };
 
-        const result = authflowFromTemplate(template);
+        const result = authflowFromTemplate('approve-invoice', template);
 
         expect(result.isOk()).toBe(true);
         const authflow = result.unwrap();

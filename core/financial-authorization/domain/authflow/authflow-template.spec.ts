@@ -47,28 +47,24 @@ describe('createAuthflowTemplate', () => {
         ];
 
         const result = createAuthflowTemplate({
-            action: 'approve-invoice',
             range: testRange,
             steps,
         });
 
         expect(result.isOk()).toBe(true);
         const authflow = result.unwrap();
-        expect(authflow.action).toBe('approve-invoice');
         expect(authflow.steps).toHaveLength(2);
         expect(authflow.id).toBeDefined();
     });
 
     it('should create an authflow template with empty steps', () => {
         const result = createAuthflowTemplate({
-            action: 'approve-invoice',
             range: testRange,
             steps: [],
         });
 
         expect(result.isOk()).toBe(true);
         const authflow = result.unwrap();
-        expect(authflow.action).toBe('approve-invoice');
         expect(authflow.steps).toHaveLength(0);
     });
 
@@ -79,7 +75,6 @@ describe('createAuthflowTemplate', () => {
         ];
 
         const result = createAuthflowTemplate({
-            action: 'approve-invoice',
             range: testRange,
             steps,
         });
@@ -100,7 +95,6 @@ describe('createAuthflowTemplate', () => {
         ];
 
         const result = createAuthflowTemplate({
-            action: 'approve-transfer',
             range: testRange,
             steps,
         });
@@ -112,12 +106,10 @@ describe('createAuthflowTemplate', () => {
 
     it('should generate a unique ID for each authflow template', () => {
         const result1 = createAuthflowTemplate({
-            action: 'action-1',
             range: testRange,
             steps: [],
         });
         const result2 = createAuthflowTemplate({
-            action: 'action-2',
             range: testRange,
             steps: [],
         });
@@ -129,7 +121,6 @@ describe('createAuthflowTemplate', () => {
 
     it('should not have isApproved property', () => {
         const result = createAuthflowTemplate({
-            action: 'approve-invoice',
             range: testRange,
             steps: [],
         });
