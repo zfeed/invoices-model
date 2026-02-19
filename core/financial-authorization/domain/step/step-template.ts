@@ -1,0 +1,65 @@
+import { applySpec, prop } from 'ramda';
+import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
+import { Result } from '../../../../building-blocks/result';
+import { GroupTemplate, groupsFromTemplates } from '../groups/group-template';
+import { createStep, Step } from './step';
+import { createId, Id } from '../id/id';
+import { Order } from '../order/order';
+import { templateOrderNonNegative } from './checks/check-template-order-non-negative';
+
+export type StepTemplate = {
+    id: Id;
+    order: Order;
+    groups: GroupTemplate[];
+};
+
+export type StepTemplateInput = {
+    order: Order;
+    groups: GroupTemplate[];
+};
+
+type RebuildStepTemplateInput = StepTemplateInput & { id: Id };
+
+const buildStepTemplate = applySpec<StepTemplate>({
+    id: () => createId(),
+    order: prop('order'),
+    groups: prop('groups'),
+});
+
+const rebuildStepTemplate = applySpec<StepTemplate>({
+    id: prop('id'),
+    order: prop('order'),
+    groups: prop('groups'),
+});
+
+export const createStepTemplate = (
+    data: StepTemplateInput
+): Result<DomainError, StepTemplate> =>
+    Result.ok<DomainError, StepTemplateInput>(data)
+        .flatMap(templateOrderNonNegative)
+        .map(buildStepTemplate);
+
+export const recreateStepTemplate = (
+    data: RebuildStepTemplateInput
+): Result<DomainError, StepTemplate> =>
+    Result.ok<DomainError, RebuildStepTemplateInput>(data)
+        .flatMap(templateOrderNonNegative)
+        .map(rebuildStepTemplate);
+
+export const stepFromTemplate = (
+    template: StepTemplate
+): Result<DomainError, Step> =>
+    groupsFromTemplates(template.groups).flatMap((groups) =>
+        createStep({ order: template.order, groups })
+    );
+
+export const stepsFromTemplates = (
+    templates: StepTemplate[]
+): Result<DomainError, Step[]> =>
+    templates.reduce<Result<DomainError, Step[]>>(
+        (acc, template) =>
+            acc.flatMap((steps) =>
+                stepFromTemplate(template).map((step) => [...steps, step])
+            ),
+        Result.ok([])
+    );
