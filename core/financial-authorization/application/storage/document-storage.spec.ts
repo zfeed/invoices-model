@@ -7,10 +7,15 @@ import { createStep } from '../../domain/step/step';
 import { createGroup } from '../../domain/groups/group';
 import { createApprover } from '../../domain/approver/approver';
 import { createMoney } from '../../domain/money/money';
+import { createRange } from '../../domain/range/range';
 import { OptimisticConcurrencyError } from '../../../shared/optimistic-concurrency.error';
 import { InMemoryDocumentStorage } from '../../../../infrastructure/storage/in-memory.document-storage';
 
 const testMoney = createMoney('10000', 'USD').unwrap();
+const testRange = createRange(
+    createMoney('0', 'USD').unwrap(),
+    createMoney('100000', 'USD').unwrap()
+).unwrap();
 
 const buildDocumentWithAuthflows = (): FinancialDocument => {
     const approver = createApprover({
@@ -27,6 +32,7 @@ const buildDocumentWithAuthflows = (): FinancialDocument => {
 
     const authflow = createAuthflow({
         action: 'approve-payment',
+        range: testRange,
         steps: [step],
     }).unwrap();
 

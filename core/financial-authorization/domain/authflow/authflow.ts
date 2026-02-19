@@ -5,18 +5,21 @@ import { Result } from '../../../../building-blocks/result';
 import { Approver } from '../approver/approver';
 import { Action } from '../action/action';
 import { createId, Id } from '../id/id';
+import { Range } from '../range/range';
 import { approveStep, Step } from '../step/step';
 import { noDuplicateStepOrders } from './checks/check-no-duplicate-step-orders';
 
 export type Authflow = {
     id: Id;
     action: Action;
+    range: Range;
     isApproved: boolean;
     steps: Step[];
 };
 
 export type AuthflowInput = {
     action: Action;
+    range: Range;
     steps: Step[];
 };
 
@@ -28,6 +31,7 @@ const allStepsApproved = (data: AuthflowInput): boolean =>
 const buildAuthflow = applySpec<Authflow>({
     id: () => createId(),
     action: prop('action'),
+    range: prop('range'),
     isApproved: allStepsApproved,
     steps: prop('steps'),
 });
@@ -35,6 +39,7 @@ const buildAuthflow = applySpec<Authflow>({
 const rebuildAuthflow = applySpec<Authflow>({
     id: prop('id'),
     action: prop('action'),
+    range: prop('range'),
     isApproved: allStepsApproved,
     steps: prop('steps'),
 });
@@ -100,6 +105,7 @@ const buildApprovedAuthflow = (
     recreateAuthflow({
         id: data.authflow.id,
         action: data.authflow.action,
+        range: data.authflow.range,
         steps: data.authflow.steps.map((s) =>
             s.order === data.updatedStep.order ? data.updatedStep : s
         ),

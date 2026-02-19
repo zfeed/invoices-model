@@ -3,17 +3,22 @@ import { Approver } from '../approver/approver';
 import { Authflow } from '../authflow/authflow';
 import { Group } from '../groups/group';
 import { createMoney } from '../money/money';
+import { createRange } from '../range/range';
 import { Step } from '../step/step';
 import { approveDocument, createDocument, FinancialDocument } from './document';
 
 const testMoney = createMoney('10000', 'USD').unwrap();
+const testRange = createRange(
+    createMoney('0', 'USD').unwrap(),
+    createMoney('100000', 'USD').unwrap()
+).unwrap();
 
 describe('createDocument', () => {
     it('should create a document successfully with unique authflow actions', () => {
         const authflows: Authflow[] = [
-            { id: '1', action: 'approve', isApproved: false, steps: [] },
-            { id: '2', action: 'reject', isApproved: false, steps: [] },
-            { id: '3', action: 'review', isApproved: false, steps: [] },
+            { id: '1', action: 'approve', range: testRange, isApproved: false, steps: [] },
+            { id: '2', action: 'reject', range: testRange, isApproved: false, steps: [] },
+            { id: '3', action: 'review', range: testRange, isApproved: false, steps: [] },
         ];
 
         const result = createDocument({
@@ -47,7 +52,7 @@ describe('createDocument', () => {
 
     it('should create a document successfully with a single authflow', () => {
         const authflows: Authflow[] = [
-            { id: '1', action: 'approve', isApproved: true, steps: [] },
+            { id: '1', action: 'approve', range: testRange, isApproved: true, steps: [] },
         ];
 
         const result = createDocument({
@@ -64,9 +69,9 @@ describe('createDocument', () => {
 
     it('should fail to create a document with duplicate authflow actions', () => {
         const authflows: Authflow[] = [
-            { id: '1', action: 'approve', isApproved: false, steps: [] },
-            { id: '2', action: 'reject', isApproved: false, steps: [] },
-            { id: '3', action: 'approve', isApproved: false, steps: [] },
+            { id: '1', action: 'approve', range: testRange, isApproved: false, steps: [] },
+            { id: '2', action: 'reject', range: testRange, isApproved: false, steps: [] },
+            { id: '3', action: 'approve', range: testRange, isApproved: false, steps: [] },
         ];
 
         const result = createDocument({
@@ -85,9 +90,9 @@ describe('createDocument', () => {
 
     it('should fail when all authflows have the same action', () => {
         const authflows: Authflow[] = [
-            { id: '1', action: 'approve', isApproved: false, steps: [] },
-            { id: '2', action: 'approve', isApproved: false, steps: [] },
-            { id: '3', action: 'approve', isApproved: false, steps: [] },
+            { id: '1', action: 'approve', range: testRange, isApproved: false, steps: [] },
+            { id: '2', action: 'approve', range: testRange, isApproved: false, steps: [] },
+            { id: '3', action: 'approve', range: testRange, isApproved: false, steps: [] },
         ];
 
         const result = createDocument({
@@ -106,10 +111,10 @@ describe('createDocument', () => {
 
     it('should fail when two authflows have the same action among unique ones', () => {
         const authflows: Authflow[] = [
-            { id: '1', action: 'approve', isApproved: false, steps: [] },
-            { id: '2', action: 'reject', isApproved: false, steps: [] },
-            { id: '3', action: 'review', isApproved: false, steps: [] },
-            { id: '4', action: 'reject', isApproved: false, steps: [] },
+            { id: '1', action: 'approve', range: testRange, isApproved: false, steps: [] },
+            { id: '2', action: 'reject', range: testRange, isApproved: false, steps: [] },
+            { id: '3', action: 'review', range: testRange, isApproved: false, steps: [] },
+            { id: '4', action: 'reject', range: testRange, isApproved: false, steps: [] },
         ];
 
         const result = createDocument({
@@ -128,9 +133,9 @@ describe('createDocument', () => {
 
     it('should treat action names as case-sensitive', () => {
         const authflows: Authflow[] = [
-            { id: '1', action: 'approve', isApproved: false, steps: [] },
-            { id: '2', action: 'Approve', isApproved: false, steps: [] },
-            { id: '3', action: 'APPROVE', isApproved: false, steps: [] },
+            { id: '1', action: 'approve', range: testRange, isApproved: false, steps: [] },
+            { id: '2', action: 'Approve', range: testRange, isApproved: false, steps: [] },
+            { id: '3', action: 'APPROVE', range: testRange, isApproved: false, steps: [] },
         ];
 
         const result = createDocument({
@@ -146,7 +151,7 @@ describe('createDocument', () => {
 
     it('should generate a unique id for the document', () => {
         const authflows: Authflow[] = [
-            { id: '1', action: 'approve', isApproved: false, steps: [] },
+            { id: '1', action: 'approve', range: testRange, isApproved: false, steps: [] },
         ];
 
         const result1 = createDocument({
@@ -174,8 +179,8 @@ describe('createDocument', () => {
 
     it('should preserve authflow data in the created document', () => {
         const authflows: Authflow[] = [
-            { id: 'flow-1', action: 'approve', isApproved: true, steps: [] },
-            { id: 'flow-2', action: 'reject', isApproved: false, steps: [] },
+            { id: 'flow-1', action: 'approve', range: testRange, isApproved: true, steps: [] },
+            { id: 'flow-2', action: 'reject', range: testRange, isApproved: false, steps: [] },
         ];
 
         const result = createDocument({
@@ -272,6 +277,7 @@ describe('approveDocument', () => {
     ): Authflow => ({
         id,
         action,
+        range: testRange,
         isApproved,
         steps,
     });

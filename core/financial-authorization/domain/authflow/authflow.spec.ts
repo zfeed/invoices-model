@@ -2,12 +2,19 @@ import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/dom
 import { Approver } from '../approver/approver';
 import { Group } from '../groups/group';
 import { Step } from '../step/step';
+import { createMoney } from '../money/money';
+import { createRange } from '../range/range';
 import {
     Authflow,
     approveAuthflow,
     createAuthflow,
     findAuthflowByAction,
 } from './authflow';
+
+const testRange = createRange(
+    createMoney('0', 'USD').unwrap(),
+    createMoney('100000', 'USD').unwrap()
+).unwrap();
 
 describe('createAuthflow', () => {
     it('should create an authflow successfully with all steps approved', () => {
@@ -62,6 +69,7 @@ describe('createAuthflow', () => {
 
         const result = createAuthflow({
             action: 'approve-invoice',
+            range: testRange,
             steps,
         });
 
@@ -119,6 +127,7 @@ describe('createAuthflow', () => {
 
         const result = createAuthflow({
             action: 'approve-invoice',
+            range: testRange,
             steps,
         });
 
@@ -169,6 +178,7 @@ describe('createAuthflow', () => {
 
         const result = createAuthflow({
             action: 'approve-payment',
+            range: testRange,
             steps,
         });
 
@@ -184,6 +194,7 @@ describe('createAuthflow', () => {
 
         const result = createAuthflow({
             action: 'approve-invoice',
+            range: testRange,
             steps,
         });
 
@@ -246,6 +257,7 @@ describe('createAuthflow', () => {
 
         const result = createAuthflow({
             action: 'approve-invoice',
+            range: testRange,
             steps,
         });
 
@@ -281,6 +293,7 @@ describe('createAuthflow', () => {
 
         const result = createAuthflow({
             action: 'approve-contract',
+            range: testRange,
             steps,
         });
 
@@ -316,6 +329,7 @@ describe('createAuthflow', () => {
 
         const result = createAuthflow({
             action: 'approve-expense',
+            range: testRange,
             steps,
         });
 
@@ -351,6 +365,7 @@ describe('createAuthflow', () => {
 
         const result = createAuthflow({
             action: 'approve-budget',
+            range: testRange,
             steps,
         });
 
@@ -385,6 +400,7 @@ describe('createAuthflow', () => {
 
         const result = createAuthflow({
             action: 'approve-transfer',
+            range: testRange,
             steps,
         });
 
@@ -426,6 +442,7 @@ describe('createAuthflow', () => {
 
         const result = createAuthflow({
             action: 'approve-invoice',
+            range: testRange,
             steps,
         });
 
@@ -462,6 +479,7 @@ describe('createAuthflow', () => {
 
         const result = createAuthflow({
             action: 'approve-payment',
+            range: testRange,
             steps,
         });
 
@@ -496,6 +514,7 @@ describe('createAuthflow', () => {
 
         const result = createAuthflow({
             action: 'approve-invoice',
+            range: testRange,
             steps,
         });
 
@@ -530,6 +549,7 @@ describe('createAuthflow', () => {
 
         const result = createAuthflow({
             action: 'approve-purchase',
+            range: testRange,
             steps,
         });
 
@@ -552,11 +572,13 @@ describe('createAuthflow', () => {
 
         const result1 = createAuthflow({
             action: 'approve-invoice-1',
+            range: testRange,
             steps,
         });
 
         const result2 = createAuthflow({
             action: 'approve-invoice-2',
+            range: testRange,
             steps,
         });
 
@@ -576,16 +598,19 @@ describe('createAuthflow', () => {
 
         const result1 = createAuthflow({
             action: 'approve-invoice',
+            range: testRange,
             steps,
         });
 
         const result2 = createAuthflow({
             action: 'approve-payment',
+            range: testRange,
             steps,
         });
 
         const result3 = createAuthflow({
             action: 'approve-contract',
+            range: testRange,
             steps,
         });
 
@@ -660,6 +685,7 @@ describe('createAuthflow', () => {
 
         const result = createAuthflow({
             action: 'approve-major-purchase',
+            range: testRange,
             steps,
         });
 
@@ -690,6 +716,7 @@ describe('createAuthflow', () => {
 
         const result = createAuthflow({
             action: 'approve-invoice',
+            range: testRange,
             steps,
         });
 
@@ -706,6 +733,7 @@ describe('findAuthflowByAction', () => {
     const makeAuthflow = (id: string, action: string): Authflow => ({
         id,
         action,
+        range: testRange,
         isApproved: false,
         steps: [],
     });
@@ -821,6 +849,7 @@ describe('approveAuthflow', () => {
         const authflow: Authflow = {
             id: 'authflow-1',
             action: 'submit',
+            range: testRange,
             isApproved: false,
             steps: [step],
         };
@@ -845,6 +874,7 @@ describe('approveAuthflow', () => {
         const authflow: Authflow = {
             id: 'authflow-1',
             action: 'submit',
+            range: testRange,
             isApproved: false,
             steps: [step1, step2],
         };
@@ -870,6 +900,7 @@ describe('approveAuthflow', () => {
         const authflow: Authflow = {
             id: 'authflow-1',
             action: 'submit',
+            range: testRange,
             isApproved: false,
             steps: [step1, step2],
         };
@@ -891,6 +922,7 @@ describe('approveAuthflow', () => {
         const authflow: Authflow = {
             id: 'authflow-1',
             action: 'submit',
+            range: testRange,
             isApproved: true,
             steps: [step],
         };
@@ -913,6 +945,7 @@ describe('approveAuthflow', () => {
         const authflow: Authflow = {
             id: 'authflow-1',
             action: 'submit',
+            range: testRange,
             isApproved: false,
             steps: [step],
         };
@@ -935,6 +968,7 @@ describe('approveAuthflow', () => {
         const authflow: Authflow = {
             id: 'authflow-1',
             action: 'submit',
+            range: testRange,
             isApproved: false,
             steps: [step],
         };
@@ -959,6 +993,7 @@ describe('approveAuthflow', () => {
         const authflow: Authflow = {
             id: 'authflow-1',
             action: 'submit',
+            range: testRange,
             isApproved: false,
             steps: [step1, step2],
         };
@@ -992,6 +1027,7 @@ describe('approveAuthflow', () => {
         const authflow: Authflow = {
             id: 'authflow-1',
             action: 'submit',
+            range: testRange,
             isApproved: false,
             steps: [step],
         };
@@ -1013,6 +1049,7 @@ describe('approveAuthflow', () => {
         const authflow: Authflow = {
             id: 'authflow-1',
             action: 'submit',
+            range: testRange,
             isApproved: false,
             steps: [step],
         };
@@ -1037,6 +1074,7 @@ describe('approveAuthflow', () => {
         const authflow: Authflow = {
             id: 'authflow-1',
             action: 'submit',
+            range: testRange,
             isApproved: false,
             steps: [step1, step2],
         };
@@ -1072,6 +1110,7 @@ describe('approveAuthflow', () => {
         const authflow: Authflow = {
             id: 'authflow-1',
             action: 'submit',
+            range: testRange,
             isApproved: false,
             steps: [step],
         };

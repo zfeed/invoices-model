@@ -1,6 +1,13 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
+import { createMoney } from '../money/money';
+import { createRange } from '../range/range';
 import { StepTemplate } from '../step/step-template';
 import { createAuthflowTemplate } from './authflow-template';
+
+const testRange = createRange(
+    createMoney('0', 'USD').unwrap(),
+    createMoney('100000', 'USD').unwrap()
+).unwrap();
 
 describe('createAuthflowTemplate', () => {
     it('should create an authflow template successfully', () => {
@@ -41,6 +48,7 @@ describe('createAuthflowTemplate', () => {
 
         const result = createAuthflowTemplate({
             action: 'approve-invoice',
+            range: testRange,
             steps,
         });
 
@@ -54,6 +62,7 @@ describe('createAuthflowTemplate', () => {
     it('should create an authflow template with empty steps', () => {
         const result = createAuthflowTemplate({
             action: 'approve-invoice',
+            range: testRange,
             steps: [],
         });
 
@@ -71,6 +80,7 @@ describe('createAuthflowTemplate', () => {
 
         const result = createAuthflowTemplate({
             action: 'approve-invoice',
+            range: testRange,
             steps,
         });
 
@@ -91,6 +101,7 @@ describe('createAuthflowTemplate', () => {
 
         const result = createAuthflowTemplate({
             action: 'approve-transfer',
+            range: testRange,
             steps,
         });
 
@@ -102,10 +113,12 @@ describe('createAuthflowTemplate', () => {
     it('should generate a unique ID for each authflow template', () => {
         const result1 = createAuthflowTemplate({
             action: 'action-1',
+            range: testRange,
             steps: [],
         });
         const result2 = createAuthflowTemplate({
             action: 'action-2',
+            range: testRange,
             steps: [],
         });
 
@@ -117,6 +130,7 @@ describe('createAuthflowTemplate', () => {
     it('should not have isApproved property', () => {
         const result = createAuthflowTemplate({
             action: 'approve-invoice',
+            range: testRange,
             steps: [],
         });
 

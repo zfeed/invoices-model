@@ -8,5 +8,5 @@ export const authflowFromTemplate = (
     template: AuthflowTemplate
 ): Result<DomainError, Authflow> =>
     stepsFromTemplates(template.steps).flatMap((steps) =>
-        createAuthflow({ action: template.action, steps })
+        createAuthflow({ action: template.action, range: template.range, steps })
     );

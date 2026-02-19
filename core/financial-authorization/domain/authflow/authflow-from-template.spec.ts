@@ -1,11 +1,19 @@
 import { AuthflowTemplate } from './authflow-template';
 import { authflowFromTemplate } from './authflow-from-template';
+import { createMoney } from '../money/money';
+import { createRange } from '../range/range';
+
+const testRange = createRange(
+    createMoney('0', 'USD').unwrap(),
+    createMoney('100000', 'USD').unwrap()
+).unwrap();
 
 describe('authflowFromTemplate', () => {
     it('should create an authflow instance from a template with empty approvals', () => {
         const template: AuthflowTemplate = {
             id: 'template-1',
             action: 'approve-invoice',
+            range: testRange,
             steps: [
                 {
                     id: 'step-1',
@@ -43,6 +51,7 @@ describe('authflowFromTemplate', () => {
         const template: AuthflowTemplate = {
             id: 'template-1',
             action: 'approve-invoice',
+            range: testRange,
             steps: [],
         };
 
@@ -58,6 +67,7 @@ describe('authflowFromTemplate', () => {
         const template: AuthflowTemplate = {
             id: 'template-1',
             action: 'approve-invoice',
+            range: testRange,
             steps: [
                 {
                     id: 'step-1',
@@ -121,6 +131,7 @@ describe('authflowFromTemplate', () => {
         const template: AuthflowTemplate = {
             id: 'template-1',
             action: 'approve-invoice',
+            range: testRange,
             steps: [],
         };
 
@@ -136,6 +147,7 @@ describe('authflowFromTemplate', () => {
         const template: AuthflowTemplate = {
             id: 'template-1',
             action: 'approve-invoice',
+            range: testRange,
             steps: [
                 {
                     id: 'step-1',
@@ -177,6 +189,7 @@ describe('authflowFromTemplate', () => {
         const template: AuthflowTemplate = {
             id: 'template-1',
             action: 'approve-invoice',
+            range: testRange,
             steps: [
                 { id: 'step-1', order: 5, groups: [] },
                 { id: 'step-2', order: 10, groups: [] },

@@ -3,10 +3,12 @@ import { DOMAIN_ERROR_CODE } from '../../../../../building-blocks/errors/domain/
 import { DomainError } from '../../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../../building-blocks/result';
 import { Action } from '../../action/action';
+import { Range } from '../../range/range';
 import { StepTemplate } from '../../step/step-template';
 
 type AuthflowTemplateInput = {
     action: Action;
+    range: Range;
     steps: StepTemplate[];
 };
 
