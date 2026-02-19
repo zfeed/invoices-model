@@ -2,8 +2,11 @@ import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/dom
 import { Approver } from '../approver/approver';
 import { Authflow } from '../authflow/authflow';
 import { Group } from '../groups/group';
+import { createMoney } from '../money/money';
 import { Step } from '../step/step';
 import { approveDocument, createDocument, FinancialDocument } from './document';
+
+const testMoney = createMoney('10000', 'USD').unwrap();
 
 describe('createDocument', () => {
     it('should create a document successfully with unique authflow actions', () => {
@@ -15,6 +18,7 @@ describe('createDocument', () => {
 
         const result = createDocument({
             referenceId: 'INV-001',
+            value: testMoney,
             authflows,
         });
 
@@ -30,6 +34,7 @@ describe('createDocument', () => {
 
         const result = createDocument({
             referenceId: 'INV-002',
+            value: testMoney,
             authflows,
         });
 
@@ -47,6 +52,7 @@ describe('createDocument', () => {
 
         const result = createDocument({
             referenceId: 'INV-003',
+            value: testMoney,
             authflows,
         });
 
@@ -65,6 +71,7 @@ describe('createDocument', () => {
 
         const result = createDocument({
             referenceId: 'INV-004',
+            value: testMoney,
             authflows,
         });
 
@@ -85,6 +92,7 @@ describe('createDocument', () => {
 
         const result = createDocument({
             referenceId: 'INV-005',
+            value: testMoney,
             authflows,
         });
 
@@ -106,6 +114,7 @@ describe('createDocument', () => {
 
         const result = createDocument({
             referenceId: 'INV-006',
+            value: testMoney,
             authflows,
         });
 
@@ -126,6 +135,7 @@ describe('createDocument', () => {
 
         const result = createDocument({
             referenceId: 'INV-007',
+            value: testMoney,
             authflows,
         });
 
@@ -141,11 +151,13 @@ describe('createDocument', () => {
 
         const result1 = createDocument({
             referenceId: 'INV-008',
+            value: testMoney,
             authflows,
         });
 
         const result2 = createDocument({
             referenceId: 'INV-008',
+            value: testMoney,
             authflows,
         });
 
@@ -168,6 +180,7 @@ describe('createDocument', () => {
 
         const result = createDocument({
             referenceId: 'INV-009',
+            value: testMoney,
             authflows,
         });
 
@@ -181,16 +194,19 @@ describe('createDocument', () => {
 
         const result1 = createDocument({
             referenceId: '',
+            value: testMoney,
             authflows,
         });
 
         const result2 = createDocument({
             referenceId: 'invoice-2024-001-special-chars_test',
+            value: testMoney,
             authflows,
         });
 
         const result3 = createDocument({
             referenceId: '12345',
+            value: testMoney,
             authflows,
         });
 
@@ -263,6 +279,7 @@ describe('approveDocument', () => {
     const makeDocument = (authflows: Authflow[]): FinancialDocument => ({
         id: 'doc-1',
         referenceId: 'INV-001',
+        value: testMoney,
         authflows,
         version: 0,
     });

@@ -1,6 +1,7 @@
 import { applySpec, find, prop, propEq, propOr } from 'ramda';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
+import { Money } from '../money/money';
 import { Approver } from '../approver/approver';
 import { Action } from '../action/action';
 import { Authflow, approveAuthflow } from '../authflow/authflow';
@@ -12,12 +13,14 @@ import { noDuplicateAuthflowActions } from './checks/check-no-duplicate-authflow
 export type FinancialDocument = {
     id: Id;
     referenceId: ReferenceId;
+    value: Money;
     authflows: Authflow[];
     version: Version;
 };
 
 type DocumentInput = {
     referenceId: ReferenceId;
+    value: Money;
     authflows: Authflow[];
 };
 
@@ -26,6 +29,7 @@ type RebuildDocumentInput = DocumentInput & { id: Id; version: Version };
 const buildDocument = applySpec<FinancialDocument>({
     id: () => createId(),
     referenceId: prop('referenceId'),
+    value: prop('value'),
     authflows: prop('authflows'),
     version: () => 0,
 });
@@ -33,6 +37,7 @@ const buildDocument = applySpec<FinancialDocument>({
 const rebuildDocument = applySpec<FinancialDocument>({
     id: prop('id'),
     referenceId: prop('referenceId'),
+    value: prop('value'),
     authflows: prop('authflows'),
     version: prop('version'),
 });
@@ -86,6 +91,7 @@ const buildApprovedDocument =
         recreateDocument({
             id: data.document.id,
             referenceId: data.document.referenceId,
+            value: data.document.value,
             authflows: data.document.authflows.map((a) =>
                 a.action === data.action ? updatedAuthflow : a
             ),

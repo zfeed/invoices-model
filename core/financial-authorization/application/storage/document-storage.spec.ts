@@ -6,8 +6,11 @@ import { createAuthflow } from '../../domain/authflow/authflow';
 import { createStep } from '../../domain/step/step';
 import { createGroup } from '../../domain/groups/group';
 import { createApprover } from '../../domain/approver/approver';
+import { createMoney } from '../../domain/money/money';
 import { OptimisticConcurrencyError } from '../../../shared/optimistic-concurrency.error';
 import { InMemoryDocumentStorage } from '../../../../infrastructure/storage/in-memory.document-storage';
+
+const testMoney = createMoney('10000', 'USD').unwrap();
 
 const buildDocumentWithAuthflows = (): FinancialDocument => {
     const approver = createApprover({
@@ -29,6 +32,7 @@ const buildDocumentWithAuthflows = (): FinancialDocument => {
 
     return createDocument({
         referenceId: 'ref-1',
+        value: testMoney,
         authflows: [authflow],
     }).unwrap();
 };
@@ -49,6 +53,7 @@ describe('DocumentStorage contract (InMemory)', () => {
             const storage = new InMemoryDocumentStorage();
             const document = createDocument({
                 referenceId: 'ref-1',
+                value: testMoney,
                 authflows: [],
             }).unwrap();
 
@@ -69,6 +74,7 @@ describe('DocumentStorage contract (InMemory)', () => {
             const storage = new InMemoryDocumentStorage();
             const document = createDocument({
                 referenceId: 'ref-1',
+                value: testMoney,
                 authflows: [],
             }).unwrap();
 
@@ -90,6 +96,7 @@ describe('DocumentStorage contract (InMemory)', () => {
             const storage = new InMemoryDocumentStorage();
             const document = createDocument({
                 referenceId: 'ref-1',
+                value: testMoney,
                 authflows: [],
             }).unwrap();
 
@@ -106,6 +113,7 @@ describe('DocumentStorage contract (InMemory)', () => {
             const storage = new InMemoryDocumentStorage();
             const document = createDocument({
                 referenceId: 'ref-1',
+                value: testMoney,
                 authflows: [],
             }).unwrap();
 
@@ -119,6 +127,7 @@ describe('DocumentStorage contract (InMemory)', () => {
             const storage = new InMemoryDocumentStorage();
             const document = createDocument({
                 referenceId: 'ref-1',
+                value: testMoney,
                 authflows: [],
             }).unwrap();
 
@@ -131,6 +140,7 @@ describe('DocumentStorage contract (InMemory)', () => {
             const storage = new InMemoryDocumentStorage();
             const document = createDocument({
                 referenceId: 'ref-1',
+                value: testMoney,
                 authflows: [],
             }).unwrap();
 
@@ -148,6 +158,7 @@ describe('DocumentStorage contract (InMemory)', () => {
             const storage = new InMemoryDocumentStorage();
             const original = createDocument({
                 referenceId: 'ref-1',
+                value: testMoney,
                 authflows: [],
             }).unwrap();
 
@@ -155,6 +166,7 @@ describe('DocumentStorage contract (InMemory)', () => {
 
             const updated = createDocument({
                 referenceId: 'ref-1',
+                value: testMoney,
                 authflows: [],
             }).unwrap();
 
@@ -174,10 +186,12 @@ describe('DocumentStorage contract (InMemory)', () => {
             const storage = new InMemoryDocumentStorage();
             const doc1 = createDocument({
                 referenceId: 'ref-1',
+                value: testMoney,
                 authflows: [],
             }).unwrap();
             const doc2 = createDocument({
                 referenceId: 'ref-2',
+                value: testMoney,
                 authflows: [],
             }).unwrap();
 
@@ -209,6 +223,7 @@ describe('DocumentStorage contract (InMemory)', () => {
             const storage = new InMemoryDocumentStorage();
             const document = createDocument({
                 referenceId: 'ref-1',
+                value: testMoney,
                 authflows: [],
             }).unwrap();
 
@@ -232,6 +247,7 @@ describe('DocumentStorage contract (InMemory)', () => {
             const storage2 = new InMemoryDocumentStorage();
             const document = createDocument({
                 referenceId: 'ref-1',
+                value: testMoney,
                 authflows: [],
             }).unwrap();
 
@@ -276,6 +292,7 @@ describe('DocumentStorage contract (InMemory)', () => {
             const storage = new InMemoryDocumentStorage();
             const document = createDocument({
                 referenceId: 'ref-1',
+                value: testMoney,
                 authflows: [],
             }).unwrap();
 
@@ -290,6 +307,7 @@ describe('DocumentStorage contract (InMemory)', () => {
             const storage = new InMemoryDocumentStorage();
             const doc = createDocument({
                 referenceId: 'ref-1',
+                value: testMoney,
                 authflows: [],
             }).unwrap();
 
@@ -311,6 +329,7 @@ describe('DocumentStorage contract (InMemory)', () => {
             const storage = new InMemoryDocumentStorage();
             const document = createDocument({
                 referenceId: 'ref-1',
+                value: testMoney,
                 authflows: [],
             }).unwrap();
 
@@ -329,6 +348,7 @@ describe('DocumentStorage contract (InMemory)', () => {
             const storage = new InMemoryDocumentStorage();
             const document = createDocument({
                 referenceId: 'ref-1',
+                value: testMoney,
                 authflows: [],
             }).unwrap();
 
@@ -336,6 +356,7 @@ describe('DocumentStorage contract (InMemory)', () => {
 
             const duplicate = createDocument({
                 referenceId: 'ref-1',
+                value: testMoney,
                 authflows: [],
             }).unwrap();
 
@@ -350,6 +371,7 @@ describe('DocumentStorage contract (InMemory)', () => {
             const storage = new InMemoryDocumentStorage();
             const document = createDocument({
                 referenceId: 'ref-1',
+                value: testMoney,
                 authflows: [],
             }).unwrap();
 
@@ -381,10 +403,12 @@ describe('DocumentStorage contract (InMemory)', () => {
             const storage = new InMemoryDocumentStorage();
             const doc1 = createDocument({
                 referenceId: 'ref-1',
+                value: testMoney,
                 authflows: [],
             }).unwrap();
             const doc2 = createDocument({
                 referenceId: 'ref-2',
+                value: testMoney,
                 authflows: [],
             }).unwrap();
 

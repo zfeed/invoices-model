@@ -1,6 +1,7 @@
 import { InMemoryDocumentStorage } from '../../../../../infrastructure/storage/in-memory.document-storage';
 import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
 import { InvoiceCreatedEvent } from '../../../../invoices/domain/invoice/events/invoice-created.event';
+import { createMoney } from '../../../domain/money/money';
 import { createDocument } from '../../../domain/document/document';
 import { onInvoiceCreated } from './on-invoice-created';
 
@@ -237,6 +238,7 @@ describe('onInvoiceCreated', () => {
 
         const existing = createDocument({
             referenceId: 'INV-001',
+            value: createMoney('100', 'USD').unwrap(),
             authflows: [],
         }).unwrap();
         await storage.save(existing).run();

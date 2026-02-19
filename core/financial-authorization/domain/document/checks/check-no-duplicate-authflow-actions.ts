@@ -2,11 +2,13 @@ import { ifElse, length, map, pipe, prop, uniq } from 'ramda';
 import { DOMAIN_ERROR_CODE } from '../../../../../building-blocks/errors/domain/domain-codes';
 import { DomainError } from '../../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../../building-blocks/result';
+import { Money } from '../../money/money';
 import { Authflow } from '../../authflow/authflow';
 import { ReferenceId } from '../../reference-id/reference-id';
 
 type DocumentInput = {
     referenceId: ReferenceId;
+    value: Money;
     authflows: Authflow[];
 };
 
