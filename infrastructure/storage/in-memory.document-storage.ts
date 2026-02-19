@@ -2,7 +2,7 @@ import { DomainError } from '../../building-blocks/errors/domain/domain.error';
 import { IO } from '../../building-blocks/io';
 import { Result } from '../../building-blocks/result';
 import { Some } from '../../building-blocks/some';
-import { DocumentStorage } from '../../core/financial-authorization/application/storage/io';
+import { DocumentStorage } from '../../core/financial-authorization/application/storage/document-storage.interface';
 import { FinancialDocument } from '../../core/financial-authorization/domain/document/document';
 import { ReferenceId } from '../../core/financial-authorization/domain/reference-id/reference-id';
 import { Store } from '../store/store';

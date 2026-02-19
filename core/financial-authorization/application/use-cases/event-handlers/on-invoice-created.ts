@@ -7,7 +7,7 @@ import {
     FinancialDocument,
 } from '../../../domain/document/document';
 import { createReferenceId } from '../../../domain/reference-id/reference-id';
-import { DocumentStorage } from '../../storage/io';
+import { DocumentStorage } from '../../storage/document-storage.interface';
 
 const extractReferenceId = (data: { id: string }) => createReferenceId(data.id);
 
