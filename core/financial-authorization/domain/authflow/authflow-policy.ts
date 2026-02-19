@@ -3,8 +3,12 @@ import { DomainError } from '../../../../building-blocks/errors/domain/domain.er
 import { Result } from '../../../../building-blocks/result';
 import { Action } from '../action/action';
 import { createId, Id } from '../id/id';
+import { Money } from '../money/money';
+import { Authflow } from './authflow';
+import { authflowFromTemplate } from './authflow-from-template';
 import { AuthflowTemplate } from './authflow-template';
 import { noOverlappingRanges } from './checks/check-no-overlapping-ranges';
+import { templateInRange } from './checks/check-template-in-range';
 
 export type AuthflowPolicy = {
     id: Id;
@@ -44,3 +48,25 @@ export const recreateAuthflowPolicy = (
     Result.ok<DomainError, RebuildAuthflowPolicyInput>(data)
         .flatMap(noOverlappingRanges)
         .map(rebuildAuthflowPolicy);
+
+type SelectAuthflowInput = {
+    policy: AuthflowPolicy;
+    amount: Money;
+};
+
+const buildAuthflow = (data: SelectAuthflowInput): Result<DomainError, Authflow> => {
+    const matched = data.policy.templates.find(
+        (t) =>
+            Number(data.amount.amount) >= Number(t.range.from.amount) &&
+            Number(data.amount.amount) <= Number(t.range.to.amount)
+    )!;
+    return authflowFromTemplate(data.policy.action, matched);
+};
+
+export const selectAuthflow = (
+    policy: AuthflowPolicy,
+    amount: Money
+): Result<DomainError, Authflow> =>
+    Result.ok<DomainError, SelectAuthflowInput>({ policy, amount })
+        .flatMap(templateInRange)
+        .flatMap(buildAuthflow);
