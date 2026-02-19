@@ -111,7 +111,7 @@ export class CreateDraftInvoice {
 
             await unitOfWork.collection(DraftInvoice).add(draftInvoice);
 
-            this.domainEvents.publishEvents(draftInvoice);
+            await this.domainEvents.publishEvents(draftInvoice);
 
             return draftInvoice.toPlain();
         });

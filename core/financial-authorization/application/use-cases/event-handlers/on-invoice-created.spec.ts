@@ -44,24 +44,20 @@ const createInvoiceEvent = (id: string) =>
         },
     });
 
-const publishEvent = (
+const publishEvent = async (
     domainEvents: InMemoryDomainEvents,
     event: InvoiceCreatedEvent
 ) => {
-    domainEvents.publishEvents({ events: [event] });
+    await domainEvents.publishEvents({ events: [event] });
 };
-
-const flushPromises = () =>
-    new Promise<void>((resolve) => setImmediate(resolve));
 
 describe('onInvoiceCreated', () => {
     it('should create a new financial document when invoice is created', async () => {
         const storage = new InMemoryDocumentStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        onInvoiceCreated(domainEvents, storage);
-        publishEvent(domainEvents, createInvoiceEvent('INV-001'));
-        await flushPromises();
+        await onInvoiceCreated(domainEvents, storage);
+        await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const result = await storage.findByReferenceId('INV-001').run();
 
@@ -79,10 +75,9 @@ describe('onInvoiceCreated', () => {
         const storage = new InMemoryDocumentStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        onInvoiceCreated(domainEvents, storage);
-        publishEvent(domainEvents, createInvoiceEvent('INV-001'));
-        publishEvent(domainEvents, createInvoiceEvent('INV-002'));
-        await flushPromises();
+        await onInvoiceCreated(domainEvents, storage);
+        await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
+        await publishEvent(domainEvents, createInvoiceEvent('INV-002'));
 
         const result1 = await storage.findByReferenceId('INV-001').run();
         const result2 = await storage.findByReferenceId('INV-002').run();
@@ -106,9 +101,8 @@ describe('onInvoiceCreated', () => {
         const storage = new InMemoryDocumentStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        onInvoiceCreated(domainEvents, storage);
-        publishEvent(domainEvents, createInvoiceEvent('INV-001'));
-        await flushPromises();
+        await onInvoiceCreated(domainEvents, storage);
+        await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const firstResult = await storage.findByReferenceId('INV-001').run();
         const firstId = firstResult.fold(
@@ -116,8 +110,7 @@ describe('onInvoiceCreated', () => {
             (doc) => doc.id
         );
 
-        publishEvent(domainEvents, createInvoiceEvent('INV-001'));
-        await flushPromises();
+        await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const secondResult = await storage.findByReferenceId('INV-001').run();
         const secondId = secondResult.fold(
@@ -132,8 +125,7 @@ describe('onInvoiceCreated', () => {
         const storage = new InMemoryDocumentStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        onInvoiceCreated(domainEvents, storage);
-        await flushPromises();
+        await onInvoiceCreated(domainEvents, storage);
 
         const result = await storage.findByReferenceId('INV-001').run();
 
@@ -144,9 +136,8 @@ describe('onInvoiceCreated', () => {
         const storage = new InMemoryDocumentStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        onInvoiceCreated(domainEvents, storage);
-        publishEvent(domainEvents, createInvoiceEvent('INV-001'));
-        await flushPromises();
+        await onInvoiceCreated(domainEvents, storage);
+        await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const result = await storage.findByReferenceId('INV-001').run();
 
@@ -162,12 +153,10 @@ describe('onInvoiceCreated', () => {
         const storage = new InMemoryDocumentStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        onInvoiceCreated(domainEvents, storage);
-        publishEvent(domainEvents, createInvoiceEvent('INV-001'));
-        await flushPromises();
+        await onInvoiceCreated(domainEvents, storage);
+        await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
-        publishEvent(domainEvents, createInvoiceEvent('INV-001'));
-        await flushPromises();
+        await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const result = await storage.findByReferenceId('INV-001').run();
 
@@ -183,9 +172,11 @@ describe('onInvoiceCreated', () => {
         const storage = new InMemoryDocumentStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        onInvoiceCreated(domainEvents, storage);
-        publishEvent(domainEvents, createInvoiceEvent('my-custom-ref-123'));
-        await flushPromises();
+        await onInvoiceCreated(domainEvents, storage);
+        await publishEvent(
+            domainEvents,
+            createInvoiceEvent('my-custom-ref-123')
+        );
 
         const result = await storage
             .findByReferenceId('my-custom-ref-123')
@@ -204,11 +195,10 @@ describe('onInvoiceCreated', () => {
         const storage = new InMemoryDocumentStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        onInvoiceCreated(domainEvents, storage);
-        publishEvent(domainEvents, createInvoiceEvent('INV-001'));
-        publishEvent(domainEvents, createInvoiceEvent('INV-002'));
-        publishEvent(domainEvents, createInvoiceEvent('INV-003'));
-        await flushPromises();
+        await onInvoiceCreated(domainEvents, storage);
+        await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
+        await publishEvent(domainEvents, createInvoiceEvent('INV-002'));
+        await publishEvent(domainEvents, createInvoiceEvent('INV-003'));
 
         const ids = await Promise.all(
             ['INV-001', 'INV-002', 'INV-003'].map(async (ref) => {
@@ -228,9 +218,8 @@ describe('onInvoiceCreated', () => {
         const storage = new InMemoryDocumentStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        onInvoiceCreated(domainEvents, storage);
-        publishEvent(domainEvents, createInvoiceEvent('INV-001'));
-        await flushPromises();
+        await onInvoiceCreated(domainEvents, storage);
+        await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const result = await storage.findByReferenceId('INV-001').run();
 
@@ -252,9 +241,8 @@ describe('onInvoiceCreated', () => {
         }).unwrap();
         await storage.save(existing).run();
 
-        onInvoiceCreated(domainEvents, storage);
-        publishEvent(domainEvents, createInvoiceEvent('INV-001'));
-        await flushPromises();
+        await onInvoiceCreated(domainEvents, storage);
+        await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const result = await storage.findByReferenceId('INV-001').run();
 
@@ -270,13 +258,12 @@ describe('onInvoiceCreated', () => {
         const storage = new InMemoryDocumentStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        onInvoiceCreated(domainEvents, storage);
+        await onInvoiceCreated(domainEvents, storage);
 
         const count = 50;
         for (let i = 0; i < count; i++) {
-            publishEvent(domainEvents, createInvoiceEvent(`INV-${i}`));
+            await publishEvent(domainEvents, createInvoiceEvent(`INV-${i}`));
         }
-        await flushPromises();
 
         for (let i = 0; i < count; i++) {
             const result = await storage.findByReferenceId(`INV-${i}`).run();
@@ -288,12 +275,11 @@ describe('onInvoiceCreated', () => {
         const storage = new InMemoryDocumentStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        publishEvent(domainEvents, createInvoiceEvent('INV-BEFORE'));
+        await publishEvent(domainEvents, createInvoiceEvent('INV-BEFORE'));
 
-        onInvoiceCreated(domainEvents, storage);
+        await onInvoiceCreated(domainEvents, storage);
 
-        publishEvent(domainEvents, createInvoiceEvent('INV-AFTER'));
-        await flushPromises();
+        await publishEvent(domainEvents, createInvoiceEvent('INV-AFTER'));
 
         const before = await storage.findByReferenceId('INV-BEFORE').run();
         const after = await storage.findByReferenceId('INV-AFTER').run();
@@ -307,9 +293,8 @@ describe('onInvoiceCreated', () => {
         const storage2 = new InMemoryDocumentStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        onInvoiceCreated(domainEvents, storage1);
-        publishEvent(domainEvents, createInvoiceEvent('INV-001'));
-        await flushPromises();
+        await onInvoiceCreated(domainEvents, storage1);
+        await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const inStorage1 = await storage1.findByReferenceId('INV-001').run();
         const inStorage2 = await storage2.findByReferenceId('INV-001').run();

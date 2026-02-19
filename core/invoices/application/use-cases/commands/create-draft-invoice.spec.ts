@@ -246,8 +246,11 @@ describe('CreateDraftInvoice', () => {
     describe('domain events', () => {
         it('should publish DraftInvoiceCreatedEvent for an empty draft', async () => {
             const createdEvents: DraftInvoiceCreatedEvent[] = [];
-            domainEvents.subscribeToEvent(DraftInvoiceCreatedEvent, (e) =>
-                createdEvents.push(e)
+            await domainEvents.subscribeToEvent(
+                DraftInvoiceCreatedEvent,
+                async (e) => {
+                    createdEvents.push(e);
+                }
             );
 
             const result = await command.execute({});
@@ -267,11 +270,17 @@ describe('CreateDraftInvoice', () => {
         it('should publish DraftInvoiceCreatedEvent and DraftInvoiceUpdatedEvent when line items are added', async () => {
             const createdEvents: DraftInvoiceCreatedEvent[] = [];
             const updatedEvents: DraftInvoiceUpdatedEvent[] = [];
-            domainEvents.subscribeToEvent(DraftInvoiceCreatedEvent, (e) =>
-                createdEvents.push(e)
+            await domainEvents.subscribeToEvent(
+                DraftInvoiceCreatedEvent,
+                async (e) => {
+                    createdEvents.push(e);
+                }
             );
-            domainEvents.subscribeToEvent(DraftInvoiceUpdatedEvent, (e) =>
-                updatedEvents.push(e)
+            await domainEvents.subscribeToEvent(
+                DraftInvoiceUpdatedEvent,
+                async (e) => {
+                    updatedEvents.push(e);
+                }
             );
 
             const result = await command.execute({
@@ -307,8 +316,11 @@ describe('CreateDraftInvoice', () => {
 
         it('should publish a DraftInvoiceUpdatedEvent per line item added', async () => {
             const updatedEvents: DraftInvoiceUpdatedEvent[] = [];
-            domainEvents.subscribeToEvent(DraftInvoiceUpdatedEvent, (e) =>
-                updatedEvents.push(e)
+            await domainEvents.subscribeToEvent(
+                DraftInvoiceUpdatedEvent,
+                async (e) => {
+                    updatedEvents.push(e);
+                }
             );
 
             const result = await command.execute({

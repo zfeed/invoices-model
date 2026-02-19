@@ -125,7 +125,7 @@ export class UpdateDraftInvoice {
                 draftInvoice.addRecipient(recipient).unwrap();
             }
 
-            this.domainEvents.publishEvents(draftInvoice);
+            await this.domainEvents.publishEvents(draftInvoice);
 
             return draftInvoice.toPlain();
         });

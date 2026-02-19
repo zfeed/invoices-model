@@ -123,8 +123,11 @@ describe('CompleteDraftInvoice', () => {
     describe('domain events', () => {
         it('should publish DraftInvoiceFinishedEvent with draft data', async () => {
             const finishedEvents: DraftInvoiceFinishedEvent[] = [];
-            domainEvents.subscribeToEvent(DraftInvoiceFinishedEvent, (e) =>
-                finishedEvents.push(e)
+            await domainEvents.subscribeToEvent(
+                DraftInvoiceFinishedEvent,
+                async (e) => {
+                    finishedEvents.push(e);
+                }
             );
 
             const created = await createCommand.execute(COMPLETE_DRAFT_REQUEST);
@@ -146,8 +149,11 @@ describe('CompleteDraftInvoice', () => {
 
         it('should publish InvoiceCreatedEvent with invoice data', async () => {
             const invoiceEvents: InvoiceCreatedEvent[] = [];
-            domainEvents.subscribeToEvent(InvoiceCreatedEvent, (e) =>
-                invoiceEvents.push(e)
+            await domainEvents.subscribeToEvent(
+                InvoiceCreatedEvent,
+                async (e) => {
+                    invoiceEvents.push(e);
+                }
             );
 
             const created = await createCommand.execute(COMPLETE_DRAFT_REQUEST);
@@ -170,11 +176,17 @@ describe('CompleteDraftInvoice', () => {
         it('should publish both draft finished and invoice created events', async () => {
             const finishedEvents: DraftInvoiceFinishedEvent[] = [];
             const invoiceEvents: InvoiceCreatedEvent[] = [];
-            domainEvents.subscribeToEvent(DraftInvoiceFinishedEvent, (e) =>
-                finishedEvents.push(e)
+            await domainEvents.subscribeToEvent(
+                DraftInvoiceFinishedEvent,
+                async (e) => {
+                    finishedEvents.push(e);
+                }
             );
-            domainEvents.subscribeToEvent(InvoiceCreatedEvent, (e) =>
-                invoiceEvents.push(e)
+            await domainEvents.subscribeToEvent(
+                InvoiceCreatedEvent,
+                async (e) => {
+                    invoiceEvents.push(e);
+                }
             );
 
             const created = await createCommand.execute(COMPLETE_DRAFT_REQUEST);

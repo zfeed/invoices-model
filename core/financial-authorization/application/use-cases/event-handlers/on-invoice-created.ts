@@ -38,9 +38,12 @@ const handleEvent =
             .run();
     };
 
-export const onInvoiceCreated = (
+export const onInvoiceCreated = async (
     domainEvents: DomainEvents,
     storage: DocumentStorage
 ) => {
-    domainEvents.subscribeToEvent(InvoiceCreatedEvent, handleEvent(storage));
+    await domainEvents.subscribeToEvent(
+        InvoiceCreatedEvent,
+        handleEvent(storage)
+    );
 };

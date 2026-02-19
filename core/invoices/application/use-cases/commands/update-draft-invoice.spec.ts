@@ -260,8 +260,11 @@ describe('UpdateDraftInvoice', () => {
             const created = await createCommand.execute({});
 
             const updatedEvents: DraftInvoiceUpdatedEvent[] = [];
-            domainEvents.subscribeToEvent(DraftInvoiceUpdatedEvent, (e) =>
-                updatedEvents.push(e)
+            await domainEvents.subscribeToEvent(
+                DraftInvoiceUpdatedEvent,
+                async (e) => {
+                    updatedEvents.push(e);
+                }
             );
 
             await updateCommand.execute(created.id, {
@@ -283,8 +286,11 @@ describe('UpdateDraftInvoice', () => {
             const created = await createCommand.execute({});
 
             const updatedEvents: DraftInvoiceUpdatedEvent[] = [];
-            domainEvents.subscribeToEvent(DraftInvoiceUpdatedEvent, (e) =>
-                updatedEvents.push(e)
+            await domainEvents.subscribeToEvent(
+                DraftInvoiceUpdatedEvent,
+                async (e) => {
+                    updatedEvents.push(e);
+                }
             );
 
             await updateCommand.execute(created.id, {

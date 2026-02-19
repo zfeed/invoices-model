@@ -2,28 +2,31 @@ import { DomainEvent } from './events/domain-event';
 import { PublishableEvents } from './events/event-publisher.interface';
 
 export class DomainEventsBus {
-    subscribers: Map<string, ((event: DomainEvent<any>) => void)[]> = new Map();
+    subscribers: Map<string, ((event: DomainEvent<any>) => Promise<void>)[]> =
+        new Map();
 
-    publishEvents<T extends DomainEvent<unknown>>(
+    async publishEvents<T extends DomainEvent<unknown>>(
         ...objects: PublishableEvents<T>[]
-    ) {
-        objects
-            .flatMap((object) => object.events)
-            .forEach((event) => {
+    ): Promise<void> {
+        for (const object of objects) {
+            for (const event of object.events) {
                 const handlers = this.subscribers.get(event.name);
 
                 if (!handlers) {
-                    return;
+                    continue;
                 }
 
-                handlers.forEach((handler) => handler(event));
-            });
+                for (const handler of handlers) {
+                    await handler(event);
+                }
+            }
+        }
     }
 
-    subscribeToEvent<T extends DomainEvent<D>, D>(
+    async subscribeToEvent<T extends DomainEvent<D>, D>(
         eventName: string,
-        handler: (event: T) => void
-    ) {
+        handler: (event: T) => Promise<void>
+    ): Promise<void> {
         this.subscribeToEvent(eventName, handler);
     }
 }

@@ -29,7 +29,7 @@ export class CompleteDraftInvoice {
 
             await unitOfWork.collection(Invoice).add(invoice);
 
-            this.domainEvents.publishEvents(draftInvoice, invoice);
+            await this.domainEvents.publishEvents(draftInvoice, invoice);
 
             return invoice.toPlain();
         });
