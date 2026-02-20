@@ -324,6 +324,121 @@ describe('Invoice', () => {
         );
     });
 
+    it('should pay a processing invoice', () => {
+        const lineItem = LineItem.create({
+            description: 'Item 1',
+            price: {
+                amount: '50',
+                currency: 'USD',
+            },
+            quantity: '2',
+        }).unwrap();
+        const lineItems = LineItems.create({
+            items: [lineItem],
+        }).unwrap();
+        const issuer = Issuer.create({
+            type: ISSUER_TYPE.COMPANY,
+            name: 'Company Inc.',
+            address: '123 Main St, City, Country',
+            taxId: 'TAX123456',
+            email: 'info@company.com',
+        }).unwrap();
+        const recipientBilling = Paypal.create({
+            email: 'customer@example.com',
+        }).unwrap();
+        const recipient = Recipient.create({
+            type: RECIPIENT_TYPE.INDIVIDUAL,
+            name: 'Jane Smith',
+            address: '456 Another St, City, Country',
+            taxId: 'TAX654321',
+            email: 'jane.smith@example.com',
+            taxResidenceCountry: 'US',
+            billing: recipientBilling,
+        }).unwrap();
+
+        const invoice = Invoice.create({
+            id: Id.create().unwrap(),
+            issueDate: CalendarDate.create('2023-01-01').unwrap(),
+            dueDate: CalendarDate.create('2028-01-01').unwrap(),
+            lineItems: lineItems,
+            vatRate: null,
+            issuer: issuer,
+            recipient: recipient,
+        }).unwrap();
+
+        invoice.process();
+        const result = invoice.pay();
+
+        expect(result.isOk()).toBe(true);
+        expect(invoice.status.equals(Status.paid())).toBe(true);
+        expect(invoice.events).toHaveLength(3);
+        expect(invoice.events[2]).toEqual(
+            expect.objectContaining({
+                name: 'invoice.paid',
+                data: expect.objectContaining({
+                    id: expect.any(String),
+                    status: 'PAID',
+                    lineItems: expect.any(Object),
+                    total: { amount: '100', currency: 'USD' },
+                    issueDate: '2023-01-01',
+                    dueDate: '2028-01-01',
+                }),
+            })
+        );
+    });
+
+    it('should not pay an issued invoice', () => {
+        const lineItem = LineItem.create({
+            description: 'Item 1',
+            price: {
+                amount: '50',
+                currency: 'USD',
+            },
+            quantity: '2',
+        }).unwrap();
+        const lineItems = LineItems.create({
+            items: [lineItem],
+        }).unwrap();
+        const issuer = Issuer.create({
+            type: ISSUER_TYPE.COMPANY,
+            name: 'Company Inc.',
+            address: '123 Main St, City, Country',
+            taxId: 'TAX123456',
+            email: 'info@company.com',
+        }).unwrap();
+        const recipientBilling = Paypal.create({
+            email: 'customer@example.com',
+        }).unwrap();
+        const recipient = Recipient.create({
+            type: RECIPIENT_TYPE.INDIVIDUAL,
+            name: 'Jane Smith',
+            address: '456 Another St, City, Country',
+            taxId: 'TAX654321',
+            email: 'jane.smith@example.com',
+            taxResidenceCountry: 'US',
+            billing: recipientBilling,
+        }).unwrap();
+
+        const invoice = Invoice.create({
+            id: Id.create().unwrap(),
+            issueDate: CalendarDate.create('2023-01-01').unwrap(),
+            dueDate: CalendarDate.create('2028-01-01').unwrap(),
+            lineItems: lineItems,
+            vatRate: null,
+            issuer: issuer,
+            recipient: recipient,
+        }).unwrap();
+
+        const result = invoice.pay();
+
+        expect(result.isError()).toBe(true);
+        expect(result.unwrapError()).toEqual(
+            expect.objectContaining({
+                code: '10001',
+            })
+        );
+    });
+
     it('should not cancel a processing invoice', () => {
         const lineItem = LineItem.create({
             description: 'Item 1',
