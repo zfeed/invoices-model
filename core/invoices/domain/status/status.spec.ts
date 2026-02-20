@@ -43,4 +43,12 @@ describe('Status', () => {
             expect(status.toString()).toBe('PAID');
         });
     });
+
+    describe('failed', () => {
+        it('should create a status with FAILED value', () => {
+            const status = Status.failed();
+
+            expect(status.toString()).toBe('FAILED');
+        });
+    });
 });
