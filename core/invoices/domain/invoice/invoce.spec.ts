@@ -7,6 +7,7 @@ import { Money } from '../money/money/money';
 import { Paypal } from '../recipient/billing/paypal';
 import { Recipient, RECIPIENT_TYPE } from '../recipient/recipient';
 import { VatRate } from '../vat-rate/vat-rate';
+import { Status } from '../status/status';
 import { Invoice } from './invoice';
 
 describe('Invoice', () => {
@@ -87,6 +88,7 @@ describe('Invoice', () => {
         expect(
             invoice.lineItems.find((lineItem) => lineItem.equals(lineItem2))
         ).toBeDefined();
+        expect(invoice.status.equals(Status.issued())).toBe(true);
         expect(invoice.issueDate.equals(issueDate)).toBe(true);
         expect(invoice.dueDate.equals(dueDate)).toBe(true);
         expect(invoice.issuer.equals(issuer)).toBe(true);
@@ -99,6 +101,7 @@ describe('Invoice', () => {
                 name: 'invoice.created',
                 data: {
                     id: expect.any(String),
+                    status: 'ISSUED',
                     lineItems: {
                         items: [
                             {

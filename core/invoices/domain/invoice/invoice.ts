@@ -8,11 +8,13 @@ import { PublishableEvents } from '../../../../building-blocks/events';
 import { CalendarDate } from '../calendar-date/calendar-date';
 import { Id } from '../id/id';
 import { LineItems, ReadOnlyLineItems } from '../line-items/line-items';
+import { Status } from '../status/status';
 import { checkDates } from './checks/check-dates';
 import { InvoiceCreatedEvent } from './events/invoice-created.event';
 
 export class Invoice implements PublishableEvents<InvoiceCreatedEvent> {
     #id: Id;
+    #status: Status;
     #vatRate: VatRate | null;
     #vatAmount: Money | null;
     #total: Money;
@@ -25,6 +27,10 @@ export class Invoice implements PublishableEvents<InvoiceCreatedEvent> {
 
     public get id(): Id {
         return this.#id;
+    }
+
+    public get status(): Status {
+        return this.#status;
     }
 
     public get events(): ReadonlyArray<InvoiceCreatedEvent> {
@@ -65,6 +71,7 @@ export class Invoice implements PublishableEvents<InvoiceCreatedEvent> {
 
     protected constructor(
         id: Id,
+        status: Status,
         lineItems: LineItems,
         total: Money,
         vatRate: VatRate | null,
@@ -75,6 +82,7 @@ export class Invoice implements PublishableEvents<InvoiceCreatedEvent> {
         recipient: Recipient
     ) {
         this.#id = id;
+        this.#status = status;
         this.#lineItems = lineItems;
         this.#total = total;
         this.#vatRate = vatRate;
@@ -112,6 +120,7 @@ export class Invoice implements PublishableEvents<InvoiceCreatedEvent> {
             : null;
         const invoice = new Invoice(
             options.id,
+            Status.issued(),
             options.lineItems,
             total,
             vatRate,
@@ -132,6 +141,7 @@ export class Invoice implements PublishableEvents<InvoiceCreatedEvent> {
     toPlain() {
         return {
             id: this.#id.toString(),
+            status: this.#status.toString(),
             lineItems: this.#lineItems.toPlain(),
             total: this.#total.toPlain(),
             vatRate: this.#vatRate ? this.#vatRate.toPlain() : null,

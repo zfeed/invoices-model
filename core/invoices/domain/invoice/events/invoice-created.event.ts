@@ -2,6 +2,7 @@ import { DomainEvent } from '../../../../../building-blocks/events/domain-event'
 
 type Data = {
     id: string;
+    status: string;
     lineItems: {
         items: {
             description: string;
