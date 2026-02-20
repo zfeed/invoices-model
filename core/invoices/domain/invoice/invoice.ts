@@ -10,9 +10,13 @@ import { Id } from '../id/id';
 import { LineItems, ReadOnlyLineItems } from '../line-items/line-items';
 import { Status } from '../status/status';
 import { checkDates } from './checks/check-dates';
+import { InvoiceCancelledEvent } from './events/invoice-cancelled.event';
 import { InvoiceCreatedEvent } from './events/invoice-created.event';
 
-export class Invoice implements PublishableEvents<InvoiceCreatedEvent> {
+export class Invoice
+    implements
+        PublishableEvents<InvoiceCreatedEvent | InvoiceCancelledEvent>
+{
     #id: Id;
     #status: Status;
     #vatRate: VatRate | null;
@@ -23,7 +27,7 @@ export class Invoice implements PublishableEvents<InvoiceCreatedEvent> {
     #dueDate: CalendarDate;
     #issuer: Issuer;
     #recipient: Recipient;
-    #events: InvoiceCreatedEvent[] = [];
+    #events: (InvoiceCreatedEvent | InvoiceCancelledEvent)[] = [];
 
     public get id(): Id {
         return this.#id;
@@ -33,7 +37,9 @@ export class Invoice implements PublishableEvents<InvoiceCreatedEvent> {
         return this.#status;
     }
 
-    public get events(): ReadonlyArray<InvoiceCreatedEvent> {
+    public get events(): ReadonlyArray<
+        InvoiceCreatedEvent | InvoiceCancelledEvent
+    > {
         return this.#events;
     }
 
@@ -136,6 +142,17 @@ export class Invoice implements PublishableEvents<InvoiceCreatedEvent> {
         invoice.#events.push(event);
 
         return Result.ok(invoice);
+    }
+
+    cancel() {
+        this.#status = Status.cancelled();
+
+        this.#events.push(
+            new InvoiceCancelledEvent({
+                id: this.#id.toString(),
+                status: this.#status.toString(),
+            })
+        );
     }
 
     toPlain() {
