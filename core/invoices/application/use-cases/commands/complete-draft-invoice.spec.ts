@@ -3,7 +3,7 @@ import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-event
 import { CreateDraftInvoice } from './create-draft-invoice';
 import { CompleteDraftInvoice } from './complete-draft-invoice';
 import { DraftInvoiceFinishedEvent } from '../../../domain/draft-invoice/events/draft-invoice-finished.event';
-import { InvoiceCreatedEvent } from '../../../domain/invoice/events/invoice-created.event';
+import { InvoiceIssuedEvent } from '../../../domain/invoice/events/invoice-issued.event';
 import { APPLICATION_ERROR_CODE } from '../../../../../building-blocks/errors/application/application-codes';
 import { DOMAIN_ERROR_CODE } from '../../../../../building-blocks/errors/domain/domain-codes';
 import { Invoice } from '../../../domain/invoice/invoice';
@@ -147,10 +147,10 @@ describe('CompleteDraftInvoice', () => {
             ]);
         });
 
-        it('should publish InvoiceCreatedEvent with invoice data', async () => {
-            const invoiceEvents: InvoiceCreatedEvent[] = [];
+        it('should publish InvoiceIssuedEvent with invoice data', async () => {
+            const invoiceEvents: InvoiceIssuedEvent[] = [];
             await domainEvents.subscribeToEvent(
-                InvoiceCreatedEvent,
+                InvoiceIssuedEvent,
                 async (e) => {
                     invoiceEvents.push(e);
                 }
@@ -161,7 +161,7 @@ describe('CompleteDraftInvoice', () => {
 
             expect(invoiceEvents).toEqual([
                 expect.objectContaining({
-                    name: 'invoice.created',
+                    name: 'invoice.issued',
                     data: expect.objectContaining({
                         id: invoice.id,
                         issueDate: '2025-01-01',
@@ -173,9 +173,9 @@ describe('CompleteDraftInvoice', () => {
             ]);
         });
 
-        it('should publish both draft finished and invoice created events', async () => {
+        it('should publish both draft finished and invoice issued events', async () => {
             const finishedEvents: DraftInvoiceFinishedEvent[] = [];
-            const invoiceEvents: InvoiceCreatedEvent[] = [];
+            const invoiceEvents: InvoiceIssuedEvent[] = [];
             await domainEvents.subscribeToEvent(
                 DraftInvoiceFinishedEvent,
                 async (e) => {
@@ -183,7 +183,7 @@ describe('CompleteDraftInvoice', () => {
                 }
             );
             await domainEvents.subscribeToEvent(
-                InvoiceCreatedEvent,
+                InvoiceIssuedEvent,
                 async (e) => {
                     invoiceEvents.push(e);
                 }
@@ -200,7 +200,7 @@ describe('CompleteDraftInvoice', () => {
             ]);
             expect(invoiceEvents).toEqual([
                 expect.objectContaining({
-                    name: 'invoice.created',
+                    name: 'invoice.issued',
                     data: expect.objectContaining({ id: invoice.id }),
                 }),
             ]);

@@ -1,7 +1,7 @@
 import { IO } from '../../../../../building-blocks/io';
 import { Some } from '../../../../../building-blocks/some';
 import { DomainEvents } from '../../../../shared/domain-events/domain-events.interface';
-import { InvoiceCreatedEvent } from '../../../../invoices/domain/invoice/events/invoice-created.event';
+import { InvoiceIssuedEvent } from '../../../../invoices/domain/invoice/events/invoice-issued.event';
 import { createDocument, FinancialDocument } from '../../../domain/document/document';
 import { Money, createMoney } from '../../../domain/money/money';
 import { createReferenceId } from '../../../domain/reference-id/reference-id';
@@ -47,7 +47,7 @@ const orElseCreate =
 
 const handleEvent =
     (domainEvents: DomainEvents, storage: DocumentStorage, policyStorage: PolicyStorage) =>
-    async (event: InvoiceCreatedEvent): Promise<void> => {
+    async (event: InvoiceIssuedEvent): Promise<void> => {
         const referenceId = extractReferenceId(event.data);
         const value = extractValue(event.data);
 
@@ -62,13 +62,13 @@ const handleEvent =
         );
     };
 
-export const onInvoiceCreated = async (
+export const onInvoiceIssued = async (
     domainEvents: DomainEvents,
     storage: DocumentStorage,
     policyStorage: PolicyStorage
 ) => {
     await domainEvents.subscribeToEvent(
-        InvoiceCreatedEvent,
+        InvoiceIssuedEvent,
         handleEvent(domainEvents, storage, policyStorage)
     );
 };

@@ -1,17 +1,18 @@
 import { InMemoryDocumentStorage } from '../../../../../infrastructure/storage/in-memory.document-storage';
 import { InMemoryPolicyStorage } from '../../../../../infrastructure/storage/in-memory.policy-storage';
 import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
-import { InvoiceCreatedEvent } from '../../../../invoices/domain/invoice/events/invoice-created.event';
+import { InvoiceIssuedEvent } from '../../../../invoices/domain/invoice/events/invoice-issued.event';
 import { createMoney } from '../../../domain/money/money';
 import { createRange } from '../../../domain/range/range';
 import { createAuthflowTemplate } from '../../../domain/authflow/authflow-template';
 import { createAuthflowPolicy } from '../../../domain/authflow/authflow-policy';
 import { createDocument } from '../../../domain/document/document';
-import { onInvoiceCreated } from './on-invoice-created';
+import { onInvoiceIssued } from './on-invoice-issued';
 
 const createInvoiceEvent = (id: string, amount = '100', currency = 'USD') =>
-    new InvoiceCreatedEvent({
+    new InvoiceIssuedEvent({
         id,
+        status: 'ISSUED',
         lineItems: {
             items: [
                 {
@@ -75,19 +76,19 @@ const seedPolicy = async (policyStorage: InMemoryPolicyStorage) => {
 
 const publishEvent = async (
     domainEvents: InMemoryDomainEvents,
-    event: InvoiceCreatedEvent
+    event: InvoiceIssuedEvent
 ) => {
     await domainEvents.publishEvents({ events: [event] });
 };
 
-describe('onInvoiceCreated', () => {
+describe('onInvoiceIssued', () => {
     it('should create a new financial document when invoice is created', async () => {
         const storage = new InMemoryDocumentStorage();
         const policyStorage = new InMemoryPolicyStorage();
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(policyStorage);
-        await onInvoiceCreated(domainEvents, storage, policyStorage);
+        await onInvoiceIssued(domainEvents, storage, policyStorage);
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const result = await storage.findByReferenceId('INV-001').run();
@@ -107,7 +108,7 @@ describe('onInvoiceCreated', () => {
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(policyStorage);
-        await onInvoiceCreated(domainEvents, storage, policyStorage);
+        await onInvoiceIssued(domainEvents, storage, policyStorage);
         await publishEvent(domainEvents, createInvoiceEvent('INV-001', '500'));
 
         const result = await storage.findByReferenceId('INV-001').run();
@@ -129,7 +130,7 @@ describe('onInvoiceCreated', () => {
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(policyStorage);
-        await onInvoiceCreated(domainEvents, storage, policyStorage);
+        await onInvoiceIssued(domainEvents, storage, policyStorage);
         await publishEvent(domainEvents, createInvoiceEvent('INV-001', '5000'));
 
         const result = await storage.findByReferenceId('INV-001').run();
@@ -149,7 +150,7 @@ describe('onInvoiceCreated', () => {
         const policyStorage = new InMemoryPolicyStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        await onInvoiceCreated(domainEvents, storage, policyStorage);
+        await onInvoiceIssued(domainEvents, storage, policyStorage);
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const result = await storage.findByReferenceId('INV-001').run();
@@ -168,7 +169,7 @@ describe('onInvoiceCreated', () => {
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(policyStorage);
-        await onInvoiceCreated(domainEvents, storage, policyStorage);
+        await onInvoiceIssued(domainEvents, storage, policyStorage);
         await publishEvent(
             domainEvents,
             createInvoiceEvent('INV-001', '999999')
@@ -190,7 +191,7 @@ describe('onInvoiceCreated', () => {
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(policyStorage);
-        await onInvoiceCreated(domainEvents, storage, policyStorage);
+        await onInvoiceIssued(domainEvents, storage, policyStorage);
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
         await publishEvent(domainEvents, createInvoiceEvent('INV-002'));
 
@@ -218,7 +219,7 @@ describe('onInvoiceCreated', () => {
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(policyStorage);
-        await onInvoiceCreated(domainEvents, storage, policyStorage);
+        await onInvoiceIssued(domainEvents, storage, policyStorage);
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const firstResult = await storage.findByReferenceId('INV-001').run();
@@ -243,7 +244,7 @@ describe('onInvoiceCreated', () => {
         const policyStorage = new InMemoryPolicyStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        await onInvoiceCreated(domainEvents, storage, policyStorage);
+        await onInvoiceIssued(domainEvents, storage, policyStorage);
 
         const result = await storage.findByReferenceId('INV-001').run();
 
@@ -256,7 +257,7 @@ describe('onInvoiceCreated', () => {
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(policyStorage);
-        await onInvoiceCreated(domainEvents, storage, policyStorage);
+        await onInvoiceIssued(domainEvents, storage, policyStorage);
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const result = await storage.findByReferenceId('INV-001').run();
@@ -275,7 +276,7 @@ describe('onInvoiceCreated', () => {
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(policyStorage);
-        await onInvoiceCreated(domainEvents, storage, policyStorage);
+        await onInvoiceIssued(domainEvents, storage, policyStorage);
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
@@ -296,7 +297,7 @@ describe('onInvoiceCreated', () => {
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(policyStorage);
-        await onInvoiceCreated(domainEvents, storage, policyStorage);
+        await onInvoiceIssued(domainEvents, storage, policyStorage);
         await publishEvent(
             domainEvents,
             createInvoiceEvent('my-custom-ref-123')
@@ -321,7 +322,7 @@ describe('onInvoiceCreated', () => {
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(policyStorage);
-        await onInvoiceCreated(domainEvents, storage, policyStorage);
+        await onInvoiceIssued(domainEvents, storage, policyStorage);
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
         await publishEvent(domainEvents, createInvoiceEvent('INV-002'));
         await publishEvent(domainEvents, createInvoiceEvent('INV-003'));
@@ -353,7 +354,7 @@ describe('onInvoiceCreated', () => {
         await storage.save(existing).run();
 
         await seedPolicy(policyStorage);
-        await onInvoiceCreated(domainEvents, storage, policyStorage);
+        await onInvoiceIssued(domainEvents, storage, policyStorage);
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const result = await storage.findByReferenceId('INV-001').run();
@@ -372,7 +373,7 @@ describe('onInvoiceCreated', () => {
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(policyStorage);
-        await onInvoiceCreated(domainEvents, storage, policyStorage);
+        await onInvoiceIssued(domainEvents, storage, policyStorage);
 
         const count = 50;
         for (let i = 0; i < count; i++) {
@@ -393,7 +394,7 @@ describe('onInvoiceCreated', () => {
         await publishEvent(domainEvents, createInvoiceEvent('INV-BEFORE'));
 
         await seedPolicy(policyStorage);
-        await onInvoiceCreated(domainEvents, storage, policyStorage);
+        await onInvoiceIssued(domainEvents, storage, policyStorage);
 
         await publishEvent(domainEvents, createInvoiceEvent('INV-AFTER'));
 
@@ -411,7 +412,7 @@ describe('onInvoiceCreated', () => {
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(policyStorage);
-        await onInvoiceCreated(domainEvents, storage1, policyStorage);
+        await onInvoiceIssued(domainEvents, storage1, policyStorage);
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const inStorage1 = await storage1.findByReferenceId('INV-001').run();

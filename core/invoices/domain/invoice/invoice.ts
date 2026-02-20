@@ -11,11 +11,11 @@ import { LineItems, ReadOnlyLineItems } from '../line-items/line-items';
 import { Status } from '../status/status';
 import { checkDates } from './checks/check-dates';
 import { InvoiceCancelledEvent } from './events/invoice-cancelled.event';
-import { InvoiceCreatedEvent } from './events/invoice-created.event';
+import { InvoiceIssuedEvent } from './events/invoice-issued.event';
 
 export class Invoice
     implements
-        PublishableEvents<InvoiceCreatedEvent | InvoiceCancelledEvent>
+        PublishableEvents<InvoiceIssuedEvent | InvoiceCancelledEvent>
 {
     #id: Id;
     #status: Status;
@@ -27,7 +27,7 @@ export class Invoice
     #dueDate: CalendarDate;
     #issuer: Issuer;
     #recipient: Recipient;
-    #events: (InvoiceCreatedEvent | InvoiceCancelledEvent)[] = [];
+    #events: (InvoiceIssuedEvent | InvoiceCancelledEvent)[] = [];
 
     public get id(): Id {
         return this.#id;
@@ -38,7 +38,7 @@ export class Invoice
     }
 
     public get events(): ReadonlyArray<
-        InvoiceCreatedEvent | InvoiceCancelledEvent
+        InvoiceIssuedEvent | InvoiceCancelledEvent
     > {
         return this.#events;
     }
@@ -137,7 +137,7 @@ export class Invoice
             recipient
         );
 
-        const event = new InvoiceCreatedEvent(invoice.toPlain());
+        const event = new InvoiceIssuedEvent(invoice.toPlain());
 
         invoice.#events.push(event);
 

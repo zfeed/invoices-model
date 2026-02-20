@@ -98,7 +98,7 @@ describe('Invoice', () => {
         expect(invoice.events).toHaveLength(1);
         expect(invoice.events[0]).toEqual(
             expect.objectContaining({
-                name: 'invoice.created',
+                name: 'invoice.issued',
                 data: {
                     id: expect.any(String),
                     status: 'ISSUED',

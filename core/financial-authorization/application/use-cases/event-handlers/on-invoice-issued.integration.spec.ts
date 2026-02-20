@@ -10,7 +10,7 @@ import { createMoney } from '../../../domain/money/money';
 import { createRange } from '../../../domain/range/range';
 import { createAuthflowTemplate } from '../../../domain/authflow/authflow-template';
 import { createAuthflowPolicy } from '../../../domain/authflow/authflow-policy';
-import { onInvoiceCreated } from './on-invoice-created';
+import { onInvoiceIssued } from './on-invoice-issued';
 
 const COMPLETE_DRAFT_REQUEST = {
     lineItems: [
@@ -67,7 +67,7 @@ const seedPolicy = async (policyStorage: InMemoryPolicyStorage) => {
     await policyStorage.save(policy).run();
 };
 
-describe('CompleteDraftInvoice + onInvoiceCreated integration', () => {
+describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
     let unitOfWorkFactory: InMemoryUnitOfWorkFactory;
     let domainEvents: InMemoryDomainEvents;
     let documentStorage: InMemoryDocumentStorage;
@@ -89,7 +89,7 @@ describe('CompleteDraftInvoice + onInvoiceCreated integration', () => {
 
     describe('without policy', () => {
         beforeEach(async () => {
-            await onInvoiceCreated(domainEvents, documentStorage, policyStorage);
+            await onInvoiceIssued(domainEvents, documentStorage, policyStorage);
         });
 
         it('should create a financial document with empty authflows when no policy exists', async () => {
@@ -120,7 +120,7 @@ describe('CompleteDraftInvoice + onInvoiceCreated integration', () => {
             expect(result.isNone()).toBe(true);
         });
 
-        it('should not create a financial document when draft creation does not trigger InvoiceCreatedEvent', async () => {
+        it('should not create a financial document when draft creation does not trigger InvoiceIssuedEvent', async () => {
             await createCommand.execute(COMPLETE_DRAFT_REQUEST);
 
             const result = await documentStorage.findByReferenceId('any-ref').run();
@@ -140,7 +140,7 @@ describe('CompleteDraftInvoice + onInvoiceCreated integration', () => {
     describe('with policy', () => {
         beforeEach(async () => {
             await seedPolicy(policyStorage);
-            await onInvoiceCreated(domainEvents, documentStorage, policyStorage);
+            await onInvoiceIssued(domainEvents, documentStorage, policyStorage);
         });
 
         it('should create a financial document with an authflow from the policy', async () => {

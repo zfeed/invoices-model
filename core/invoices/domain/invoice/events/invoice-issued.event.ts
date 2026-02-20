@@ -65,8 +65,8 @@ type Data = {
     };
 };
 
-export class InvoiceCreatedEvent extends DomainEvent<Data> {
+export class InvoiceIssuedEvent extends DomainEvent<Data> {
     constructor(data: Data) {
-        super({ name: 'invoice.created', data });
+        super({ name: 'invoice.issued', data });
     }
 }
