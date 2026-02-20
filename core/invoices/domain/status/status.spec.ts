@@ -1,6 +1,17 @@
+import { testEquatable } from '../../../../building-blocks/equatable.test-helper';
 import { Status } from './status';
 
 describe('Status', () => {
+    testEquatable({
+        typeName: 'Status',
+        createEqual: () => [
+            Status.issued(),
+            Status.issued(),
+            Status.issued(),
+        ],
+        createDifferent: () => [Status.issued(), Status.cancelled()],
+    });
+
     describe('issued', () => {
         it('should create a status with ISSUED value', () => {
             const status = Status.issued();
@@ -9,12 +20,11 @@ describe('Status', () => {
         });
     });
 
-    describe('equals', () => {
-        it('should be equal to another ISSUED status', () => {
-            const a = Status.issued();
-            const b = Status.issued();
+    describe('cancelled', () => {
+        it('should create a status with CANCELLED value', () => {
+            const status = Status.cancelled();
 
-            expect(a.equals(b)).toBe(true);
+            expect(status.toString()).toBe('CANCELLED');
         });
     });
 });
