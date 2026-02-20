@@ -12,13 +12,14 @@ import { Status } from '../status/status';
 import { checkDates } from './checks/check-dates';
 import { InvoiceCancelledEvent } from './events/invoice-cancelled.event';
 import { InvoiceIssuedEvent } from './events/invoice-issued.event';
+import { InvoiceFailedEvent } from './events/invoice-failed.event';
 import { InvoicePaidEvent } from './events/invoice-paid.event';
 import { InvoiceProcessingEvent } from './events/invoice-processing.event';
 
 export class Invoice
     implements
         PublishableEvents<
-            InvoiceIssuedEvent | InvoiceProcessingEvent | InvoiceCancelledEvent | InvoicePaidEvent
+            InvoiceIssuedEvent | InvoiceProcessingEvent | InvoiceCancelledEvent | InvoicePaidEvent | InvoiceFailedEvent
         >
 {
     #id: Id;
@@ -46,7 +47,7 @@ export class Invoice
     }
 
     public get events(): ReadonlyArray<
-        InvoiceIssuedEvent | InvoiceProcessingEvent | InvoiceCancelledEvent | InvoicePaidEvent
+        InvoiceIssuedEvent | InvoiceProcessingEvent | InvoiceCancelledEvent | InvoicePaidEvent | InvoiceFailedEvent
     > {
         return this.#events;
     }
@@ -182,6 +183,23 @@ export class Invoice
         this.#status = Status.paid();
 
         this.#events.push(new InvoicePaidEvent(this.toPlain()));
+
+        return Result.ok(undefined);
+    }
+
+    fail() {
+        if (!this.#status.equals(Status.processing())) {
+            return Result.error(
+                new DomainError({
+                    message: `Cannot fail invoice in status ${this.#status.toString()}`,
+                    code: DOMAIN_ERROR_CODE.INVOICE_INVALID_STATUS_TRANSITION,
+                })
+            );
+        }
+
+        this.#status = Status.failed();
+
+        this.#events.push(new InvoiceFailedEvent(this.toPlain()));
 
         return Result.ok(undefined);
     }
