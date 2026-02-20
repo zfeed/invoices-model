@@ -6,6 +6,8 @@ import { createMoney } from '../money/money';
 import { createRange } from '../range/range';
 import { Step } from '../step/step';
 import { approveDocument, createDocument, FinancialDocument } from './document';
+import { DocumentCreatedEvent } from './events/document-created.event';
+import { DocumentApprovedEvent } from './events/document-approved.event';
 
 const testMoney = createMoney('10000', 'USD').unwrap();
 const testRange = createRange(
@@ -224,6 +226,43 @@ describe('createDocument', () => {
             'invoice-2024-001-special-chars_test'
         );
         expect(result3.unwrap().referenceId).toBe('12345');
+    });
+
+    it('should produce a DocumentCreatedEvent', () => {
+        const authflows: Authflow[] = [
+            { id: '1', action: 'approve', range: testRange, isApproved: false, steps: [] },
+        ];
+
+        const result = createDocument({
+            referenceId: 'INV-001',
+            value: testMoney,
+            authflows,
+        });
+
+        const document = result.unwrap();
+        expect(document.events).toHaveLength(1);
+        expect(document.events[0]).toBeInstanceOf(DocumentCreatedEvent);
+    });
+
+    it('should include document data in the DocumentCreatedEvent', () => {
+        const authflows: Authflow[] = [
+            { id: '1', action: 'approve', range: testRange, isApproved: false, steps: [] },
+            { id: '2', action: 'reject', range: testRange, isApproved: false, steps: [] },
+        ];
+
+        const result = createDocument({
+            referenceId: 'INV-010',
+            value: testMoney,
+            authflows,
+        });
+
+        const document = result.unwrap();
+        const event = document.events[0];
+        expect(event.data.id).toBe(document.id);
+        expect(event.data.referenceId).toBe('INV-010');
+        expect(event.data.value).toEqual(testMoney);
+        expect(event.data.authflows).toEqual(authflows);
+        expect(event.data.version).toBe(0);
     });
 });
 
@@ -661,5 +700,43 @@ describe('approveDocument', () => {
         expect(result2.isOk()).toBe(true);
         const afterSecond = result2.unwrap();
         expect(afterSecond.authflows[0].isApproved).toBe(true);
+    });
+
+    it('should produce a DocumentApprovedEvent', () => {
+        const group = makeGroup('group-1', [approver1], false);
+        const step = makeStep('step-1', 0, [group], false);
+        const authflow = makeAuthflow('authflow-1', 'submit', [step], false);
+        const document = makeDocument([authflow]);
+
+        const result = approveDocument({
+            document,
+            action: 'submit',
+            approver: approver1,
+        });
+
+        const updated = result.unwrap();
+        expect(updated.events).toHaveLength(1);
+        expect(updated.events[0]).toBeInstanceOf(DocumentApprovedEvent);
+    });
+
+    it('should include approval data in the DocumentApprovedEvent', () => {
+        const group = makeGroup('group-1', [approver1], false);
+        const step = makeStep('step-1', 0, [group], false);
+        const authflow = makeAuthflow('authflow-1', 'submit', [step], false);
+        const document = makeDocument([authflow]);
+
+        const result = approveDocument({
+            document,
+            action: 'submit',
+            approver: approver1,
+        });
+
+        const updated = result.unwrap();
+        const event = updated.events[0];
+        expect(event.data.id).toBe('doc-1');
+        expect(event.data.referenceId).toBe('INV-001');
+        expect(event.data.value).toEqual(testMoney);
+        expect(event.data.authflows).toEqual(updated.authflows);
+        expect(event.data.version).toBe(0);
     });
 });

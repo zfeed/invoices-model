@@ -1,25 +1,29 @@
 import { InMemoryDocumentStorage } from '../../../../../infrastructure/storage/in-memory.document-storage';
+import { InMemoryPolicyStorage } from '../../../../../infrastructure/storage/in-memory.policy-storage';
 import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
 import { InvoiceCreatedEvent } from '../../../../invoices/domain/invoice/events/invoice-created.event';
 import { createMoney } from '../../../domain/money/money';
+import { createRange } from '../../../domain/range/range';
+import { createAuthflowTemplate } from '../../../domain/authflow/authflow-template';
+import { createAuthflowPolicy } from '../../../domain/authflow/authflow-policy';
 import { createDocument } from '../../../domain/document/document';
 import { onInvoiceCreated } from './on-invoice-created';
 
-const createInvoiceEvent = (id: string) =>
+const createInvoiceEvent = (id: string, amount = '100', currency = 'USD') =>
     new InvoiceCreatedEvent({
         id,
         lineItems: {
             items: [
                 {
                     description: 'Service',
-                    price: { amount: '100', currency: 'USD' },
+                    price: { amount, currency },
                     quantity: '1',
-                    total: { amount: '100', currency: 'USD' },
+                    total: { amount, currency },
                 },
             ],
-            subtotal: { amount: '100', currency: 'USD' },
+            subtotal: { amount, currency },
         },
-        total: { amount: '100', currency: 'USD' },
+        total: { amount, currency },
         vatRate: null,
         vatAmount: null,
         dueDate: '2026-03-01',
@@ -45,6 +49,30 @@ const createInvoiceEvent = (id: string) =>
         },
     });
 
+const range = (from: string, to: string) =>
+    createRange(
+        createMoney(from, 'USD').unwrap(),
+        createMoney(to, 'USD').unwrap()
+    ).unwrap();
+
+const template = (from: string, to: string) =>
+    createAuthflowTemplate({
+        range: range(from, to),
+        steps: [],
+    }).unwrap();
+
+const seedPolicy = async (policyStorage: InMemoryPolicyStorage) => {
+    const policy = createAuthflowPolicy({
+        action: 'approve',
+        templates: [
+            template('0', '999'),
+            template('1000', '9999'),
+            template('10000', '100000'),
+        ],
+    }).unwrap();
+    await policyStorage.save(policy).run();
+};
+
 const publishEvent = async (
     domainEvents: InMemoryDomainEvents,
     event: InvoiceCreatedEvent
@@ -55,9 +83,11 @@ const publishEvent = async (
 describe('onInvoiceCreated', () => {
     it('should create a new financial document when invoice is created', async () => {
         const storage = new InMemoryDocumentStorage();
+        const policyStorage = new InMemoryPolicyStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        await onInvoiceCreated(domainEvents, storage);
+        await seedPolicy(policyStorage);
+        await onInvoiceCreated(domainEvents, storage, policyStorage);
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const result = await storage.findByReferenceId('INV-001').run();
@@ -67,16 +97,100 @@ describe('onInvoiceCreated', () => {
             () => fail('Expected document to exist'),
             (doc) => {
                 expect(doc.referenceId).toBe('INV-001');
-                expect(doc.authflows).toHaveLength(0);
+            }
+        );
+    });
+
+    it('should create a document with an authflow selected from the policy', async () => {
+        const storage = new InMemoryDocumentStorage();
+        const policyStorage = new InMemoryPolicyStorage();
+        const domainEvents = new InMemoryDomainEvents();
+
+        await seedPolicy(policyStorage);
+        await onInvoiceCreated(domainEvents, storage, policyStorage);
+        await publishEvent(domainEvents, createInvoiceEvent('INV-001', '500'));
+
+        const result = await storage.findByReferenceId('INV-001').run();
+
+        result.fold(
+            () => fail('Expected document to exist'),
+            (doc) => {
+                expect(doc.authflows).toHaveLength(1);
+                expect(doc.authflows[0].action).toBe('approve');
+                expect(doc.authflows[0].range.from.amount).toBe('0');
+                expect(doc.authflows[0].range.to.amount).toBe('999');
+            }
+        );
+    });
+
+    it('should select the correct authflow range for the invoice amount', async () => {
+        const storage = new InMemoryDocumentStorage();
+        const policyStorage = new InMemoryPolicyStorage();
+        const domainEvents = new InMemoryDomainEvents();
+
+        await seedPolicy(policyStorage);
+        await onInvoiceCreated(domainEvents, storage, policyStorage);
+        await publishEvent(domainEvents, createInvoiceEvent('INV-001', '5000'));
+
+        const result = await storage.findByReferenceId('INV-001').run();
+
+        result.fold(
+            () => fail('Expected document to exist'),
+            (doc) => {
+                expect(doc.authflows).toHaveLength(1);
+                expect(doc.authflows[0].range.from.amount).toBe('1000');
+                expect(doc.authflows[0].range.to.amount).toBe('9999');
+            }
+        );
+    });
+
+    it('should create a document with empty authflows when no policy exists', async () => {
+        const storage = new InMemoryDocumentStorage();
+        const policyStorage = new InMemoryPolicyStorage();
+        const domainEvents = new InMemoryDomainEvents();
+
+        await onInvoiceCreated(domainEvents, storage, policyStorage);
+        await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
+
+        const result = await storage.findByReferenceId('INV-001').run();
+
+        result.fold(
+            () => fail('Expected document to exist'),
+            (doc) => {
+                expect(doc.authflows).toEqual([]);
+            }
+        );
+    });
+
+    it('should create a document with empty authflows when amount is outside policy ranges', async () => {
+        const storage = new InMemoryDocumentStorage();
+        const policyStorage = new InMemoryPolicyStorage();
+        const domainEvents = new InMemoryDomainEvents();
+
+        await seedPolicy(policyStorage);
+        await onInvoiceCreated(domainEvents, storage, policyStorage);
+        await publishEvent(
+            domainEvents,
+            createInvoiceEvent('INV-001', '999999')
+        );
+
+        const result = await storage.findByReferenceId('INV-001').run();
+
+        result.fold(
+            () => fail('Expected document to exist'),
+            (doc) => {
+                expect(doc.authflows).toEqual([]);
             }
         );
     });
 
     it('should create documents with different referenceIds for different invoices', async () => {
         const storage = new InMemoryDocumentStorage();
+        const policyStorage = new InMemoryPolicyStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        await onInvoiceCreated(domainEvents, storage);
+        await seedPolicy(policyStorage);
+        await onInvoiceCreated(domainEvents, storage, policyStorage);
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
         await publishEvent(domainEvents, createInvoiceEvent('INV-002'));
 
@@ -100,9 +214,11 @@ describe('onInvoiceCreated', () => {
 
     it('should not create a duplicate document when invoice with same id is created twice', async () => {
         const storage = new InMemoryDocumentStorage();
+        const policyStorage = new InMemoryPolicyStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        await onInvoiceCreated(domainEvents, storage);
+        await seedPolicy(policyStorage);
+        await onInvoiceCreated(domainEvents, storage, policyStorage);
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const firstResult = await storage.findByReferenceId('INV-001').run();
@@ -124,9 +240,10 @@ describe('onInvoiceCreated', () => {
 
     it('should not create a document when no event is published', async () => {
         const storage = new InMemoryDocumentStorage();
+        const policyStorage = new InMemoryPolicyStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        await onInvoiceCreated(domainEvents, storage);
+        await onInvoiceCreated(domainEvents, storage, policyStorage);
 
         const result = await storage.findByReferenceId('INV-001').run();
 
@@ -135,9 +252,11 @@ describe('onInvoiceCreated', () => {
 
     it('should create a document with version 1 after save', async () => {
         const storage = new InMemoryDocumentStorage();
+        const policyStorage = new InMemoryPolicyStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        await onInvoiceCreated(domainEvents, storage);
+        await seedPolicy(policyStorage);
+        await onInvoiceCreated(domainEvents, storage, policyStorage);
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const result = await storage.findByReferenceId('INV-001').run();
@@ -152,9 +271,11 @@ describe('onInvoiceCreated', () => {
 
     it('should not modify an existing document version on duplicate event', async () => {
         const storage = new InMemoryDocumentStorage();
+        const policyStorage = new InMemoryPolicyStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        await onInvoiceCreated(domainEvents, storage);
+        await seedPolicy(policyStorage);
+        await onInvoiceCreated(domainEvents, storage, policyStorage);
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
@@ -171,9 +292,11 @@ describe('onInvoiceCreated', () => {
 
     it('should use event data id as the document referenceId', async () => {
         const storage = new InMemoryDocumentStorage();
+        const policyStorage = new InMemoryPolicyStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        await onInvoiceCreated(domainEvents, storage);
+        await seedPolicy(policyStorage);
+        await onInvoiceCreated(domainEvents, storage, policyStorage);
         await publishEvent(
             domainEvents,
             createInvoiceEvent('my-custom-ref-123')
@@ -194,9 +317,11 @@ describe('onInvoiceCreated', () => {
 
     it('should generate a unique document id for each new document', async () => {
         const storage = new InMemoryDocumentStorage();
+        const policyStorage = new InMemoryPolicyStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        await onInvoiceCreated(domainEvents, storage);
+        await seedPolicy(policyStorage);
+        await onInvoiceCreated(domainEvents, storage, policyStorage);
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
         await publishEvent(domainEvents, createInvoiceEvent('INV-002'));
         await publishEvent(domainEvents, createInvoiceEvent('INV-003'));
@@ -215,25 +340,9 @@ describe('onInvoiceCreated', () => {
         expect(uniqueIds.size).toBe(3);
     });
 
-    it('should create a document with empty authflows', async () => {
-        const storage = new InMemoryDocumentStorage();
-        const domainEvents = new InMemoryDomainEvents();
-
-        await onInvoiceCreated(domainEvents, storage);
-        await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
-
-        const result = await storage.findByReferenceId('INV-001').run();
-
-        result.fold(
-            () => fail('Expected document to exist'),
-            (doc) => {
-                expect(doc.authflows).toEqual([]);
-            }
-        );
-    });
-
     it('should not overwrite a pre-existing document in storage', async () => {
         const storage = new InMemoryDocumentStorage();
+        const policyStorage = new InMemoryPolicyStorage();
         const domainEvents = new InMemoryDomainEvents();
 
         const existing = createDocument({
@@ -243,7 +352,8 @@ describe('onInvoiceCreated', () => {
         }).unwrap();
         await storage.save(existing).run();
 
-        await onInvoiceCreated(domainEvents, storage);
+        await seedPolicy(policyStorage);
+        await onInvoiceCreated(domainEvents, storage, policyStorage);
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const result = await storage.findByReferenceId('INV-001').run();
@@ -258,9 +368,11 @@ describe('onInvoiceCreated', () => {
 
     it('should handle many events for different invoices', async () => {
         const storage = new InMemoryDocumentStorage();
+        const policyStorage = new InMemoryPolicyStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        await onInvoiceCreated(domainEvents, storage);
+        await seedPolicy(policyStorage);
+        await onInvoiceCreated(domainEvents, storage, policyStorage);
 
         const count = 50;
         for (let i = 0; i < count; i++) {
@@ -275,11 +387,13 @@ describe('onInvoiceCreated', () => {
 
     it('should only react to events published after subscription', async () => {
         const storage = new InMemoryDocumentStorage();
+        const policyStorage = new InMemoryPolicyStorage();
         const domainEvents = new InMemoryDomainEvents();
 
         await publishEvent(domainEvents, createInvoiceEvent('INV-BEFORE'));
 
-        await onInvoiceCreated(domainEvents, storage);
+        await seedPolicy(policyStorage);
+        await onInvoiceCreated(domainEvents, storage, policyStorage);
 
         await publishEvent(domainEvents, createInvoiceEvent('INV-AFTER'));
 
@@ -293,9 +407,11 @@ describe('onInvoiceCreated', () => {
     it('should isolate documents across separate storage instances', async () => {
         const storage1 = new InMemoryDocumentStorage();
         const storage2 = new InMemoryDocumentStorage();
+        const policyStorage = new InMemoryPolicyStorage();
         const domainEvents = new InMemoryDomainEvents();
 
-        await onInvoiceCreated(domainEvents, storage1);
+        await seedPolicy(policyStorage);
+        await onInvoiceCreated(domainEvents, storage1, policyStorage);
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const inStorage1 = await storage1.findByReferenceId('INV-001').run();

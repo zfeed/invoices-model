@@ -4,6 +4,7 @@ import { createRange } from '../range/range';
 import { createAuthflowTemplate } from './authflow-template';
 import { createAuthflowPolicy, selectAuthflow } from './authflow-policy';
 import { StepTemplate } from '../step/step-template';
+import { AuthflowPolicyCreatedEvent } from './events/authflow-policy-created.event';
 
 const range = (from: string, to: string) =>
     createRange(
@@ -141,6 +142,34 @@ describe('createAuthflowPolicy', () => {
         expect(result1.isOk()).toBe(true);
         expect(result2.isOk()).toBe(true);
         expect(result1.unwrap().id).not.toBe(result2.unwrap().id);
+    });
+
+    it('should produce an AuthflowPolicyCreatedEvent', () => {
+        const result = createAuthflowPolicy({
+            action: 'approve-invoice',
+            templates: [template('0', '1000')],
+        });
+
+        const policy = result.unwrap();
+        expect(policy.events).toHaveLength(1);
+        expect(policy.events[0]).toBeInstanceOf(AuthflowPolicyCreatedEvent);
+    });
+
+    it('should include policy data in the AuthflowPolicyCreatedEvent', () => {
+        const result = createAuthflowPolicy({
+            action: 'approve-invoice',
+            templates: [
+                template('0', '1000'),
+                template('1001', '5000'),
+            ],
+        });
+
+        const policy = result.unwrap();
+        const event = policy.events[0];
+        expect(event.data.id).toBe(policy.id);
+        expect(event.data.action).toBe('approve-invoice');
+        expect(event.data.templates).toEqual(policy.templates);
+        expect(event.data.version).toBe(0);
     });
 });
 

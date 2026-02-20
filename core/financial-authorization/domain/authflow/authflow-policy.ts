@@ -1,6 +1,7 @@
 import { applySpec, prop } from 'ramda';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
+import { WithEvents, withEvents } from '../../../../building-blocks/events/with-events';
 import { Action } from '../action/action';
 import { createId, Id } from '../id/id';
 import { Money } from '../money/money';
@@ -10,6 +11,7 @@ import { authflowFromTemplate } from './authflow-from-template';
 import { AuthflowTemplate } from './authflow-template';
 import { noOverlappingRanges } from './checks/check-no-overlapping-ranges';
 import { templateInRange } from './checks/check-template-in-range';
+import { AuthflowPolicyCreatedEvent } from './events/authflow-policy-created.event';
 
 export type AuthflowPolicy = {
     id: Id;
@@ -41,10 +43,13 @@ const rebuildAuthflowPolicy = applySpec<AuthflowPolicy>({
 
 export const createAuthflowPolicy = (
     data: AuthflowPolicyInput
-): Result<DomainError, AuthflowPolicy> =>
+): Result<DomainError, WithEvents<AuthflowPolicy, AuthflowPolicyCreatedEvent>> =>
     Result.ok<DomainError, AuthflowPolicyInput>(data)
         .flatMap(noOverlappingRanges)
-        .map(buildAuthflowPolicy);
+        .map(buildAuthflowPolicy)
+        .map((policy) =>
+            withEvents(policy, [new AuthflowPolicyCreatedEvent(policy)])
+        );
 
 export const recreateAuthflowPolicy = (
     data: RebuildAuthflowPolicyInput

@@ -1,6 +1,7 @@
 import { applySpec, find, prop, propEq, propOr } from 'ramda';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
+import { WithEvents, withEvents } from '../../../../building-blocks/events/with-events';
 import { Money } from '../money/money';
 import { Approver } from '../approver/approver';
 import { Action } from '../action/action';
@@ -9,6 +10,8 @@ import { ReferenceId } from '../reference-id/reference-id';
 import { createId, Id } from '../id/id';
 import { Version } from '../version/version';
 import { noDuplicateAuthflowActions } from './checks/check-no-duplicate-authflow-actions';
+import { DocumentCreatedEvent } from './events/document-created.event';
+import { DocumentApprovedEvent } from './events/document-approved.event';
 
 export type FinancialDocument = {
     id: Id;
@@ -44,10 +47,13 @@ const rebuildDocument = applySpec<FinancialDocument>({
 
 export const createDocument = (
     data: DocumentInput
-): Result<DomainError, FinancialDocument> =>
+): Result<DomainError, WithEvents<FinancialDocument, DocumentCreatedEvent>> =>
     Result.ok<DomainError, DocumentInput>(data)
         .flatMap(noDuplicateAuthflowActions)
-        .map(buildDocument);
+        .map(buildDocument)
+        .map((doc) =>
+            withEvents(doc, [new DocumentCreatedEvent(doc)])
+        );
 
 const recreateDocument = (
     data: RebuildDocumentInput
@@ -100,7 +106,10 @@ const buildApprovedDocument =
 
 export const approveDocument = (
     data: ApproveDocumentInput
-): Result<DomainError, FinancialDocument> =>
+): Result<DomainError, WithEvents<FinancialDocument, DocumentApprovedEvent>> =>
     Result.ok<DomainError, ApproveDocumentInput>(data)
         .flatMap(applyAuthflowApproval)
-        .flatMap(buildApprovedDocument(data));
+        .flatMap(buildApprovedDocument(data))
+        .map((doc) =>
+            withEvents(doc, [new DocumentApprovedEvent(doc)])
+        );
