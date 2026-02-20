@@ -4,6 +4,7 @@ export enum INVOICE_STATUS {
     ISSUED = 'ISSUED',
     PROCESSING = 'PROCESSING',
     CANCELLED = 'CANCELLED',
+    PAID = 'PAID',
 }
 
 export class Status implements Equatable<Status> {
@@ -23,6 +24,10 @@ export class Status implements Equatable<Status> {
 
     static cancelled(): Status {
         return new Status(INVOICE_STATUS.CANCELLED);
+    }
+
+    static paid(): Status {
+        return new Status(INVOICE_STATUS.PAID);
     }
 
     toString(): string {

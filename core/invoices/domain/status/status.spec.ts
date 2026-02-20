@@ -35,4 +35,12 @@ describe('Status', () => {
             expect(status.toString()).toBe('CANCELLED');
         });
     });
+
+    describe('paid', () => {
+        it('should create a status with PAID value', () => {
+            const status = Status.paid();
+
+            expect(status.toString()).toBe('PAID');
+        });
+    });
 });
