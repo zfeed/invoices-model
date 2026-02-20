@@ -2,6 +2,7 @@ import { Equatable } from '../../../../building-blocks';
 
 export enum INVOICE_STATUS {
     ISSUED = 'ISSUED',
+    PROCESSING = 'PROCESSING',
     CANCELLED = 'CANCELLED',
 }
 
@@ -14,6 +15,10 @@ export class Status implements Equatable<Status> {
 
     static issued(): Status {
         return new Status(INVOICE_STATUS.ISSUED);
+    }
+
+    static processing(): Status {
+        return new Status(INVOICE_STATUS.PROCESSING);
     }
 
     static cancelled(): Status {

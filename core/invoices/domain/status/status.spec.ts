@@ -20,6 +20,14 @@ describe('Status', () => {
         });
     });
 
+    describe('processing', () => {
+        it('should create a status with PROCESSING value', () => {
+            const status = Status.processing();
+
+            expect(status.toString()).toBe('PROCESSING');
+        });
+    });
+
     describe('cancelled', () => {
         it('should create a status with CANCELLED value', () => {
             const status = Status.cancelled();
