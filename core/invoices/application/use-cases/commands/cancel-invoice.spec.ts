@@ -92,10 +92,35 @@ describe('CancelInvoice', () => {
         expect(cancelledEvents).toEqual([
             expect.objectContaining({
                 name: 'invoice.cancelled',
-                data: {
+                data: expect.objectContaining({
                     id: invoice.id,
                     status: 'CANCELLED',
-                },
+                    lineItems: expect.any(Object),
+                    total: { amount: '220', currency: 'USD' },
+                    vatRate: '10',
+                    vatAmount: { amount: '20', currency: 'USD' },
+                    issueDate: '2025-01-01',
+                    dueDate: '2025-02-01',
+                    issuer: {
+                        type: 'COMPANY',
+                        name: 'Company Inc.',
+                        address: '123 Main St',
+                        taxId: 'TAX123',
+                        email: 'info@company.com',
+                    },
+                    recipient: {
+                        type: 'INDIVIDUAL',
+                        name: 'Jane Smith',
+                        address: '456 Oak Ave',
+                        taxId: 'TAX456',
+                        email: 'jane@example.com',
+                        taxResidenceCountry: 'US',
+                        billing: {
+                            type: 'PAYPAL',
+                            data: { email: 'jane@paypal.com' },
+                        },
+                    },
+                }),
             }),
         ]);
     });

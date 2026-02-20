@@ -1,4 +1,4 @@
-import { Result } from '../../../../building-blocks';
+import { DOMAIN_ERROR_CODE, DomainError, Result } from '../../../../building-blocks';
 import { Issuer } from '../issuer/issuer';
 import { Money } from '../money/money/money';
 import { Recipient } from '../recipient/recipient';
@@ -12,10 +12,13 @@ import { Status } from '../status/status';
 import { checkDates } from './checks/check-dates';
 import { InvoiceCancelledEvent } from './events/invoice-cancelled.event';
 import { InvoiceIssuedEvent } from './events/invoice-issued.event';
+import { InvoiceProcessingEvent } from './events/invoice-processing.event';
 
 export class Invoice
     implements
-        PublishableEvents<InvoiceIssuedEvent | InvoiceCancelledEvent>
+        PublishableEvents<
+            InvoiceIssuedEvent | InvoiceProcessingEvent | InvoiceCancelledEvent
+        >
 {
     #id: Id;
     #status: Status;
@@ -27,7 +30,11 @@ export class Invoice
     #dueDate: CalendarDate;
     #issuer: Issuer;
     #recipient: Recipient;
-    #events: (InvoiceIssuedEvent | InvoiceCancelledEvent)[] = [];
+    #events: (
+        | InvoiceIssuedEvent
+        | InvoiceProcessingEvent
+        | InvoiceCancelledEvent
+    )[] = [];
 
     public get id(): Id {
         return this.#id;
@@ -38,7 +45,7 @@ export class Invoice
     }
 
     public get events(): ReadonlyArray<
-        InvoiceIssuedEvent | InvoiceCancelledEvent
+        InvoiceIssuedEvent | InvoiceProcessingEvent | InvoiceCancelledEvent
     > {
         return this.#events;
     }
@@ -144,15 +151,27 @@ export class Invoice
         return Result.ok(invoice);
     }
 
+    process() {
+        if (!this.#status.equals(Status.issued())) {
+            return Result.error(
+                new DomainError({
+                    message: `Cannot process invoice in status ${this.#status.toString()}`,
+                    code: DOMAIN_ERROR_CODE.INVOICE_INVALID_STATUS_TRANSITION,
+                })
+            );
+        }
+
+        this.#status = Status.processing();
+
+        this.#events.push(new InvoiceProcessingEvent(this.toPlain()));
+
+        return Result.ok(undefined);
+    }
+
     cancel() {
         this.#status = Status.cancelled();
 
-        this.#events.push(
-            new InvoiceCancelledEvent({
-                id: this.#id.toString(),
-                status: this.#status.toString(),
-            })
-        );
+        this.#events.push(new InvoiceCancelledEvent(this.toPlain()));
     }
 
     toPlain() {

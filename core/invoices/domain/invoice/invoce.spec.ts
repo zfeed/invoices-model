@@ -148,6 +148,121 @@ describe('Invoice', () => {
         );
     });
 
+    it('should process an issued invoice', () => {
+        const lineItem = LineItem.create({
+            description: 'Item 1',
+            price: {
+                amount: '50',
+                currency: 'USD',
+            },
+            quantity: '2',
+        }).unwrap();
+        const lineItems = LineItems.create({
+            items: [lineItem],
+        }).unwrap();
+        const issuer = Issuer.create({
+            type: ISSUER_TYPE.COMPANY,
+            name: 'Company Inc.',
+            address: '123 Main St, City, Country',
+            taxId: 'TAX123456',
+            email: 'info@company.com',
+        }).unwrap();
+        const recipientBilling = Paypal.create({
+            email: 'customer@example.com',
+        }).unwrap();
+        const recipient = Recipient.create({
+            type: RECIPIENT_TYPE.INDIVIDUAL,
+            name: 'Jane Smith',
+            address: '456 Another St, City, Country',
+            taxId: 'TAX654321',
+            email: 'jane.smith@example.com',
+            taxResidenceCountry: 'US',
+            billing: recipientBilling,
+        }).unwrap();
+
+        const invoice = Invoice.create({
+            id: Id.create().unwrap(),
+            issueDate: CalendarDate.create('2023-01-01').unwrap(),
+            dueDate: CalendarDate.create('2028-01-01').unwrap(),
+            lineItems: lineItems,
+            vatRate: null,
+            issuer: issuer,
+            recipient: recipient,
+        }).unwrap();
+
+        const result = invoice.process();
+
+        expect(result.isOk()).toBe(true);
+        expect(invoice.status.equals(Status.processing())).toBe(true);
+        expect(invoice.events).toHaveLength(2);
+        expect(invoice.events[1]).toEqual(
+            expect.objectContaining({
+                name: 'invoice.processing',
+                data: expect.objectContaining({
+                    id: expect.any(String),
+                    status: 'PROCESSING',
+                    lineItems: expect.any(Object),
+                    total: { amount: '100', currency: 'USD' },
+                    issueDate: '2023-01-01',
+                    dueDate: '2028-01-01',
+                }),
+            })
+        );
+    });
+
+    it('should not process a cancelled invoice', () => {
+        const lineItem = LineItem.create({
+            description: 'Item 1',
+            price: {
+                amount: '50',
+                currency: 'USD',
+            },
+            quantity: '2',
+        }).unwrap();
+        const lineItems = LineItems.create({
+            items: [lineItem],
+        }).unwrap();
+        const issuer = Issuer.create({
+            type: ISSUER_TYPE.COMPANY,
+            name: 'Company Inc.',
+            address: '123 Main St, City, Country',
+            taxId: 'TAX123456',
+            email: 'info@company.com',
+        }).unwrap();
+        const recipientBilling = Paypal.create({
+            email: 'customer@example.com',
+        }).unwrap();
+        const recipient = Recipient.create({
+            type: RECIPIENT_TYPE.INDIVIDUAL,
+            name: 'Jane Smith',
+            address: '456 Another St, City, Country',
+            taxId: 'TAX654321',
+            email: 'jane.smith@example.com',
+            taxResidenceCountry: 'US',
+            billing: recipientBilling,
+        }).unwrap();
+
+        const invoice = Invoice.create({
+            id: Id.create().unwrap(),
+            issueDate: CalendarDate.create('2023-01-01').unwrap(),
+            dueDate: CalendarDate.create('2028-01-01').unwrap(),
+            lineItems: lineItems,
+            vatRate: null,
+            issuer: issuer,
+            recipient: recipient,
+        }).unwrap();
+
+        invoice.cancel();
+        const result = invoice.process();
+
+        expect(result.isError()).toBe(true);
+        expect(result.unwrapError()).toEqual(
+            expect.objectContaining({
+                code: '10001',
+            })
+        );
+    });
+
     it('should cancel an invoice', () => {
         const lineItem = LineItem.create({
             description: 'Item 1',
@@ -197,10 +312,14 @@ describe('Invoice', () => {
         expect(invoice.events[1]).toEqual(
             expect.objectContaining({
                 name: 'invoice.cancelled',
-                data: {
+                data: expect.objectContaining({
                     id: expect.any(String),
                     status: 'CANCELLED',
-                },
+                    lineItems: expect.any(Object),
+                    total: { amount: '100', currency: 'USD' },
+                    issueDate: '2023-01-01',
+                    dueDate: '2028-01-01',
+                }),
             })
         );
     });
