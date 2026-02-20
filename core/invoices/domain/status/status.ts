@@ -1,0 +1,25 @@
+import { Equatable } from '../../../../building-blocks';
+
+export enum INVOICE_STATUS {
+    ISSUED = 'ISSUED',
+}
+
+export class Status implements Equatable<Status> {
+    #value: INVOICE_STATUS;
+
+    protected constructor(value: INVOICE_STATUS) {
+        this.#value = value;
+    }
+
+    static issued(): Status {
+        return new Status(INVOICE_STATUS.ISSUED);
+    }
+
+    toString(): string {
+        return this.#value;
+    }
+
+    equals(other: Status): boolean {
+        return this.#value === other.#value;
+    }
+}
