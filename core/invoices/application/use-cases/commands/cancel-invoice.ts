@@ -25,7 +25,7 @@ export class CancelInvoice {
                     });
                 }
 
-                invoice.cancel();
+                invoice.cancel().unwrap();
 
                 return invoice;
             }

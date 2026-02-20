@@ -169,9 +169,20 @@ export class Invoice
     }
 
     cancel() {
+        if (!this.#status.equals(Status.issued())) {
+            return Result.error(
+                new DomainError({
+                    message: `Cannot cancel invoice in status ${this.#status.toString()}`,
+                    code: DOMAIN_ERROR_CODE.INVOICE_INVALID_STATUS_TRANSITION,
+                })
+            );
+        }
+
         this.#status = Status.cancelled();
 
         this.#events.push(new InvoiceCancelledEvent(this.toPlain()));
+
+        return Result.ok(undefined);
     }
 
     toPlain() {
