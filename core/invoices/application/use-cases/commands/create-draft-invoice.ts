@@ -55,65 +55,76 @@ export class CreateDraftInvoice {
                   };
         };
     }) {
-        return this.unitOfWorkFactory.start(async (unitOfWork) => {
-            const draftInvoice = DraftInvoice.create(
-                Id.create().unwrap()
-            ).unwrap();
-
-            if (request.lineItems) {
-                request.lineItems
-                    .map((lineItem) => LineItem.create(lineItem).unwrap())
-                    .forEach((lineItem) =>
-                        draftInvoice.addLineItem(lineItem).unwrap()
-                    );
-            }
-
-            if (request.vatRate) {
-                const vatRate = VatRate.create(request.vatRate).unwrap();
-                draftInvoice.applyVat(vatRate).unwrap();
-            }
-
-            if (request.issueDate) {
-                const issueDate = CalendarDate.create(
-                    request.issueDate
+        const draftInvoice = await this.unitOfWorkFactory.start(
+            async (unitOfWork) => {
+                const draftInvoice = DraftInvoice.create(
+                    Id.create().unwrap()
                 ).unwrap();
-                draftInvoice.addIssueDate(issueDate).unwrap();
+
+                if (request.lineItems) {
+                    request.lineItems
+                        .map((lineItem) => LineItem.create(lineItem).unwrap())
+                        .forEach((lineItem) =>
+                            draftInvoice.addLineItem(lineItem).unwrap()
+                        );
+                }
+
+                if (request.vatRate) {
+                    const vatRate = VatRate.create(request.vatRate).unwrap();
+                    draftInvoice.applyVat(vatRate).unwrap();
+                }
+
+                if (request.issueDate) {
+                    const issueDate = CalendarDate.create(
+                        request.issueDate
+                    ).unwrap();
+                    draftInvoice.addIssueDate(issueDate).unwrap();
+                }
+
+                if (request.dueDate) {
+                    const dueDate = CalendarDate.create(
+                        request.dueDate
+                    ).unwrap();
+                    draftInvoice.addDueDate(dueDate).unwrap();
+                }
+
+                if (request.issuer) {
+                    const issuer = Issuer.create(request.issuer).unwrap();
+                    draftInvoice.addIssuer(issuer).unwrap();
+                }
+
+                if (request.recipient) {
+                    const billing =
+                        request.recipient.billing.type === 'PAYPAL'
+                            ? Paypal.create(
+                                  request.recipient.billing
+                              ).unwrap()
+                            : Wire.create(
+                                  request.recipient.billing
+                              ).unwrap();
+
+                    const recipient = Recipient.create({
+                        type: request.recipient.type,
+                        name: request.recipient.name,
+                        address: request.recipient.address,
+                        taxId: request.recipient.taxId,
+                        email: request.recipient.email,
+                        taxResidenceCountry:
+                            request.recipient.taxResidenceCountry,
+                        billing,
+                    }).unwrap();
+
+                    draftInvoice.addRecipient(recipient).unwrap();
+                }
+
+                await unitOfWork.collection(DraftInvoice).add(draftInvoice);
+
+                return draftInvoice;
             }
+        );
 
-            if (request.dueDate) {
-                const dueDate = CalendarDate.create(request.dueDate).unwrap();
-                draftInvoice.addDueDate(dueDate).unwrap();
-            }
+        await this.domainEvents.publishEvents(draftInvoice);
 
-            if (request.issuer) {
-                const issuer = Issuer.create(request.issuer).unwrap();
-                draftInvoice.addIssuer(issuer).unwrap();
-            }
-
-            if (request.recipient) {
-                const billing =
-                    request.recipient.billing.type === 'PAYPAL'
-                        ? Paypal.create(request.recipient.billing).unwrap()
-                        : Wire.create(request.recipient.billing).unwrap();
-
-                const recipient = Recipient.create({
-                    type: request.recipient.type,
-                    name: request.recipient.name,
-                    address: request.recipient.address,
-                    taxId: request.recipient.taxId,
-                    email: request.recipient.email,
-                    taxResidenceCountry: request.recipient.taxResidenceCountry,
-                    billing,
-                }).unwrap();
-
-                draftInvoice.addRecipient(recipient).unwrap();
-            }
-
-            await unitOfWork.collection(DraftInvoice).add(draftInvoice);
-
-            await this.domainEvents.publishEvents(draftInvoice);
-
-            return draftInvoice.toPlain();
-        });
+        return draftInvoice.toPlain();
     }
 }

@@ -12,23 +12,27 @@ export class CancelInvoice {
     ) {}
 
     public async execute(id: string) {
-        return this.unitOfWorkFactory.start(async (unitOfWork) => {
-            const invoice = await unitOfWork
-                .collection(Invoice)
-                .get(Id.fromString(id));
+        const invoice = await this.unitOfWorkFactory.start(
+            async (unitOfWork) => {
+                const invoice = await unitOfWork
+                    .collection(Invoice)
+                    .get(Id.fromString(id));
 
-            if (!invoice) {
-                throw new ApplicationError({
-                    message: 'Invoice not found',
-                    code: APPLICATION_ERROR_CODE.ITEM_NOT_FOUND,
-                });
+                if (!invoice) {
+                    throw new ApplicationError({
+                        message: 'Invoice not found',
+                        code: APPLICATION_ERROR_CODE.ITEM_NOT_FOUND,
+                    });
+                }
+
+                invoice.cancel();
+
+                return invoice;
             }
+        );
 
-            invoice.cancel();
+        await this.domainEvents.publishEvents(invoice);
 
-            await this.domainEvents.publishEvents(invoice);
-
-            return invoice.toPlain();
-        });
+        return invoice.toPlain();
     }
 }
