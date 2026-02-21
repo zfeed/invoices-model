@@ -36,6 +36,10 @@ export class Wire
         this.data = data;
     }
 
+    static fromPlain(plain: ReturnType<Wire['toPlain']>) {
+        return new Wire(plain.data);
+    }
+
     static create(data: {
         swift: string;
         accountNumber: string;

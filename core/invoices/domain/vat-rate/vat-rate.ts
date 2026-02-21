@@ -17,6 +17,12 @@ export class VatRate implements Equatable<VatRate> {
         return this.#value.equals(other.rate);
     }
 
+    static fromPlain(value: string) {
+        const oneHundred = Numeric.create('100');
+        const percents = Numeric.create(value);
+        return new VatRate(percents.divideBy(oneHundred));
+    }
+
     static create(value: string) {
         const error = checkPercents(value);
 

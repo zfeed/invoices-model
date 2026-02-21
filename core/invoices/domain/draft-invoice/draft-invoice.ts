@@ -389,29 +389,29 @@ export class DraftInvoice
         return Result.ok(draftInvoice);
     }
 
-    static reconstruct(options: {
-        id: Id;
-        status: DraftInvoiceStatus;
-        lineItems?: LineItems | null;
-        total?: Money | null;
-        vatRate?: VatRate | null;
-        vatAmount?: Money | null;
-        issueDate?: CalendarDate | null;
-        dueDate?: CalendarDate | null;
-        issuer?: Issuer | null;
-        recipient?: Recipient | null;
-    }) {
+    static fromPlain(plain: ReturnType<DraftInvoice['toPlain']>) {
+        const id = Id.fromString(plain.id);
+        const status = DraftInvoiceStatus.fromString(plain.status).unwrap();
+        const lineItems = plain.lineItems ? LineItems.fromPlain(plain.lineItems) : null;
+        const vatRate = plain.vatRate ? VatRate.fromPlain(plain.vatRate) : null;
+        const total = plain.total ? Money.fromPlain(plain.total) : null;
+        const vatAmount = plain.vatAmount ? Money.fromPlain(plain.vatAmount) : null;
+        const issueDate = plain.issueDate ? CalendarDate.fromPlain(plain.issueDate) : null;
+        const dueDate = plain.dueDate ? CalendarDate.fromPlain(plain.dueDate) : null;
+        const issuer = plain.issuer ? Issuer.fromPlain(plain.issuer) : null;
+        const recipient = plain.recipient ? Recipient.fromPlain(plain.recipient) : null;
+
         return new DraftInvoice(
-            options.id,
-            options.status,
-            options.lineItems ?? null,
-            options.total ?? null,
-            options.vatRate ?? null,
-            options.vatAmount ?? null,
-            options.issueDate ?? null,
-            options.dueDate ?? null,
-            options.issuer ?? null,
-            options.recipient ?? null
+            id,
+            status,
+            lineItems,
+            total,
+            vatRate,
+            vatAmount,
+            issueDate,
+            dueDate,
+            issuer,
+            recipient,
         );
     }
 

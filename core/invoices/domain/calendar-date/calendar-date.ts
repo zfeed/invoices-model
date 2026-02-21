@@ -10,6 +10,10 @@ export class CalendarDate
         this.#value = value;
     }
 
+    static fromPlain(value: string) {
+        return new CalendarDate(value);
+    }
+
     static create(date: string) {
         const error = checkIsISO8601Date(date);
 

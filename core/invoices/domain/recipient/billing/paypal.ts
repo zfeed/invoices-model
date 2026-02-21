@@ -14,6 +14,10 @@ export class Paypal implements IBilling<'PAYPAL', { email: Email }> {
         return { type: this.type, data: { email: this.data.email.toString() } };
     }
 
+    static fromPlain(plain: ReturnType<Paypal['toPlain']>) {
+        return new Paypal({ email: Email.fromPlain(plain.data.email) });
+    }
+
     static create(data: { email: string }) {
         const emailResult = Email.create(data.email);
 

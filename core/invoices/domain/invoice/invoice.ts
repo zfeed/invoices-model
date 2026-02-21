@@ -108,6 +108,32 @@ export class Invoice
         this.#issuer = issuer;
     }
 
+    static fromPlain(plain: ReturnType<Invoice['toPlain']>) {
+        const id = Id.fromString(plain.id);
+        const status = InvoiceStatus.fromString(plain.status).unwrap();
+        const lineItems = LineItems.fromPlain(plain.lineItems);
+        const vatRate = plain.vatRate ? VatRate.fromPlain(plain.vatRate) : null;
+        const total = Money.fromPlain(plain.total);
+        const vatAmount = plain.vatAmount ? Money.fromPlain(plain.vatAmount) : null;
+        const issueDate = CalendarDate.fromPlain(plain.issueDate);
+        const dueDate = CalendarDate.fromPlain(plain.dueDate);
+        const issuer = Issuer.fromPlain(plain.issuer);
+        const recipient = Recipient.fromPlain(plain.recipient);
+
+        return new Invoice(
+            id,
+            status,
+            lineItems,
+            total,
+            vatRate,
+            vatAmount,
+            issueDate,
+            dueDate,
+            issuer,
+            recipient,
+        );
+    }
+
     static create(options: {
         id: Id;
         status?: InvoiceStatus;

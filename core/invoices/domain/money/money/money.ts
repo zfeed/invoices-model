@@ -60,6 +60,10 @@ export class Money implements Equatable<Money> {
         return new Money(value, this.#currency);
     }
 
+    static fromPlain(plain: { amount: string; currency: string }) {
+        return new Money(Numeric.create(plain.amount), Currency.fromPlain(plain.currency));
+    }
+
     static create(amount: string, currency: string) {
         const error = checkMinorUnits(amount);
 

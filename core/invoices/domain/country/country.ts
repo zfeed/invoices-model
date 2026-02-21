@@ -8,6 +8,10 @@ export class Country implements Equatable<Country> {
         this.#code = code;
     }
 
+    static fromPlain(code: string) {
+        return new Country(code);
+    }
+
     static create({ code }: { code: string }) {
         const error = checkCountryCode(code);
 

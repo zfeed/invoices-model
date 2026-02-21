@@ -9,6 +9,10 @@ export class UnitQuantity implements Equatable<UnitQuantity> {
         this.#value = value;
     }
 
+    static fromPlain(value: string) {
+        return new this(Numeric.create(value));
+    }
+
     static create(value: string) {
         const error = checkUnitQuantity(value);
 

@@ -54,6 +54,15 @@ export class LineItem implements Equatable<LineItem> {
         };
     }
 
+    static fromPlain(plain: ReturnType<LineItem['toPlain']>) {
+        return new this(
+            UnitDescription.create(plain.description),
+            Money.fromPlain(plain.price),
+            UnitQuantity.fromPlain(plain.quantity),
+            Money.fromPlain(plain.total),
+        );
+    }
+
     static create({
         description,
         price,

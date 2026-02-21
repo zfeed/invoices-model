@@ -8,6 +8,10 @@ export class Currency implements Equatable<Currency> {
         this.#code = code;
     }
 
+    static fromPlain(code: string) {
+        return new Currency(code);
+    }
+
     static create(code: string) {
         const error = checkCurrencyCode(code);
 

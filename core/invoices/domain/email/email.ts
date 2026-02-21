@@ -8,6 +8,10 @@ export class Email implements Equatable<Email | string> {
         this.#value = value;
     }
 
+    static fromPlain(value: string) {
+        return new Email(value);
+    }
+
     static create(value: string) {
         const error = checkEmailFormat(value);
 

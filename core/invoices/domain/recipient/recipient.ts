@@ -88,6 +88,22 @@ export class Recipient implements Equatable<Recipient> {
         };
     }
 
+    static fromPlain(plain: ReturnType<Recipient['toPlain']>) {
+        const billing = plain.billing.type === 'PAYPAL'
+            ? Paypal.fromPlain(plain.billing as ReturnType<Paypal['toPlain']>)
+            : Wire.fromPlain(plain.billing as ReturnType<Wire['toPlain']>);
+
+        return new this(
+            plain.type,
+            plain.name,
+            plain.address,
+            plain.taxId,
+            Email.fromPlain(plain.email),
+            Country.fromPlain(plain.taxResidenceCountry),
+            billing,
+        );
+    }
+
     static create({
         type,
         name,

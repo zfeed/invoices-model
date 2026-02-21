@@ -67,6 +67,16 @@ export class Issuer implements Equatable<Issuer> {
         };
     }
 
+    static fromPlain(plain: ReturnType<Issuer['toPlain']>) {
+        return new this(
+            plain.type,
+            plain.name,
+            plain.address,
+            plain.taxId,
+            Email.fromPlain(plain.email),
+        );
+    }
+
     static create({
         type,
         name,
