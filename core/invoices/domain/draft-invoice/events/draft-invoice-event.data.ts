@@ -1,5 +1,6 @@
 export type DraftInvoiceEventData = {
     id: string;
+    status: string;
     lineItems: {
         items:
             | {

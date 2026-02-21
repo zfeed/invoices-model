@@ -8,7 +8,7 @@ import { PublishableEvents } from '../../../../building-blocks/events';
 import { CalendarDate } from '../calendar-date/calendar-date';
 import { Id } from '../id/id';
 import { LineItems, ReadOnlyLineItems } from '../line-items/line-items';
-import { Status } from '../status/status';
+import { InvoiceStatus } from '../status/status';
 import { checkDates } from './checks/check-dates';
 import { InvoiceCancelledEvent } from './events/invoice-cancelled.event';
 import { InvoiceIssuedEvent } from './events/invoice-issued.event';
@@ -23,7 +23,7 @@ export class Invoice
         >
 {
     #id: Id;
-    #status: Status;
+    #status: InvoiceStatus;
     #vatRate: VatRate | null;
     #vatAmount: Money | null;
     #total: Money;
@@ -42,7 +42,7 @@ export class Invoice
         return this.#id;
     }
 
-    public get status(): Status {
+    public get status(): InvoiceStatus {
         return this.#status;
     }
 
@@ -86,7 +86,7 @@ export class Invoice
 
     protected constructor(
         id: Id,
-        status: Status,
+        status: InvoiceStatus,
         lineItems: LineItems,
         total: Money,
         vatRate: VatRate | null,
@@ -110,7 +110,7 @@ export class Invoice
 
     static create(options: {
         id: Id;
-        status?: Status;
+        status?: InvoiceStatus;
         lineItems: LineItems;
         issueDate: CalendarDate;
         dueDate: CalendarDate;
@@ -134,7 +134,7 @@ export class Invoice
         const vatAmount = vatRate
             ? total.subtract(options.lineItems.subtotal).unwrap()
             : null;
-        const status = options.status ?? Status.issued();
+        const status = options.status ?? InvoiceStatus.issued();
         const invoice = new Invoice(
             options.id,
             status,
@@ -157,7 +157,7 @@ export class Invoice
     }
 
     process() {
-        if (!this.#status.equals(Status.issued())) {
+        if (!this.#status.equals(InvoiceStatus.issued())) {
             return Result.error(
                 new DomainError({
                     message: `Cannot process invoice in status ${this.#status.toString()}`,
@@ -166,7 +166,7 @@ export class Invoice
             );
         }
 
-        this.#status = Status.processing();
+        this.#status = InvoiceStatus.processing();
 
         this.#events.push(new InvoiceProcessingEvent(this.toPlain()));
 
@@ -174,7 +174,7 @@ export class Invoice
     }
 
     pay() {
-        if (!this.#status.equals(Status.processing())) {
+        if (!this.#status.equals(InvoiceStatus.processing())) {
             return Result.error(
                 new DomainError({
                     message: `Cannot pay invoice in status ${this.#status.toString()}`,
@@ -183,7 +183,7 @@ export class Invoice
             );
         }
 
-        this.#status = Status.paid();
+        this.#status = InvoiceStatus.paid();
 
         this.#events.push(new InvoicePaidEvent(this.toPlain()));
 
@@ -191,7 +191,7 @@ export class Invoice
     }
 
     fail() {
-        if (!this.#status.equals(Status.processing())) {
+        if (!this.#status.equals(InvoiceStatus.processing())) {
             return Result.error(
                 new DomainError({
                     message: `Cannot fail invoice in status ${this.#status.toString()}`,
@@ -200,7 +200,7 @@ export class Invoice
             );
         }
 
-        this.#status = Status.failed();
+        this.#status = InvoiceStatus.failed();
 
         this.#events.push(new InvoiceFailedEvent(this.toPlain()));
 
@@ -208,7 +208,7 @@ export class Invoice
     }
 
     cancel() {
-        if (!this.#status.equals(Status.issued())) {
+        if (!this.#status.equals(InvoiceStatus.issued())) {
             return Result.error(
                 new DomainError({
                     message: `Cannot cancel invoice in status ${this.#status.toString()}`,
@@ -217,7 +217,7 @@ export class Invoice
             );
         }
 
-        this.#status = Status.cancelled();
+        this.#status = InvoiceStatus.cancelled();
 
         this.#events.push(new InvoiceCancelledEvent(this.toPlain()));
 

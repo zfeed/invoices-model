@@ -1,4 +1,4 @@
-import { DomainError, Result } from '../../../../building-blocks';
+import { DOMAIN_ERROR_CODE, DomainError, Result } from '../../../../building-blocks';
 import { PublishableEvents } from '../../../../building-blocks/events';
 import { CalendarDate } from '../calendar-date/calendar-date';
 import { Id } from '../id/id';
@@ -12,9 +12,12 @@ import { Recipient } from '../recipient/recipient';
 import { VatRate } from '../vat-rate/vat-rate';
 import { checkDraftInvoiceComplete } from './checks/check-draft-invoice-complete';
 import { checkLineItemsNotEmpty } from './checks/check-line-items-not-empty';
+import { DraftInvoiceArchivedEvent } from './events/draft-invoice-archived.event';
 import { DraftInvoiceCreatedEvent } from './events/draft-invoice-created.event';
+import { DraftInvoiceDraftedEvent } from './events/draft-invoice-drafted.event';
 import { DraftInvoiceFinishedEvent } from './events/draft-invoice-finished.event';
 import { DraftInvoiceUpdatedEvent } from './events/draft-invoice-updated.event';
+import { DraftInvoiceStatus } from '../status/status';
 
 export class DraftInvoice
     implements
@@ -22,9 +25,12 @@ export class DraftInvoice
             | DraftInvoiceCreatedEvent
             | DraftInvoiceUpdatedEvent
             | DraftInvoiceFinishedEvent
+            | DraftInvoiceArchivedEvent
+            | DraftInvoiceDraftedEvent
         >
 {
     #id: Id;
+    #status: DraftInvoiceStatus;
     #vatRate: VatRate | null;
     #vatAmount: Money | null;
     #total: Money | null;
@@ -37,18 +43,26 @@ export class DraftInvoice
         | DraftInvoiceCreatedEvent
         | DraftInvoiceUpdatedEvent
         | DraftInvoiceFinishedEvent
+        | DraftInvoiceArchivedEvent
+        | DraftInvoiceDraftedEvent
     )[] = [];
 
     public get events(): ReadonlyArray<
         | DraftInvoiceCreatedEvent
         | DraftInvoiceUpdatedEvent
         | DraftInvoiceFinishedEvent
+        | DraftInvoiceArchivedEvent
+        | DraftInvoiceDraftedEvent
     > {
         return this.#events;
     }
 
     public get id(): Id {
         return this.#id;
+    }
+
+    public get status(): DraftInvoiceStatus {
+        return this.#status;
     }
 
     public get total(): Money | null {
@@ -85,6 +99,7 @@ export class DraftInvoice
 
     protected constructor(
         id: Id,
+        status: DraftInvoiceStatus,
         lineItems: LineItems | null = null,
         total: Money | null = null,
         vatRate: VatRate | null = null,
@@ -95,6 +110,7 @@ export class DraftInvoice
         recipient: Recipient | null = null
     ) {
         this.#id = id;
+        this.#status = status;
         this.#lineItems = lineItems;
         this.#total = total;
         this.#vatRate = vatRate;
@@ -105,7 +121,22 @@ export class DraftInvoice
         this.#issuer = issuer;
     }
 
+    #guardDraftStatus(): DomainError | null {
+        if (!this.#status.equals(DraftInvoiceStatus.draft())) {
+            return new DomainError({
+                message: `Cannot modify draft invoice in status ${this.#status.toString()}`,
+                code: DOMAIN_ERROR_CODE.DRAFT_INVOICE_INVALID_STATUS_TRANSITION,
+            });
+        }
+        return null;
+    }
+
     public toInvoice(): Result<DomainError, Invoice> {
+        const guardError = this.#guardDraftStatus();
+        if (guardError) {
+            return Result.error(guardError);
+        }
+
         const error = checkDraftInvoiceComplete({
             total: this.#total,
             vatRate: this.#vatRate,
@@ -131,12 +162,53 @@ export class DraftInvoice
             recipient: this.#recipient!,
         });
 
+        this.#status = DraftInvoiceStatus.completed();
+
         this.#events.push(new DraftInvoiceFinishedEvent(this.toPlain()));
 
         return result;
     }
 
+    public archive(): Result<DomainError, void> {
+        if (!this.#status.equals(DraftInvoiceStatus.draft())) {
+            return Result.error(
+                new DomainError({
+                    message: `Cannot archive draft invoice in status ${this.#status.toString()}`,
+                    code: DOMAIN_ERROR_CODE.DRAFT_INVOICE_INVALID_STATUS_TRANSITION,
+                })
+            );
+        }
+
+        this.#status = DraftInvoiceStatus.archived();
+
+        this.#events.push(new DraftInvoiceArchivedEvent(this.toPlain()));
+
+        return Result.ok(undefined);
+    }
+
+    public draft(): Result<DomainError, void> {
+        if (!this.#status.equals(DraftInvoiceStatus.archived())) {
+            return Result.error(
+                new DomainError({
+                    message: `Cannot move to draft from status ${this.#status.toString()}`,
+                    code: DOMAIN_ERROR_CODE.DRAFT_INVOICE_INVALID_STATUS_TRANSITION,
+                })
+            );
+        }
+
+        this.#status = DraftInvoiceStatus.draft();
+
+        this.#events.push(new DraftInvoiceDraftedEvent(this.toPlain()));
+
+        return Result.ok(undefined);
+    }
+
     public addLineItem(lineItem: LineItem) {
+        const guardError = this.#guardDraftStatus();
+        if (guardError) {
+            return Result.error(guardError);
+        }
+
         let lineItemsResult;
 
         if (this.#lineItems === null) {
@@ -159,6 +231,11 @@ export class DraftInvoice
     }
 
     public removeLineItem(lineItem: LineItem) {
+        const guardError = this.#guardDraftStatus();
+        if (guardError) {
+            return Result.error(guardError);
+        }
+
         const lineItemsResult = this.#lineItems!.remove(lineItem);
 
         if (lineItemsResult.isError()) {
@@ -177,6 +254,11 @@ export class DraftInvoice
     }
 
     public applyVat(vatRate: VatRate): Result<DomainError, void> {
+        const guardError = this.#guardDraftStatus();
+        if (guardError) {
+            return Result.error(guardError);
+        }
+
         const error = checkLineItemsNotEmpty(this.#lineItems);
 
         if (error) {
@@ -190,6 +272,11 @@ export class DraftInvoice
     }
 
     public addIssuer(issuer: Issuer): Result<DomainError, void> {
+        const guardError = this.#guardDraftStatus();
+        if (guardError) {
+            return Result.error(guardError);
+        }
+
         this.#issuer = issuer;
         this.#events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
 
@@ -197,6 +284,11 @@ export class DraftInvoice
     }
 
     public addRecipient(recipient: Recipient): Result<DomainError, void> {
+        const guardError = this.#guardDraftStatus();
+        if (guardError) {
+            return Result.error(guardError);
+        }
+
         this.#recipient = recipient;
         this.#events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
 
@@ -204,6 +296,11 @@ export class DraftInvoice
     }
 
     public addDueDate(dueDate: CalendarDate): Result<DomainError, void> {
+        const guardError = this.#guardDraftStatus();
+        if (guardError) {
+            return Result.error(guardError);
+        }
+
         if (this.#issueDate !== null) {
             const dateError = checkDates({
                 issueDate: this.#issueDate,
@@ -222,6 +319,11 @@ export class DraftInvoice
     }
 
     public addIssueDate(issueDate: CalendarDate): Result<DomainError, void> {
+        const guardError = this.#guardDraftStatus();
+        if (guardError) {
+            return Result.error(guardError);
+        }
+
         if (this.#dueDate !== null) {
             const dateError = checkDates({
                 issueDate,
@@ -278,7 +380,7 @@ export class DraftInvoice
     }
 
     static create(id: Id) {
-        const draftInvoice = new DraftInvoice(id);
+        const draftInvoice = new DraftInvoice(id, DraftInvoiceStatus.draft());
 
         draftInvoice.#events.push(
             new DraftInvoiceCreatedEvent(draftInvoice.toPlain())
@@ -290,6 +392,7 @@ export class DraftInvoice
     toPlain() {
         return {
             id: this.#id.toString(),
+            status: this.#status.toString(),
             lineItems: this.#lineItems?.toPlain() ?? null,
             total: this.#total?.toPlain() ?? null,
             vatRate: this.#vatRate?.toPlain() ?? null,

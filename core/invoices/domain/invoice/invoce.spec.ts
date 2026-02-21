@@ -7,7 +7,7 @@ import { Money } from '../money/money/money';
 import { Paypal } from '../recipient/billing/paypal';
 import { Recipient, RECIPIENT_TYPE } from '../recipient/recipient';
 import { VatRate } from '../vat-rate/vat-rate';
-import { Status } from '../status/status';
+import { InvoiceStatus } from '../status/status';
 import { Invoice } from './invoice';
 
 describe('Invoice', () => {
@@ -88,7 +88,7 @@ describe('Invoice', () => {
         expect(
             invoice.lineItems.find((lineItem) => lineItem.equals(lineItem2))
         ).toBeDefined();
-        expect(invoice.status.equals(Status.issued())).toBe(true);
+        expect(invoice.status.equals(InvoiceStatus.issued())).toBe(true);
         expect(invoice.issueDate.equals(issueDate)).toBe(true);
         expect(invoice.dueDate.equals(dueDate)).toBe(true);
         expect(invoice.issuer.equals(issuer)).toBe(true);
@@ -193,7 +193,7 @@ describe('Invoice', () => {
         const result = invoice.process();
 
         expect(result.isOk()).toBe(true);
-        expect(invoice.status.equals(Status.processing())).toBe(true);
+        expect(invoice.status.equals(InvoiceStatus.processing())).toBe(true);
         expect(invoice.events).toHaveLength(2);
         expect(invoice.events[1]).toEqual(
             expect.objectContaining({
@@ -307,7 +307,7 @@ describe('Invoice', () => {
 
         invoice.cancel();
 
-        expect(invoice.status.equals(Status.cancelled())).toBe(true);
+        expect(invoice.status.equals(InvoiceStatus.cancelled())).toBe(true);
         expect(invoice.events).toHaveLength(2);
         expect(invoice.events[1]).toEqual(
             expect.objectContaining({
@@ -370,7 +370,7 @@ describe('Invoice', () => {
         const result = invoice.pay();
 
         expect(result.isOk()).toBe(true);
-        expect(invoice.status.equals(Status.paid())).toBe(true);
+        expect(invoice.status.equals(InvoiceStatus.paid())).toBe(true);
         expect(invoice.events).toHaveLength(3);
         expect(invoice.events[2]).toEqual(
             expect.objectContaining({
@@ -485,7 +485,7 @@ describe('Invoice', () => {
         const result = invoice.fail();
 
         expect(result.isOk()).toBe(true);
-        expect(invoice.status.equals(Status.failed())).toBe(true);
+        expect(invoice.status.equals(InvoiceStatus.failed())).toBe(true);
         expect(invoice.events).toHaveLength(3);
         expect(invoice.events[2]).toEqual(
             expect.objectContaining({

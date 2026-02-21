@@ -1,20 +1,20 @@
 import { testEquatable } from '../../../../building-blocks/equatable.test-helper';
-import { Status } from './status';
+import { InvoiceStatus, DraftInvoiceStatus } from './status';
 
-describe('Status', () => {
+describe('InvoiceStatus', () => {
     testEquatable({
-        typeName: 'Status',
+        typeName: 'InvoiceStatus',
         createEqual: () => [
-            Status.issued(),
-            Status.issued(),
-            Status.issued(),
+            InvoiceStatus.issued(),
+            InvoiceStatus.issued(),
+            InvoiceStatus.issued(),
         ],
-        createDifferent: () => [Status.issued(), Status.cancelled()],
+        createDifferent: () => [InvoiceStatus.issued(), InvoiceStatus.cancelled()],
     });
 
     describe('issued', () => {
         it('should create a status with ISSUED value', () => {
-            const status = Status.issued();
+            const status = InvoiceStatus.issued();
 
             expect(status.toString()).toBe('ISSUED');
         });
@@ -22,7 +22,7 @@ describe('Status', () => {
 
     describe('processing', () => {
         it('should create a status with PROCESSING value', () => {
-            const status = Status.processing();
+            const status = InvoiceStatus.processing();
 
             expect(status.toString()).toBe('PROCESSING');
         });
@@ -30,7 +30,7 @@ describe('Status', () => {
 
     describe('cancelled', () => {
         it('should create a status with CANCELLED value', () => {
-            const status = Status.cancelled();
+            const status = InvoiceStatus.cancelled();
 
             expect(status.toString()).toBe('CANCELLED');
         });
@@ -38,7 +38,7 @@ describe('Status', () => {
 
     describe('paid', () => {
         it('should create a status with PAID value', () => {
-            const status = Status.paid();
+            const status = InvoiceStatus.paid();
 
             expect(status.toString()).toBe('PAID');
         });
@@ -46,9 +46,45 @@ describe('Status', () => {
 
     describe('failed', () => {
         it('should create a status with FAILED value', () => {
-            const status = Status.failed();
+            const status = InvoiceStatus.failed();
 
             expect(status.toString()).toBe('FAILED');
+        });
+    });
+});
+
+describe('DraftInvoiceStatus', () => {
+    testEquatable({
+        typeName: 'DraftInvoiceStatus',
+        createEqual: () => [
+            DraftInvoiceStatus.draft(),
+            DraftInvoiceStatus.draft(),
+            DraftInvoiceStatus.draft(),
+        ],
+        createDifferent: () => [DraftInvoiceStatus.draft(), DraftInvoiceStatus.completed()],
+    });
+
+    describe('draft', () => {
+        it('should create a status with DRAFT value', () => {
+            const status = DraftInvoiceStatus.draft();
+
+            expect(status.toString()).toBe('DRAFT');
+        });
+    });
+
+    describe('completed', () => {
+        it('should create a status with COMPLETED value', () => {
+            const status = DraftInvoiceStatus.completed();
+
+            expect(status.toString()).toBe('COMPLETED');
+        });
+    });
+
+    describe('archived', () => {
+        it('should create a status with ARCHIVED value', () => {
+            const status = DraftInvoiceStatus.archived();
+
+            expect(status.toString()).toBe('ARCHIVED');
         });
     });
 });
