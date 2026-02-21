@@ -6,7 +6,7 @@ import { Approver } from '../approver/approver';
 import { Action } from '../action/action';
 import { createId, Id } from '../id/id';
 import { Range } from '../range/range';
-import { approveStep, Step } from '../step/step';
+import { approveStep, hasEligibleApprover, Step } from '../step/step';
 import { noDuplicateStepOrders } from './checks/check-no-duplicate-step-orders';
 
 export type Authflow = {
@@ -71,6 +71,30 @@ export const findAuthflowByAction = (
                   message: `Authflow with action ${action} not found`,
               })
           );
+};
+
+type CanApproverApproveInput = {
+    authflows: Authflow[];
+    action: Action;
+    approverId: Id;
+};
+
+export const canApproverApprove = (
+    data: CanApproverApproveInput
+): boolean => {
+    const result = findAuthflowByAction(data.authflows, data.action);
+
+    if (result.isError()) {
+        return false;
+    }
+
+    const authflow = result.unwrap();
+
+    if (authflow.isApproved) {
+        return false;
+    }
+
+    return hasEligibleApprover(authflow.steps, data.approverId);
 };
 
 type ApproveAuthflowInput = {

@@ -3,7 +3,11 @@ import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/dom
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
 import { Approver } from '../approver/approver';
-import { approveGroup, Group } from '../groups/group';
+import {
+    approveGroup,
+    hasEligibleApprover as hasEligibleApproverInGroups,
+    Group,
+} from '../groups/group';
 import { createId, Id } from '../id/id';
 import { Order } from '../order/order';
 import { orderNonNegative } from './checks/check-order-non-negative';
@@ -51,6 +55,20 @@ const findCurrentStep = (steps: Step[]): Result<DomainError, Step> => {
                   message: 'No pending steps found',
               })
           );
+};
+
+export const hasEligibleApprover = (steps: Step[], approverId: Id): boolean => {
+    const result = findCurrentStep(steps);
+
+    if (
+        result.isError() &&
+        result.unwrapError().code ===
+            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NO_PENDING_STEPS
+    ) {
+        return false;
+    }
+
+    return hasEligibleApproverInGroups(result.unwrap().groups, approverId);
 };
 
 type ApproveStepInput = {

@@ -5,7 +5,7 @@ import { WithEvents, withEvents } from '../../../../building-blocks/events/with-
 import { Money } from '../money/money';
 import { Approver } from '../approver/approver';
 import { Action } from '../action/action';
-import { Authflow, approveAuthflow } from '../authflow/authflow';
+import { Authflow, approveAuthflow, canApproverApprove as canApproverApproveAuthflow } from '../authflow/authflow';
 import { ReferenceId } from '../reference-id/reference-id';
 import { createId, Id } from '../id/id';
 import { Version } from '../version/version';
@@ -71,6 +71,21 @@ export const isActionApproved = (
         'isApproved',
         find(propEq(action, 'action'), document.authflows)
     );
+
+type CanApproverApproveInput = {
+    document: FinancialDocument;
+    action: Action;
+    approverId: Id;
+};
+
+export const canApproverApprove = (
+    data: CanApproverApproveInput
+): boolean =>
+    canApproverApproveAuthflow({
+        authflows: data.document.authflows,
+        action: data.action,
+        approverId: data.approverId,
+    });
 
 type ApproveDocumentInput = {
     document: FinancialDocument;

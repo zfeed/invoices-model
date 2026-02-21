@@ -99,6 +99,11 @@ const buildUpdatedGroups = (
         data.groups.map((g) => (g.id === data.group.id ? updatedGroup : g))
     );
 
+export const hasEligibleApprover = (groups: Group[], approverId: Id): boolean =>
+    groups.some(
+        (g) => !g.isApproved && g.approvers.some((a) => a.id === approverId)
+    );
+
 export const approveGroup = (
     groups: Group[],
     approver: Approver

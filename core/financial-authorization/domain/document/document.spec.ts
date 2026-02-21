@@ -5,7 +5,12 @@ import { Group } from '../groups/group';
 import { createMoney } from '../money/money';
 import { createRange } from '../range/range';
 import { Step } from '../step/step';
-import { approveDocument, createDocument, FinancialDocument } from './document';
+import {
+    approveDocument,
+    canApproverApprove,
+    createDocument,
+    FinancialDocument,
+} from './document';
 import { DocumentCreatedEvent } from './events/document-created.event';
 import { DocumentApprovedEvent } from './events/document-approved.event';
 
@@ -738,5 +743,320 @@ describe('approveDocument', () => {
         expect(event.data.value).toEqual(testMoney);
         expect(event.data.authflows).toEqual(updated.authflows);
         expect(event.data.version).toBe(0);
+    });
+});
+
+describe('canApproverApprove', () => {
+    it('should return true when approver is in the current step', () => {
+        const result = canApproverApprove({
+            document: {
+                id: 'doc-1',
+                referenceId: 'INV-001',
+                value: { amount: '10000', currency: 'USD' },
+                version: 0,
+                authflows: [{
+                    id: 'authflow-1',
+                    action: 'pay',
+                    range: { from: { amount: '0', currency: 'USD' }, to: { amount: '100000', currency: 'USD' } },
+                    isApproved: false,
+                    steps: [{
+                        id: 'step-1',
+                        order: 0,
+                        isApproved: false,
+                        groups: [{
+                            id: 'group-1',
+                            isApproved: false,
+                            approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
+                            approvals: [],
+                        }],
+                    }],
+                }],
+            },
+            action: 'pay',
+            approverId: 'approver-1',
+        });
+
+        expect(result).toBe(true);
+    });
+
+    it('should return false when action does not exist', () => {
+        const result = canApproverApprove({
+            document: {
+                id: 'doc-1',
+                referenceId: 'INV-001',
+                value: { amount: '10000', currency: 'USD' },
+                version: 0,
+                authflows: [{
+                    id: 'authflow-1',
+                    action: 'pay',
+                    range: { from: { amount: '0', currency: 'USD' }, to: { amount: '100000', currency: 'USD' } },
+                    isApproved: false,
+                    steps: [{
+                        id: 'step-1',
+                        order: 0,
+                        isApproved: false,
+                        groups: [{
+                            id: 'group-1',
+                            isApproved: false,
+                            approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
+                            approvals: [],
+                        }],
+                    }],
+                }],
+            },
+            action: 'non-existent',
+            approverId: 'approver-1',
+        });
+
+        expect(result).toBe(false);
+    });
+
+    it('should return false when authflow is already approved', () => {
+        const result = canApproverApprove({
+            document: {
+                id: 'doc-1',
+                referenceId: 'INV-001',
+                value: { amount: '10000', currency: 'USD' },
+                version: 0,
+                authflows: [{
+                    id: 'authflow-1',
+                    action: 'pay',
+                    range: { from: { amount: '0', currency: 'USD' }, to: { amount: '100000', currency: 'USD' } },
+                    isApproved: true,
+                    steps: [{
+                        id: 'step-1',
+                        order: 0,
+                        isApproved: true,
+                        groups: [{
+                            id: 'group-1',
+                            isApproved: true,
+                            approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
+                            approvals: [{ approverId: 'approver-1', createdAt: new Date(), comment: null }],
+                        }],
+                    }],
+                }],
+            },
+            action: 'pay',
+            approverId: 'approver-1',
+        });
+
+        expect(result).toBe(false);
+    });
+
+    it('should return false when approver is in a later step', () => {
+        const result = canApproverApprove({
+            document: {
+                id: 'doc-1',
+                referenceId: 'INV-001',
+                value: { amount: '10000', currency: 'USD' },
+                version: 0,
+                authflows: [{
+                    id: 'authflow-1',
+                    action: 'pay',
+                    range: { from: { amount: '0', currency: 'USD' }, to: { amount: '100000', currency: 'USD' } },
+                    isApproved: false,
+                    steps: [
+                        {
+                            id: 'step-1',
+                            order: 0,
+                            isApproved: false,
+                            groups: [{
+                                id: 'group-1',
+                                isApproved: false,
+                                approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
+                                approvals: [],
+                            }],
+                        },
+                        {
+                            id: 'step-2',
+                            order: 1,
+                            isApproved: false,
+                            groups: [{
+                                id: 'group-2',
+                                isApproved: false,
+                                approvers: [{ id: 'approver-2', name: 'Bob', email: 'bob@example.com' }],
+                                approvals: [],
+                            }],
+                        },
+                    ],
+                }],
+            },
+            action: 'pay',
+            approverId: 'approver-2',
+        });
+
+        expect(result).toBe(false);
+    });
+
+    it('should return true when approver is in the current step after previous step is approved', () => {
+        const result = canApproverApprove({
+            document: {
+                id: 'doc-1',
+                referenceId: 'INV-001',
+                value: { amount: '10000', currency: 'USD' },
+                version: 0,
+                authflows: [{
+                    id: 'authflow-1',
+                    action: 'pay',
+                    range: { from: { amount: '0', currency: 'USD' }, to: { amount: '100000', currency: 'USD' } },
+                    isApproved: false,
+                    steps: [
+                        {
+                            id: 'step-1',
+                            order: 0,
+                            isApproved: true,
+                            groups: [{
+                                id: 'group-1',
+                                isApproved: true,
+                                approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
+                                approvals: [{ approverId: 'approver-1', createdAt: new Date(), comment: null }],
+                            }],
+                        },
+                        {
+                            id: 'step-2',
+                            order: 1,
+                            isApproved: false,
+                            groups: [{
+                                id: 'group-2',
+                                isApproved: false,
+                                approvers: [{ id: 'approver-2', name: 'Bob', email: 'bob@example.com' }],
+                                approvals: [],
+                            }],
+                        },
+                    ],
+                }],
+            },
+            action: 'pay',
+            approverId: 'approver-2',
+        });
+
+        expect(result).toBe(true);
+    });
+
+    it('should return false when approver is not in any group', () => {
+        const result = canApproverApprove({
+            document: {
+                id: 'doc-1',
+                referenceId: 'INV-001',
+                value: { amount: '10000', currency: 'USD' },
+                version: 0,
+                authflows: [{
+                    id: 'authflow-1',
+                    action: 'pay',
+                    range: { from: { amount: '0', currency: 'USD' }, to: { amount: '100000', currency: 'USD' } },
+                    isApproved: false,
+                    steps: [{
+                        id: 'step-1',
+                        order: 0,
+                        isApproved: false,
+                        groups: [{
+                            id: 'group-1',
+                            isApproved: false,
+                            approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
+                            approvals: [],
+                        }],
+                    }],
+                }],
+            },
+            action: 'pay',
+            approverId: 'unknown-approver',
+        });
+
+        expect(result).toBe(false);
+    });
+
+    it('should return false when the approver group is already approved', () => {
+        const result = canApproverApprove({
+            document: {
+                id: 'doc-1',
+                referenceId: 'INV-001',
+                value: { amount: '10000', currency: 'USD' },
+                version: 0,
+                authflows: [{
+                    id: 'authflow-1',
+                    action: 'pay',
+                    range: { from: { amount: '0', currency: 'USD' }, to: { amount: '100000', currency: 'USD' } },
+                    isApproved: false,
+                    steps: [{
+                        id: 'step-1',
+                        order: 0,
+                        isApproved: true,
+                        groups: [{
+                            id: 'group-1',
+                            isApproved: true,
+                            approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
+                            approvals: [{ approverId: 'approver-1', createdAt: new Date(), comment: null }],
+                        }],
+                    }],
+                }],
+            },
+            action: 'pay',
+            approverId: 'approver-1',
+        });
+
+        expect(result).toBe(false);
+    });
+
+    it('should pick the lowest-order unapproved step regardless of array order', () => {
+        const document: FinancialDocument = {
+            id: 'doc-1',
+            referenceId: 'INV-001',
+            value: { amount: '10000', currency: 'USD' },
+            version: 0,
+            authflows: [{
+                id: 'authflow-1',
+                action: 'pay',
+                range: { from: { amount: '0', currency: 'USD' }, to: { amount: '100000', currency: 'USD' } },
+                isApproved: false,
+                steps: [
+                    {
+                        id: 'step-1',
+                        order: 5,
+                        isApproved: false,
+                        groups: [{
+                            id: 'group-1',
+                            isApproved: false,
+                            approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
+                            approvals: [],
+                        }],
+                    },
+                    {
+                        id: 'step-2',
+                        order: 2,
+                        isApproved: false,
+                        groups: [{
+                            id: 'group-2',
+                            isApproved: false,
+                            approvers: [{ id: 'approver-2', name: 'Bob', email: 'bob@example.com' }],
+                            approvals: [],
+                        }],
+                    },
+                ],
+            }],
+        };
+
+        expect(
+            canApproverApprove({ document, action: 'pay', approverId: 'approver-2' })
+        ).toBe(true);
+
+        expect(
+            canApproverApprove({ document, action: 'pay', approverId: 'approver-1' })
+        ).toBe(false);
+    });
+
+    it('should return false when document has no authflows', () => {
+        const result = canApproverApprove({
+            document: {
+                id: 'doc-1',
+                referenceId: 'INV-001',
+                value: { amount: '10000', currency: 'USD' },
+                version: 0,
+                authflows: [],
+            },
+            action: 'pay',
+            approverId: 'approver-1',
+        });
+
+        expect(result).toBe(false);
     });
 });
