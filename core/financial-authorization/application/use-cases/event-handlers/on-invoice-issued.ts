@@ -2,7 +2,10 @@ import { IO } from '../../../../../building-blocks/io';
 import { Some } from '../../../../../building-blocks/some';
 import { DomainEvents } from '../../../../shared/domain-events/domain-events.interface';
 import { InvoiceIssuedEvent } from '../../../../invoices/domain/invoice/events/invoice-issued.event';
-import { createDocument, FinancialDocument } from '../../../domain/document/document';
+import {
+    createDocument,
+    FinancialDocument,
+} from '../../../domain/document/document';
 import { Money, createMoney } from '../../../domain/money/money';
 import { createReferenceId } from '../../../domain/reference-id/reference-id';
 import { selectAuthflow } from '../../../domain/authflow/authflow-policy';
@@ -16,9 +19,8 @@ const extractValue = (data: {
 }): Money => createMoney(data.total.amount, data.total.currency).unwrap();
 
 const createNewDocument =
-    (policyStorage: PolicyStorage) =>
-    (referenceId: string, value: Money) =>
-        policyStorage.findByAction('approve').map((found) => {
+    (policyStorage: PolicyStorage) => (referenceId: string, value: Money) =>
+        policyStorage.findByAction('pay').map((found) => {
             const authflows = found.fold(
                 () => [],
                 (policy) => {
@@ -41,12 +43,19 @@ const orElseCreate =
     (referenceId: string, value: Money) =>
     (found: Some<FinancialDocument>) =>
         found.fold(
-            () => saveNewDocument(storage, policyStorage)(referenceId, value).map(Some.of),
+            () =>
+                saveNewDocument(storage, policyStorage)(referenceId, value).map(
+                    Some.of
+                ),
             () => IO.of(Some.none())
         );
 
 const handleEvent =
-    (domainEvents: DomainEvents, storage: DocumentStorage, policyStorage: PolicyStorage) =>
+    (
+        domainEvents: DomainEvents,
+        storage: DocumentStorage,
+        policyStorage: PolicyStorage
+    ) =>
     async (event: InvoiceIssuedEvent): Promise<void> => {
         const referenceId = extractReferenceId(event.data);
         const value = extractValue(event.data);
