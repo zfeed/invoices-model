@@ -1,8 +1,8 @@
-import { Result } from '../../../../../building-blocks';
+import { Mappable, Result } from '../../../../../building-blocks';
 import { Email } from '../../email/email';
 import { IBilling } from './billing.interface';
 
-export class Paypal implements IBilling<'PAYPAL', { email: Email }> {
+export class Paypal implements IBilling<'PAYPAL', { email: Email }>, Mappable<ReturnType<Paypal['toPlain']>> {
     public readonly type = 'PAYPAL' as const;
     public readonly data: { email: Email };
 

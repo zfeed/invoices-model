@@ -1,9 +1,9 @@
-import { Equatable, Result } from '../../../../building-blocks';
+import { Equatable, Mappable, Result } from '../../../../building-blocks';
 import { Money } from '../money/money/money';
 import { UnitDescription } from './unit-description';
 import { UnitQuantity } from './unit-quantity';
 
-export class LineItem implements Equatable<LineItem> {
+export class LineItem implements Equatable<LineItem>, Mappable<ReturnType<LineItem['toPlain']>> {
     #price: Money;
     #description: UnitDescription;
     #quantity: UnitQuantity;

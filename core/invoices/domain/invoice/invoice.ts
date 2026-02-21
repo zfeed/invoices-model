@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE, DomainError, Result } from '../../../../building-blocks';
+import { DOMAIN_ERROR_CODE, DomainError, Mappable, Result } from '../../../../building-blocks';
 import { Issuer } from '../issuer/issuer';
 import { Money } from '../money/money/money';
 import { Recipient } from '../recipient/recipient';
@@ -18,6 +18,7 @@ import { InvoiceProcessingEvent } from './events/invoice-processing.event';
 
 export class Invoice
     implements
+        Mappable<ReturnType<Invoice['toPlain']>>,
         PublishableEvents<
             InvoiceIssuedEvent | InvoiceProcessingEvent | InvoiceCancelledEvent | InvoicePaidEvent | InvoiceFailedEvent
         >

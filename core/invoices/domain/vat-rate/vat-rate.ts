@@ -1,8 +1,8 @@
-import { Equatable, Result } from '../../../../building-blocks';
+import { Equatable, Mappable, Result } from '../../../../building-blocks';
 import { Money } from '../money/money/money';
 import { Numeric } from '../numeric/numeric';
 import { checkPercents } from './checks/check-percents';
-export class VatRate implements Equatable<VatRate> {
+export class VatRate implements Equatable<VatRate>, Mappable<ReturnType<VatRate['toPlain']>> {
     #value: Numeric;
 
     public get rate(): Numeric {

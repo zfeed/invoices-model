@@ -1,11 +1,11 @@
-import { Equatable, Result } from '../../../../../building-blocks';
+import { Equatable, Mappable, Result } from '../../../../../building-blocks';
 import { Numeric } from '../../numeric/numeric';
 import { ROUNDING } from '../../numeric/rounding';
 import { Currency } from '../currency/currency';
 import { checkEqualCurrencies } from './checks/check-equal-currencies';
 import { checkMinorUnits } from './checks/check-minor-units';
 
-export class Money implements Equatable<Money> {
+export class Money implements Equatable<Money>, Mappable<ReturnType<Money['toPlain']>> {
     #amount: Numeric;
     #currency: Currency;
 

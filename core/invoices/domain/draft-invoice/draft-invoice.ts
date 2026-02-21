@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE, DomainError, Result } from '../../../../building-blocks';
+import { DOMAIN_ERROR_CODE, DomainError, Mappable, Result } from '../../../../building-blocks';
 import { PublishableEvents } from '../../../../building-blocks/events';
 import { CalendarDate } from '../calendar-date/calendar-date';
 import { Id } from '../id/id';
@@ -21,6 +21,7 @@ import { DraftInvoiceStatus } from '../status/status';
 
 export class DraftInvoice
     implements
+        Mappable<ReturnType<DraftInvoice['toPlain']>>,
         PublishableEvents<
             | DraftInvoiceCreatedEvent
             | DraftInvoiceUpdatedEvent

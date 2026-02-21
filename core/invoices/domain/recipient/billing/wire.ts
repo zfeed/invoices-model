@@ -1,8 +1,9 @@
-import { Result } from '../../../../../building-blocks';
+import { Mappable, Result } from '../../../../../building-blocks';
 import { IBilling } from './billing.interface';
 
 export class Wire
     implements
+        Mappable<ReturnType<Wire['toPlain']>>,
         IBilling<
             'WIRE',
             {

@@ -1,11 +1,11 @@
-import { Equatable, Result } from '../../../../building-blocks';
+import { Equatable, Mappable, Result } from '../../../../building-blocks';
 import { LineItem } from '../line-item/line-item';
 import { Money } from '../money/money/money';
 import { checkNoDuplicate } from './checks/check-no-duplicate';
 import { checkNonEmpty } from './checks/check-non-empty';
 import { checkSameCurrency } from './checks/check-same-currency';
 
-export class LineItems implements Equatable<ReadOnlyLineItems> {
+export class LineItems implements Equatable<ReadOnlyLineItems>, Mappable<ReturnType<LineItems['toPlain']>> {
     #items: LineItem[];
     #subtotal: Money;
 
