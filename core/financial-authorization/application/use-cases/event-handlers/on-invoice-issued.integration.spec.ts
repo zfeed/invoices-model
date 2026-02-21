@@ -58,7 +58,7 @@ const template = (from: string, to: string) =>
 
 const seedPolicy = async (policyStorage: InMemoryPolicyStorage) => {
     const policy = createAuthflowPolicy({
-        action: 'approve',
+        action: 'pay',
         templates: [
             template('0', '999'),
             template('1000', '9999'),
@@ -157,7 +157,7 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
                 (doc) => {
                     expect(doc.referenceId).toBe(invoice.id);
                     expect(doc.authflows).toHaveLength(1);
-                    expect(doc.authflows[0].action).toBe('approve');
+                    expect(doc.authflows[0].action).toBe('pay');
                     expect(doc.version).toBe(1);
                 }
             );

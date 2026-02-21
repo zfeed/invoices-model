@@ -64,7 +64,7 @@ const template = (from: string, to: string) =>
 
 const seedPolicy = async (policyStorage: InMemoryPolicyStorage) => {
     const policy = createAuthflowPolicy({
-        action: 'approve',
+        action: 'pay',
         templates: [
             template('0', '999'),
             template('1000', '9999'),
@@ -117,7 +117,7 @@ describe('onInvoiceIssued', () => {
             () => fail('Expected document to exist'),
             (doc) => {
                 expect(doc.authflows).toHaveLength(1);
-                expect(doc.authflows[0].action).toBe('approve');
+                expect(doc.authflows[0].action).toBe('pay');
                 expect(doc.authflows[0].range.from.amount).toBe('0');
                 expect(doc.authflows[0].range.to.amount).toBe('999');
             }
