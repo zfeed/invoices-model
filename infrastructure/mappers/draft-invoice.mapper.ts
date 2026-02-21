@@ -3,9 +3,11 @@ import { DraftInvoice } from '../../core/invoices/domain/draft-invoice/draft-inv
 import { Id } from '../../core/invoices/domain/id/id';
 import { Issuer } from '../../core/invoices/domain/issuer/issuer';
 import { LineItem } from '../../core/invoices/domain/line-item/line-item';
+import { LineItems } from '../../core/invoices/domain/line-items/line-items';
 import { Paypal } from '../../core/invoices/domain/recipient/billing/paypal';
 import { Wire } from '../../core/invoices/domain/recipient/billing/wire';
 import { Recipient } from '../../core/invoices/domain/recipient/recipient';
+import { DraftInvoiceStatus } from '../../core/invoices/domain/status/status';
 import { VatRate } from '../../core/invoices/domain/vat-rate/vat-rate';
 import { Mapper } from './mapper';
 
@@ -21,49 +23,74 @@ class DraftInvoiceMapper extends Mapper<DraftInvoice, DraftInvoicePlain> {
     }
 
     toDomain(plain: DraftInvoicePlain): DraftInvoice {
-        const draft = DraftInvoice.create(Id.fromString(plain.id)).unwrap();
+        const status = DraftInvoiceStatus.fromString(plain.status).unwrap();
 
-        if (plain.lineItems) {
-            for (const item of plain.lineItems.items) {
-                draft.addLineItem(
-                    LineItem.create({
-                        description: item.description,
-                        price: item.price,
-                        quantity: item.quantity,
-                    }).unwrap()
-                );
-            }
-        }
-
-        if (plain.vatRate) {
-            draft.applyVat(VatRate.create(plain.vatRate).unwrap());
-        }
-
-        if (plain.issuer) {
-            draft.addIssuer(Issuer.create(plain.issuer).unwrap());
-        }
-
-        if (plain.recipient) {
-            const billing =
-                plain.recipient.billing.type === 'PAYPAL'
-                    ? Paypal.create({
-                          email: plain.recipient.billing.data.email,
+        const lineItems = plain.lineItems
+            ? LineItems.create({
+                  items: plain.lineItems.items.map((item) =>
+                      LineItem.create({
+                          description: item.description,
+                          price: item.price,
+                          quantity: item.quantity,
                       }).unwrap()
-                    : Wire.create(plain.recipient.billing.data).unwrap();
-            draft.addRecipient(
-                Recipient.create({ ...plain.recipient, billing }).unwrap()
-            );
-        }
+                  ),
+              }).unwrap()
+            : null;
 
-        if (plain.issueDate) {
-            draft.addIssueDate(CalendarDate.create(plain.issueDate).unwrap());
-        }
+        const vatRate = plain.vatRate
+            ? VatRate.create(plain.vatRate).unwrap()
+            : null;
 
-        if (plain.dueDate) {
-            draft.addDueDate(CalendarDate.create(plain.dueDate).unwrap());
-        }
+        const issuer = plain.issuer
+            ? Issuer.create(plain.issuer).unwrap()
+            : null;
 
-        return draft;
+        const recipient = plain.recipient
+            ? (() => {
+                  const billing =
+                      plain.recipient.billing.type === 'PAYPAL'
+                          ? Paypal.create({
+                                email: plain.recipient.billing.data.email,
+                            }).unwrap()
+                          : Wire.create(plain.recipient.billing.data).unwrap();
+                  return Recipient.create({
+                      ...plain.recipient,
+                      billing,
+                  }).unwrap();
+              })()
+            : null;
+
+        const issueDate = plain.issueDate
+            ? CalendarDate.create(plain.issueDate).unwrap()
+            : null;
+
+        const dueDate = plain.dueDate
+            ? CalendarDate.create(plain.dueDate).unwrap()
+            : null;
+
+        const total = lineItems
+            ? vatRate
+                ? vatRate.applyTo(lineItems.subtotal)
+                : lineItems.subtotal
+            : null;
+
+        const vatAmount =
+            lineItems && vatRate && total
+                ? total.subtract(lineItems.subtotal).unwrap()
+                : null;
+
+        return DraftInvoice.reconstruct({
+            id: Id.fromString(plain.id),
+            status,
+            lineItems,
+            total,
+            vatRate,
+            vatAmount,
+            issueDate,
+            dueDate,
+            issuer,
+            recipient,
+        });
     }
 }
 

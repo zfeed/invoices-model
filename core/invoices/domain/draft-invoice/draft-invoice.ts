@@ -389,6 +389,32 @@ export class DraftInvoice
         return Result.ok(draftInvoice);
     }
 
+    static reconstruct(options: {
+        id: Id;
+        status: DraftInvoiceStatus;
+        lineItems?: LineItems | null;
+        total?: Money | null;
+        vatRate?: VatRate | null;
+        vatAmount?: Money | null;
+        issueDate?: CalendarDate | null;
+        dueDate?: CalendarDate | null;
+        issuer?: Issuer | null;
+        recipient?: Recipient | null;
+    }) {
+        return new DraftInvoice(
+            options.id,
+            options.status,
+            options.lineItems ?? null,
+            options.total ?? null,
+            options.vatRate ?? null,
+            options.vatAmount ?? null,
+            options.issueDate ?? null,
+            options.dueDate ?? null,
+            options.issuer ?? null,
+            options.recipient ?? null
+        );
+    }
+
     toPlain() {
         return {
             id: this.#id.toString(),
