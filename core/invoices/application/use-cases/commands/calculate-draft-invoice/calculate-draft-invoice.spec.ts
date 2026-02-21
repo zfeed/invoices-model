@@ -1,6 +1,6 @@
 import { CalculateDraftInvoice } from './calculate-draft-invoice';
-import { ISSUER_TYPE } from '../../../domain/issuer/issuer';
-import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
+import { ISSUER_TYPE } from '../../../../domain/issuer/issuer';
+import { RECIPIENT_TYPE } from '../../../../domain/recipient/recipient';
 
 describe('CalculateDraftInvoice', () => {
     let command: CalculateDraftInvoice;

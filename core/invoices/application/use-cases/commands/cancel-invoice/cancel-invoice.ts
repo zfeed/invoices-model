@@ -1,11 +1,11 @@
-import { APPLICATION_ERROR_CODE } from '../../../../../building-blocks/errors/application/application-codes';
-import { ApplicationError } from '../../../../../building-blocks/errors/application/application.error';
-import { Id } from '../../../domain/id/id';
-import { Invoice } from '../../../domain/invoice/invoice';
-import { DomainEvents } from '../../../../shared/domain-events/domain-events.interface';
-import { UnitOfWorkFactory } from '../../unit-of-work/unit-of-work.interface';
+import { APPLICATION_ERROR_CODE } from '../../../../../../building-blocks/errors/application/application-codes';
+import { ApplicationError } from '../../../../../../building-blocks/errors/application/application.error';
+import { Id } from '../../../../domain/id/id';
+import { Invoice } from '../../../../domain/invoice/invoice';
+import { DomainEvents } from '../../../../../shared/domain-events/domain-events.interface';
+import { UnitOfWorkFactory } from '../../../unit-of-work/unit-of-work.interface';
 
-export class ProcessInvoice {
+export class CancelInvoice {
     constructor(
         private readonly unitOfWorkFactory: UnitOfWorkFactory,
         private readonly domainEvents: DomainEvents
@@ -25,7 +25,7 @@ export class ProcessInvoice {
                     });
                 }
 
-                invoice.process().unwrap();
+                invoice.cancel().unwrap();
 
                 return invoice;
             }

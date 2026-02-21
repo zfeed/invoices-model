@@ -1,15 +1,15 @@
-import { InMemoryUnitOfWorkFactory } from '../../../../../infrastructure/unit-of-work/in-memory.unit-of-work';
-import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
-import { CreateDraftInvoice } from './create-draft-invoice';
+import { InMemoryUnitOfWorkFactory } from '../../../../../../infrastructure/unit-of-work/in-memory.unit-of-work';
+import { InMemoryDomainEvents } from '../../../../../../infrastructure/domain-events/in-memory-domain-events';
+import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice';
 import { CompleteDraftInvoice } from './complete-draft-invoice';
-import { DraftInvoiceFinishedEvent } from '../../../domain/draft-invoice/events/draft-invoice-finished.event';
-import { InvoiceIssuedEvent } from '../../../domain/invoice/events/invoice-issued.event';
-import { APPLICATION_ERROR_CODE } from '../../../../../building-blocks/errors/application/application-codes';
-import { DOMAIN_ERROR_CODE } from '../../../../../building-blocks/errors/domain/domain-codes';
-import { Invoice } from '../../../domain/invoice/invoice';
-import { Id } from '../../../domain/id/id';
-import { ISSUER_TYPE } from '../../../domain/issuer/issuer';
-import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
+import { DraftInvoiceFinishedEvent } from '../../../../domain/draft-invoice/events/draft-invoice-finished.event';
+import { InvoiceIssuedEvent } from '../../../../domain/invoice/events/invoice-issued.event';
+import { APPLICATION_ERROR_CODE } from '../../../../../../building-blocks/errors/application/application-codes';
+import { DOMAIN_ERROR_CODE } from '../../../../../../building-blocks/errors/domain/domain-codes';
+import { Invoice } from '../../../../domain/invoice/invoice';
+import { Id } from '../../../../domain/id/id';
+import { ISSUER_TYPE } from '../../../../domain/issuer/issuer';
+import { RECIPIENT_TYPE } from '../../../../domain/recipient/recipient';
 
 const COMPLETE_DRAFT_REQUEST = {
     lineItems: [

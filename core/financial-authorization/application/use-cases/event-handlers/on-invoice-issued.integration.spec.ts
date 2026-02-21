@@ -2,8 +2,8 @@ import { InMemoryDocumentStorage } from '../../../../../infrastructure/storage/i
 import { InMemoryPolicyStorage } from '../../../../../infrastructure/storage/in-memory.policy-storage';
 import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
 import { InMemoryUnitOfWorkFactory } from '../../../../../infrastructure/unit-of-work/in-memory.unit-of-work';
-import { CreateDraftInvoice } from '../../../../invoices/application/use-cases/commands/create-draft-invoice';
-import { CompleteDraftInvoice } from '../../../../invoices/application/use-cases/commands/complete-draft-invoice';
+import { CreateDraftInvoice } from '../../../../invoices/application/use-cases/commands/create-draft-invoice/create-draft-invoice';
+import { CompleteDraftInvoice } from '../../../../invoices/application/use-cases/commands/complete-draft-invoice/complete-draft-invoice';
 import { ISSUER_TYPE } from '../../../../invoices/domain/issuer/issuer';
 import { RECIPIENT_TYPE } from '../../../../invoices/domain/recipient/recipient';
 import { createMoney } from '../../../domain/money/money';

@@ -1,12 +1,12 @@
-import { InMemoryUnitOfWorkFactory } from '../../../../../infrastructure/unit-of-work/in-memory.unit-of-work';
-import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
+import { InMemoryUnitOfWorkFactory } from '../../../../../../infrastructure/unit-of-work/in-memory.unit-of-work';
+import { InMemoryDomainEvents } from '../../../../../../infrastructure/domain-events/in-memory-domain-events';
 import { CreateDraftInvoice } from './create-draft-invoice';
-import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
-import { DraftInvoiceCreatedEvent } from '../../../domain/draft-invoice/events/draft-invoice-created.event';
-import { DraftInvoiceUpdatedEvent } from '../../../domain/draft-invoice/events/draft-invoice-updated.event';
-import { ISSUER_TYPE } from '../../../domain/issuer/issuer';
-import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
-import { Id } from '../../../domain/id/id';
+import { DraftInvoice } from '../../../../domain/draft-invoice/draft-invoice';
+import { DraftInvoiceCreatedEvent } from '../../../../domain/draft-invoice/events/draft-invoice-created.event';
+import { DraftInvoiceUpdatedEvent } from '../../../../domain/draft-invoice/events/draft-invoice-updated.event';
+import { ISSUER_TYPE } from '../../../../domain/issuer/issuer';
+import { RECIPIENT_TYPE } from '../../../../domain/recipient/recipient';
+import { Id } from '../../../../domain/id/id';
 
 describe('CreateDraftInvoice', () => {
     let unitOfWorkFactory: InMemoryUnitOfWorkFactory;

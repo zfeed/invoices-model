@@ -1,15 +1,15 @@
-import { InMemoryUnitOfWorkFactory } from '../../../../../infrastructure/unit-of-work/in-memory.unit-of-work';
-import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
-import { InMemoryDocumentStorage } from '../../../../../infrastructure/storage/in-memory.document-storage';
-import { createDocument } from '../../../../financial-authorization/domain/document/document';
-import { CreateDraftInvoice } from './create-draft-invoice';
-import { CompleteDraftInvoice } from './complete-draft-invoice';
-import { ProcessInvoice } from './process-invoice';
+import { InMemoryUnitOfWorkFactory } from '../../../../../../infrastructure/unit-of-work/in-memory.unit-of-work';
+import { InMemoryDomainEvents } from '../../../../../../infrastructure/domain-events/in-memory-domain-events';
+import { InMemoryDocumentStorage } from '../../../../../../infrastructure/storage/in-memory.document-storage';
+import { createDocument } from '../../../../../financial-authorization/domain/document/document';
+import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice';
+import { CompleteDraftInvoice } from '../complete-draft-invoice/complete-draft-invoice';
+import { ProcessInvoice } from '../process-invoice/process-invoice';
 import { PayInvoice } from './pay-invoice';
-import { InvoicePaidEvent } from '../../../domain/invoice/events/invoice-paid.event';
-import { APPLICATION_ERROR_CODE } from '../../../../../building-blocks/errors/application/application-codes';
-import { ISSUER_TYPE } from '../../../domain/issuer/issuer';
-import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
+import { InvoicePaidEvent } from '../../../../domain/invoice/events/invoice-paid.event';
+import { APPLICATION_ERROR_CODE } from '../../../../../../building-blocks/errors/application/application-codes';
+import { ISSUER_TYPE } from '../../../../domain/issuer/issuer';
+import { RECIPIENT_TYPE } from '../../../../domain/recipient/recipient';
 
 const COMPLETE_DRAFT_REQUEST = {
     lineItems: [

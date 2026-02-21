@@ -1,11 +1,11 @@
-import { InMemoryUnitOfWorkFactory } from '../../../../../infrastructure/unit-of-work/in-memory.unit-of-work';
-import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
-import { CreateDraftInvoice } from './create-draft-invoice';
+import { InMemoryUnitOfWorkFactory } from '../../../../../../infrastructure/unit-of-work/in-memory.unit-of-work';
+import { InMemoryDomainEvents } from '../../../../../../infrastructure/domain-events/in-memory-domain-events';
+import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice';
 import { UpdateDraftInvoice } from './update-draft-invoice';
-import { DraftInvoiceUpdatedEvent } from '../../../domain/draft-invoice/events/draft-invoice-updated.event';
-import { APPLICATION_ERROR_CODE } from '../../../../../building-blocks/errors/application/application-codes';
-import { ISSUER_TYPE } from '../../../domain/issuer/issuer';
-import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
+import { DraftInvoiceUpdatedEvent } from '../../../../domain/draft-invoice/events/draft-invoice-updated.event';
+import { APPLICATION_ERROR_CODE } from '../../../../../../building-blocks/errors/application/application-codes';
+import { ISSUER_TYPE } from '../../../../domain/issuer/issuer';
+import { RECIPIENT_TYPE } from '../../../../domain/recipient/recipient';
 
 describe('UpdateDraftInvoice', () => {
     let unitOfWorkFactory: InMemoryUnitOfWorkFactory;

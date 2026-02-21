@@ -1,12 +1,12 @@
-import { InMemoryUnitOfWorkFactory } from '../../../../../infrastructure/unit-of-work/in-memory.unit-of-work';
-import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
-import { CreateDraftInvoice } from './create-draft-invoice';
-import { CompleteDraftInvoice } from './complete-draft-invoice';
+import { InMemoryUnitOfWorkFactory } from '../../../../../../infrastructure/unit-of-work/in-memory.unit-of-work';
+import { InMemoryDomainEvents } from '../../../../../../infrastructure/domain-events/in-memory-domain-events';
+import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice';
+import { CompleteDraftInvoice } from '../complete-draft-invoice/complete-draft-invoice';
 import { ProcessInvoice } from './process-invoice';
-import { InvoiceProcessingEvent } from '../../../domain/invoice/events/invoice-processing.event';
-import { APPLICATION_ERROR_CODE } from '../../../../../building-blocks/errors/application/application-codes';
-import { ISSUER_TYPE } from '../../../domain/issuer/issuer';
-import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
+import { InvoiceProcessingEvent } from '../../../../domain/invoice/events/invoice-processing.event';
+import { APPLICATION_ERROR_CODE } from '../../../../../../building-blocks/errors/application/application-codes';
+import { ISSUER_TYPE } from '../../../../domain/issuer/issuer';
+import { RECIPIENT_TYPE } from '../../../../domain/recipient/recipient';
 
 const COMPLETE_DRAFT_REQUEST = {
     lineItems: [
