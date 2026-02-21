@@ -110,6 +110,7 @@ export class Invoice
 
     static create(options: {
         id: Id;
+        status?: Status;
         lineItems: LineItems;
         issueDate: CalendarDate;
         dueDate: CalendarDate;
@@ -133,9 +134,10 @@ export class Invoice
         const vatAmount = vatRate
             ? total.subtract(options.lineItems.subtotal).unwrap()
             : null;
+        const status = options.status ?? Status.issued();
         const invoice = new Invoice(
             options.id,
-            Status.issued(),
+            status,
             options.lineItems,
             total,
             vatRate,
@@ -146,9 +148,10 @@ export class Invoice
             recipient
         );
 
-        const event = new InvoiceIssuedEvent(invoice.toPlain());
-
-        invoice.#events.push(event);
+        if (!options.status) {
+            const event = new InvoiceIssuedEvent(invoice.toPlain());
+            invoice.#events.push(event);
+        }
 
         return Result.ok(invoice);
     }

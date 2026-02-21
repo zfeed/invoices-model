@@ -7,6 +7,7 @@ import { LineItems } from '../../core/invoices/domain/line-items/line-items';
 import { Paypal } from '../../core/invoices/domain/recipient/billing/paypal';
 import { Wire } from '../../core/invoices/domain/recipient/billing/wire';
 import { Recipient } from '../../core/invoices/domain/recipient/recipient';
+import { Status } from '../../core/invoices/domain/status/status';
 import { VatRate } from '../../core/invoices/domain/vat-rate/vat-rate';
 import { Mapper } from './mapper';
 
@@ -49,6 +50,7 @@ class InvoiceMapper extends Mapper<Invoice, InvoicePlain> {
 
         return Invoice.create({
             id: Id.fromString(plain.id),
+            status: Status.fromString(plain.status).unwrap(),
             lineItems,
             issueDate,
             dueDate,
