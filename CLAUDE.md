@@ -28,7 +28,7 @@ TypeScript DDD codebase with two bounded contexts: **invoices** (OOP class-based
 - Avoid class-based implementations when a functional approach is asked for. Avoid manual object reconstruction, wrapper functions, and explicit type aliases unless asked.
 - When asked for functional style, use the existing monadic types in `building-blocks/` — do not introduce new wrapper constructs.
 - **financial-authorization** context: functional style with Ramda (`applySpec`, `prop`, `map`, `find`, `propEq`), plain types, factory functions.
-- **invoices** context: OOP style with private `#fields`, `protected constructor`, static `create`/`fromString` factories, `toPlain()` serialization, `Equatable<T>`.
+- **invoices** context: OOP style with private `#fields`, `protected constructor`, static `create`/`fromPlain` factories, `toPlain()` serialization, `Equatable<T>`. Status types use `fromString` instead of `fromPlain`.
 - Domain events in financial-authorization use `applySpec`/`prop` for data transformation in constructors.
 - Domain events in invoices pass `toPlain()` output as event data.
 
