@@ -2,7 +2,7 @@ import { testEquatable } from '../../../../building-blocks/equatable.test-helper
 import { Money } from '../money/money/money';
 import { LineItem } from './line-item';
 import { UnitDescription } from './unit-description';
-import { UnitQuantity } from './unit-quantity';
+import { UnitQuantity } from './unit-quantity/unit-quantity';
 
 describe('LineItem', () => {
     testEquatable({

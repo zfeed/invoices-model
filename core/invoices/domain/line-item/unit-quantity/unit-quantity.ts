@@ -1,5 +1,5 @@
-import { Equatable, Mappable, Result } from '../../../../building-blocks';
-import { Numeric } from '../numeric/numeric';
+import { Equatable, Mappable, Result } from '../../../../../building-blocks';
+import { Numeric } from '../../numeric/numeric';
 import { checkUnitQuantity } from './checks/check-unit-quantity';
 
 export class UnitQuantity implements Equatable<UnitQuantity>, Mappable<string> {

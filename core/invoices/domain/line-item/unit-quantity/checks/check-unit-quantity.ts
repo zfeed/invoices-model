@@ -1,5 +1,5 @@
 import { isInt } from 'validator';
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../building-blocks';
+import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../../building-blocks';
 
 export function checkUnitQuantity(quantity: string): DomainError | null {
     if (!isInt(quantity)) {
