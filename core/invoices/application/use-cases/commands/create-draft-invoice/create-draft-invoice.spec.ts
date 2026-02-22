@@ -104,7 +104,7 @@ describe('CreateDraftInvoice', () => {
             vatRate: '20',
         });
 
-        expect(result.vatRate).toBe('20');
+        expect(result.vatRate).toBe('0.2');
         expect(result.total).toEqual({ amount: '120', currency: 'USD' });
         expect(result.vatAmount).toEqual({ amount: '20', currency: 'USD' });
     });
@@ -235,7 +235,7 @@ describe('CreateDraftInvoice', () => {
 
         expect(result.lineItems).not.toBeNull();
         expect(result.total).toEqual({ amount: '220', currency: 'USD' });
-        expect(result.vatRate).toBe('10');
+        expect(result.vatRate).toBe('0.1');
         expect(result.vatAmount).toEqual({ amount: '20', currency: 'USD' });
         expect(result.issueDate).toBe('2025-01-01');
         expect(result.dueDate).toBe('2025-02-01');

@@ -18,9 +18,7 @@ export class VatRate implements Equatable<VatRate>, Mappable<ReturnType<VatRate[
     }
 
     static fromPlain(value: string) {
-        const oneHundred = Numeric.create('100').unwrap();
-        const percents = Numeric.create(value).unwrap();
-        return new VatRate(percents.divideBy(oneHundred).unwrap());
+        return new VatRate(Numeric.fromPlain(value));
     }
 
     static create(value: string) {
@@ -45,6 +43,6 @@ export class VatRate implements Equatable<VatRate>, Mappable<ReturnType<VatRate[
     }
 
     toPlain() {
-        return this.#value.multiplyBy(Numeric.create('100').unwrap()).toString();
+        return this.#value.toString();
     }
 }

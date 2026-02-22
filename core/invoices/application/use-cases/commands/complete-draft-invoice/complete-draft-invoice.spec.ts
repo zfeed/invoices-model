@@ -87,7 +87,7 @@ describe('CompleteDraftInvoice', () => {
                 id: expect.any(String),
                 issueDate: '2025-01-01',
                 dueDate: '2025-02-01',
-                vatRate: '10',
+                vatRate: '0.1',
             })
         );
         expect(result.lineItems.items).toHaveLength(1);
@@ -140,7 +140,7 @@ describe('CompleteDraftInvoice', () => {
                         id: created.id,
                         issueDate: '2025-01-01',
                         dueDate: '2025-02-01',
-                        vatRate: '10',
+                        vatRate: '0.1',
                         total: { amount: '220', currency: 'USD' },
                     }),
                 }),
@@ -166,7 +166,7 @@ describe('CompleteDraftInvoice', () => {
                         id: invoice.id,
                         issueDate: '2025-01-01',
                         dueDate: '2025-02-01',
-                        vatRate: '10',
+                        vatRate: '0.1',
                         total: { amount: '220', currency: 'USD' },
                     }),
                 }),

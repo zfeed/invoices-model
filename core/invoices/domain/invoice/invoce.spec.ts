@@ -120,7 +120,7 @@ describe('Invoice', () => {
                         subtotal: { amount: '200', currency: 'USD' },
                     },
                     total: { amount: '220', currency: 'USD' },
-                    vatRate: '10',
+                    vatRate: '0.1',
                     vatAmount: { amount: '20', currency: 'USD' },
                     issueDate: '2023-01-01',
                     dueDate: '2028-01-01',

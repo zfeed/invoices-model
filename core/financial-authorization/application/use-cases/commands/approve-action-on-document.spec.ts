@@ -54,7 +54,7 @@ const INVOICE_DATA = {
         subtotal: { amount: '200', currency: 'USD' },
     },
     total: { amount: '220', currency: 'USD' },
-    vatRate: '10',
+    vatRate: '0.1',
     vatAmount: { amount: '20', currency: 'USD' },
     issueDate: '2025-01-01',
     dueDate: '2025-02-01',

@@ -90,7 +90,7 @@ describe('UpdateDraftInvoice', () => {
             vatRate: '20',
         });
 
-        expect(result.vatRate).toBe('20');
+        expect(result.vatRate).toBe('0.2');
         expect(result.total).toEqual({ amount: '120', currency: 'USD' });
         expect(result.vatAmount).toEqual({ amount: '20', currency: 'USD' });
     });
@@ -232,7 +232,7 @@ describe('UpdateDraftInvoice', () => {
         });
 
         expect(result.lineItems!.items).toHaveLength(1);
-        expect(result.vatRate).toBe('15');
+        expect(result.vatRate).toBe('0.15');
         expect(result.total).toEqual({ amount: '115', currency: 'USD' });
         expect(result.issueDate).toBe('2025-01-01');
         expect(result.dueDate).toBe('2025-02-01');
