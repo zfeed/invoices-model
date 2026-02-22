@@ -29,27 +29,19 @@ export class CalendarDate
     }
 
     public lessThan(other: CalendarDate): boolean {
-        return (
-            new Date(this.#value).getTime() < new Date(other.#value).getTime()
-        );
+        return this.#value < other.#value;
     }
 
     public lessThanEqual(other: CalendarDate): boolean {
-        return (
-            new Date(this.#value).getTime() <= new Date(other.#value).getTime()
-        );
+        return this.#value <= other.#value;
     }
 
     public greaterThan(other: CalendarDate): boolean {
-        return (
-            new Date(this.#value).getTime() > new Date(other.#value).getTime()
-        );
+        return this.#value > other.#value;
     }
 
     public greaterThanEqual(other: CalendarDate): boolean {
-        return (
-            new Date(this.#value).getTime() >= new Date(other.#value).getTime()
-        );
+        return this.#value >= other.#value;
     }
 
     toPlain(): string {
