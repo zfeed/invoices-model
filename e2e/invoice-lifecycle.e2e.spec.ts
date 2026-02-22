@@ -6,7 +6,7 @@ describe('Invoice lifecycle flows', () => {
     describe('create -> update -> complete -> process', () => {
         it('progresses through the full draft-to-processing flow', async () => {
             const createRes = await postJson('/invoices/drafts', {});
-            expect(createRes.status).toBe(201);
+            expect(createRes.status).toBe(200);
             const draft = await getData(createRes);
             expect(draft.status).toBe('DRAFT');
 
@@ -40,7 +40,7 @@ describe('Invoice lifecycle flows', () => {
                 '/invoices/drafts',
                 COMPLETE_DRAFT_REQUEST
             );
-            expect(createRes.status).toBe(201);
+            expect(createRes.status).toBe(200);
             const draft = await getData(createRes);
 
             const completeRes = await post(
@@ -62,7 +62,7 @@ describe('Invoice lifecycle flows', () => {
     describe('create -> archive -> draft', () => {
         it('creates, archives, then un-archives a draft', async () => {
             const createRes = await postJson('/invoices/drafts', {});
-            expect(createRes.status).toBe(201);
+            expect(createRes.status).toBe(200);
             const draft = await getData(createRes);
             expect(draft.status).toBe('DRAFT');
 

@@ -5,7 +5,7 @@ const { postJson, postRaw } = setupApp();
 describe('POST /invoices/drafts', () => {
     it('creates an empty draft invoice', async () => {
         const res = await postJson('/invoices/drafts', {});
-        expect(res.status).toBe(201);
+        expect(res.status).toBe(200);
         const json = await res.json();
         expect(json.data).toEqual(
             expect.objectContaining({ status: 'DRAFT' })
@@ -24,7 +24,7 @@ describe('POST /invoices/drafts', () => {
             ],
             vatRate: '10',
         });
-        expect(res.status).toBe(201);
+        expect(res.status).toBe(200);
         const json = await res.json();
         expect(json.data.lineItems.items).toHaveLength(1);
         expect(json.data.lineItems.items[0].description).toBe('Service');

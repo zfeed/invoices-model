@@ -10,6 +10,6 @@ export const createDraftInvoiceRoute = (app: Hono, commands: Commands) => {
         const body = await c.req.json();
         const data = parse(draftInvoiceSchema, body);
         const result = await commands.createDraftInvoice.execute(data);
-        return c.json({ data: result }, 201);
+        return c.json({ data: result });
     });
 };

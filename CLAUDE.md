@@ -36,6 +36,7 @@ TypeScript DDD codebase with two bounded contexts: **invoices** (OOP class-based
 
 - HTTP routes use only **POST** and **GET** methods. No PUT, PATCH, or DELETE.
 - Actions are expressed via URL path segments (e.g., `POST /invoices/drafts/:id/update`, not `PUT /invoices/drafts/:id`).
+- All successful responses return **200**. Never use 201 or other 2xx codes.
 
 ## Project Structure
 
