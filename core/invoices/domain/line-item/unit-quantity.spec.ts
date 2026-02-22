@@ -1,5 +1,4 @@
 import { testEquatable } from '../../../../building-blocks/equatable.test-helper';
-import { Numeric } from '../numeric/numeric';
 import { UnitQuantity } from './unit-quantity';
 
 describe('UnitQuantity', () => {
@@ -18,7 +17,7 @@ describe('UnitQuantity', () => {
 
     it('should create a unit quantity', () => {
         const quantity = UnitQuantity.create('4').unwrap();
-        expect(quantity.value.equals(Numeric.create('4').unwrap())).toBe(true);
+        expect(quantity.toPlain()).toBe('4');
     });
 
     it.each(['-1', '0', '-100', '-5'])(
@@ -45,4 +44,25 @@ describe('UnitQuantity', () => {
             );
         }
     );
+
+    it.each(['abc', ''])(
+        'should not create quantity from non-numeric input: %p',
+        (invalidQuantity) => {
+            const result = UnitQuantity.create(invalidQuantity);
+            expect(result.unwrapError()).toEqual(
+                expect.objectContaining({
+                    code: '2000',
+                })
+            );
+        }
+    );
+
+    describe('toPlain / fromPlain', () => {
+        it('round-trips through toPlain and fromPlain', () => {
+            const quantity = UnitQuantity.create('5').unwrap();
+            const restored = UnitQuantity.fromPlain(quantity.toPlain());
+
+            expect(restored.equals(quantity)).toBe(true);
+        });
+    });
 });
