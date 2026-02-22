@@ -157,12 +157,24 @@ export class Invoice
             return Result.error(dateError);
         }
 
-        const total = vatRate
-            ? vatRate.addTo(options.lineItems.subtotal).unwrap()
-            : options.lineItems.subtotal;
-        const vatAmount = vatRate
-            ? total.subtract(options.lineItems.subtotal).unwrap()
-            : null;
+        const totalResult = vatRate
+            ? vatRate.addTo(options.lineItems.subtotal)
+            : Result.ok<DomainError, Money>(options.lineItems.subtotal);
+
+        if (totalResult.isError()) {
+            return totalResult.error();
+        }
+
+        const total = totalResult.unwrap();
+        const vatAmountResult = vatRate
+            ? total.subtract(options.lineItems.subtotal)
+            : Result.ok<DomainError, Money | null>(null);
+
+        if (vatAmountResult.isError()) {
+            return vatAmountResult.error();
+        }
+
+        const vatAmount = vatAmountResult.unwrap();
         const status = options.status ?? InvoiceStatus.issued();
         const invoice = new Invoice(
             options.id,
