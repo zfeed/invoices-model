@@ -68,7 +68,7 @@ export class Issuer implements Equatable<Issuer>, Mappable<ReturnType<Issuer['to
     }
 
     static fromPlain(plain: ReturnType<Issuer['toPlain']>) {
-        return new this(
+        return new Issuer(
             plain.type,
             plain.name,
             plain.address,
@@ -98,6 +98,6 @@ export class Issuer implements Equatable<Issuer>, Mappable<ReturnType<Issuer['to
 
         const issueEmail = emailResult.unwrap();
 
-        return Result.ok(new this(type, name, address, taxId, issueEmail));
+        return Result.ok(new Issuer(type, name, address, taxId, issueEmail));
     }
 }
