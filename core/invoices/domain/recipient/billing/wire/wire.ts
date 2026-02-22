@@ -1,4 +1,4 @@
-import { Mappable, Result } from '../../../../../../building-blocks';
+import { Equatable, Mappable, Result } from '../../../../../../building-blocks';
 import { IBilling } from '../billing.interface';
 import { checkSwift } from './checks/check-swift';
 import { checkBankCountry } from './checks/check-bank-country';
@@ -15,6 +15,7 @@ type WireData = {
 
 export class Wire
     implements
+        Equatable<Wire>,
         Mappable<ReturnType<Wire['toPlain']>>,
         IBilling<'WIRE', WireData>
 {
@@ -43,6 +44,17 @@ export class Wire
         }
 
         return Result.ok(new Wire(data));
+    }
+
+    equals(other: Wire): boolean {
+        return (
+            this.data.swift === other.data.swift &&
+            this.data.accountNumber === other.data.accountNumber &&
+            this.data.accountHolderName === other.data.accountHolderName &&
+            this.data.bankName === other.data.bankName &&
+            this.data.bankAddress === other.data.bankAddress &&
+            this.data.bankCountry === other.data.bankCountry
+        );
     }
 
     toPlain() {

@@ -73,7 +73,8 @@ export class Recipient implements Equatable<Recipient>, Mappable<ReturnType<Reci
             this.#taxId === other.#taxId &&
             this.#email.equals(other.#email) &&
             this.#taxResidenceCountry.equals(other.#taxResidenceCountry) &&
-            this.#billing === other.#billing
+            this.#billing.type === other.#billing.type &&
+            this.#billing.equals(other.#billing as any)
         );
     }
 
