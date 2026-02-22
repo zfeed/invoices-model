@@ -37,6 +37,8 @@ export class Invoice
         | InvoiceIssuedEvent
         | InvoiceProcessingEvent
         | InvoiceCancelledEvent
+        | InvoicePaidEvent
+        | InvoiceFailedEvent
     )[] = [];
 
     public get id(): Id {
