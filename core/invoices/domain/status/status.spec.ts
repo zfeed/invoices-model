@@ -1,5 +1,6 @@
 import { testEquatable } from '../../../../building-blocks/equatable.test-helper';
-import { InvoiceStatus, DraftInvoiceStatus } from './status';
+import { InvoiceStatus } from './invoice-status';
+import { DraftInvoiceStatus } from './draft-invoice-status';
 
 describe('InvoiceStatus', () => {
     testEquatable({

@@ -17,7 +17,7 @@ import { DraftInvoiceCreatedEvent } from './events/draft-invoice-created.event';
 import { DraftInvoiceDraftedEvent } from './events/draft-invoice-drafted.event';
 import { DraftInvoiceFinishedEvent } from './events/draft-invoice-finished.event';
 import { DraftInvoiceUpdatedEvent } from './events/draft-invoice-updated.event';
-import { DraftInvoiceStatus } from '../status/status';
+import { DraftInvoiceStatus } from '../status/draft-invoice-status';
 
 export class DraftInvoice
     implements

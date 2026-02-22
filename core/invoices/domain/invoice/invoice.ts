@@ -8,7 +8,7 @@ import { PublishableEvents } from '../../../../building-blocks/events';
 import { CalendarDate } from '../calendar-date/calendar-date';
 import { Id } from '../id/id';
 import { LineItems, ReadOnlyLineItems } from '../line-items/line-items';
-import { InvoiceStatus } from '../status/status';
+import { InvoiceStatus } from '../status/invoice-status';
 import { checkDates } from './checks/check-dates';
 import { InvoiceCancelledEvent } from './events/invoice-cancelled.event';
 import { InvoiceIssuedEvent } from './events/invoice-issued.event';

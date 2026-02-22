@@ -7,7 +7,7 @@ import { Money } from '../money/money/money';
 import { Paypal } from '../recipient/billing/paypal';
 import { Recipient, RECIPIENT_TYPE } from '../recipient/recipient';
 import { VatRate } from '../vat-rate/vat-rate';
-import { InvoiceStatus } from '../status/status';
+import { InvoiceStatus } from '../status/invoice-status';
 import { Invoice } from './invoice';
 
 describe('Invoice', () => {

@@ -7,7 +7,7 @@ import { Paypal } from '../recipient/billing/paypal';
 import { Recipient, RECIPIENT_TYPE } from '../recipient/recipient';
 import { VatRate } from '../vat-rate/vat-rate';
 import { DraftInvoice } from './draft-invoice';
-import { DraftInvoiceStatus } from '../status/status';
+import { DraftInvoiceStatus } from '../status/draft-invoice-status';
 
 describe('DraftInvoice', () => {
     it('should create a draft invoice instance with missing data', () => {
