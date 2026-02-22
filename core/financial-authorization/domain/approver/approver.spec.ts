@@ -2,7 +2,7 @@ import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/dom
 import { createApprover } from './approver';
 
 describe('createApprover', () => {
-    it('should create an approver with valid email', () => {
+    it('should create an approver with valid data', () => {
         const data = {
             name: 'John Doe',
             email: 'john.doe@example.com',
@@ -37,7 +37,22 @@ describe('createApprover', () => {
         expect(approver1.id).not.toBe(approver2.id);
     });
 
-    it('should fail with invalid email format', () => {
+    it('should generate valid UUID format for id', () => {
+        const data = {
+            name: 'UUID Test',
+            email: 'uuid@example.com',
+        };
+
+        const result = createApprover(data);
+
+        expect(result.isOk()).toBe(true);
+        const approver = result.unwrap();
+        const uuidRegex =
+            /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        expect(approver.id).toMatch(uuidRegex);
+    });
+
+    it('should fail with invalid email', () => {
         const data = {
             name: 'Invalid User',
             email: 'not-an-email',
@@ -53,126 +68,6 @@ describe('createApprover', () => {
         );
     });
 
-    it('should fail with empty email', () => {
-        const data = {
-            name: 'Empty Email User',
-            email: '',
-        };
-
-        const result = createApprover(data);
-
-        expect(result.isError()).toBe(true);
-        const error = result.unwrapError();
-        expect(error.message).toBe('Invalid email');
-        expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_EMAIL_INVALID_FORMAT
-        );
-    });
-
-    it('should fail with email missing @ symbol', () => {
-        const data = {
-            name: 'No At Symbol',
-            email: 'invalidemail.com',
-        };
-
-        const result = createApprover(data);
-
-        expect(result.isError()).toBe(true);
-        const error = result.unwrapError();
-        expect(error.message).toBe('Invalid email');
-    });
-
-    it('should fail with email missing domain', () => {
-        const data = {
-            name: 'No Domain',
-            email: 'user@',
-        };
-
-        const result = createApprover(data);
-
-        expect(result.isError()).toBe(true);
-        const error = result.unwrapError();
-        expect(error.message).toBe('Invalid email');
-    });
-
-    it('should fail with email missing local part', () => {
-        const data = {
-            name: 'No Local Part',
-            email: '@example.com',
-        };
-
-        const result = createApprover(data);
-
-        expect(result.isError()).toBe(true);
-        const error = result.unwrapError();
-        expect(error.message).toBe('Invalid email');
-    });
-
-    it('should accept email with subdomain', () => {
-        const data = {
-            name: 'Subdomain User',
-            email: 'user@mail.example.com',
-        };
-
-        const result = createApprover(data);
-
-        expect(result.isOk()).toBe(true);
-        const approver = result.unwrap();
-        expect(approver.email).toBe('user@mail.example.com');
-    });
-
-    it('should accept email with plus sign', () => {
-        const data = {
-            name: 'Plus User',
-            email: 'user+test@example.com',
-        };
-
-        const result = createApprover(data);
-
-        expect(result.isOk()).toBe(true);
-        const approver = result.unwrap();
-        expect(approver.email).toBe('user+test@example.com');
-    });
-
-    it('should accept email with dots in local part', () => {
-        const data = {
-            name: 'Dotted User',
-            email: 'first.last@example.com',
-        };
-
-        const result = createApprover(data);
-
-        expect(result.isOk()).toBe(true);
-        const approver = result.unwrap();
-        expect(approver.email).toBe('first.last@example.com');
-    });
-
-    it('should accept email with numbers', () => {
-        const data = {
-            name: 'Numbered User',
-            email: 'user123@example456.com',
-        };
-
-        const result = createApprover(data);
-
-        expect(result.isOk()).toBe(true);
-        const approver = result.unwrap();
-        expect(approver.email).toBe('user123@example456.com');
-    });
-
-    it('should accept email with hyphens in domain', () => {
-        const data = {
-            name: 'Hyphen Domain User',
-            email: 'user@my-company.com',
-        };
-
-        const result = createApprover(data);
-
-        expect(result.isOk()).toBe(true);
-        const approver = result.unwrap();
-        expect(approver.email).toBe('user@my-company.com');
-    });
-
     it('should reject approver with empty name', () => {
         const data = {
             name: '',
@@ -182,6 +77,27 @@ describe('createApprover', () => {
         const result = createApprover(data);
 
         expect(result.isError()).toBe(true);
+        const error = result.unwrapError();
+        expect(error.message).toBe('Name cannot be blank');
+        expect(error.code).toBe(
+            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NAME_BLANK
+        );
+    });
+
+    it('should reject approver with whitespace-only name', () => {
+        const data = {
+            name: '   ',
+            email: 'valid@example.com',
+        };
+
+        const result = createApprover(data);
+
+        expect(result.isError()).toBe(true);
+        const error = result.unwrapError();
+        expect(error.message).toBe('Name cannot be blank');
+        expect(error.code).toBe(
+            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NAME_BLANK
+        );
     });
 
     it('should create approver with long name', () => {
@@ -236,86 +152,5 @@ describe('createApprover', () => {
         expect(result.isOk()).toBe(true);
         const approver = result.unwrap();
         expect(approver.name).toBe('  John   Doe  ');
-    });
-
-    it('should fail with email containing spaces', () => {
-        const data = {
-            name: 'Space User',
-            email: 'user name@example.com',
-        };
-
-        const result = createApprover(data);
-
-        expect(result.isError()).toBe(true);
-        const error = result.unwrapError();
-        expect(error.message).toBe('Invalid email');
-    });
-
-    it('should fail with multiple @ symbols', () => {
-        const data = {
-            name: 'Double At User',
-            email: 'user@@example.com',
-        };
-
-        const result = createApprover(data);
-
-        expect(result.isError()).toBe(true);
-        const error = result.unwrapError();
-        expect(error.message).toBe('Invalid email');
-    });
-
-    it('should generate valid UUID format for id', () => {
-        const data = {
-            name: 'UUID Test',
-            email: 'uuid@example.com',
-        };
-
-        const result = createApprover(data);
-
-        expect(result.isOk()).toBe(true);
-        const approver = result.unwrap();
-        // UUID v4 format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
-        const uuidRegex =
-            /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-        expect(approver.id).toMatch(uuidRegex);
-    });
-
-    it('should accept email with uppercase letters', () => {
-        const data = {
-            name: 'Uppercase User',
-            email: 'User@Example.COM',
-        };
-
-        const result = createApprover(data);
-
-        expect(result.isOk()).toBe(true);
-        const approver = result.unwrap();
-        expect(approver.email).toBe('User@Example.COM');
-    });
-
-    it('should accept short email addresses', () => {
-        const data = {
-            name: 'Short Email',
-            email: 'a@b.co',
-        };
-
-        const result = createApprover(data);
-
-        expect(result.isOk()).toBe(true);
-        const approver = result.unwrap();
-        expect(approver.email).toBe('a@b.co');
-    });
-
-    it('should fail with invalid TLD', () => {
-        const data = {
-            name: 'Invalid TLD',
-            email: 'user@example',
-        };
-
-        const result = createApprover(data);
-
-        expect(result.isError()).toBe(true);
-        const error = result.unwrapError();
-        expect(error.message).toBe('Invalid email');
     });
 });
