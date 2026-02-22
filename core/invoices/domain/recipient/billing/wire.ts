@@ -1,5 +1,8 @@
 import { Mappable, Result } from '../../../../../building-blocks';
 import { IBilling } from './billing.interface';
+import { checkSwift } from './checks/check-swift';
+import { checkBankCountry } from './checks/check-bank-country';
+import { checkWireNonEmpty } from './checks/check-wire-non-empty';
 
 type WireData = {
     swift: string;
@@ -27,6 +30,18 @@ export class Wire
     }
 
     static create(data: WireData) {
+        const error =
+            checkSwift(data.swift) ??
+            checkWireNonEmpty('accountNumber', data.accountNumber) ??
+            checkWireNonEmpty('accountHolderName', data.accountHolderName) ??
+            checkWireNonEmpty('bankName', data.bankName) ??
+            checkWireNonEmpty('bankAddress', data.bankAddress) ??
+            checkBankCountry(data.bankCountry);
+
+        if (error) {
+            return Result.error(error);
+        }
+
         return Result.ok(new Wire(data));
     }
 
