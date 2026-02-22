@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { createApp } from '../http/create-app';
+import { createApp } from '../src/http/create-app';
 
 let app: Hono;
 

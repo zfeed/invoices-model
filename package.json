@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "",
     "scripts": {
-        "start": "tsc --noEmit && tsx http/app.ts",
+        "start": "tsc --noEmit && tsx src/http/app.ts",
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
