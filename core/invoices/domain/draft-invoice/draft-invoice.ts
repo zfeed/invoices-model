@@ -391,7 +391,7 @@ export class DraftInvoice
     }
 
     static fromPlain(plain: ReturnType<DraftInvoice['toPlain']>) {
-        const id = Id.fromString(plain.id);
+        const id = Id.fromPlain(plain.id);
         const status = DraftInvoiceStatus.fromString(plain.status).unwrap();
         const lineItems = plain.lineItems ? LineItems.fromPlain(plain.lineItems) : null;
         const vatRate = plain.vatRate ? VatRate.fromPlain(plain.vatRate) : null;
@@ -418,7 +418,7 @@ export class DraftInvoice
 
     toPlain() {
         return {
-            id: this.#id.toString(),
+            id: this.#id.toPlain(),
             status: this.#status.toString(),
             lineItems: this.#lineItems?.toPlain() ?? null,
             total: this.#total?.toPlain() ?? null,

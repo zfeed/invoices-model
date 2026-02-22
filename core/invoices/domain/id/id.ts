@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
-import { Equatable, Result } from '../../../../building-blocks';
+import { Equatable, Mappable, Result } from '../../../../building-blocks';
 
-export class Id implements Equatable<Id> {
+export class Id implements Equatable<Id>, Mappable<string> {
     #value: string;
 
     protected constructor(value: string) {
@@ -12,12 +12,20 @@ export class Id implements Equatable<Id> {
         return Result.ok(new Id(randomUUID()));
     }
 
-    static fromString(value: string) {
+    static fromPlain(value: string) {
         return new Id(value);
+    }
+
+    static fromString(value: string) {
+        return Id.fromPlain(value);
     }
 
     equals(other: Id): boolean {
         return this.#value === other.#value;
+    }
+
+    toPlain(): string {
+        return this.#value;
     }
 
     toString(): string {
