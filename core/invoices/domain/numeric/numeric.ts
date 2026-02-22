@@ -8,8 +8,8 @@ export class Numeric implements Equatable<Numeric>, Comparable<Numeric> {
         this.#value = new Decimal(value);
     }
 
-    static create(value: string) {
-        return new this(value);
+    static create(value: string): Numeric {
+        return new Numeric(value);
     }
 
     multiplyBy(value: Numeric) {
