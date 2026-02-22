@@ -1,4 +1,5 @@
-import { Equatable, Mappable } from '../../../../building-blocks';
+import { Equatable, Mappable, Result } from '../../../../building-blocks';
+import { checkDescriptionNonEmpty } from './checks/check-description-non-empty';
 
 export class UnitDescription implements Equatable<UnitDescription>, Mappable<string> {
     #value: string;
@@ -8,7 +9,13 @@ export class UnitDescription implements Equatable<UnitDescription>, Mappable<str
     }
 
     static create(value: string) {
-        return new UnitDescription(value);
+        const error = checkDescriptionNonEmpty(value);
+
+        if (error) {
+            return Result.error(error);
+        }
+
+        return Result.ok(new UnitDescription(value));
     }
 
     static fromPlain(value: string) {

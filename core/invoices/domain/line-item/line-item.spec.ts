@@ -51,7 +51,7 @@ describe('LineItem', () => {
 
         expect(lineItem.price.equals(price)).toBe(true);
         expect(
-            lineItem.description.equals(UnitDescription.create('Product 1'))
+            lineItem.description.equals(UnitDescription.create('Product 1').unwrap())
         ).toBe(true);
         expect(
             lineItem.quantity.equals(UnitQuantity.create('4').unwrap())
