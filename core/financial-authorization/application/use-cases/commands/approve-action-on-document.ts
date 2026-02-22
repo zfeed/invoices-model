@@ -42,11 +42,11 @@ export const approveActionOnDocumentCommand =
             );
         }
 
-        const result = approveDocument({
+        const result = approveDocument(
             document,
-            action: request.action,
-            approver: request.approver,
-        });
+            request.action,
+            request.approver
+        );
 
         if (result.isError()) {
             return result.error();

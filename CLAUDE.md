@@ -49,9 +49,20 @@ infrastructure/      # In-memory implementations (store, storage, mappers, domai
 
 ## Key Patterns
 
-- **financial-authorization**: `Result.ok(data).flatMap(check1).flatMap(check2).map(build)` — validation pipelines with checks as standalone functions returning `Result<DomainError, T>`, composed via flatMap
+- **financial-authorization value objects**: every value object (`Name`, `Email`, `Comment`, `Id`, `Order`, `Action`, `ReferenceId`, `Money`) has a factory function (`createName`, `createEmail`, etc.) that returns `Result<DomainError, T>` with validation. Each has a `checks/` folder with standalone check functions using the `ifElse(predicate, createError, Result.ok)` pattern from Ramda.
+- **financial-authorization factory inputs**: factory functions accept raw primitives (`string`, `number`, `string | null`), not domain type aliases. The factory validates and produces the domain type.
+- **financial-authorization composite factories**: composites (`createApproval`, `createApprover`) validate fields via their value-object factories using nested `flatMap`:
+  ```ts
+  export const createApproval = (data: ApprovalInput): Result<DomainError, Approval> =>
+      fromString(data.approverId).flatMap((approverId) =>
+          createComment(data.comment)
+              .map((comment) => ({ approverId, comment }))
+              .map(buildApproval)
+      );
+  ```
+- **financial-authorization aggregate operations**: functions like `approveGroup`, `approveStep`, `approveAuthflow`, `approveDocument` take positional arguments (not data objects) and use nested `flatMap` chains — no intermediate accumulation types.
 - **financial-authorization build functions**: use `applySpec<Entity>({ field: prop('field'), id: () => createId() })` to construct domain structures from validated input — never manual object literals
-- **financial-authorization checks**: each check lives in its own file under a `checks/` folder (e.g., `approver/checks/check-name-not-blank.ts`), exports a named function (e.g., `nameIsNotBlank`), and uses the `ifElse(predicate, createError, Result.ok)` pattern from Ramda
+- **financial-authorization aggregate checks**: aggregate-level invariants (e.g., no duplicate approvers, approvers not empty) live in the aggregate's own `checks/` folder and operate on the composite input type
 - `withEvents(entity, [new SomeEvent(entity)])` — attaching domain events to entities
 - `PublishableEvents<E>` interface for event publishing
 - In-memory infrastructure with versioned store for optimistic concurrency

@@ -12,7 +12,8 @@ import { selectAuthflow } from '../../../domain/authflow/authflow-policy';
 import { DocumentStorage } from '../../storage/document-storage.interface';
 import { PolicyStorage } from '../../storage/policy-storage.interface';
 
-const extractReferenceId = (data: { id: string }) => createReferenceId(data.id);
+const extractReferenceId = (data: { id: string }) =>
+    createReferenceId(data.id).unwrap();
 
 const extractValue = (data: {
     total: { amount: string; currency: string };

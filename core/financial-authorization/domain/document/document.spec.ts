@@ -340,11 +340,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflow('authflow-1', 'submit', [step], false);
         const document = makeDocument([authflow]);
 
-        const result = approveDocument({
-            document,
-            action: 'submit',
-            approver: approver1,
-        });
+        const result = approveDocument(document, 'submit', approver1);
 
         expect(result.isOk()).toBe(true);
         const updated = result.unwrap();
@@ -365,11 +361,7 @@ describe('approveDocument', () => {
         );
         const document = makeDocument([authflow]);
 
-        const result = approveDocument({
-            document,
-            action: 'submit',
-            approver: approver1,
-        });
+        const result = approveDocument(document, 'submit', approver1);
 
         expect(result.isOk()).toBe(true);
         const updated = result.unwrap();
@@ -391,11 +383,7 @@ describe('approveDocument', () => {
         );
         const document = makeDocument([authflow]);
 
-        const result = approveDocument({
-            document,
-            action: 'submit',
-            approver: approver1,
-        });
+        const result = approveDocument(document, 'submit', approver1);
 
         expect(result.isOk()).toBe(true);
         const updated = result.unwrap();
@@ -423,11 +411,7 @@ describe('approveDocument', () => {
         );
         const document = makeDocument([authflow]);
 
-        const result = approveDocument({
-            document,
-            action: 'submit',
-            approver: approver1,
-        });
+        const result = approveDocument(document, 'submit', approver1);
 
         expect(result.isOk()).toBe(true);
         const updated = result.unwrap();
@@ -445,11 +429,7 @@ describe('approveDocument', () => {
         const authflow2 = makeAuthflow('authflow-2', 'review', [step2], false);
         const document = makeDocument([authflow1, authflow2]);
 
-        const result = approveDocument({
-            document,
-            action: 'submit',
-            approver: approver1,
-        });
+        const result = approveDocument(document, 'submit', approver1);
 
         expect(result.isOk()).toBe(true);
         const updated = result.unwrap();
@@ -464,11 +444,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflow('authflow-1', 'submit', [step], false);
         const document = makeDocument([authflow]);
 
-        const result = approveDocument({
-            document,
-            action: 'non-existent',
-            approver: approver1,
-        });
+        const result = approveDocument(document, 'non-existent', approver1);
 
         expect(result.isError()).toBe(true);
         const error = result.unwrapError();
@@ -486,11 +462,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflow('authflow-1', 'submit', [step], true);
         const document = makeDocument([authflow]);
 
-        const result = approveDocument({
-            document,
-            action: 'submit',
-            approver: approver1,
-        });
+        const result = approveDocument(document, 'submit', approver1);
 
         expect(result.isError()).toBe(true);
         const error = result.unwrapError();
@@ -506,11 +478,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflow('authflow-1', 'submit', [step], false);
         const document = makeDocument([authflow]);
 
-        const result = approveDocument({
-            document,
-            action: 'submit',
-            approver: approver2,
-        });
+        const result = approveDocument(document, 'submit', approver2);
 
         expect(result.isError()).toBe(true);
         const error = result.unwrapError();
@@ -525,11 +493,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflow('authflow-1', 'submit', [step], false);
         const document = makeDocument([authflow]);
 
-        const result = approveDocument({
-            document,
-            action: 'submit',
-            approver: approver1,
-        });
+        const result = approveDocument(document, 'submit', approver1);
 
         expect(result.isOk()).toBe(true);
         const updated = result.unwrap();
@@ -542,11 +506,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflow('authflow-1', 'submit', [step], false);
         const document = makeDocument([authflow]);
 
-        const result = approveDocument({
-            document,
-            action: 'submit',
-            approver: approver1,
-        });
+        const result = approveDocument(document, 'submit', approver1);
 
         expect(result.isOk()).toBe(true);
         const updated = result.unwrap();
@@ -569,11 +529,7 @@ describe('approveDocument', () => {
         );
         const document = makeDocument([authflow]);
 
-        const result1 = approveDocument({
-            document,
-            action: 'submit',
-            approver: approver1,
-        });
+        const result1 = approveDocument(document, 'submit', approver1);
 
         expect(result1.isOk()).toBe(true);
         const afterFirst = result1.unwrap();
@@ -582,11 +538,7 @@ describe('approveDocument', () => {
         expect(afterFirst.authflows[0].steps[0].id).toBe('step-1');
         expect(afterFirst.authflows[0].steps[1].id).toBe('step-2');
 
-        const result2 = approveDocument({
-            document: afterFirst,
-            action: 'submit',
-            approver: approver1,
-        });
+        const result2 = approveDocument(afterFirst, 'submit', approver1);
 
         expect(result2.isOk()).toBe(true);
         const afterSecond = result2.unwrap();
@@ -605,11 +557,7 @@ describe('approveDocument', () => {
         const authflow2 = makeAuthflow('authflow-2', 'review', [step2], false);
         const document = makeDocument([authflow1, authflow2]);
 
-        const result = approveDocument({
-            document,
-            action: 'submit',
-            approver: approver1,
-        });
+        const result = approveDocument(document, 'submit', approver1);
 
         expect(result.isOk()).toBe(true);
         const updated = result.unwrap();
@@ -625,11 +573,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflow('authflow-1', 'submit', [step], false);
         const document = makeDocument([authflow]);
 
-        const result = approveDocument({
-            document,
-            action: 'submit',
-            approver: approver1,
-        });
+        const result = approveDocument(document, 'submit', approver1);
 
         expect(result.isOk()).toBe(true);
         const updated = result.unwrap();
@@ -650,11 +594,7 @@ describe('approveDocument', () => {
         const document = makeDocument([authflow]);
 
         // First approval — step 1
-        const result1 = approveDocument({
-            document,
-            action: 'submit',
-            approver: approver1,
-        });
+        const result1 = approveDocument(document, 'submit', approver1);
 
         expect(result1.isOk()).toBe(true);
         const afterFirst = result1.unwrap();
@@ -663,11 +603,7 @@ describe('approveDocument', () => {
         expect(afterFirst.authflows[0].isApproved).toBe(false);
 
         // Second approval — step 2
-        const result2 = approveDocument({
-            document: afterFirst,
-            action: 'submit',
-            approver: approver1,
-        });
+        const result2 = approveDocument(afterFirst, 'submit', approver1);
 
         expect(result2.isOk()).toBe(true);
         const afterSecond = result2.unwrap();
@@ -684,11 +620,7 @@ describe('approveDocument', () => {
         const document = makeDocument([authflow]);
 
         // Approve first group
-        const result1 = approveDocument({
-            document,
-            action: 'submit',
-            approver: approver1,
-        });
+        const result1 = approveDocument(document, 'submit', approver1);
 
         expect(result1.isOk()).toBe(true);
         const afterFirst = result1.unwrap();
@@ -696,11 +628,7 @@ describe('approveDocument', () => {
         expect(afterFirst.authflows[0].steps[0].groups).toHaveLength(2);
 
         // Approve second group
-        const result2 = approveDocument({
-            document: afterFirst,
-            action: 'submit',
-            approver: approver2,
-        });
+        const result2 = approveDocument(afterFirst, 'submit', approver2);
 
         expect(result2.isOk()).toBe(true);
         const afterSecond = result2.unwrap();
@@ -713,11 +641,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflow('authflow-1', 'submit', [step], false);
         const document = makeDocument([authflow]);
 
-        const result = approveDocument({
-            document,
-            action: 'submit',
-            approver: approver1,
-        });
+        const result = approveDocument(document, 'submit', approver1);
 
         const updated = result.unwrap();
         expect(updated.events).toHaveLength(1);
@@ -730,11 +654,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflow('authflow-1', 'submit', [step], false);
         const document = makeDocument([authflow]);
 
-        const result = approveDocument({
-            document,
-            action: 'submit',
-            approver: approver1,
-        });
+        const result = approveDocument(document, 'submit', approver1);
 
         const updated = result.unwrap();
         const event = updated.events[0];

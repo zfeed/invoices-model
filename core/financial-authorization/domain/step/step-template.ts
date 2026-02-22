@@ -4,8 +4,7 @@ import { Result } from '../../../../building-blocks/result';
 import { GroupTemplate, groupsFromTemplates } from '../groups/group-template';
 import { createStep, Step } from './step';
 import { createId, Id } from '../id/id';
-import { Order } from '../order/order';
-import { templateOrderNonNegative } from './checks/check-template-order-non-negative';
+import { createOrder, Order } from '../order/order';
 
 export type StepTemplate = {
     id: Id;
@@ -14,11 +13,16 @@ export type StepTemplate = {
 };
 
 export type StepTemplateInput = {
+    order: number;
+    groups: GroupTemplate[];
+};
+
+type ValidatedStepTemplateInput = {
     order: Order;
     groups: GroupTemplate[];
 };
 
-type RebuildStepTemplateInput = StepTemplateInput & { id: Id };
+type RebuildStepTemplateInput = ValidatedStepTemplateInput & { id: Id };
 
 const buildStepTemplate = applySpec<StepTemplate>({
     id: () => createId(),
@@ -35,15 +39,20 @@ const rebuildStepTemplate = applySpec<StepTemplate>({
 export const createStepTemplate = (
     data: StepTemplateInput
 ): Result<DomainError, StepTemplate> =>
-    Result.ok<DomainError, StepTemplateInput>(data)
-        .flatMap(templateOrderNonNegative)
+    createOrder(data.order)
+        .map(
+            (order): ValidatedStepTemplateInput => ({
+                order,
+                groups: data.groups,
+            })
+        )
         .map(buildStepTemplate);
 
 export const recreateStepTemplate = (
     data: RebuildStepTemplateInput
 ): Result<DomainError, StepTemplate> =>
-    Result.ok<DomainError, RebuildStepTemplateInput>(data)
-        .flatMap(templateOrderNonNegative)
+    createOrder(data.order)
+        .map((order): RebuildStepTemplateInput => ({ ...data, order }))
         .map(rebuildStepTemplate);
 
 export const stepFromTemplate = (

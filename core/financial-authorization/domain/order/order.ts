@@ -1,5 +1,8 @@
+import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
+import { Result } from '../../../../building-blocks/result';
+import { orderIsNonNegative } from './checks/check-order-non-negative';
+
 export type Order = number;
 
-export function createOrder(value: number): Order {
-    return value;
-}
+export const createOrder = (value: number): Result<DomainError, Order> =>
+    Result.ok<DomainError, number>(value).flatMap(orderIsNonNegative);

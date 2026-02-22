@@ -9,8 +9,7 @@ import {
     Group,
 } from '../groups/group';
 import { createId, Id } from '../id/id';
-import { Order } from '../order/order';
-import { orderNonNegative } from './checks/check-order-non-negative';
+import { createOrder, Order } from '../order/order';
 
 export type Step = {
     id: Id;
@@ -20,13 +19,18 @@ export type Step = {
 };
 
 type StepInput = {
+    order: number;
+    groups: Group[];
+};
+
+type ValidatedStepInput = {
     order: Order;
     groups: Group[];
 };
 
-type RebuildStepInput = StepInput & { id: Id };
+type RebuildStepInput = ValidatedStepInput & { id: Id };
 
-const allGroupsApproved = (data: StepInput) =>
+const allGroupsApproved = (data: ValidatedStepInput) =>
     data.groups.every((group) => group.isApproved);
 
 const buildStep = applySpec<Step>({
@@ -71,51 +75,28 @@ export const hasEligibleApprover = (steps: Step[], approverId: Id): boolean => {
     return hasEligibleApproverInGroups(result.unwrap().groups, approverId);
 };
 
-type ApproveStepInput = {
-    steps: Step[];
-    approver: Approver;
-};
-
-type ApproveStepWithStep = ApproveStepInput & { step: Step };
-
-type ApproveStepWithGroups = ApproveStepWithStep & { updatedGroups: Group[] };
-
-const findStep = (
-    data: ApproveStepInput
-): Result<DomainError, ApproveStepWithStep> =>
-    findCurrentStep(data.steps).map((step) => ({ ...data, step }));
-
-const applyAproval = (
-    data: ApproveStepWithStep
-): Result<DomainError, ApproveStepWithGroups> =>
-    approveGroup(data.step.groups, data.approver).map((updatedGroups) => ({
-        ...data,
-        updatedGroups,
-    }));
-
-const buildApprovedStep = (
-    data: ApproveStepWithGroups
-): Result<DomainError, Step> =>
-    recreateStep({
-        id: data.step.id,
-        order: data.step.order,
-        groups: data.updatedGroups,
-    });
-
 export const createStep = (data: StepInput): Result<DomainError, Step> =>
-    Result.ok<DomainError, StepInput>(data)
-        .flatMap(orderNonNegative)
+    createOrder(data.order)
+        .map((order): ValidatedStepInput => ({ order, groups: data.groups }))
         .map(buildStep);
 
-const recreateStep = (data: RebuildStepInput): Result<DomainError, Step> =>
-    Result.ok<DomainError, RebuildStepInput>(data)
-        .flatMap(orderNonNegative)
+const recreateStep = (
+    data: RebuildStepInput
+): Result<DomainError, Step> =>
+    createOrder(data.order)
+        .map((order): RebuildStepInput => ({ ...data, order }))
         .map(rebuildStep);
 
 export const approveStep = (
-    data: ApproveStepInput
+    steps: Step[],
+    approver: Approver
 ): Result<DomainError, Step> =>
-    Result.ok<DomainError, ApproveStepInput>(data)
-        .flatMap(findStep)
-        .flatMap(applyAproval)
-        .flatMap(buildApprovedStep);
+    findCurrentStep(steps).flatMap((step) =>
+        approveGroup(step.groups, approver).flatMap((updatedGroups) =>
+            recreateStep({
+                id: step.id,
+                order: step.order,
+                groups: updatedGroups,
+            })
+        )
+    );

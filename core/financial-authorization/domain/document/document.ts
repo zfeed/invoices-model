@@ -87,44 +87,20 @@ export const canApproverApprove = (
         approverId: data.approverId,
     });
 
-type ApproveDocumentInput = {
-    document: FinancialDocument;
-    action: Action;
-    approver: Approver;
-};
-
-const applyAuthflowApproval = (
-    data: ApproveDocumentInput
-): Result<DomainError, Authflow> =>
-    approveAuthflow({
-        authflows: data.document.authflows,
-        action: data.action,
-        approver: data.approver,
-    });
-
-const buildApprovedDocument =
-    (
-        data: ApproveDocumentInput
-    ): ((
-        updatedAuthflow: Authflow
-    ) => Result<DomainError, FinancialDocument>) =>
-    (updatedAuthflow) =>
-        recreateDocument({
-            id: data.document.id,
-            referenceId: data.document.referenceId,
-            value: data.document.value,
-            authflows: data.document.authflows.map((a) =>
-                a.action === data.action ? updatedAuthflow : a
-            ),
-            version: data.document.version,
-        });
-
 export const approveDocument = (
-    data: ApproveDocumentInput
+    document: FinancialDocument,
+    action: Action,
+    approver: Approver
 ): Result<DomainError, WithEvents<FinancialDocument, DocumentApprovedEvent>> =>
-    Result.ok<DomainError, ApproveDocumentInput>(data)
-        .flatMap(applyAuthflowApproval)
-        .flatMap(buildApprovedDocument(data))
-        .map((doc) =>
-            withEvents(doc, [new DocumentApprovedEvent(doc)])
-        );
+    approveAuthflow(document.authflows, action, approver).flatMap(
+        (updatedAuthflow) =>
+            recreateDocument({
+                id: document.id,
+                referenceId: document.referenceId,
+                value: document.value,
+                authflows: document.authflows.map((a) =>
+                    a.action === action ? updatedAuthflow : a
+                ),
+                version: document.version,
+            }).map((doc) => withEvents(doc, [new DocumentApprovedEvent(doc)]))
+    );

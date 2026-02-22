@@ -97,48 +97,20 @@ export const canApproverApprove = (
     return hasEligibleApprover(authflow.steps, data.approverId);
 };
 
-type ApproveAuthflowInput = {
-    authflows: Authflow[];
-    action: Action;
-    approver: Approver;
-};
-
-type ApproveWithAuthflow = ApproveAuthflowInput & { authflow: Authflow };
-
-type ApproveWithStep = ApproveWithAuthflow & { updatedStep: Step };
-
-const findAuthflow = (
-    data: ApproveAuthflowInput
-): Result<DomainError, ApproveWithAuthflow> =>
-    findAuthflowByAction(data.authflows, data.action).map((authflow) => ({
-        ...data,
-        authflow,
-    }));
-
-const applyApproval = (
-    data: ApproveWithAuthflow
-): Result<DomainError, ApproveWithStep> =>
-    approveStep({
-        steps: data.authflow.steps,
-        approver: data.approver,
-    }).map((updatedStep) => ({ ...data, updatedStep }));
-
-const buildApprovedAuthflow = (
-    data: ApproveWithStep
-): Result<DomainError, Authflow> =>
-    recreateAuthflow({
-        id: data.authflow.id,
-        action: data.authflow.action,
-        range: data.authflow.range,
-        steps: data.authflow.steps.map((s) =>
-            s.order === data.updatedStep.order ? data.updatedStep : s
-        ),
-    });
-
 export const approveAuthflow = (
-    data: ApproveAuthflowInput
+    authflows: Authflow[],
+    action: Action,
+    approver: Approver
 ): Result<DomainError, Authflow> =>
-    Result.ok<DomainError, ApproveAuthflowInput>(data)
-        .flatMap(findAuthflow)
-        .flatMap(applyApproval)
-        .flatMap(buildApprovedAuthflow);
+    findAuthflowByAction(authflows, action).flatMap((authflow) =>
+        approveStep(authflow.steps, approver).flatMap((updatedStep) =>
+            recreateAuthflow({
+                id: authflow.id,
+                action: authflow.action,
+                range: authflow.range,
+                steps: authflow.steps.map((s) =>
+                    s.order === updatedStep.order ? updatedStep : s
+                ),
+            })
+        )
+    );

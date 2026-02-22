@@ -9,6 +9,7 @@ import { approvalReferencesExistingApprover } from './checks/check-approver-exis
 import { approversNotEmpty } from './checks/check-approvers-not-empty';
 import { approvalsNotDuplicated } from './checks/check-no-duplicate-approvals';
 import { approversNotDuplicated } from './checks/check-no-duplicate-approvers';
+
 export type Group = {
     id: Id;
     isApproved: boolean;
@@ -53,51 +54,23 @@ const recreateGroup = (data: RebuildGroupInput): Result<DomainError, Group> =>
         .flatMap(approvalsNotDuplicated)
         .map(rebuildGroup);
 
-type ApproveGroupInput = {
-    groups: Group[];
-    approver: Approver;
-};
-
-type ApproveGroupWithGroup = ApproveGroupInput & { group: Group };
-
-type ApproveGroupWithApproval = ApproveGroupWithGroup & {
-    approval: Approval;
-};
-
 const findGroup = (
-    data: ApproveGroupInput
-): Result<DomainError, ApproveGroupWithGroup> => {
-    const group = data.groups.find(
+    groups: Group[],
+    approver: Approver
+): Result<DomainError, Group> => {
+    const group = groups.find(
         (g) =>
-            !g.isApproved && g.approvers.some((a) => a.id === data.approver.id)
+            !g.isApproved && g.approvers.some((a) => a.id === approver.id)
     );
     return group
-        ? Result.ok({ ...data, group })
+        ? Result.ok(group)
         : Result.error(
               new DomainError({
                   code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND,
-                  message: `No eligible group found for approver ${data.approver.id}`,
+                  message: `No eligible group found for approver ${approver.id}`,
               })
           );
 };
-
-const addApproval = (
-    data: ApproveGroupWithGroup
-): Result<DomainError, ApproveGroupWithApproval> =>
-    createApproval({ approverId: data.approver.id, comment: null }).map(
-        (approval) => ({ ...data, approval })
-    );
-
-const buildUpdatedGroups = (
-    data: ApproveGroupWithApproval
-): Result<DomainError, Group[]> =>
-    recreateGroup({
-        id: data.group.id,
-        approvers: data.group.approvers,
-        approvals: [...data.group.approvals, data.approval],
-    }).map((updatedGroup) =>
-        data.groups.map((g) => (g.id === data.group.id ? updatedGroup : g))
-    );
 
 export const hasEligibleApprover = (groups: Group[], approverId: Id): boolean =>
     groups.some(
@@ -108,7 +81,17 @@ export const approveGroup = (
     groups: Group[],
     approver: Approver
 ): Result<DomainError, Group[]> =>
-    Result.ok<DomainError, ApproveGroupInput>({ groups, approver })
-        .flatMap(findGroup)
-        .flatMap(addApproval)
-        .flatMap(buildUpdatedGroups);
+    findGroup(groups, approver).flatMap((group) =>
+        createApproval({ approverId: approver.id, comment: null }).flatMap(
+            (approval) =>
+                recreateGroup({
+                    id: group.id,
+                    approvers: group.approvers,
+                    approvals: [...group.approvals, approval],
+                }).map((updatedGroup) =>
+                    groups.map((g) =>
+                        g.id === group.id ? updatedGroup : g
+                    )
+                )
+        )
+    );

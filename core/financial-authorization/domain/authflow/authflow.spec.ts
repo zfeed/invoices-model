@@ -854,11 +854,7 @@ describe('approveAuthflow', () => {
             steps: [step],
         };
 
-        const result = approveAuthflow({
-            authflows: [authflow],
-            action: 'submit',
-            approver: approver1,
-        });
+        const result = approveAuthflow([authflow], 'submit', approver1);
 
         expect(result.isOk()).toBe(true);
         const updated = result.unwrap();
@@ -879,11 +875,7 @@ describe('approveAuthflow', () => {
             steps: [step1, step2],
         };
 
-        const result = approveAuthflow({
-            authflows: [authflow],
-            action: 'submit',
-            approver: approver1,
-        });
+        const result = approveAuthflow([authflow], 'submit', approver1);
 
         expect(result.isOk()).toBe(true);
         const updated = result.unwrap();
@@ -905,11 +897,7 @@ describe('approveAuthflow', () => {
             steps: [step1, step2],
         };
 
-        const result = approveAuthflow({
-            authflows: [authflow],
-            action: 'submit',
-            approver: approver1,
-        });
+        const result = approveAuthflow([authflow], 'submit', approver1);
 
         expect(result.isOk()).toBe(true);
         const updated = result.unwrap();
@@ -927,11 +915,7 @@ describe('approveAuthflow', () => {
             steps: [step],
         };
 
-        const result = approveAuthflow({
-            authflows: [authflow],
-            action: 'submit',
-            approver: approver1,
-        });
+        const result = approveAuthflow([authflow], 'submit', approver1);
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError().code).toBe(
@@ -950,11 +934,7 @@ describe('approveAuthflow', () => {
             steps: [step],
         };
 
-        const result = approveAuthflow({
-            authflows: [authflow],
-            action: 'non-existent',
-            approver: approver1,
-        });
+        const result = approveAuthflow([authflow], 'non-existent', approver1);
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError().code).toBe(
@@ -973,11 +953,7 @@ describe('approveAuthflow', () => {
             steps: [step],
         };
 
-        const result = approveAuthflow({
-            authflows: [authflow],
-            action: 'submit',
-            approver: approver2,
-        });
+        const result = approveAuthflow([authflow], 'submit', approver2);
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError().code).toBe(
@@ -999,22 +975,14 @@ describe('approveAuthflow', () => {
         };
 
         // First approval
-        const result1 = approveAuthflow({
-            authflows: [authflow],
-            action: 'submit',
-            approver: approver1,
-        });
+        const result1 = approveAuthflow([authflow], 'submit', approver1);
 
         expect(result1.isOk()).toBe(true);
         const afterFirst = result1.unwrap();
         expect(afterFirst.isApproved).toBe(false);
 
         // Second approval
-        const result2 = approveAuthflow({
-            authflows: [afterFirst],
-            action: 'submit',
-            approver: approver1,
-        });
+        const result2 = approveAuthflow([afterFirst], 'submit', approver1);
 
         expect(result2.isOk()).toBe(true);
         const afterSecond = result2.unwrap();
@@ -1032,11 +1000,7 @@ describe('approveAuthflow', () => {
             steps: [step],
         };
 
-        const result = approveAuthflow({
-            authflows: [authflow],
-            action: 'submit',
-            approver: approver1,
-        });
+        const result = approveAuthflow([authflow], 'submit', approver1);
 
         expect(result.isOk()).toBe(true);
         const updated = result.unwrap();
@@ -1054,11 +1018,7 @@ describe('approveAuthflow', () => {
             steps: [step],
         };
 
-        const result = approveAuthflow({
-            authflows: [authflow],
-            action: 'submit',
-            approver: approver1,
-        });
+        const result = approveAuthflow([authflow], 'submit', approver1);
 
         expect(result.isOk()).toBe(true);
         const updated = result.unwrap();
@@ -1079,11 +1039,7 @@ describe('approveAuthflow', () => {
             steps: [step1, step2],
         };
 
-        const result1 = approveAuthflow({
-            authflows: [authflow],
-            action: 'submit',
-            approver: approver1,
-        });
+        const result1 = approveAuthflow([authflow], 'submit', approver1);
 
         expect(result1.isOk()).toBe(true);
         const afterFirst = result1.unwrap();
@@ -1091,11 +1047,7 @@ describe('approveAuthflow', () => {
         expect(afterFirst.steps[0].id).toBe('step-1');
         expect(afterFirst.steps[1].id).toBe('step-2');
 
-        const result2 = approveAuthflow({
-            authflows: [afterFirst],
-            action: 'submit',
-            approver: approver1,
-        });
+        const result2 = approveAuthflow([afterFirst], 'submit', approver1);
 
         expect(result2.isOk()).toBe(true);
         const afterSecond = result2.unwrap();
@@ -1115,11 +1067,7 @@ describe('approveAuthflow', () => {
             steps: [step],
         };
 
-        const result = approveAuthflow({
-            authflows: [authflow],
-            action: 'submit',
-            approver: approver1,
-        });
+        const result = approveAuthflow([authflow], 'submit', approver1);
 
         expect(result.isOk()).toBe(true);
         expect(result.unwrap().action).toBe('submit');
