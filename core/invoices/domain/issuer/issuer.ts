@@ -63,7 +63,7 @@ export class Issuer implements Equatable<Issuer>, Mappable<ReturnType<Issuer['to
             name: this.#name,
             address: this.#address,
             taxId: this.#taxId,
-            email: this.#email.toString(),
+            email: this.#email.toPlain(),
         };
     }
 

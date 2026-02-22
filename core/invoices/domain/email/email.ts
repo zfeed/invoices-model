@@ -1,7 +1,7 @@
-import { Equatable, Result } from '../../../../building-blocks';
+import { Equatable, Mappable, Result } from '../../../../building-blocks';
 import { checkEmailFormat } from './checks/check-email-format';
 
-export class Email implements Equatable<Email | string> {
+export class Email implements Equatable<Email | string>, Mappable<string> {
     #value: string;
 
     protected constructor(value: string) {
@@ -27,6 +27,10 @@ export class Email implements Equatable<Email | string> {
             return this.#value === other;
         }
         return this.#value === other.#value;
+    }
+
+    toPlain(): string {
+        return this.#value;
     }
 
     toString(): string {
