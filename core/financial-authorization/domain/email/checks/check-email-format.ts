@@ -3,15 +3,8 @@ import { isEmail } from 'validator';
 import { DOMAIN_ERROR_CODE } from '../../../../../building-blocks/errors/domain/domain-codes';
 import { DomainError } from '../../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../../building-blocks/result';
-import { Email } from '../../email/email';
-import { Name } from '../../name/name';
 
-type ApproverInput = {
-    name: Name;
-    email: Email;
-};
-
-const emailInvalid = (data: ApproverInput) => !isEmail(data.email);
+const emailInvalid = (value: string) => !isEmail(value);
 const createEmailInvalidError = () =>
     Result.error(
         new DomainError({
@@ -20,8 +13,8 @@ const createEmailInvalidError = () =>
         })
     );
 
-export function emailHasValidFormat(data: ApproverInput) {
-    return Result.ok<DomainError, ApproverInput>(data).flatMap(
+export function emailHasValidFormat(value: string) {
+    return Result.ok<DomainError, string>(value).flatMap(
         ifElse(emailInvalid, createEmailInvalidError, Result.ok)
     );
 }

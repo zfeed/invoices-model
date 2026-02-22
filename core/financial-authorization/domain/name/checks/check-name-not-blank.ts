@@ -2,16 +2,9 @@ import { ifElse } from 'ramda';
 import { DOMAIN_ERROR_CODE } from '../../../../../building-blocks/errors/domain/domain-codes';
 import { DomainError } from '../../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../../building-blocks/result';
-import { Email } from '../../email/email';
-import { Name } from '../../name/name';
 
-type ApproverInput = {
-    name: Name;
-    email: Email;
-};
-
-const nameIsBlank = (data: ApproverInput) => !data.name.trim();
-const createNameBlankError = () =>
+const isBlank = (value: string) => !value.trim();
+const createBlankError = () =>
     Result.error(
         new DomainError({
             message: 'Name cannot be blank',
@@ -19,8 +12,8 @@ const createNameBlankError = () =>
         })
     );
 
-export function nameIsNotBlank(data: ApproverInput) {
-    return Result.ok<DomainError, ApproverInput>(data).flatMap(
-        ifElse(nameIsBlank, createNameBlankError, Result.ok)
+export function nameIsNotBlank(value: string) {
+    return Result.ok<DomainError, string>(value).flatMap(
+        ifElse(isBlank, createBlankError, Result.ok)
     );
 }

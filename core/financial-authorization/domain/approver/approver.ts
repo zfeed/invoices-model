@@ -1,11 +1,9 @@
 import { applySpec, prop } from 'ramda';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
-import { Email } from '../email/email';
-import { Name } from '../name/name';
+import { createEmail, Email } from '../email/email';
+import { createName, Name } from '../name/name';
 import { createId, Id } from '../id/id';
-import { emailHasValidFormat } from './checks/check-email-format';
-import { nameIsNotBlank } from './checks/check-name-not-blank';
 
 export type Approver = {
     id: Id;
@@ -14,8 +12,8 @@ export type Approver = {
 };
 
 type ApproverInput = {
-    name: Name;
-    email: Email;
+    name: string;
+    email: string;
 };
 
 const buildApprover = applySpec<Approver>({
@@ -27,7 +25,8 @@ const buildApprover = applySpec<Approver>({
 export const createApprover = (
     data: ApproverInput
 ): Result<DomainError, Approver> =>
-    Result.ok<DomainError, ApproverInput>(data)
-        .flatMap(nameIsNotBlank)
-        .flatMap(emailHasValidFormat)
-        .map(buildApprover);
+    createName(data.name).flatMap((name) =>
+        createEmail(data.email)
+            .map((email) => ({ name, email }))
+            .map(buildApprover)
+    );
