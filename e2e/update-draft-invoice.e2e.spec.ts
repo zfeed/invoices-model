@@ -1,38 +1,19 @@
-import { Hono } from 'hono';
-import { createApp } from '../src/http/create-app';
+import { setupApp, expectError } from './helpers';
 
-let app: Hono;
-
-beforeEach(async () => {
-    app = await createApp();
-});
-
-const createDraft = async () => {
-    const res = await app.request('/invoices/drafts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-    });
-    const json = await res.json();
-    return json.data;
-};
+const { putJson, putRaw, createDraft } = setupApp();
 
 describe('PUT /invoices/drafts/:id', () => {
     it('updates a draft invoice', async () => {
         const draft = await createDraft();
-        const res = await app.request(`/invoices/drafts/${draft.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                lineItems: [
-                    {
-                        description: 'Consulting',
-                        price: { amount: '100', currency: 'USD' },
-                        quantity: '2',
-                    },
-                ],
-                vatRate: '20',
-            }),
+        const res = await putJson(`/invoices/drafts/${draft.id}`, {
+            lineItems: [
+                {
+                    description: 'Consulting',
+                    price: { amount: '100', currency: 'USD' },
+                    quantity: '2',
+                },
+            ],
+            vatRate: '20',
         });
         expect(res.status).toBe(200);
         const json = await res.json();
@@ -42,30 +23,18 @@ describe('PUT /invoices/drafts/:id', () => {
 
     it('updates with empty body', async () => {
         const draft = await createDraft();
-        const res = await app.request(`/invoices/drafts/${draft.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({}),
-        });
+        const res = await putJson(`/invoices/drafts/${draft.id}`, {});
         expect(res.status).toBe(200);
     });
 
     it('returns 422 for non-existent draft', async () => {
-        const res = await app.request('/invoices/drafts/non-existent-id', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({}),
-        });
-        expect(res.status).toBe(422);
+        const res = await putJson('/invoices/drafts/non-existent-id', {});
+        await expectError(res, 422);
     });
 
     it('returns 400 for invalid JSON', async () => {
         const draft = await createDraft();
-        const res = await app.request(`/invoices/drafts/${draft.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: 'not json',
-        });
-        expect(res.status).toBe(400);
+        const res = await putRaw(`/invoices/drafts/${draft.id}`, 'not json');
+        await expectError(res, 400, 'Invalid JSON');
     });
 });

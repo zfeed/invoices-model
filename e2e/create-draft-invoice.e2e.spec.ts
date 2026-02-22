@@ -1,22 +1,10 @@
-import { Hono } from 'hono';
-import { createApp } from '../src/http/create-app';
+import { setupApp, expectError } from './helpers';
 
-let app: Hono;
-
-beforeEach(async () => {
-    app = await createApp();
-});
-
-const post = (body: unknown) =>
-    app.request('/invoices/drafts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-    });
+const { postJson, postRaw } = setupApp();
 
 describe('POST /invoices/drafts', () => {
     it('creates an empty draft invoice', async () => {
-        const res = await post({});
+        const res = await postJson('/invoices/drafts', {});
         expect(res.status).toBe(201);
         const json = await res.json();
         expect(json.data).toEqual(
@@ -26,7 +14,7 @@ describe('POST /invoices/drafts', () => {
     });
 
     it('creates a draft invoice with line items', async () => {
-        const res = await post({
+        const res = await postJson('/invoices/drafts', {
             lineItems: [
                 {
                     description: 'Service',
@@ -43,29 +31,19 @@ describe('POST /invoices/drafts', () => {
     });
 
     it('returns 400 for invalid JSON', async () => {
-        const res = await app.request('/invoices/drafts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: 'not json',
-        });
-        expect(res.status).toBe(400);
-        const json = await res.json();
-        expect(json.error.message).toBe('Invalid JSON');
-        expect(json.error.issues).toEqual([]);
+        const res = await postRaw('/invoices/drafts', 'not json');
+        await expectError(res, 400, 'Invalid JSON');
     });
 
     it('returns 400 for validation error', async () => {
-        const res = await post({
+        const res = await postJson('/invoices/drafts', {
             lineItems: [{ description: 'Item', price: { amount: '100' } }],
         });
-        expect(res.status).toBe(400);
-        const json = await res.json();
-        expect(json.error.message).toBe('Validation failed');
-        expect(json.error.issues.length).toBeGreaterThan(0);
+        await expectError(res, 400, 'Validation failed');
     });
 
     it('returns 422 for domain error', async () => {
-        const res = await post({
+        const res = await postJson('/invoices/drafts', {
             lineItems: [
                 {
                     description: 'Item',
@@ -74,9 +52,6 @@ describe('POST /invoices/drafts', () => {
                 },
             ],
         });
-        expect(res.status).toBe(422);
-        const json = await res.json();
-        expect(json.error.message).toBeDefined();
-        expect(json.error.code).toBeDefined();
+        await expectError(res, 422);
     });
 });

@@ -1,22 +1,10 @@
-import { Hono } from 'hono';
-import { createApp } from '../src/http/create-app';
+import { setupApp, expectError } from './helpers';
 
-let app: Hono;
-
-beforeEach(async () => {
-    app = await createApp();
-});
-
-const post = (body: unknown) =>
-    app.request('/invoices/drafts/calculate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-    });
+const { postJson, postRaw } = setupApp();
 
 describe('POST /invoices/drafts/calculate', () => {
     it('calculates totals for a draft invoice', async () => {
-        const res = await post({
+        const res = await postJson('/invoices/drafts/calculate', {
             lineItems: [
                 {
                     description: 'Service',
@@ -28,27 +16,32 @@ describe('POST /invoices/drafts/calculate', () => {
         });
         expect(res.status).toBe(200);
         const json = await res.json();
-        expect(json.data).toBeDefined();
-        expect(json.data.lineItems.subtotal).toBeDefined();
-        expect(json.data.total).toBeDefined();
+        expect(json.data.lineItems.subtotal).toEqual({
+            amount: '600',
+            currency: 'USD',
+        });
+        expect(json.data.vatAmount).toEqual({
+            amount: '60',
+            currency: 'USD',
+        });
+        expect(json.data.total).toEqual({
+            amount: '660',
+            currency: 'USD',
+        });
     });
 
     it('calculates with empty body', async () => {
-        const res = await post({});
+        const res = await postJson('/invoices/drafts/calculate', {});
         expect(res.status).toBe(200);
     });
 
     it('returns 400 for invalid JSON', async () => {
-        const res = await app.request('/invoices/drafts/calculate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: 'not json',
-        });
-        expect(res.status).toBe(400);
+        const res = await postRaw('/invoices/drafts/calculate', 'not json');
+        await expectError(res, 400, 'Invalid JSON');
     });
 
     it('returns 422 for domain error', async () => {
-        const res = await post({
+        const res = await postJson('/invoices/drafts/calculate', {
             lineItems: [
                 {
                     description: 'Item',
@@ -57,6 +50,6 @@ describe('POST /invoices/drafts/calculate', () => {
                 },
             ],
         });
-        expect(res.status).toBe(422);
+        await expectError(res, 422);
     });
 });
