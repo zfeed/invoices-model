@@ -175,4 +175,30 @@ describe('Recipient', () => {
             expect.objectContaining({ code: '14000' }),
         );
     });
+
+    it('should serialize to plain and reconstruct via fromPlain', () => {
+        const billing = Wire.create({
+            swift: 'DEUTDEFF',
+            accountNumber: 'DE89370400440532013000',
+            accountHolderName: 'John Doe',
+            bankName: 'Deutsche Bank',
+            bankAddress: 'Taunusanlage 12, 60325 Frankfurt',
+            bankCountry: 'DE',
+        }).unwrap();
+
+        const recipient = Recipient.create({
+            type: RECIPIENT_TYPE.COMPANY,
+            name: 'Acme Corp',
+            taxResidenceCountry: 'DE',
+            address: '456 Berlin St',
+            taxId: 'DE123456789',
+            email: 'info@acme.com',
+            billing,
+        }).unwrap();
+
+        const plain = recipient.toPlain();
+        const restored = Recipient.fromPlain(plain);
+
+        expect(restored.equals(recipient)).toBe(true);
+    });
 });
