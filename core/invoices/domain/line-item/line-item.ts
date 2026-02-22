@@ -49,7 +49,7 @@ export class LineItem implements Equatable<LineItem>, Mappable<ReturnType<LineIt
         return {
             description: this.#description.toString(),
             price: this.#price.toPlain(),
-            quantity: this.#quantity.value.toString(),
+            quantity: this.#quantity.toPlain(),
             total: this.#total.toPlain(),
         };
     }

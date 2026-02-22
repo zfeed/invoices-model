@@ -1,8 +1,8 @@
-import { Equatable, Result } from '../../../../building-blocks';
+import { Equatable, Mappable, Result } from '../../../../building-blocks';
 import { Numeric } from '../numeric/numeric';
 import { checkUnitQuantity } from './checks/check-unit-quantity';
 
-export class UnitQuantity implements Equatable<UnitQuantity> {
+export class UnitQuantity implements Equatable<UnitQuantity>, Mappable<string> {
     #value: Numeric;
 
     protected constructor(value: Numeric) {
@@ -29,5 +29,9 @@ export class UnitQuantity implements Equatable<UnitQuantity> {
 
     equals(other: UnitQuantity) {
         return this.#value.equals(other.#value);
+    }
+
+    toPlain() {
+        return this.#value.toString();
     }
 }
