@@ -10,74 +10,76 @@ import { VatRate } from '../vat-rate/vat-rate';
 import { InvoiceStatus } from '../status/invoice-status';
 import { Invoice } from './invoice';
 
+const createLineItem = (description = 'Item 1', amount = '50', quantity = '2') =>
+    LineItem.create({
+        description,
+        price: { amount, currency: 'USD' },
+        quantity,
+    }).unwrap();
+
+const createIssuer = () =>
+    Issuer.create({
+        type: ISSUER_TYPE.COMPANY,
+        name: 'Company Inc.',
+        address: '123 Main St, City, Country',
+        taxId: 'TAX123456',
+        email: 'info@company.com',
+    }).unwrap();
+
+const createRecipient = () => {
+    const billing = Paypal.create({ email: 'customer@example.com' }).unwrap();
+    return Recipient.create({
+        type: RECIPIENT_TYPE.INDIVIDUAL,
+        name: 'Jane Smith',
+        address: '456 Another St, City, Country',
+        taxId: 'TAX654321',
+        email: 'jane.smith@example.com',
+        taxResidenceCountry: 'US',
+        billing,
+    }).unwrap();
+};
+
+const createIssuedInvoice = (options?: { vatRate?: VatRate | null; items?: LineItem[] }) => {
+    const items = options?.items ?? [createLineItem()];
+    const lineItems = LineItems.create({ items }).unwrap();
+    return Invoice.create({
+        id: Id.create().unwrap(),
+        issueDate: CalendarDate.create('2023-01-01').unwrap(),
+        dueDate: CalendarDate.create('2028-01-01').unwrap(),
+        lineItems,
+        vatRate: options?.vatRate ?? null,
+        issuer: createIssuer(),
+        recipient: createRecipient(),
+    }).unwrap();
+};
+
 describe('Invoice', () => {
     it('should create an invoice', () => {
-        const lineItem1 = LineItem.create({
-            description: 'Item 1',
-            price: {
-                amount: '50',
-                currency: 'USD',
-            },
-            quantity: '2',
-        }).unwrap();
-        const lineItem2 = LineItem.create({
-            description: 'Item 2',
-            price: {
-                amount: '100',
-                currency: 'USD',
-            },
-            quantity: '1',
-        }).unwrap();
+        const lineItem1 = createLineItem('Item 1', '50', '2');
+        const lineItem2 = createLineItem('Item 2', '100', '1');
         const issueDate = CalendarDate.create('2023-01-01').unwrap();
         const dueDate = CalendarDate.create('2028-01-01').unwrap();
-        const issuer = Issuer.create({
-            type: ISSUER_TYPE.COMPANY,
-            name: 'Company Inc.',
-            address: '123 Main St, City, Country',
-            taxId: 'TAX123456',
-            email: 'info@company.com',
-        }).unwrap();
-
-        const recipientBilling = Paypal.create({
-            email: 'customer@example.com',
-        }).unwrap();
-        const recipient = Recipient.create({
-            type: RECIPIENT_TYPE.INDIVIDUAL,
-            name: 'Jane Smith',
-            address: '456 Another St, City, Country',
-            taxId: 'TAX654321',
-            email: 'jane.smith@example.com',
-            taxResidenceCountry: 'US',
-            billing: recipientBilling,
-        }).unwrap();
-        const lineItems = LineItems.create({
-            items: [lineItem1, lineItem2],
-        }).unwrap();
-
+        const issuer = createIssuer();
+        const recipient = createRecipient();
+        const lineItems = LineItems.create({ items: [lineItem1, lineItem2] }).unwrap();
         const vatRate = VatRate.create('10').unwrap();
         const vatAmount = Money.create('20', 'USD').unwrap();
 
         const invoice = Invoice.create({
             id: Id.create().unwrap(),
-            issueDate: issueDate,
-            dueDate: dueDate,
-            lineItems: lineItems,
-            vatRate: vatRate,
-            issuer: issuer,
-            recipient: recipient,
+            issueDate,
+            dueDate,
+            lineItems,
+            vatRate,
+            issuer,
+            recipient,
         }).unwrap();
 
-        expect(invoice.total.equals(Money.create('220', 'USD').unwrap())).toBe(
-            true
-        );
+        expect(invoice.total.equals(Money.create('220', 'USD').unwrap())).toBe(true);
         expect(
-            invoice.lineItems.subtotal.equals(
-                Money.create('200', 'USD').unwrap()
-            )
+            invoice.lineItems.subtotal.equals(Money.create('200', 'USD').unwrap())
         ).toBe(true);
-        expect(invoice.vatRate!.equals(VatRate.create('10').unwrap())).toBe(
-            true
-        );
+        expect(invoice.vatRate!.equals(VatRate.create('10').unwrap())).toBe(true);
         expect(
             invoice.vatAmount!.equals(Money.create('20', 'USD').unwrap())
         ).toBe(true);
@@ -149,46 +151,7 @@ describe('Invoice', () => {
     });
 
     it('should process an issued invoice', () => {
-        const lineItem = LineItem.create({
-            description: 'Item 1',
-            price: {
-                amount: '50',
-                currency: 'USD',
-            },
-            quantity: '2',
-        }).unwrap();
-        const lineItems = LineItems.create({
-            items: [lineItem],
-        }).unwrap();
-        const issuer = Issuer.create({
-            type: ISSUER_TYPE.COMPANY,
-            name: 'Company Inc.',
-            address: '123 Main St, City, Country',
-            taxId: 'TAX123456',
-            email: 'info@company.com',
-        }).unwrap();
-        const recipientBilling = Paypal.create({
-            email: 'customer@example.com',
-        }).unwrap();
-        const recipient = Recipient.create({
-            type: RECIPIENT_TYPE.INDIVIDUAL,
-            name: 'Jane Smith',
-            address: '456 Another St, City, Country',
-            taxId: 'TAX654321',
-            email: 'jane.smith@example.com',
-            taxResidenceCountry: 'US',
-            billing: recipientBilling,
-        }).unwrap();
-
-        const invoice = Invoice.create({
-            id: Id.create().unwrap(),
-            issueDate: CalendarDate.create('2023-01-01').unwrap(),
-            dueDate: CalendarDate.create('2028-01-01').unwrap(),
-            lineItems: lineItems,
-            vatRate: null,
-            issuer: issuer,
-            recipient: recipient,
-        }).unwrap();
+        const invoice = createIssuedInvoice();
 
         const result = invoice.process();
 
@@ -211,48 +174,9 @@ describe('Invoice', () => {
     });
 
     it('should not process a cancelled invoice', () => {
-        const lineItem = LineItem.create({
-            description: 'Item 1',
-            price: {
-                amount: '50',
-                currency: 'USD',
-            },
-            quantity: '2',
-        }).unwrap();
-        const lineItems = LineItems.create({
-            items: [lineItem],
-        }).unwrap();
-        const issuer = Issuer.create({
-            type: ISSUER_TYPE.COMPANY,
-            name: 'Company Inc.',
-            address: '123 Main St, City, Country',
-            taxId: 'TAX123456',
-            email: 'info@company.com',
-        }).unwrap();
-        const recipientBilling = Paypal.create({
-            email: 'customer@example.com',
-        }).unwrap();
-        const recipient = Recipient.create({
-            type: RECIPIENT_TYPE.INDIVIDUAL,
-            name: 'Jane Smith',
-            address: '456 Another St, City, Country',
-            taxId: 'TAX654321',
-            email: 'jane.smith@example.com',
-            taxResidenceCountry: 'US',
-            billing: recipientBilling,
-        }).unwrap();
+        const invoice = createIssuedInvoice();
 
-        const invoice = Invoice.create({
-            id: Id.create().unwrap(),
-            issueDate: CalendarDate.create('2023-01-01').unwrap(),
-            dueDate: CalendarDate.create('2028-01-01').unwrap(),
-            lineItems: lineItems,
-            vatRate: null,
-            issuer: issuer,
-            recipient: recipient,
-        }).unwrap();
-
-        invoice.cancel();
+        invoice.cancel().unwrap();
         const result = invoice.process();
 
         expect(result.isError()).toBe(true);
@@ -264,46 +188,7 @@ describe('Invoice', () => {
     });
 
     it('should cancel an invoice', () => {
-        const lineItem = LineItem.create({
-            description: 'Item 1',
-            price: {
-                amount: '50',
-                currency: 'USD',
-            },
-            quantity: '2',
-        }).unwrap();
-        const lineItems = LineItems.create({
-            items: [lineItem],
-        }).unwrap();
-        const issuer = Issuer.create({
-            type: ISSUER_TYPE.COMPANY,
-            name: 'Company Inc.',
-            address: '123 Main St, City, Country',
-            taxId: 'TAX123456',
-            email: 'info@company.com',
-        }).unwrap();
-        const recipientBilling = Paypal.create({
-            email: 'customer@example.com',
-        }).unwrap();
-        const recipient = Recipient.create({
-            type: RECIPIENT_TYPE.INDIVIDUAL,
-            name: 'Jane Smith',
-            address: '456 Another St, City, Country',
-            taxId: 'TAX654321',
-            email: 'jane.smith@example.com',
-            taxResidenceCountry: 'US',
-            billing: recipientBilling,
-        }).unwrap();
-
-        const invoice = Invoice.create({
-            id: Id.create().unwrap(),
-            issueDate: CalendarDate.create('2023-01-01').unwrap(),
-            dueDate: CalendarDate.create('2028-01-01').unwrap(),
-            lineItems: lineItems,
-            vatRate: null,
-            issuer: issuer,
-            recipient: recipient,
-        }).unwrap();
+        const invoice = createIssuedInvoice();
 
         invoice.cancel();
 
@@ -325,48 +210,9 @@ describe('Invoice', () => {
     });
 
     it('should pay a processing invoice', () => {
-        const lineItem = LineItem.create({
-            description: 'Item 1',
-            price: {
-                amount: '50',
-                currency: 'USD',
-            },
-            quantity: '2',
-        }).unwrap();
-        const lineItems = LineItems.create({
-            items: [lineItem],
-        }).unwrap();
-        const issuer = Issuer.create({
-            type: ISSUER_TYPE.COMPANY,
-            name: 'Company Inc.',
-            address: '123 Main St, City, Country',
-            taxId: 'TAX123456',
-            email: 'info@company.com',
-        }).unwrap();
-        const recipientBilling = Paypal.create({
-            email: 'customer@example.com',
-        }).unwrap();
-        const recipient = Recipient.create({
-            type: RECIPIENT_TYPE.INDIVIDUAL,
-            name: 'Jane Smith',
-            address: '456 Another St, City, Country',
-            taxId: 'TAX654321',
-            email: 'jane.smith@example.com',
-            taxResidenceCountry: 'US',
-            billing: recipientBilling,
-        }).unwrap();
+        const invoice = createIssuedInvoice();
 
-        const invoice = Invoice.create({
-            id: Id.create().unwrap(),
-            issueDate: CalendarDate.create('2023-01-01').unwrap(),
-            dueDate: CalendarDate.create('2028-01-01').unwrap(),
-            lineItems: lineItems,
-            vatRate: null,
-            issuer: issuer,
-            recipient: recipient,
-        }).unwrap();
-
-        invoice.process();
+        invoice.process().unwrap();
         const result = invoice.pay();
 
         expect(result.isOk()).toBe(true);
@@ -388,46 +234,7 @@ describe('Invoice', () => {
     });
 
     it('should not pay an issued invoice', () => {
-        const lineItem = LineItem.create({
-            description: 'Item 1',
-            price: {
-                amount: '50',
-                currency: 'USD',
-            },
-            quantity: '2',
-        }).unwrap();
-        const lineItems = LineItems.create({
-            items: [lineItem],
-        }).unwrap();
-        const issuer = Issuer.create({
-            type: ISSUER_TYPE.COMPANY,
-            name: 'Company Inc.',
-            address: '123 Main St, City, Country',
-            taxId: 'TAX123456',
-            email: 'info@company.com',
-        }).unwrap();
-        const recipientBilling = Paypal.create({
-            email: 'customer@example.com',
-        }).unwrap();
-        const recipient = Recipient.create({
-            type: RECIPIENT_TYPE.INDIVIDUAL,
-            name: 'Jane Smith',
-            address: '456 Another St, City, Country',
-            taxId: 'TAX654321',
-            email: 'jane.smith@example.com',
-            taxResidenceCountry: 'US',
-            billing: recipientBilling,
-        }).unwrap();
-
-        const invoice = Invoice.create({
-            id: Id.create().unwrap(),
-            issueDate: CalendarDate.create('2023-01-01').unwrap(),
-            dueDate: CalendarDate.create('2028-01-01').unwrap(),
-            lineItems: lineItems,
-            vatRate: null,
-            issuer: issuer,
-            recipient: recipient,
-        }).unwrap();
+        const invoice = createIssuedInvoice();
 
         const result = invoice.pay();
 
@@ -440,48 +247,9 @@ describe('Invoice', () => {
     });
 
     it('should fail a processing invoice', () => {
-        const lineItem = LineItem.create({
-            description: 'Item 1',
-            price: {
-                amount: '50',
-                currency: 'USD',
-            },
-            quantity: '2',
-        }).unwrap();
-        const lineItems = LineItems.create({
-            items: [lineItem],
-        }).unwrap();
-        const issuer = Issuer.create({
-            type: ISSUER_TYPE.COMPANY,
-            name: 'Company Inc.',
-            address: '123 Main St, City, Country',
-            taxId: 'TAX123456',
-            email: 'info@company.com',
-        }).unwrap();
-        const recipientBilling = Paypal.create({
-            email: 'customer@example.com',
-        }).unwrap();
-        const recipient = Recipient.create({
-            type: RECIPIENT_TYPE.INDIVIDUAL,
-            name: 'Jane Smith',
-            address: '456 Another St, City, Country',
-            taxId: 'TAX654321',
-            email: 'jane.smith@example.com',
-            taxResidenceCountry: 'US',
-            billing: recipientBilling,
-        }).unwrap();
+        const invoice = createIssuedInvoice();
 
-        const invoice = Invoice.create({
-            id: Id.create().unwrap(),
-            issueDate: CalendarDate.create('2023-01-01').unwrap(),
-            dueDate: CalendarDate.create('2028-01-01').unwrap(),
-            lineItems: lineItems,
-            vatRate: null,
-            issuer: issuer,
-            recipient: recipient,
-        }).unwrap();
-
-        invoice.process();
+        invoice.process().unwrap();
         const result = invoice.fail();
 
         expect(result.isOk()).toBe(true);
@@ -503,46 +271,7 @@ describe('Invoice', () => {
     });
 
     it('should not fail an issued invoice', () => {
-        const lineItem = LineItem.create({
-            description: 'Item 1',
-            price: {
-                amount: '50',
-                currency: 'USD',
-            },
-            quantity: '2',
-        }).unwrap();
-        const lineItems = LineItems.create({
-            items: [lineItem],
-        }).unwrap();
-        const issuer = Issuer.create({
-            type: ISSUER_TYPE.COMPANY,
-            name: 'Company Inc.',
-            address: '123 Main St, City, Country',
-            taxId: 'TAX123456',
-            email: 'info@company.com',
-        }).unwrap();
-        const recipientBilling = Paypal.create({
-            email: 'customer@example.com',
-        }).unwrap();
-        const recipient = Recipient.create({
-            type: RECIPIENT_TYPE.INDIVIDUAL,
-            name: 'Jane Smith',
-            address: '456 Another St, City, Country',
-            taxId: 'TAX654321',
-            email: 'jane.smith@example.com',
-            taxResidenceCountry: 'US',
-            billing: recipientBilling,
-        }).unwrap();
-
-        const invoice = Invoice.create({
-            id: Id.create().unwrap(),
-            issueDate: CalendarDate.create('2023-01-01').unwrap(),
-            dueDate: CalendarDate.create('2028-01-01').unwrap(),
-            lineItems: lineItems,
-            vatRate: null,
-            issuer: issuer,
-            recipient: recipient,
-        }).unwrap();
+        const invoice = createIssuedInvoice();
 
         const result = invoice.fail();
 
@@ -555,48 +284,9 @@ describe('Invoice', () => {
     });
 
     it('should not cancel a processing invoice', () => {
-        const lineItem = LineItem.create({
-            description: 'Item 1',
-            price: {
-                amount: '50',
-                currency: 'USD',
-            },
-            quantity: '2',
-        }).unwrap();
-        const lineItems = LineItems.create({
-            items: [lineItem],
-        }).unwrap();
-        const issuer = Issuer.create({
-            type: ISSUER_TYPE.COMPANY,
-            name: 'Company Inc.',
-            address: '123 Main St, City, Country',
-            taxId: 'TAX123456',
-            email: 'info@company.com',
-        }).unwrap();
-        const recipientBilling = Paypal.create({
-            email: 'customer@example.com',
-        }).unwrap();
-        const recipient = Recipient.create({
-            type: RECIPIENT_TYPE.INDIVIDUAL,
-            name: 'Jane Smith',
-            address: '456 Another St, City, Country',
-            taxId: 'TAX654321',
-            email: 'jane.smith@example.com',
-            taxResidenceCountry: 'US',
-            billing: recipientBilling,
-        }).unwrap();
+        const invoice = createIssuedInvoice();
 
-        const invoice = Invoice.create({
-            id: Id.create().unwrap(),
-            issueDate: CalendarDate.create('2023-01-01').unwrap(),
-            dueDate: CalendarDate.create('2028-01-01').unwrap(),
-            lineItems: lineItems,
-            vatRate: null,
-            issuer: issuer,
-            recipient: recipient,
-        }).unwrap();
-
-        invoice.process();
+        invoice.process().unwrap();
         const result = invoice.cancel();
 
         expect(result.isError()).toBe(true);
@@ -608,58 +298,19 @@ describe('Invoice', () => {
     });
 
     it('should not create an invoice when due date is before issue date', () => {
-        const lineItem1 = LineItem.create({
-            description: 'Item 1',
-            price: {
-                amount: '50',
-                currency: 'USD',
-            },
-            quantity: '2',
-        }).unwrap();
-        const lineItem2 = LineItem.create({
-            description: 'Item 2',
-            price: {
-                amount: '100',
-                currency: 'USD',
-            },
-            quantity: '1',
-        }).unwrap();
-        const issueDate = CalendarDate.create('2028-02-01').unwrap();
-        const dueDate = CalendarDate.create('2023-01-01').unwrap();
-        const issuer = Issuer.create({
-            type: ISSUER_TYPE.COMPANY,
-            name: 'Company Inc.',
-            address: '123 Main St, City, Country',
-            taxId: 'TAX123456',
-            email: 'info@company.com',
-        }).unwrap();
-
-        const recipientBilling = Paypal.create({
-            email: 'customer@example.com',
-        }).unwrap();
-        const recipient = Recipient.create({
-            type: RECIPIENT_TYPE.INDIVIDUAL,
-            name: 'Jane Smith',
-            address: '456 Another St, City, Country',
-            taxId: 'TAX654321',
-            email: 'jane.smith@example.com',
-            taxResidenceCountry: 'US',
-            billing: recipientBilling,
-        }).unwrap();
-        const lineItems = LineItems.create({
-            items: [lineItem1, lineItem2],
-        }).unwrap();
-
+        const lineItem1 = createLineItem('Item 1', '50', '2');
+        const lineItem2 = createLineItem('Item 2', '100', '1');
+        const lineItems = LineItems.create({ items: [lineItem1, lineItem2] }).unwrap();
         const vatRate = VatRate.create('10').unwrap();
 
         const invoice = Invoice.create({
             id: Id.create().unwrap(),
-            issueDate: issueDate,
-            dueDate: dueDate,
-            lineItems: lineItems,
-            vatRate: vatRate,
-            issuer: issuer,
-            recipient: recipient,
+            issueDate: CalendarDate.create('2028-02-01').unwrap(),
+            dueDate: CalendarDate.create('2023-01-01').unwrap(),
+            lineItems,
+            vatRate,
+            issuer: createIssuer(),
+            recipient: createRecipient(),
         });
 
         expect(invoice.isError()).toBe(true);
