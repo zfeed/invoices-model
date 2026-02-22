@@ -115,7 +115,7 @@ describe('DraftInvoice', () => {
         ).toBe(true);
     });
 
-    it('should add not apply vat to invoice with no line items', () => {
+    it('should not apply vat to invoice with no line items', () => {
         const draftInvoice = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
         const vat = VatRate.create('20').unwrap();
@@ -257,7 +257,6 @@ describe('DraftInvoice', () => {
             billing: recipientBilling,
         }).unwrap();
 
-        draftInvoice.addDueDate(dueDate).unwrap();
         draftInvoice.addRecipient(recipient).unwrap();
         draftInvoice.addIssuer(issuer).unwrap();
         draftInvoice.addLineItem(lineItem1).unwrap();
@@ -307,7 +306,6 @@ describe('DraftInvoice', () => {
             billing: recipientBilling,
         }).unwrap();
 
-        draftInvoice.addDueDate(dueDate).unwrap();
         draftInvoice.addRecipient(recipient).unwrap();
         draftInvoice.addIssuer(issuer).unwrap();
         draftInvoice.addLineItem(lineItem1).unwrap();
@@ -318,14 +316,14 @@ describe('DraftInvoice', () => {
         const invoice = draftInvoice.toInvoice().unwrap();
 
         expect(draftInvoice.status.equals(DraftInvoiceStatus.completed())).toBe(true);
-        expect(invoice.dueDate.equals(draftInvoice.dueDate!));
-        expect(invoice.issueDate.equals(draftInvoice.issueDate!));
-        expect(invoice.issuer.equals(draftInvoice.issuer!));
-        expect(invoice.recipient.equals(draftInvoice.recipient!));
-        expect(invoice.vatRate!.equals(draftInvoice.vatRate!));
-        expect(invoice.lineItems.equals(draftInvoice.lineItems!));
-        expect(invoice.vatAmount!.equals(draftInvoice.vatAmount!));
-        expect(invoice.total.equals(draftInvoice.total!));
+        expect(invoice.dueDate.equals(draftInvoice.dueDate!)).toBe(true);
+        expect(invoice.issueDate.equals(draftInvoice.issueDate!)).toBe(true);
+        expect(invoice.issuer.equals(draftInvoice.issuer!)).toBe(true);
+        expect(invoice.recipient.equals(draftInvoice.recipient!)).toBe(true);
+        expect(invoice.vatRate!.equals(draftInvoice.vatRate!)).toBe(true);
+        expect(invoice.lineItems.equals(draftInvoice.lineItems!)).toBe(true);
+        expect(invoice.vatAmount!.equals(draftInvoice.vatAmount!)).toBe(true);
+        expect(invoice.total.equals(draftInvoice.total!)).toBe(true);
     });
 
     it('should not allow modifications after completing draft invoice', () => {
@@ -440,7 +438,6 @@ describe('DraftInvoice', () => {
 
         const result = draftInvoice.archive();
 
-        expect(result.isError()).toBe(true);
         expect(result.unwrapError()).toEqual(
             expect.objectContaining({
                 code: '8003',
@@ -462,7 +459,6 @@ describe('DraftInvoice', () => {
 
         const result = draftInvoice.draft();
 
-        expect(result.isError()).toBe(true);
         expect(result.unwrapError()).toEqual(
             expect.objectContaining({
                 code: '8003',
@@ -516,7 +512,6 @@ describe('DraftInvoice', () => {
 
         const result = draftInvoice.draft();
 
-        expect(result.isError()).toBe(true);
         expect(result.unwrapError()).toEqual(
             expect.objectContaining({
                 code: '8003',
