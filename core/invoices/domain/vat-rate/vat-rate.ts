@@ -38,7 +38,7 @@ export class VatRate implements Equatable<VatRate>, Mappable<ReturnType<VatRate[
         return Result.ok(new VatRate(numericValue));
     }
 
-    applyTo(money: Money) {
+    addTo(money: Money) {
         const vat = money.multiplyBy(this.rate);
 
         return money.add(vat).unwrap();

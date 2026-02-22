@@ -370,7 +370,7 @@ export class DraftInvoice
         const subtotal = this.#lineItems.subtotal;
 
         const total = this.#vatRate
-            ? this.#vatRate.applyTo(subtotal)
+            ? this.#vatRate.addTo(subtotal)
             : subtotal;
         const vatAmount = this.#vatRate
             ? total.subtract(subtotal).unwrap()

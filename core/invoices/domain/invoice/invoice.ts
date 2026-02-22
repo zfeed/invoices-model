@@ -156,7 +156,7 @@ export class Invoice
         }
 
         const total = vatRate
-            ? vatRate.applyTo(options.lineItems.subtotal)
+            ? vatRate.addTo(options.lineItems.subtotal)
             : options.lineItems.subtotal;
         const vatAmount = vatRate
             ? total.subtract(options.lineItems.subtotal).unwrap()
