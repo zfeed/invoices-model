@@ -1,6 +1,6 @@
-import { Equatable } from '../../../../building-blocks';
+import { Equatable, Mappable } from '../../../../building-blocks';
 
-export class UnitDescription implements Equatable<UnitDescription> {
+export class UnitDescription implements Equatable<UnitDescription>, Mappable<string> {
     #value: string;
 
     protected constructor(value: string) {
@@ -11,8 +11,16 @@ export class UnitDescription implements Equatable<UnitDescription> {
         return new UnitDescription(value);
     }
 
+    static fromPlain(value: string) {
+        return new UnitDescription(value);
+    }
+
     equals(other: UnitDescription) {
         return this.#value === other.#value;
+    }
+
+    toPlain(): string {
+        return this.#value;
     }
 
     toString(): string {

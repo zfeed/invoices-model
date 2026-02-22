@@ -47,7 +47,7 @@ export class LineItem implements Equatable<LineItem>, Mappable<ReturnType<LineIt
 
     toPlain() {
         return {
-            description: this.#description.toString(),
+            description: this.#description.toPlain(),
             price: this.#price.toPlain(),
             quantity: this.#quantity.toPlain(),
             total: this.#total.toPlain(),
@@ -56,7 +56,7 @@ export class LineItem implements Equatable<LineItem>, Mappable<ReturnType<LineIt
 
     static fromPlain(plain: ReturnType<LineItem['toPlain']>) {
         return new this(
-            UnitDescription.create(plain.description),
+            UnitDescription.fromPlain(plain.description),
             Money.fromPlain(plain.price),
             UnitQuantity.fromPlain(plain.quantity),
             Money.fromPlain(plain.total),
