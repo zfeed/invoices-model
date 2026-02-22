@@ -15,16 +15,16 @@ describe('Currency', () => {
         ],
     });
 
-    test('should create currency', () => {
-        const result = Currency.create('USD').unwrap();
+    test.each(['USD', 'EUR', 'JPY'])('should create currency %s', (code) => {
+        const currency = Currency.create(code).unwrap();
 
-        expect(result).toBeDefined();
+        expect(currency.toString()).toBe(code);
     });
 
-    test.each([{ currency: 'ABC' }, { currency: 'XYZ' }])(
-        'should return error for invalid currency code',
-        ({ currency }) => {
-            const result = Currency.create(currency);
+    test.each(['ABC', 'XYZ'])(
+        'should return error for invalid currency code %s',
+        (code) => {
+            const result = Currency.create(code);
 
             expect(result.unwrapError()).toEqual(
                 expect.objectContaining({
@@ -33,4 +33,16 @@ describe('Currency', () => {
             );
         }
     );
+
+    test('should reconstruct from plain', () => {
+        const currency = Currency.fromPlain('USD');
+
+        expect(currency.equals(Currency.create('USD').unwrap())).toBe(true);
+    });
+
+    test('should return string representation', () => {
+        const currency = Currency.create('EUR').unwrap();
+
+        expect(currency.toString()).toBe('EUR');
+    });
 });
