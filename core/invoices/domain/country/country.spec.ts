@@ -16,21 +16,26 @@ describe('Country', () => {
     });
 
     it('should create a country', () => {
-        const result = Country.create('US');
-
-        const country = result.unwrap();
-
-        expect(country).toBeDefined();
+        const country = Country.create('US').unwrap();
+        expect(country.equals(Country.create('US').unwrap())).toBe(true);
     });
 
     it('should fail to create a country with not alpha 2 code', () => {
         const result = Country.create('USA');
-
-        expect(result.isError()).toBe(true);
         expect(result.unwrapError()).toEqual(
             expect.objectContaining({
                 code: '7000',
             })
         );
+    });
+
+    it('should serialize to plain string', () => {
+        const country = Country.create('US').unwrap();
+        expect(country.toPlain()).toBe('US');
+    });
+
+    it('should reconstruct from plain', () => {
+        const country = Country.fromPlain('US');
+        expect(country.toPlain()).toBe('US');
     });
 });
