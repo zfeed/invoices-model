@@ -1,4 +1,4 @@
-import { Equatable, Mappable, Result } from '../../../../building-blocks';
+import { DomainError, Equatable, Mappable, Result } from '../../../../building-blocks';
 import { Country } from '../country/country';
 import { Email } from '../email/email';
 import { Paypal } from './billing/paypal';
@@ -120,17 +120,17 @@ export class Recipient implements Equatable<Recipient>, Mappable<ReturnType<Reci
         email: string;
         taxResidenceCountry: string;
         billing: Paypal | Wire;
-    }) {
+    }): Result<DomainError, Recipient> {
         const emailResult = Email.create(email);
 
         if (emailResult.isError()) {
-            return emailResult.error();
+            return emailResult;
         }
 
         const countryResult = Country.create({ code: taxResidenceCountry });
 
         if (countryResult.isError()) {
-            return countryResult.error();
+            return countryResult;
         }
 
         const recipientEmail = emailResult.unwrap();
