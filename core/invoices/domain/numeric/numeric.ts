@@ -1,5 +1,6 @@
 import { Decimal } from 'decimal.js';
 import { Comparable, DomainError, Equatable, Result } from '../../../../building-blocks';
+import { checkDivisionByZero } from './checks/check-division-by-zero';
 import { checkNumericValue } from './checks/check-numeric-value';
 import { ROUNDING } from './rounding';
 
@@ -31,8 +32,14 @@ export class Numeric implements Equatable<Numeric>, Comparable<Numeric> {
         return new Numeric(this.#value.sub(value.#value).toString());
     }
 
-    divideBy(value: Numeric): Numeric {
-        return new Numeric(this.#value.div(value.#value).toString());
+    divideBy(value: Numeric): Result<DomainError, Numeric> {
+        const error = checkDivisionByZero(value);
+
+        if (error) {
+            return Result.error(error);
+        }
+
+        return Result.ok(new Numeric(this.#value.div(value.#value).toString()));
     }
 
     toDecimalPlaces(places: number, rounding: ROUNDING = ROUNDING.UP): Numeric {

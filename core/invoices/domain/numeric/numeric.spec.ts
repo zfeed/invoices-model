@@ -87,7 +87,7 @@ describe('Numeric', () => {
     ])('divides %s by %s', (a, b, expected) => {
         const numA = Numeric.create(a).unwrap();
         const numB = Numeric.create(b).unwrap();
-        const result = numA.divideBy(numB);
+        const result = numA.divideBy(numB).unwrap();
         expect(result.equals(Numeric.create(expected).unwrap())).toBe(true);
     });
 
