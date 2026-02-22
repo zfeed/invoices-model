@@ -99,4 +99,28 @@ describe('LineItem', () => {
             expect.objectContaining({ code: '5000' })
         );
     });
+
+    it('should calculate total correctly', () => {
+        const lineItem = LineItem.create({
+            description: 'Service',
+            price: { amount: '250', currency: 'EUR' },
+            quantity: '3',
+        }).unwrap();
+
+        expect(lineItem.total.equals(Money.create('750', 'EUR').unwrap())).toBe(true);
+    });
+
+    describe('toPlain / fromPlain', () => {
+        it('round-trips through toPlain and fromPlain', () => {
+            const lineItem = LineItem.create({
+                description: 'Product A',
+                price: { amount: '100', currency: 'USD' },
+                quantity: '2',
+            }).unwrap();
+
+            const restored = LineItem.fromPlain(lineItem.toPlain());
+
+            expect(restored.equals(lineItem)).toBe(true);
+        });
+    });
 });
