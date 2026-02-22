@@ -24,23 +24,23 @@ export class CalendarDate
         return Result.ok(new CalendarDate(date));
     }
 
-    public equals(other: CalendarDate): boolean {
+    equals(other: CalendarDate): boolean {
         return this.#value === other.#value;
     }
 
-    public lessThan(other: CalendarDate): boolean {
+    lessThan(other: CalendarDate): boolean {
         return this.#value < other.#value;
     }
 
-    public lessThanEqual(other: CalendarDate): boolean {
+    lessThanEqual(other: CalendarDate): boolean {
         return this.#value <= other.#value;
     }
 
-    public greaterThan(other: CalendarDate): boolean {
+    greaterThan(other: CalendarDate): boolean {
         return this.#value > other.#value;
     }
 
-    public greaterThanEqual(other: CalendarDate): boolean {
+    greaterThanEqual(other: CalendarDate): boolean {
         return this.#value >= other.#value;
     }
 
