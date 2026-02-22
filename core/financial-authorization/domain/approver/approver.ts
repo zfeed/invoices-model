@@ -5,6 +5,7 @@ import { Email } from '../email/email';
 import { Name } from '../name/name';
 import { createId, Id } from '../id/id';
 import { emailHasValidFormat } from './checks/check-email-format';
+import { nameIsNotBlank } from './checks/check-name-not-blank';
 
 export type Approver = {
     id: Id;
@@ -27,5 +28,6 @@ export const createApprover = (
     data: ApproverInput
 ): Result<DomainError, Approver> =>
     Result.ok<DomainError, ApproverInput>(data)
+        .flatMap(nameIsNotBlank)
         .flatMap(emailHasValidFormat)
         .map(buildApprover);

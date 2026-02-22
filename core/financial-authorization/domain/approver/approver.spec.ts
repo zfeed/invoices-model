@@ -173,7 +173,7 @@ describe('createApprover', () => {
         expect(approver.email).toBe('user@my-company.com');
     });
 
-    it('should create approver with empty name', () => {
+    it('should reject approver with empty name', () => {
         const data = {
             name: '',
             email: 'valid@example.com',
@@ -181,10 +181,7 @@ describe('createApprover', () => {
 
         const result = createApprover(data);
 
-        expect(result.isOk()).toBe(true);
-        const approver = result.unwrap();
-        expect(approver.name).toBe('');
-        expect(approver.email).toBe('valid@example.com');
+        expect(result.isError()).toBe(true);
     });
 
     it('should create approver with long name', () => {
