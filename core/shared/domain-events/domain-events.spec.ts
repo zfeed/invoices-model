@@ -4,13 +4,13 @@ import { InMemoryDomainEvents } from '../../../infrastructure/domain-events/in-m
 
 class OrderPlacedEvent extends DomainEvent<{ orderId: string }> {
     constructor(orderId: string) {
-        super({ name: 'order.placed', data: { orderId } });
+        super({ orderId });
     }
 }
 
 class OrderCancelledEvent extends DomainEvent<{ orderId: string }> {
     constructor(orderId: string) {
-        super({ name: 'order.cancelled', data: { orderId } });
+        super({ orderId });
     }
 }
 

@@ -67,6 +67,6 @@ type Data = {
 
 export class InvoiceIssuedEvent extends DomainEvent<Data> {
     constructor(data: Data) {
-        super({ name: 'invoice.issued', data });
+        super(data);
     }
 }

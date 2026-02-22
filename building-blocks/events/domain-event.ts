@@ -6,11 +6,11 @@ export abstract class DomainEvent<T> {
     createdAt: string;
     data: T;
 
-    constructor(event: { name: string; data: T }) {
+    constructor(data: T) {
         this.id = randomUUID();
         this.name = this.buildName();
         this.createdAt = new Date().toISOString();
-        this.data = event.data;
+        this.data = data;
     }
 
     private buildName(): string {

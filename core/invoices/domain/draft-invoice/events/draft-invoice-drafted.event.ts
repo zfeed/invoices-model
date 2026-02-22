@@ -3,6 +3,6 @@ import { DraftInvoiceEventData } from './draft-invoice-event.data';
 
 export class DraftInvoiceDraftedEvent extends DomainEvent<DraftInvoiceEventData> {
     constructor(data: DraftInvoiceEventData) {
-        super({ name: 'draft-invoice.drafted', data });
+        super(data);
     }
 }

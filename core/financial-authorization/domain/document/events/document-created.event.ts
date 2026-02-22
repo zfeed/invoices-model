@@ -97,6 +97,6 @@ const toData = applySpec<Data>({
 
 export class DocumentCreatedEvent extends DomainEvent<Data> {
     constructor(data: Data) {
-        super({ name: 'document.created', data: toData(data) });
+        super(toData(data));
     }
 }

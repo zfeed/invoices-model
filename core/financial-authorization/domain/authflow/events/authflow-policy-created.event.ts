@@ -68,6 +68,6 @@ const toData = applySpec<Data>({
 
 export class AuthflowPolicyCreatedEvent extends DomainEvent<Data> {
     constructor(data: Data) {
-        super({ name: 'authflow-policy.created', data: toData(data) });
+        super(toData(data));
     }
 }

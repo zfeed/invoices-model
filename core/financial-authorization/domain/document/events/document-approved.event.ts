@@ -97,6 +97,6 @@ const toData = applySpec<Data>({
 
 export class DocumentApprovedEvent extends DomainEvent<Data> {
     constructor(data: Data) {
-        super({ name: 'document.approved', data: toData(data) });
+        super(toData(data));
     }
 }
