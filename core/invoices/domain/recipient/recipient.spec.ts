@@ -93,7 +93,7 @@ describe('Recipient', () => {
         expect(recipient.type).toBe('INDIVIDUAL');
         expect(
             recipient.taxResidenceCountry.equals(
-                Country.create({ code: 'US' }).unwrap()
+                Country.create('US').unwrap()
             )
         ).toBe(true);
         expect(recipient.billing.type).toBe('PAYPAL');

@@ -12,7 +12,7 @@ export class Country implements Equatable<Country>, Mappable<string> {
         return new Country(code);
     }
 
-    static create({ code }: { code: string }) {
+    static create(code: string) {
         const error = checkCountryCode(code);
 
         if (error) {

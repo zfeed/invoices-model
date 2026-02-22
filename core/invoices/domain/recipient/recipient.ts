@@ -144,7 +144,7 @@ export class Recipient implements Equatable<Recipient>, Mappable<ReturnType<Reci
             return emailResult;
         }
 
-        const countryResult = Country.create({ code: taxResidenceCountry });
+        const countryResult = Country.create(taxResidenceCountry);
 
         if (countryResult.isError()) {
             return countryResult;
