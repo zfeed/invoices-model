@@ -32,19 +32,27 @@ TypeScript DDD codebase with two bounded contexts: **invoices** (OOP class-based
 - Domain events in financial-authorization use `applySpec`/`prop` for data transformation in constructors.
 - Domain events in invoices pass `toPlain()` output as event data.
 
+## HTTP Conventions
+
+- HTTP routes use only **POST** and **GET** methods. No PUT, PATCH, or DELETE.
+- Actions are expressed via URL path segments (e.g., `POST /invoices/drafts/:id/update`, not `PUT /invoices/drafts/:id`).
+
 ## Project Structure
 
 ```
-building-blocks/     # Result, Some, IO monads, DomainEvent base, errors
-core/
-  invoices/          # OOP class-based bounded context
-    domain/          # Entities, value objects, events, checks
-    application/     # Use cases, unit-of-work interface
-  financial-authorization/  # Functional bounded context
-    domain/          # Plain types, factory functions, events, checks
-    application/     # Use cases, storage interfaces
-  shared/            # Cross-context interfaces (domain-events, optimistic concurrency)
-infrastructure/      # In-memory implementations (store, storage, mappers, domain-events)
+src/
+  building-blocks/   # Result, Some, IO monads, DomainEvent base, errors
+  core/
+    invoices/          # OOP class-based bounded context
+      domain/          # Entities, value objects, events, checks
+      application/     # Use cases, unit-of-work interface
+    financial-authorization/  # Functional bounded context
+      domain/          # Plain types, factory functions, events, checks
+      application/     # Use cases, storage interfaces
+    shared/            # Cross-context interfaces (domain-events, optimistic concurrency)
+  infrastructure/    # In-memory implementations (store, storage, mappers, domain-events)
+  http/              # Hono HTTP layer (routes, schemas, validation)
+e2e/                 # E2E tests (outside src/)
 ```
 
 ## Key Patterns

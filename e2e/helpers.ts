@@ -47,23 +47,9 @@ export const setupApp = () => {
             body: JSON.stringify(body),
         });
 
-    const putJson = (path: string, body: unknown) =>
-        app.request(path, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-        });
-
     const postRaw = (path: string, body: string) =>
         app.request(path, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body,
-        });
-
-    const putRaw = (path: string, body: string) =>
-        app.request(path, {
-            method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body,
         });
@@ -91,9 +77,7 @@ export const setupApp = () => {
 
     return {
         postJson,
-        putJson,
         postRaw,
-        putRaw,
         post,
         getData,
         createDraft,

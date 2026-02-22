@@ -1,6 +1,6 @@
 import { setupApp, COMPLETE_DRAFT_REQUEST, expectError } from './helpers';
 
-const { postJson, putJson, post, getData } = setupApp();
+const { postJson, post, getData } = setupApp();
 
 describe('Invoice lifecycle flows', () => {
     describe('create -> update -> complete -> process', () => {
@@ -10,8 +10,8 @@ describe('Invoice lifecycle flows', () => {
             const draft = await getData(createRes);
             expect(draft.status).toBe('DRAFT');
 
-            const updateRes = await putJson(
-                `/invoices/drafts/${draft.id}`,
+            const updateRes = await postJson(
+                `/invoices/drafts/${draft.id}/update`,
                 COMPLETE_DRAFT_REQUEST
             );
             expect(updateRes.status).toBe(200);
