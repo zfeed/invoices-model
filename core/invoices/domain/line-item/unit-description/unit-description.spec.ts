@@ -1,4 +1,4 @@
-import { testEquatable } from '../../../../building-blocks/equatable.test-helper';
+import { testEquatable } from '../../../../../building-blocks/equatable.test-helper';
 import { UnitDescription } from './unit-description';
 
 describe('UnitDescription', () => {

@@ -1,4 +1,4 @@
-import { Equatable, Mappable, Result } from '../../../../building-blocks';
+import { Equatable, Mappable, Result } from '../../../../../building-blocks';
 import { checkDescriptionNonEmpty } from './checks/check-description-non-empty';
 
 export class UnitDescription implements Equatable<UnitDescription>, Mappable<string> {
