@@ -1,39 +1,24 @@
 import { Mappable, Result } from '../../../../../building-blocks';
 import { IBilling } from './billing.interface';
 
+type WireData = {
+    swift: string;
+    accountNumber: string;
+    accountHolderName: string;
+    bankName: string;
+    bankAddress: string;
+    bankCountry: string;
+};
+
 export class Wire
     implements
         Mappable<ReturnType<Wire['toPlain']>>,
-        IBilling<
-            'WIRE',
-            {
-                swift: string;
-                accountNumber: string;
-                accountHolderName: string;
-                bankName: string;
-                bankAddress: string;
-                bankCountry: string;
-            }
-        >
+        IBilling<'WIRE', WireData>
 {
     public readonly type = 'WIRE' as const;
-    public readonly data: {
-        swift: string;
-        accountNumber: string;
-        accountHolderName: string;
-        bankName: string;
-        bankAddress: string;
-        bankCountry: string;
-    };
+    public readonly data: WireData;
 
-    protected constructor(data: {
-        swift: string;
-        accountNumber: string;
-        accountHolderName: string;
-        bankName: string;
-        bankAddress: string;
-        bankCountry: string;
-    }) {
+    protected constructor(data: WireData) {
         this.data = data;
     }
 
@@ -41,14 +26,7 @@ export class Wire
         return new Wire(plain.data);
     }
 
-    static create(data: {
-        swift: string;
-        accountNumber: string;
-        accountHolderName: string;
-        bankName: string;
-        bankAddress: string;
-        bankCountry: string;
-    }) {
+    static create(data: WireData) {
         return Result.ok(new Wire(data));
     }
 
