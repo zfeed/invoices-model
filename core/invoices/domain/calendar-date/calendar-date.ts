@@ -1,8 +1,8 @@
-import { Comparable, Equatable, Result } from '../../../../building-blocks';
+import { Comparable, Equatable, Mappable, Result } from '../../../../building-blocks';
 import { checkIsISO8601Date } from './checks/check-iso8601-date';
 
 export class CalendarDate
-    implements Equatable<CalendarDate>, Comparable<CalendarDate>
+    implements Equatable<CalendarDate>, Comparable<CalendarDate>, Mappable<string>
 {
     #value: string;
 
@@ -50,6 +50,10 @@ export class CalendarDate
         return (
             new Date(this.#value).getTime() >= new Date(other.#value).getTime()
         );
+    }
+
+    toPlain(): string {
+        return this.#value;
     }
 
     toString(): string {
