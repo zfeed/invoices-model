@@ -1,7 +1,7 @@
 import { testEquatable } from '../../../../building-blocks/equatable.test-helper';
 import { Country } from '../country/country';
 import { Email } from '../email/email';
-import { Paypal } from './billing/paypal';
+import { Paypal } from './billing/paypal/paypal';
 import { Wire } from './billing/wire/wire';
 import { Recipient, RECIPIENT_TYPE } from './recipient';
 

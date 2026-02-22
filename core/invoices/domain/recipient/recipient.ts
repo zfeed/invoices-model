@@ -2,7 +2,7 @@ import { assertNever, DomainError, Equatable, Mappable, Result } from '../../../
 import { checkRecipientNonEmpty } from './checks/check-recipient-non-empty';
 import { Country } from '../country/country';
 import { Email } from '../email/email';
-import { Paypal } from './billing/paypal';
+import { Paypal } from './billing/paypal/paypal';
 import { Wire } from './billing/wire/wire';
 
 export enum RECIPIENT_TYPE {
