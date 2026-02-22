@@ -104,4 +104,35 @@ describe('Issuer', () => {
             );
         }
     );
+
+    it('should not create an issuer with invalid email', () => {
+        const result = Issuer.create({
+            type: ISSUER_TYPE.INDIVIDUAL,
+            name: 'John Doe',
+            address: '123 Main St',
+            taxId: 'TAX123',
+            email: 'not-an-email',
+        });
+
+        expect(result.isError()).toBe(true);
+        expect(result.unwrapError()).toEqual(
+            expect.objectContaining({ code: '6000' })
+        );
+    });
+
+    describe('toPlain / fromPlain', () => {
+        it('round-trips through toPlain and fromPlain', () => {
+            const issuer = Issuer.create({
+                type: ISSUER_TYPE.COMPANY,
+                name: 'Company Inc.',
+                address: '123 Main St',
+                taxId: 'TAX123',
+                email: 'info@company.com',
+            }).unwrap();
+
+            const restored = Issuer.fromPlain(issuer.toPlain());
+
+            expect(restored.equals(issuer)).toBe(true);
+        });
+    });
 });
