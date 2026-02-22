@@ -32,7 +32,7 @@ describe('Money', () => {
         },
     ])('should create Money for %s', ({ amount, currency }) => {
         const money = Money.create(amount, currency).unwrap();
-        const expectedAmount = Numeric.create(amount);
+        const expectedAmount = Numeric.create(amount).unwrap();
         const expectedCurrency = Currency.create(currency).unwrap();
         expect(money.amount.equals(expectedAmount)).toBe(true);
         expect(money.currency.equals(expectedCurrency)).toBe(true);
@@ -40,7 +40,7 @@ describe('Money', () => {
 
     test('should create Money from string using create', () => {
         const money = Money.create('355435', 'USD').unwrap();
-        expect(money.amount.equals(Numeric.create('355435'))).toBe(true);
+        expect(money.amount.equals(Numeric.create('355435').unwrap())).toBe(true);
         expect(money.currency.equals(Currency.create('USD').unwrap())).toBe(
             true
         );
@@ -48,7 +48,7 @@ describe('Money', () => {
 
     test('should create money from integer', () => {
         const money = Money.create('200', 'USD').unwrap();
-        expect(money.amount.equals(Numeric.create('200'))).toBe(true);
+        expect(money.amount.equals(Numeric.create('200').unwrap())).toBe(true);
         expect(money.currency.equals(Currency.create('USD').unwrap())).toBe(
             true
         );

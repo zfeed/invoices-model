@@ -18,7 +18,7 @@ describe('UnitQuantity', () => {
 
     it('should create a unit quantity', () => {
         const quantity = UnitQuantity.create('4').unwrap();
-        expect(quantity.value.equals(Numeric.create('4'))).toBe(true);
+        expect(quantity.value.equals(Numeric.create('4').unwrap())).toBe(true);
     });
 
     it.each(['-1', '0', '-100', '-5'])(

@@ -61,7 +61,7 @@ export class Money implements Equatable<Money>, Mappable<ReturnType<Money['toPla
     }
 
     static fromPlain(plain: { amount: string; currency: string }) {
-        return new Money(Numeric.create(plain.amount), Currency.fromPlain(plain.currency));
+        return new Money(Numeric.create(plain.amount).unwrap(), Currency.fromPlain(plain.currency));
     }
 
     static create(amount: string, currency: string) {
@@ -71,7 +71,7 @@ export class Money implements Equatable<Money>, Mappable<ReturnType<Money['toPla
             return Result.error(error);
         }
 
-        const numericValue = Numeric.create(amount);
+        const numericValue = Numeric.create(amount).unwrap();
 
         const currencyResult = Currency.create(currency);
 

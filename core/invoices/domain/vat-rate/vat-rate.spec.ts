@@ -19,12 +19,12 @@ describe('VatRate', () => {
     describe('create', () => {
         it('should create vat from integer input', () => {
             const vat = VatRate.create('20').unwrap();
-            expect(vat.rate.equals(Numeric.create('0.2'))).toBe(true);
+            expect(vat.rate.equals(Numeric.create('0.2').unwrap())).toBe(true);
         });
 
         it('should create vat from decimal input', () => {
             const vat = VatRate.create('0.5').unwrap();
-            expect(vat.rate.equals(Numeric.create('0.005'))).toBe(true);
+            expect(vat.rate.equals(Numeric.create('0.005').unwrap())).toBe(true);
         });
 
         it('should not create vat when not numeric input', () => {
@@ -71,19 +71,19 @@ describe('VatRate', () => {
     describe('rate', () => {
         it('returns the correct rate', () => {
             const vat = VatRate.create('10').unwrap();
-            expect(vat.rate.equals(Numeric.create('0.1'))).toBe(true);
+            expect(vat.rate.equals(Numeric.create('0.1').unwrap())).toBe(true);
         });
     });
 
     describe('rate', () => {
         it('returns the correct rate', () => {
             const vat = VatRate.create('5').unwrap();
-            expect(vat.rate.equals(Numeric.create('0.05'))).toBe(true);
+            expect(vat.rate.equals(Numeric.create('0.05').unwrap())).toBe(true);
         });
 
         it('returns the correct rate', () => {
             const vat = VatRate.create('0').unwrap();
-            expect(vat.rate.equals(Numeric.create('0'))).toBe(true);
+            expect(vat.rate.equals(Numeric.create('0').unwrap())).toBe(true);
         });
     });
 });

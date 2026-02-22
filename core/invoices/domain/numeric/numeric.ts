@@ -1,5 +1,6 @@
 import { Decimal } from 'decimal.js';
-import { Comparable, Equatable } from '../../../../building-blocks';
+import { Comparable, DomainError, Equatable, Result } from '../../../../building-blocks';
+import { checkNumericValue } from './checks/check-numeric-value';
 import { ROUNDING } from './rounding';
 
 export class Numeric implements Equatable<Numeric>, Comparable<Numeric> {
@@ -8,8 +9,14 @@ export class Numeric implements Equatable<Numeric>, Comparable<Numeric> {
         this.#value = new Decimal(value);
     }
 
-    static create(value: string): Numeric {
-        return new Numeric(value);
+    static create(value: string): Result<DomainError, Numeric> {
+        const error = checkNumericValue(value);
+
+        if (error) {
+            return Result.error(error);
+        }
+
+        return Result.ok(new Numeric(value));
     }
 
     multiplyBy(value: Numeric): Numeric {

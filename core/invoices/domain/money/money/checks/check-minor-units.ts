@@ -29,7 +29,7 @@ export function checkMinorUnits(units: string | Numeric): DomainError | null {
         return minorUnitsNotIntegerError;
     }
 
-    if (units.lessThan(Numeric.create('0'))) {
+    if (units.lessThan(Numeric.create('0').unwrap())) {
         return minorUnitsNotGteZeroError;
     }
 

@@ -10,7 +10,7 @@ export class UnitQuantity implements Equatable<UnitQuantity> {
     }
 
     static fromPlain(value: string) {
-        return new this(Numeric.create(value));
+        return new this(Numeric.create(value).unwrap());
     }
 
     static create(value: string) {
@@ -20,7 +20,7 @@ export class UnitQuantity implements Equatable<UnitQuantity> {
             return Result.error(error);
         }
 
-        return Result.ok(new this(Numeric.create(value)));
+        return Result.ok(new this(Numeric.create(value).unwrap()));
     }
 
     get value(): Numeric {
