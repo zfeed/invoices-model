@@ -12,27 +12,24 @@ export class Numeric implements Equatable<Numeric>, Comparable<Numeric> {
         return new Numeric(value);
     }
 
-    multiplyBy(value: Numeric) {
-        const result = this.#value.mul(value.#value);
-        return new Numeric(result.toString());
+    multiplyBy(value: Numeric): Numeric {
+        return new Numeric(this.#value.mul(value.#value).toString());
     }
 
-    add(value: Numeric) {
+    add(value: Numeric): Numeric {
         return new Numeric(this.#value.add(value.#value).toString());
     }
 
-    subtract(value: Numeric) {
+    subtract(value: Numeric): Numeric {
         return new Numeric(this.#value.sub(value.#value).toString());
     }
 
-    divideBy(value: Numeric) {
-        const result = this.#value.div(value.#value);
-        return new Numeric(result.toString());
+    divideBy(value: Numeric): Numeric {
+        return new Numeric(this.#value.div(value.#value).toString());
     }
 
-    toDecimalPlaces(places: number, rounding: ROUNDING = ROUNDING.UP) {
-        const result = this.#value.toDecimalPlaces(places, rounding);
-        return new Numeric(result.toString());
+    toDecimalPlaces(places: number, rounding: ROUNDING = ROUNDING.UP): Numeric {
+        return new Numeric(this.#value.toDecimalPlaces(places, rounding).toString());
     }
 
     decimalPlaces(): number {
