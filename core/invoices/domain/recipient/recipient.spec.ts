@@ -97,4 +97,55 @@ describe('Recipient', () => {
         ).toBe(true);
         expect(recipient.billing.type).toBe('PAYPAL');
     });
+
+    it('should fail with empty name', () => {
+        const result = Recipient.create({
+            type: RECIPIENT_TYPE.INDIVIDUAL,
+            name: '',
+            taxResidenceCountry: 'US',
+            address: '123 Main St',
+            taxId: 'TAX123',
+            email: 'info@company.com',
+            billing: Paypal.create({ email: 'billing@company.com' }).unwrap(),
+        });
+
+        expect(result.isError()).toBe(true);
+        expect(result.unwrapError()).toEqual(
+            expect.objectContaining({ code: '14000' }),
+        );
+    });
+
+    it('should fail with empty address', () => {
+        const result = Recipient.create({
+            type: RECIPIENT_TYPE.INDIVIDUAL,
+            name: 'John Doe',
+            taxResidenceCountry: 'US',
+            address: '  ',
+            taxId: 'TAX123',
+            email: 'info@company.com',
+            billing: Paypal.create({ email: 'billing@company.com' }).unwrap(),
+        });
+
+        expect(result.isError()).toBe(true);
+        expect(result.unwrapError()).toEqual(
+            expect.objectContaining({ code: '14000' }),
+        );
+    });
+
+    it('should fail with empty taxId', () => {
+        const result = Recipient.create({
+            type: RECIPIENT_TYPE.INDIVIDUAL,
+            name: 'John Doe',
+            taxResidenceCountry: 'US',
+            address: '123 Main St',
+            taxId: '',
+            email: 'info@company.com',
+            billing: Paypal.create({ email: 'billing@company.com' }).unwrap(),
+        });
+
+        expect(result.isError()).toBe(true);
+        expect(result.unwrapError()).toEqual(
+            expect.objectContaining({ code: '14000' }),
+        );
+    });
 });
