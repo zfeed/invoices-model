@@ -19,7 +19,7 @@ TypeScript DDD codebase with two bounded contexts: **invoices** (OOP class-based
 - Error-returning functions must return `Result<DomainError, T>` — never throw.
 - Domain naming matters. Use exact method names as specified (e.g., `draft()` not `toDraft()`, `create` not `reconstruct`). When a name is corrected, apply the correction across all related files immediately.
 - Version/concurrency fields belong ON the entity/document itself, not in separate internal maps or tracking structures.
-- Status types use class hierarchies with static factory methods (e.g., `InvoiceStatus.issued()`), transition guards, and `fromString` reconstruction.
+- Status types use class hierarchies with static factory methods (e.g., `InvoiceStatus.issued()`), transition guards, `fromPlain` for trusted reconstruction, and `fromString` for validated parsing.
 - Event names are auto-derived from class name: `DraftInvoiceCreatedEvent` → `draft-invoice.created` (dot-separated kebab-case).
 
 ## Code Style
@@ -28,7 +28,7 @@ TypeScript DDD codebase with two bounded contexts: **invoices** (OOP class-based
 - Avoid class-based implementations when a functional approach is asked for. Avoid manual object reconstruction, wrapper functions, and explicit type aliases unless asked.
 - When asked for functional style, use the existing monadic types in `building-blocks/` — do not introduce new wrapper constructs.
 - **financial-authorization** context: functional style with Ramda (`applySpec`, `prop`, `map`, `find`, `propEq`), plain types, factory functions.
-- **invoices** context: OOP style with private `#fields`, `protected constructor`, static `create`/`fromPlain` factories, `toPlain()` serialization, `Equatable<T>`. Status types use `fromString` instead of `fromPlain`.
+- **invoices** context: OOP style with private `#fields`, `protected constructor`, static `create`/`fromPlain` factories, `toPlain()` serialization, `Equatable<T>`. Status types use `fromPlain` for trusted reconstruction and `fromString` for validated parsing (returns `Result`).
 - Domain events in financial-authorization use `applySpec`/`prop` for data transformation in constructors.
 - Domain events in invoices pass `toPlain()` output as event data.
 

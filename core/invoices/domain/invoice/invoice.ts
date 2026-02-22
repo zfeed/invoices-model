@@ -113,7 +113,7 @@ export class Invoice
 
     static fromPlain(plain: ReturnType<Invoice['toPlain']>) {
         const id = Id.fromPlain(plain.id);
-        const status = InvoiceStatus.fromString(plain.status).unwrap();
+        const status = InvoiceStatus.fromPlain(plain.status);
         const lineItems = LineItems.fromPlain(plain.lineItems);
         const vatRate = plain.vatRate ? VatRate.fromPlain(plain.vatRate) : null;
         const total = Money.fromPlain(plain.total);
