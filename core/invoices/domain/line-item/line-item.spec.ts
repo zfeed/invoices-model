@@ -60,4 +60,43 @@ describe('LineItem', () => {
             true
         );
     });
+
+    it('should not create a line item with empty description', () => {
+        const result = LineItem.create({
+            description: '',
+            price: { amount: '100', currency: 'USD' },
+            quantity: '2',
+        });
+
+        expect(result.isError()).toBe(true);
+        expect(result.unwrapError()).toEqual(
+            expect.objectContaining({ code: '15000' })
+        );
+    });
+
+    it('should not create a line item with invalid quantity', () => {
+        const result = LineItem.create({
+            description: 'Product A',
+            price: { amount: '100', currency: 'USD' },
+            quantity: '-1',
+        });
+
+        expect(result.isError()).toBe(true);
+        expect(result.unwrapError()).toEqual(
+            expect.objectContaining({ code: '2001' })
+        );
+    });
+
+    it('should not create a line item with invalid currency', () => {
+        const result = LineItem.create({
+            description: 'Product A',
+            price: { amount: '100', currency: 'INVALID' },
+            quantity: '2',
+        });
+
+        expect(result.isError()).toBe(true);
+        expect(result.unwrapError()).toEqual(
+            expect.objectContaining({ code: '5000' })
+        );
+    });
 });
