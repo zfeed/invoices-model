@@ -1,5 +1,5 @@
 import { isISO31661Alpha2 } from 'validator';
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../../building-blocks';
+import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../../../building-blocks';
 
 export function checkBankCountry(value: string): DomainError | null {
     if (!isISO31661Alpha2(value)) {

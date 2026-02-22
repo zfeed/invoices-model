@@ -4,7 +4,7 @@ import { Id } from '../../../../domain/id/id';
 import { Issuer, ISSUER_TYPE } from '../../../../domain/issuer/issuer';
 import { LineItem } from '../../../../domain/line-item/line-item';
 import { Paypal } from '../../../../domain/recipient/billing/paypal';
-import { Wire } from '../../../../domain/recipient/billing/wire';
+import { Wire } from '../../../../domain/recipient/billing/wire/wire';
 import { Recipient, RECIPIENT_TYPE } from '../../../../domain/recipient/recipient';
 import { VatRate } from '../../../../domain/vat-rate/vat-rate';
 

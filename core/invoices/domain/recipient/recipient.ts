@@ -2,7 +2,7 @@ import { Equatable, Mappable, Result } from '../../../../building-blocks';
 import { Country } from '../country/country';
 import { Email } from '../email/email';
 import { Paypal } from './billing/paypal';
-import { Wire } from './billing/wire';
+import { Wire } from './billing/wire/wire';
 
 export enum RECIPIENT_TYPE {
     INDIVIDUAL = 'INDIVIDUAL',
