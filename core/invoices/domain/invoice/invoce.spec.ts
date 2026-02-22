@@ -4,7 +4,7 @@ import { Issuer, ISSUER_TYPE } from '../issuer/issuer';
 import { LineItem } from '../line-item/line-item';
 import { LineItems } from '../line-items/line-items';
 import { Money } from '../money/money/money';
-import { Paypal } from '../recipient/billing/paypal/paypal';
+import { Paypal } from '../billing/paypal/paypal';
 import { Recipient, RECIPIENT_TYPE } from '../recipient/recipient';
 import { VatRate } from '../vat-rate/vat-rate';
 import { InvoiceStatus } from '../status/invoice-status';

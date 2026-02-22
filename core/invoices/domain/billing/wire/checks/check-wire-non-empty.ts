@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../../../building-blocks';
+import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../../building-blocks';
 
 export function checkWireNonEmpty(
     field: string,

@@ -1,4 +1,4 @@
-import { Equatable, Mappable, Result } from '../../../../../../building-blocks';
+import { Equatable, Mappable, Result } from '../../../../../building-blocks';
 import { IBilling } from '../billing.interface';
 import { checkSwift } from './checks/check-swift';
 import { checkBankCountry } from './checks/check-bank-country';

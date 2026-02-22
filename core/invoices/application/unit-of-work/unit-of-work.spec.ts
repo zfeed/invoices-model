@@ -7,7 +7,7 @@ import { Invoice } from '../../domain/invoice/invoice';
 import { CalendarDate } from '../../domain/calendar-date/calendar-date';
 import { Issuer, ISSUER_TYPE } from '../../domain/issuer/issuer';
 import { Recipient, RECIPIENT_TYPE } from '../../domain/recipient/recipient';
-import { Paypal } from '../../domain/recipient/billing/paypal/paypal';
+import { Paypal } from '../../domain/billing/paypal/paypal';
 import { UnitDescription } from '../../domain/line-item/unit-description';
 
 describe('UnitOfWork contract (InMemory)', () => {

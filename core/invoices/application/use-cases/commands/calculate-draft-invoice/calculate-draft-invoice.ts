@@ -3,8 +3,8 @@ import { DraftInvoice } from '../../../../domain/draft-invoice/draft-invoice';
 import { Id } from '../../../../domain/id/id';
 import { Issuer, ISSUER_TYPE } from '../../../../domain/issuer/issuer';
 import { LineItem } from '../../../../domain/line-item/line-item';
-import { Paypal } from '../../../../domain/recipient/billing/paypal/paypal';
-import { Wire } from '../../../../domain/recipient/billing/wire/wire';
+import { Paypal } from '../../../../domain/billing/paypal/paypal';
+import { Wire } from '../../../../domain/billing/wire/wire';
 import { Recipient, RECIPIENT_TYPE } from '../../../../domain/recipient/recipient';
 import { VatRate } from '../../../../domain/vat-rate/vat-rate';
 

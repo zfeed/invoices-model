@@ -3,7 +3,7 @@ import { Id } from '../id/id';
 import { Issuer, ISSUER_TYPE } from '../issuer/issuer';
 import { LineItem } from '../line-item/line-item';
 import { Money } from '../money/money/money';
-import { Paypal } from '../recipient/billing/paypal/paypal';
+import { Paypal } from '../billing/paypal/paypal';
 import { Recipient, RECIPIENT_TYPE } from '../recipient/recipient';
 import { VatRate } from '../vat-rate/vat-rate';
 import { DraftInvoice } from './draft-invoice';
