@@ -50,6 +50,8 @@ infrastructure/      # In-memory implementations (store, storage, mappers, domai
 ## Key Patterns
 
 - **financial-authorization**: `Result.ok(data).flatMap(check1).flatMap(check2).map(build)` — validation pipelines with checks as standalone functions returning `Result<DomainError, T>`, composed via flatMap
+- **financial-authorization build functions**: use `applySpec<Entity>({ field: prop('field'), id: () => createId() })` to construct domain structures from validated input — never manual object literals
+- **financial-authorization checks**: each check lives in its own file under a `checks/` folder (e.g., `approver/checks/check-name-not-blank.ts`), exports a named function (e.g., `nameIsNotBlank`), and uses the `ifElse(predicate, createError, Result.ok)` pattern from Ramda
 - `withEvents(entity, [new SomeEvent(entity)])` — attaching domain events to entities
 - `PublishableEvents<E>` interface for event publishing
 - In-memory infrastructure with versioned store for optimistic concurrency

@@ -1,3 +1,4 @@
+import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { createApproval } from './approval';
 
 describe('createApproval', () => {
@@ -152,6 +153,38 @@ describe('createApproval', () => {
         expect(result.isOk()).toBe(true);
         const approval = result.unwrap();
         expect(approval.comment).toBe('  Comment with  multiple   spaces  ');
+    });
+
+    it('should reject empty approverId', () => {
+        const data = {
+            approverId: '',
+            comment: 'Approved',
+        };
+
+        const result = createApproval(data);
+
+        expect(result.isError()).toBe(true);
+        const error = result.unwrapError();
+        expect(error.message).toBe('Approver ID cannot be blank');
+        expect(error.code).toBe(
+            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVER_ID_BLANK
+        );
+    });
+
+    it('should reject whitespace-only approverId', () => {
+        const data = {
+            approverId: '   ',
+            comment: 'Approved',
+        };
+
+        const result = createApproval(data);
+
+        expect(result.isError()).toBe(true);
+        const error = result.unwrapError();
+        expect(error.message).toBe('Approver ID cannot be blank');
+        expect(error.code).toBe(
+            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVER_ID_BLANK
+        );
     });
 });
 

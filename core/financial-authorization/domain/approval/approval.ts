@@ -4,6 +4,7 @@ import { Result } from '../../../../building-blocks/result';
 import { Comment } from '../comment/comment';
 import { Timestamp, createTimestamp } from '../timestamp/timestamp';
 import { Id } from '../id/id';
+import { approverIdIsNotBlank } from './checks/check-approver-id-not-blank';
 
 export type Approval = {
     approverId: Id;
@@ -25,4 +26,6 @@ const buildApproval = applySpec<Approval>({
 export const createApproval = (
     data: ApprovalInput
 ): Result<DomainError, Approval> =>
-    Result.ok<DomainError, ApprovalInput>(data).map(buildApproval);
+    Result.ok<DomainError, ApprovalInput>(data)
+        .flatMap(approverIdIsNotBlank)
+        .map(buildApproval);
