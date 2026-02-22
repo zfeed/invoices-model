@@ -1,4 +1,5 @@
 import { testEquatable } from '../../../../building-blocks/equatable.test-helper';
+import { Money } from '../money/money/money';
 import { Numeric } from '../numeric/numeric';
 import { VatRate } from './vat-rate';
 
@@ -69,21 +70,50 @@ describe('VatRate', () => {
     });
 
     describe('rate', () => {
-        it('returns the correct rate', () => {
+        it('returns the correct rate for 10%', () => {
             const vat = VatRate.create('10').unwrap();
             expect(vat.rate.equals(Numeric.create('0.1').unwrap())).toBe(true);
         });
-    });
 
-    describe('rate', () => {
-        it('returns the correct rate', () => {
+        it('returns the correct rate for 5%', () => {
             const vat = VatRate.create('5').unwrap();
             expect(vat.rate.equals(Numeric.create('0.05').unwrap())).toBe(true);
         });
 
-        it('returns the correct rate', () => {
+        it('returns the correct rate for 0%', () => {
             const vat = VatRate.create('0').unwrap();
             expect(vat.rate.equals(Numeric.create('0').unwrap())).toBe(true);
+        });
+    });
+
+    describe('addTo', () => {
+        it('applies vat rate to money', () => {
+            const vat = VatRate.create('20').unwrap();
+            const money = Money.create('10000', 'EUR').unwrap();
+
+            const result = vat.addTo(money);
+
+            expect(result.isOk()).toBe(true);
+            expect(result.unwrap().equals(Money.create('12000', 'EUR').unwrap())).toBe(true);
+        });
+
+        it('applies 0% vat rate to money', () => {
+            const vat = VatRate.create('0').unwrap();
+            const money = Money.create('10000', 'EUR').unwrap();
+
+            const result = vat.addTo(money);
+
+            expect(result.isOk()).toBe(true);
+            expect(result.unwrap().equals(money)).toBe(true);
+        });
+    });
+
+    describe('toPlain / fromPlain', () => {
+        it('round-trips through toPlain and fromPlain', () => {
+            const vat = VatRate.create('20').unwrap();
+            const restored = VatRate.fromPlain(vat.toPlain());
+
+            expect(restored.equals(vat)).toBe(true);
         });
     });
 });
