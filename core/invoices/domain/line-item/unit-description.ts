@@ -8,7 +8,7 @@ export class UnitDescription implements Equatable<UnitDescription> {
     }
 
     static create(value: string) {
-        return new this(value);
+        return new UnitDescription(value);
     }
 
     equals(other: UnitDescription) {
