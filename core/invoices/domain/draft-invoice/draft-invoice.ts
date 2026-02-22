@@ -424,8 +424,8 @@ export class DraftInvoice
             total: this.#total?.toPlain() ?? null,
             vatRate: this.#vatRate?.toPlain() ?? null,
             vatAmount: this.#vatAmount?.toPlain() ?? null,
-            issueDate: this.#issueDate?.toString() ?? null,
-            dueDate: this.#dueDate?.toString() ?? null,
+            issueDate: this.#issueDate?.toPlain() ?? null,
+            dueDate: this.#dueDate?.toPlain() ?? null,
             issuer: this.#issuer?.toPlain() ?? null,
             recipient: this.#recipient?.toPlain() ?? null,
         };
