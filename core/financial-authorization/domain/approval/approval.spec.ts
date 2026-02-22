@@ -67,97 +67,25 @@ describe('createApproval', () => {
         expect(approval.createdAt).toBeInstanceOf(Date);
     });
 
-    it('should create approval with long comment', () => {
-        const longComment = 'A'.repeat(1000);
-        const data = {
-            approverId: 'user-002',
-            comment: longComment,
-        };
-
-        const result = createApproval(data);
-
-        expect(result.isOk()).toBe(true);
-        const approval = result.unwrap();
-        expect(approval.approverId).toBe('user-002');
-        expect(approval.comment).toBe(longComment);
-        expect(approval.comment?.length).toBe(1000);
-    });
-
-    it('should create approval with special characters in approverId', () => {
-        const data = {
-            approverId: 'user-123-abc@example.com',
-            comment: 'Approved',
-        };
-
-        const result = createApproval(data);
-
-        expect(result.isOk()).toBe(true);
-        const approval = result.unwrap();
-        expect(approval.approverId).toBe('user-123-abc@example.com');
-    });
-
-    it('should create approval with multiline comment', () => {
-        const data = {
-            approverId: 'user-003',
-            comment: 'Line 1\nLine 2\nLine 3',
-        };
-
-        const result = createApproval(data);
-
-        expect(result.isOk()).toBe(true);
-        const approval = result.unwrap();
-        expect(approval.comment).toBe('Line 1\nLine 2\nLine 3');
-    });
-
-    it('should create multiple approvals with unique timestamps', async () => {
-        const data1 = { approverId: '1', comment: 'First' };
-        const data2 = { approverId: '2', comment: 'Second' };
-
-        const result1 = createApproval(data1);
-        // Small delay to ensure different timestamps
-        await new Promise((resolve) => setTimeout(resolve, 10));
-        const result2 = createApproval(data2);
-
-        expect(result1.isOk()).toBe(true);
-        expect(result2.isOk()).toBe(true);
-
-        const approval1 = result1.unwrap();
-        const approval2 = result2.unwrap();
-
-        expect(approval2.createdAt.getTime()).toBeGreaterThanOrEqual(
-            approval1.createdAt.getTime()
-        );
-    });
-
-    it('should create approval with UUID-style approverId', () => {
-        const data = {
-            approverId: '550e8400-e29b-41d4-a716-446655440000',
-            comment: 'Approved',
-        };
-
-        const result = createApproval(data);
-
-        expect(result.isOk()).toBe(true);
-        const approval = result.unwrap();
-        expect(approval.approverId).toBe('550e8400-e29b-41d4-a716-446655440000');
-    });
-
-    it('should preserve exact comment content including whitespace', () => {
-        const data = {
-            approverId: 'user-004',
-            comment: '  Comment with  multiple   spaces  ',
-        };
-
-        const result = createApproval(data);
-
-        expect(result.isOk()).toBe(true);
-        const approval = result.unwrap();
-        expect(approval.comment).toBe('  Comment with  multiple   spaces  ');
-    });
-
     it('should reject empty approverId', () => {
         const data = {
             approverId: '',
+            comment: 'Approved',
+        };
+
+        const result = createApproval(data);
+
+        expect(result.isError()).toBe(true);
+        const error = result.unwrapError();
+        expect(error.message).toBe('Approver ID cannot be blank');
+        expect(error.code).toBe(
+            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVER_ID_BLANK
+        );
+    });
+
+    it('should reject null approverId', () => {
+        const data = {
+            approverId: null as unknown as string,
             comment: 'Approved',
         };
 

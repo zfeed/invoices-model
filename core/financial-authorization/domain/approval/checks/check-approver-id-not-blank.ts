@@ -10,7 +10,8 @@ type ApprovalInput = {
     comment: Comment;
 };
 
-const approverIdIsBlank = (data: ApprovalInput) => !data.approverId.trim();
+const approverIdIsBlank = (data: ApprovalInput) =>
+    !data.approverId || !data.approverId.trim();
 const createApproverIdBlankError = () =>
     Result.error(
         new DomainError({
