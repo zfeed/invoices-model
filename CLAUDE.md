@@ -49,8 +49,7 @@ infrastructure/      # In-memory implementations (store, storage, mappers, domai
 
 ## Key Patterns
 
-- `Result.ok(data).flatMap(check1).flatMap(check2).map(build)` — validation pipelines
+- **financial-authorization**: `Result.ok(data).flatMap(check1).flatMap(check2).map(build)` — validation pipelines with checks as standalone functions returning `Result<DomainError, T>`, composed via flatMap
 - `withEvents(entity, [new SomeEvent(entity)])` — attaching domain events to entities
 - `PublishableEvents<E>` interface for event publishing
-- Checks are standalone functions returning `Result<DomainError, T>` — composed via flatMap
 - In-memory infrastructure with versioned store for optimistic concurrency
