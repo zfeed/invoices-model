@@ -1,4 +1,5 @@
 import { assertNever, DomainError, Equatable, Mappable, Result } from '../../../../building-blocks';
+import { checkRecipientNonEmpty } from './checks/check-recipient-non-empty';
 import { Country } from '../country/country';
 import { Email } from '../email/email';
 import { Paypal } from './billing/paypal';
@@ -127,6 +128,15 @@ export class Recipient implements Equatable<Recipient>, Mappable<ReturnType<Reci
         taxResidenceCountry: string;
         billing: Paypal | Wire;
     }): Result<DomainError, Recipient> {
+        const fieldError =
+            checkRecipientNonEmpty('name', name) ??
+            checkRecipientNonEmpty('address', address) ??
+            checkRecipientNonEmpty('taxId', taxId);
+
+        if (fieldError) {
+            return Result.error(fieldError);
+        }
+
         const emailResult = Email.create(email);
 
         if (emailResult.isError()) {
