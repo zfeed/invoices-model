@@ -2,7 +2,7 @@ import { DOMAIN_ERROR_CODE } from '../../../../../building-blocks/errors/domain/
 import { DomainError } from '../../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../../building-blocks/result';
 import { DomainEvents } from '../../../../shared/domain-events/domain-events.interface';
-import { Action } from '../../../domain/action/action';
+import { Action, createAction } from '../../../domain/action/action';
 import { Approver } from '../../../domain/approver/approver';
 import { approveDocument, FinancialDocument } from '../../../domain/document/document';
 import { ReferenceId } from '../../../domain/reference-id/reference-id';
@@ -19,6 +19,11 @@ export const approveActionOnDocumentCommand =
     async (
         request: ApproveActionRequest
     ): Promise<Result<DomainError, FinancialDocument>> => {
+        const actionResult = createAction(request.action);
+        if (actionResult.isError()) {
+            return Result.error(actionResult.unwrapError());
+        }
+
         const found = await documentStorage
             .findByReferenceId(request.referenceId)
             .run();
