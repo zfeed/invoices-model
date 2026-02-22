@@ -1,5 +1,6 @@
 import { Equatable, Mappable, Result } from '../../../../building-blocks';
 import { Email } from '../email/email';
+import { checkIssuerNonEmpty } from './checks/check-issuer-non-empty';
 
 export enum ISSUER_TYPE {
     INDIVIDUAL = 'INDIVIDUAL',
@@ -90,6 +91,21 @@ export class Issuer implements Equatable<Issuer>, Mappable<ReturnType<Issuer['to
         taxId: string;
         email: string;
     }) {
+        const nameError = checkIssuerNonEmpty('name', name);
+        if (nameError) {
+            return Result.error(nameError);
+        }
+
+        const addressError = checkIssuerNonEmpty('address', address);
+        if (addressError) {
+            return Result.error(addressError);
+        }
+
+        const taxIdError = checkIssuerNonEmpty('taxId', taxId);
+        if (taxIdError) {
+            return Result.error(taxIdError);
+        }
+
         const emailResult = Email.create(email);
 
         if (emailResult.isError()) {

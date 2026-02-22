@@ -85,4 +85,23 @@ describe('Issuer', () => {
         expect(issuer.taxId).toBe('TAX123456');
         expect(issuer.type).toBe('COMPANY');
     });
+
+    it.each(['name', 'address', 'taxId'] as const)(
+        'should not create an issuer with empty %s',
+        (field) => {
+            const result = Issuer.create({
+                type: ISSUER_TYPE.INDIVIDUAL,
+                name: 'John Doe',
+                address: '123 Main St',
+                taxId: 'TAX123',
+                email: 'info@company.com',
+                [field]: '',
+            });
+
+            expect(result.isError()).toBe(true);
+            expect(result.unwrapError()).toEqual(
+                expect.objectContaining({ code: '16000' })
+            );
+        }
+    );
 });
