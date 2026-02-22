@@ -31,17 +31,25 @@ describe('CalendarDate', () => {
 
     it('should create issue date', () => {
         const issueDate = CalendarDate.create('2023-01-01').unwrap();
-
-        expect(issueDate).toBeDefined();
+        expect(issueDate.equals(CalendarDate.create('2023-01-01').unwrap())).toBe(true);
     });
 
     it("should not create issue date if it's not a valid date", () => {
         const result = CalendarDate.create('invalid-date');
-
         expect(result.unwrapError()).toEqual(
             expect.objectContaining({
                 code: '3000',
             })
         );
+    });
+
+    it('should serialize to plain string', () => {
+        const date = CalendarDate.create('2023-01-01').unwrap();
+        expect(date.toPlain()).toBe('2023-01-01');
+    });
+
+    it('should reconstruct from plain', () => {
+        const date = CalendarDate.fromPlain('2023-01-01');
+        expect(date.toPlain()).toBe('2023-01-01');
     });
 });
