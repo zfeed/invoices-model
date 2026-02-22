@@ -1,4 +1,4 @@
-import { DomainError, Equatable, Mappable, Result } from '../../../../building-blocks';
+import { assertNever, DomainError, Equatable, Mappable, Result } from '../../../../building-blocks';
 import { Country } from '../country/country';
 import { Email } from '../email/email';
 import { Paypal } from './billing/paypal';
@@ -89,9 +89,15 @@ export class Recipient implements Equatable<Recipient>, Mappable<ReturnType<Reci
     }
 
     static fromPlain(plain: ReturnType<Recipient['toPlain']>) {
-        const billing = plain.billing.type === 'PAYPAL'
-            ? Paypal.fromPlain(plain.billing as ReturnType<Paypal['toPlain']>)
-            : Wire.fromPlain(plain.billing as ReturnType<Wire['toPlain']>);
+        let billing: Paypal | Wire;
+
+        if (plain.billing.type === 'PAYPAL') {
+            billing = Paypal.fromPlain(plain.billing);
+        } else if (plain.billing.type === 'WIRE') {
+            billing = Wire.fromPlain(plain.billing);
+        } else {
+            return assertNever(plain.billing);
+        }
 
         return new this(
             plain.type,

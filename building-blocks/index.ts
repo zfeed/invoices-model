@@ -6,3 +6,4 @@ export * from './mappable.interface';
 export * from './errors/domain/domain-codes';
 export * from './errors/domain/domain.error';
 export * from './result';
+export * from './assert-never';
