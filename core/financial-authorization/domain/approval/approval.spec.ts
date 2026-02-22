@@ -52,7 +52,7 @@ describe('createApproval', () => {
         );
     });
 
-    it('should create approval with empty string comment', () => {
+    it('should reject empty string comment', () => {
         const data = {
             approverId: 'user-001',
             comment: '',
@@ -60,11 +60,24 @@ describe('createApproval', () => {
 
         const result = createApproval(data);
 
-        expect(result.isOk()).toBe(true);
-        const approval = result.unwrap();
-        expect(approval.approverId).toBe('user-001');
-        expect(approval.comment).toBe('');
-        expect(approval.createdAt).toBeInstanceOf(Date);
+        expect(result.isError()).toBe(true);
+        expect(result.unwrapError().code).toBe(
+            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_COMMENT_BLANK
+        );
+    });
+
+    it('should reject whitespace-only comment', () => {
+        const data = {
+            approverId: 'user-001',
+            comment: '   ',
+        };
+
+        const result = createApproval(data);
+
+        expect(result.isError()).toBe(true);
+        expect(result.unwrapError().code).toBe(
+            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_COMMENT_BLANK
+        );
     });
 
     it('should reject empty approverId', () => {

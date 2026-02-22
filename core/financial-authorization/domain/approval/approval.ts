@@ -1,7 +1,7 @@
 import { applySpec, prop } from 'ramda';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
-import { Comment } from '../comment/comment';
+import { createComment, Comment } from '../comment/comment';
 import { Timestamp, createTimestamp } from '../timestamp/timestamp';
 import { Id } from '../id/id';
 import { approverIdIsNotBlank } from './checks/check-approver-id-not-blank';
@@ -28,4 +28,5 @@ export const createApproval = (
 ): Result<DomainError, Approval> =>
     Result.ok<DomainError, ApprovalInput>(data)
         .flatMap(approverIdIsNotBlank)
+        .flatMap((d) => createComment(d.comment).map(() => d))
         .map(buildApproval);
