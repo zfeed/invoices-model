@@ -147,7 +147,7 @@ describe('approveActionOnDocumentCommand', () => {
             .run();
 
         found.fold(
-            () => fail('Expected document to exist'),
+            () => { throw new Error('Expected document to exist'); },
             (doc) => {
                 const authflow = doc.authflows.find((a) => a.action === 'pay');
                 expect(authflow?.isApproved).toBe(true);

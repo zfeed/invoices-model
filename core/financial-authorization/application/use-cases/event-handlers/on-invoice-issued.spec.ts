@@ -95,7 +95,7 @@ describe('onInvoiceIssued', () => {
 
         expect(result.isSome()).toBe(true);
         result.fold(
-            () => fail('Expected document to exist'),
+            () => { throw new Error('Expected document to exist'); },
             (doc) => {
                 expect(doc.referenceId).toBe('INV-001');
             }
@@ -114,7 +114,7 @@ describe('onInvoiceIssued', () => {
         const result = await storage.findByReferenceId('INV-001').run();
 
         result.fold(
-            () => fail('Expected document to exist'),
+            () => { throw new Error('Expected document to exist'); },
             (doc) => {
                 expect(doc.authflows).toHaveLength(1);
                 expect(doc.authflows[0].action).toBe('pay');
@@ -136,7 +136,7 @@ describe('onInvoiceIssued', () => {
         const result = await storage.findByReferenceId('INV-001').run();
 
         result.fold(
-            () => fail('Expected document to exist'),
+            () => { throw new Error('Expected document to exist'); },
             (doc) => {
                 expect(doc.authflows).toHaveLength(1);
                 expect(doc.authflows[0].range.from.amount).toBe('1000');
@@ -156,7 +156,7 @@ describe('onInvoiceIssued', () => {
         const result = await storage.findByReferenceId('INV-001').run();
 
         result.fold(
-            () => fail('Expected document to exist'),
+            () => { throw new Error('Expected document to exist'); },
             (doc) => {
                 expect(doc.authflows).toEqual([]);
             }
@@ -178,7 +178,7 @@ describe('onInvoiceIssued', () => {
         const result = await storage.findByReferenceId('INV-001').run();
 
         result.fold(
-            () => fail('Expected document to exist'),
+            () => { throw new Error('Expected document to exist'); },
             (doc) => {
                 expect(doc.authflows).toEqual([]);
             }
@@ -263,7 +263,7 @@ describe('onInvoiceIssued', () => {
         const result = await storage.findByReferenceId('INV-001').run();
 
         result.fold(
-            () => fail('Expected document to exist'),
+            () => { throw new Error('Expected document to exist'); },
             (doc) => {
                 expect(doc.version).toBe(1);
             }
@@ -284,7 +284,7 @@ describe('onInvoiceIssued', () => {
         const result = await storage.findByReferenceId('INV-001').run();
 
         result.fold(
-            () => fail('Expected document to exist'),
+            () => { throw new Error('Expected document to exist'); },
             (doc) => {
                 expect(doc.version).toBe(1);
             }
@@ -309,7 +309,7 @@ describe('onInvoiceIssued', () => {
 
         expect(result.isSome()).toBe(true);
         result.fold(
-            () => fail('Expected document to exist'),
+            () => { throw new Error('Expected document to exist'); },
             (doc) => {
                 expect(doc.referenceId).toBe('my-custom-ref-123');
             }
@@ -360,7 +360,7 @@ describe('onInvoiceIssued', () => {
         const result = await storage.findByReferenceId('INV-001').run();
 
         result.fold(
-            () => fail('Expected document to exist'),
+            () => { throw new Error('Expected document to exist'); },
             (doc) => {
                 expect(doc.id).toBe(existing.id);
             }

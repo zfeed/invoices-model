@@ -26,7 +26,7 @@ describe('DomainEvents contract (InMemory)', () => {
     describe('publishEvents', () => {
         it('should call the handler when a matching event is published', async () => {
             const domainEvents = new InMemoryDomainEvents();
-            const handler = jest.fn().mockResolvedValue(undefined);
+            const handler = vi.fn().mockResolvedValue(undefined);
 
             await domainEvents.subscribeToEvent(OrderPlacedEvent, handler);
             await domainEvents.publishEvents(
@@ -41,7 +41,7 @@ describe('DomainEvents contract (InMemory)', () => {
 
         it('should not call the handler when a different event is published', async () => {
             const domainEvents = new InMemoryDomainEvents();
-            const handler = jest.fn().mockResolvedValue(undefined);
+            const handler = vi.fn().mockResolvedValue(undefined);
 
             await domainEvents.subscribeToEvent(OrderPlacedEvent, handler);
             await domainEvents.publishEvents(
@@ -53,8 +53,8 @@ describe('DomainEvents contract (InMemory)', () => {
 
         it('should call multiple handlers for the same event type', async () => {
             const domainEvents = new InMemoryDomainEvents();
-            const handler1 = jest.fn().mockResolvedValue(undefined);
-            const handler2 = jest.fn().mockResolvedValue(undefined);
+            const handler1 = vi.fn().mockResolvedValue(undefined);
+            const handler2 = vi.fn().mockResolvedValue(undefined);
 
             await domainEvents.subscribeToEvent(OrderPlacedEvent, handler1);
             await domainEvents.subscribeToEvent(OrderPlacedEvent, handler2);
@@ -68,7 +68,7 @@ describe('DomainEvents contract (InMemory)', () => {
 
         it('should handle multiple events from a single publisher', async () => {
             const domainEvents = new InMemoryDomainEvents();
-            const handler = jest.fn().mockResolvedValue(undefined);
+            const handler = vi.fn().mockResolvedValue(undefined);
 
             await domainEvents.subscribeToEvent(OrderPlacedEvent, handler);
             await domainEvents.publishEvents(
@@ -83,7 +83,7 @@ describe('DomainEvents contract (InMemory)', () => {
 
         it('should handle multiple publishers', async () => {
             const domainEvents = new InMemoryDomainEvents();
-            const handler = jest.fn().mockResolvedValue(undefined);
+            const handler = vi.fn().mockResolvedValue(undefined);
 
             await domainEvents.subscribeToEvent(OrderPlacedEvent, handler);
             await domainEvents.publishEvents(
@@ -96,8 +96,8 @@ describe('DomainEvents contract (InMemory)', () => {
 
         it('should dispatch each event only to its matching handler', async () => {
             const domainEvents = new InMemoryDomainEvents();
-            const placedHandler = jest.fn().mockResolvedValue(undefined);
-            const cancelledHandler = jest.fn().mockResolvedValue(undefined);
+            const placedHandler = vi.fn().mockResolvedValue(undefined);
+            const cancelledHandler = vi.fn().mockResolvedValue(undefined);
 
             await domainEvents.subscribeToEvent(
                 OrderPlacedEvent,
@@ -136,7 +136,7 @@ describe('DomainEvents contract (InMemory)', () => {
 
         it('should do nothing when publishing an empty publisher', async () => {
             const domainEvents = new InMemoryDomainEvents();
-            const handler = jest.fn().mockResolvedValue(undefined);
+            const handler = vi.fn().mockResolvedValue(undefined);
 
             await domainEvents.subscribeToEvent(OrderPlacedEvent, handler);
             await domainEvents.publishEvents(new FakePublisher());

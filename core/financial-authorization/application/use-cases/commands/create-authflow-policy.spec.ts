@@ -53,7 +53,7 @@ describe('createAuthflowPolicyCommand', () => {
 
         expect(found.isSome()).toBe(true);
         found.fold(
-            () => fail('Expected policy to exist'),
+            () => { throw new Error('Expected policy to exist'); },
             (policy) => {
                 expect(policy.id).toBe(result.unwrap().id);
             }

@@ -102,7 +102,7 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
 
             expect(result.isSome()).toBe(true);
             result.fold(
-                () => fail('Expected financial document to exist'),
+                () => { throw new Error('Expected financial document to exist'); },
                 (doc) => {
                     expect(doc.referenceId).toBe(invoice.id);
                     expect(doc.authflows).toHaveLength(0);
@@ -153,7 +153,7 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
 
             expect(result.isSome()).toBe(true);
             result.fold(
-                () => fail('Expected financial document to exist'),
+                () => { throw new Error('Expected financial document to exist'); },
                 (doc) => {
                     expect(doc.referenceId).toBe(invoice.id);
                     expect(doc.authflows).toHaveLength(1);
@@ -172,7 +172,7 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
                 .run();
 
             result.fold(
-                () => fail('Expected financial document to exist'),
+                () => { throw new Error('Expected financial document to exist'); },
                 (doc) => {
                     // invoice total is 220 (200 + 10% VAT), falls in 0-999
                     expect(doc.authflows[0].range.from.amount).toBe('0');
@@ -190,7 +190,7 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
                 .run();
 
             result.fold(
-                () => fail('Expected financial document to exist'),
+                () => { throw new Error('Expected financial document to exist'); },
                 (doc) => {
                     expect(doc.referenceId).toBe(invoice.id);
                 }
