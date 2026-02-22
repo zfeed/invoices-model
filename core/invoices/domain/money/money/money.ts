@@ -76,7 +76,7 @@ export class Money implements Equatable<Money>, Mappable<ReturnType<Money['toPla
         const currencyResult = Currency.create(currency);
 
         if (currencyResult.isError()) {
-            return currencyResult.error();
+            return Result.error(currencyResult.unwrapError());
         }
 
         return Result.ok(new Money(numericValue, currencyResult.unwrap()));
