@@ -2,6 +2,7 @@ import { testEquatable } from '../../../../building-blocks/equatable.test-helper
 import { Country } from '../country/country';
 import { Email } from '../email/email';
 import { Paypal } from './billing/paypal';
+import { Wire } from './billing/wire/wire';
 import { Recipient, RECIPIENT_TYPE } from './recipient';
 
 describe('Recipient', () => {
@@ -96,6 +97,32 @@ describe('Recipient', () => {
             )
         ).toBe(true);
         expect(recipient.billing.type).toBe('PAYPAL');
+    });
+
+    it('should create a recipient with wire billing', () => {
+        const billing = Wire.create({
+            swift: 'DEUTDEFF',
+            accountNumber: 'DE89370400440532013000',
+            accountHolderName: 'John Doe',
+            bankName: 'Deutsche Bank',
+            bankAddress: 'Taunusanlage 12, 60325 Frankfurt',
+            bankCountry: 'DE',
+        }).unwrap();
+
+        const result = Recipient.create({
+            type: RECIPIENT_TYPE.COMPANY,
+            name: 'Acme Corp',
+            taxResidenceCountry: 'DE',
+            address: '456 Berlin St',
+            taxId: 'DE123456789',
+            email: 'info@acme.com',
+            billing,
+        });
+
+        const recipient = result.unwrap();
+
+        expect(recipient.billing.type).toBe('WIRE');
+        expect(recipient.type).toBe('COMPANY');
     });
 
     it('should fail with empty name', () => {
