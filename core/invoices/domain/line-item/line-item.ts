@@ -55,7 +55,7 @@ export class LineItem implements Equatable<LineItem>, Mappable<ReturnType<LineIt
     }
 
     static fromPlain(plain: ReturnType<LineItem['toPlain']>) {
-        return new this(
+        return new LineItem(
             UnitDescription.fromPlain(plain.description),
             Money.fromPlain(plain.price),
             UnitQuantity.fromPlain(plain.quantity),
@@ -78,19 +78,19 @@ export class LineItem implements Equatable<LineItem>, Mappable<ReturnType<LineIt
         const unitDescriptionResult = UnitDescription.create(description);
 
         if (unitDescriptionResult.isError()) {
-            return unitDescriptionResult.error();
+            return Result.error(unitDescriptionResult.unwrapError());
         }
 
         const unitQuantityResult = UnitQuantity.create(quantity);
 
         if (unitQuantityResult.isError()) {
-            return unitQuantityResult.error();
+            return Result.error(unitQuantityResult.unwrapError());
         }
 
         const moneyResult = Money.create(price.amount, price.currency);
 
         if (moneyResult.isError()) {
-            return moneyResult.error();
+            return Result.error(moneyResult.unwrapError());
         }
 
         const unitDescription = unitDescriptionResult.unwrap();
@@ -100,7 +100,7 @@ export class LineItem implements Equatable<LineItem>, Mappable<ReturnType<LineIt
         const unitTotal = unitPrice.multiplyBy(unitQuantity.value);
 
         return Result.ok(
-            new this(unitDescription, unitPrice, unitQuantity, unitTotal)
+            new LineItem(unitDescription, unitPrice, unitQuantity, unitTotal)
         );
     }
 }
