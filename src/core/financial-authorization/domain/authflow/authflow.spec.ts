@@ -20,6 +20,7 @@ describe('createAuthflow', () => {
                 groups: [
                     {
                         id: 'group-1',
+                        isApproved: true,
                         approvers: [
                             {
                                 id: '1',
@@ -43,6 +44,7 @@ describe('createAuthflow', () => {
                 groups: [
                     {
                         id: 'group-2',
+                        isApproved: true,
                         approvers: [
                             { id: '2', name: 'Bob', email: 'bob@example.com' },
                         ],
@@ -80,6 +82,7 @@ describe('createAuthflow', () => {
                 groups: [
                     {
                         id: 'group-1',
+                        isApproved: true,
                         approvers: [
                             {
                                 id: '1',
@@ -103,6 +106,7 @@ describe('createAuthflow', () => {
                 groups: [
                     {
                         id: 'group-2',
+                        isApproved: false,
                         approvers: [
                             { id: '2', name: 'Bob', email: 'bob@example.com' },
                         ],
@@ -133,6 +137,7 @@ describe('createAuthflow', () => {
                 groups: [
                     {
                         id: 'group-1',
+                        isApproved: false,
                         approvers: [
                             {
                                 id: '1',
@@ -150,6 +155,7 @@ describe('createAuthflow', () => {
                 groups: [
                     {
                         id: 'group-2',
+                        isApproved: false,
                         approvers: [
                             { id: '2', name: 'Bob', email: 'bob@example.com' },
                         ],
@@ -196,6 +202,7 @@ describe('createAuthflow', () => {
                 groups: [
                     {
                         id: 'group-1',
+                        isApproved: true,
                         approvers: [
                             {
                                 id: '1',
@@ -219,6 +226,7 @@ describe('createAuthflow', () => {
                 groups: [
                     {
                         id: 'group-2',
+                        isApproved: true,
                         approvers: [
                             { id: '2', name: 'Bob', email: 'bob@example.com' },
                         ],
@@ -386,6 +394,7 @@ describe('createAuthflow', () => {
                 groups: [
                     {
                         id: 'group-1',
+                        isApproved: true,
                         approvers: [
                             {
                                 id: '1',
@@ -427,6 +436,7 @@ describe('createAuthflow', () => {
                 groups: [
                     {
                         id: 'group-1',
+                        isApproved: false,
                         approvers: [
                             {
                                 id: '1',
@@ -471,6 +481,7 @@ describe('createAuthflow', () => {
                 groups: [
                     {
                         id: 'group-1',
+                        isApproved: false,
                         approvers: [
                             { id: '1', name: 'Alice', email: 'alice@example.com' },
                         ],
@@ -501,6 +512,7 @@ describe('createAuthflow', () => {
                 groups: [
                     {
                         id: 'group-1',
+                        isApproved: false,
                         approvers: [
                             { id: '1', name: 'Alice', email: 'alice@example.com' },
                         ],
@@ -603,6 +615,7 @@ describe('createAuthflow', () => {
                 groups: [
                     {
                         id: 'group-1',
+                        isApproved: true,
                         approvers: [
                             {
                                 id: '1',
@@ -632,6 +645,7 @@ describe('createAuthflow', () => {
                 groups: [
                     {
                         id: 'group-2',
+                        isApproved: true,
                         approvers: [
                             {
                                 id: '3',
@@ -786,6 +800,7 @@ describe('approveAuthflow', () => {
             order: number;
             groups: {
                 id: string;
+                isApproved: boolean;
                 approvers: { id: string; name: string; email: string }[];
                 approvals: { approverId: string; createdAt: string; comment: string | null }[];
             }[];
@@ -804,6 +819,7 @@ describe('approveAuthflow', () => {
         isApproved: boolean
     ) => ({
         id,
+        isApproved,
         approvers,
         approvals: isApproved
             ? approvers.map((a) => ({

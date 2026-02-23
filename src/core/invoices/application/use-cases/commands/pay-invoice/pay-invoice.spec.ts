@@ -65,6 +65,7 @@ const createAuthorizationDocument = (referenceId: string) =>
                         groups: [
                             {
                                 id: 'group-1',
+                                isApproved: false,
                                 approvers: [
                                     {
                                         id: 'approver-1',

@@ -9,11 +9,13 @@ import { checkNoDuplicateApprovals } from './checks/check-no-duplicate-approvals
 
 export class Group implements Mappable<ReturnType<Group['toPlain']>> {
     #id: Id;
+    #isApproved: boolean;
     #approvers: Approver[];
     #approvals: Approval[];
 
-    protected constructor(id: Id, approvers: Approver[], approvals: Approval[]) {
+    protected constructor(id: Id, isApproved: boolean, approvers: Approver[], approvals: Approval[]) {
         this.#id = id;
+        this.#isApproved = isApproved;
         this.#approvers = approvers;
         this.#approvals = approvals;
     }
@@ -23,7 +25,7 @@ export class Group implements Mappable<ReturnType<Group['toPlain']>> {
     }
 
     public get isApproved(): boolean {
-        return this.#approvals.length > 0;
+        return this.#isApproved;
     }
 
     public get approvers(): readonly Approver[] {
@@ -55,16 +57,18 @@ export class Group implements Mappable<ReturnType<Group['toPlain']>> {
             return Result.error(duplicateApprovalsError);
         }
 
-        return Result.ok(new Group(Id.create().unwrap(), data.approvers, data.approvals));
+        return Result.ok(new Group(Id.create().unwrap(), data.approvals.length > 0, data.approvers, data.approvals));
     }
 
     static fromPlain(plain: {
         id: string;
+        isApproved: boolean;
         approvers: { id: string; name: string; email: string }[];
         approvals: { approverId: string; createdAt: string; comment: string | null }[];
     }) {
         return new Group(
             Id.fromPlain(plain.id),
+            plain.isApproved,
             plain.approvers.map((a) => Approver.fromPlain(a)),
             plain.approvals.map((a) => Approval.fromPlain(a)),
         );
@@ -111,7 +115,7 @@ export class Group implements Mappable<ReturnType<Group['toPlain']>> {
             return Result.error(duplicateApprovalsError);
         }
 
-        return Result.ok(new Group(this.#id, this.#approvers, newApprovals));
+        return Result.ok(new Group(this.#id, true, this.#approvers, newApprovals));
     }
 
     hasEligibleApprover(approverId: Id): boolean {

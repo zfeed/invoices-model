@@ -24,6 +24,7 @@ const makeAuthflow = (
         order: number;
         groups: {
             id: string;
+            isApproved: boolean;
             approvers: { id: string; name: string; email: string }[];
             approvals: { approverId: string; createdAt: string; comment: string | null }[];
         }[];
@@ -309,6 +310,7 @@ describe('approveDocument', () => {
         isApproved: boolean
     ) => ({
         id,
+        isApproved,
         approvers,
         approvals: isApproved
             ? approvers.map((a) => ({
@@ -677,6 +679,7 @@ describe('canApproverApprove', () => {
                     order: 0,
                     groups: [{
                         id: 'group-1',
+                        isApproved: false,
                         approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
                         approvals: [],
                     }],
@@ -707,6 +710,7 @@ describe('canApproverApprove', () => {
                     order: 0,
                     groups: [{
                         id: 'group-1',
+                        isApproved: false,
                         approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
                         approvals: [],
                     }],
@@ -737,6 +741,7 @@ describe('canApproverApprove', () => {
                     order: 0,
                     groups: [{
                         id: 'group-1',
+                        isApproved: true,
                         approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
                         approvals: [{ approverId: 'approver-1', createdAt: new Date().toISOString(), comment: null }],
                     }],
@@ -768,6 +773,7 @@ describe('canApproverApprove', () => {
                         order: 0,
                         groups: [{
                             id: 'group-1',
+                            isApproved: false,
                             approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
                             approvals: [],
                         }],
@@ -777,6 +783,7 @@ describe('canApproverApprove', () => {
                         order: 1,
                         groups: [{
                             id: 'group-2',
+                            isApproved: false,
                             approvers: [{ id: 'approver-2', name: 'Bob', email: 'bob@example.com' }],
                             approvals: [],
                         }],
@@ -809,6 +816,7 @@ describe('canApproverApprove', () => {
                         order: 0,
                         groups: [{
                             id: 'group-1',
+                            isApproved: true,
                             approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
                             approvals: [{ approverId: 'approver-1', createdAt: new Date().toISOString(), comment: null }],
                         }],
@@ -818,6 +826,7 @@ describe('canApproverApprove', () => {
                         order: 1,
                         groups: [{
                             id: 'group-2',
+                            isApproved: false,
                             approvers: [{ id: 'approver-2', name: 'Bob', email: 'bob@example.com' }],
                             approvals: [],
                         }],
@@ -849,6 +858,7 @@ describe('canApproverApprove', () => {
                     order: 0,
                     groups: [{
                         id: 'group-1',
+                        isApproved: false,
                         approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
                         approvals: [],
                     }],
@@ -879,6 +889,7 @@ describe('canApproverApprove', () => {
                     order: 0,
                     groups: [{
                         id: 'group-1',
+                        isApproved: true,
                         approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
                         approvals: [{ approverId: 'approver-1', createdAt: new Date().toISOString(), comment: null }],
                     }],
@@ -910,6 +921,7 @@ describe('canApproverApprove', () => {
                         order: 5,
                         groups: [{
                             id: 'group-1',
+                            isApproved: false,
                             approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
                             approvals: [],
                         }],
@@ -919,6 +931,7 @@ describe('canApproverApprove', () => {
                         order: 2,
                         groups: [{
                             id: 'group-2',
+                            isApproved: false,
                             approvers: [{ id: 'approver-2', name: 'Bob', email: 'bob@example.com' }],
                             approvals: [],
                         }],

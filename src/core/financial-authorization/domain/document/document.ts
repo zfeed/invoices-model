@@ -81,6 +81,7 @@ export class FinancialDocument implements Mappable<ReturnType<FinancialDocument[
                 order: number;
                 groups: {
                     id: string;
+                    isApproved: boolean;
                     approvers: { id: string; name: string; email: string }[];
                     approvals: { approverId: string; createdAt: string; comment: string | null }[];
                 }[];
