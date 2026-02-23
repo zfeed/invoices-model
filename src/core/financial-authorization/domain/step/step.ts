@@ -1,4 +1,5 @@
 import { DOMAIN_ERROR_CODE, DomainError, Mappable, Result } from '../../../../building-blocks';
+import { Approval } from '../approval/approval';
 import { Approver } from '../approver/approver';
 import { Group } from '../groups/group';
 import { Id } from '../id/id';
@@ -74,7 +75,13 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
             );
         }
 
-        const groupResult = this.#groups[groupIndex].approve(approver);
+        const approvalResult = Approval.create({ approverId: approver.id, comment: null });
+
+        if (approvalResult.isError()) {
+            return Result.error(approvalResult.unwrapError());
+        }
+
+        const groupResult = this.#groups[groupIndex].apply(approvalResult.unwrap());
 
         if (groupResult.isError()) {
             return Result.error(groupResult.unwrapError());

@@ -397,7 +397,7 @@ describe('Group.create', () => {
     });
 });
 
-describe('Group.approve', () => {
+describe('Group.apply', () => {
     const approver1 = Approver.fromPlain({
         id: '1',
         name: 'Alice',
@@ -416,13 +416,17 @@ describe('Group.approve', () => {
         email: 'charlie@example.com',
     });
 
+    const createApproval = (approverId: string) =>
+        Approval.create({ approverId: Approver.fromPlain({ id: approverId, name: 'x', email: 'x@x.com' }).id, comment: null }).unwrap();
+
     it('should successfully add approval from existing approver', () => {
         const group = Group.create({
             approvers: [approver1, approver2],
             approvals: [],
         }).unwrap();
 
-        const result = group.approve(approver1);
+        const approval = createApproval('1');
+        const result = group.apply(approval);
 
         expect(result.isOk()).toBe(true);
 
@@ -447,7 +451,8 @@ describe('Group.approve', () => {
             approvals: [existingApproval],
         }).unwrap();
 
-        const result = group.approve(approver2);
+        const approval = createApproval('2');
+        const result = group.apply(approval);
 
         expect(result.isError()).toBe(true);
         const error = result.unwrapError();
@@ -465,7 +470,8 @@ describe('Group.approve', () => {
             approvals: [],
         }).unwrap();
 
-        const result = group.approve(approver3);
+        const approval = createApproval('3');
+        const result = group.apply(approval);
 
         expect(result.isError()).toBe(true);
         const error = result.unwrapError();
@@ -489,7 +495,8 @@ describe('Group.approve', () => {
             approvals: [existingApproval],
         }).unwrap();
 
-        const result = group.approve(approver1);
+        const approval = createApproval('1');
+        const result = group.apply(approval);
 
         expect(result.isError()).toBe(true);
         const error = result.unwrapError();
@@ -510,7 +517,8 @@ describe('Group.approve', () => {
         const originalApproversLength = originalGroup.approvers.length;
         const originalIsApproved = originalGroup.isApproved;
 
-        originalGroup.approve(approver1);
+        const approval = createApproval('1');
+        originalGroup.apply(approval);
 
         expect(originalGroup.approvals).toHaveLength(originalApprovalsLength);
         expect(originalGroup.approvers).toHaveLength(originalApproversLength);
@@ -524,14 +532,15 @@ describe('Group.approve', () => {
         }).unwrap();
 
         const beforeTime = new Date();
-        const result = group.approve(approver1);
+        const approval = createApproval('1');
+        const result = group.apply(approval);
         const afterTime = new Date();
 
         expect(result.isOk()).toBe(true);
 
         const approvedGroup = result.unwrap();
-        const approval = approvedGroup.approvals[0];
-        const createdAtTime = new Date(approval.createdAt.toPlain()).getTime();
+        const resultApproval = approvedGroup.approvals[0];
+        const createdAtTime = new Date(resultApproval.createdAt.toPlain()).getTime();
         expect(createdAtTime).toBeGreaterThanOrEqual(beforeTime.getTime());
         expect(createdAtTime).toBeLessThanOrEqual(afterTime.getTime());
     });
@@ -542,7 +551,8 @@ describe('Group.approve', () => {
             approvals: [],
         }).unwrap();
 
-        const result = group.approve(approver1);
+        const approval = createApproval('1');
+        const result = group.apply(approval);
 
         expect(result.isOk()).toBe(true);
 
@@ -561,14 +571,16 @@ describe('Group.approve', () => {
         expect(group.isApproved).toBe(false);
 
         // First approval
-        const firstApprovalResult = group.approve(approver1);
+        const approval1 = createApproval('1');
+        const firstApprovalResult = group.apply(approval1);
         expect(firstApprovalResult.isOk()).toBe(true);
         const approvedGroup = firstApprovalResult.unwrap();
         expect(approvedGroup.approvals).toHaveLength(1);
         expect(approvedGroup.isApproved).toBe(true);
 
         // Second approval -- group is already approved, so this should fail
-        const secondApprovalResult = approvedGroup.approve(approver2);
+        const approval2 = createApproval('2');
+        const secondApprovalResult = approvedGroup.apply(approval2);
         expect(secondApprovalResult.isError()).toBe(true);
     });
 
@@ -579,7 +591,8 @@ describe('Group.approve', () => {
         }).unwrap();
         const originalId = group.id.toPlain();
 
-        const result = group.approve(approver1);
+        const approval = createApproval('1');
+        const result = group.apply(approval);
 
         expect(result.isOk()).toBe(true);
         const approvedGroup = result.unwrap();
@@ -592,7 +605,8 @@ describe('Group.approve', () => {
             approvals: [],
         }).unwrap();
 
-        const result = group.approve(approver2);
+        const approval = createApproval('2');
+        const result = group.apply(approval);
 
         expect(result.isOk()).toBe(true);
 

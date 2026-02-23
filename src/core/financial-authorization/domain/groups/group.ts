@@ -70,32 +70,26 @@ export class Group implements Mappable<ReturnType<Group['toPlain']>> {
         );
     }
 
-    approve(approver: Approver): Result<DomainError, Group> {
+    apply(approval: Approval): Result<DomainError, Group> {
         if (this.isApproved) {
             return Result.error(
                 new DomainError({
                     code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND,
-                    message: `No eligible group found for approver ${approver.id.toPlain()}`,
+                    message: `No eligible group found for approver ${approval.approverId.toPlain()}`,
                 })
             );
         }
 
-        if (!this.#approvers.some((a) => a.id.equals(approver.id))) {
+        if (!this.#approvers.some((a) => a.id.equals(approval.approverId))) {
             return Result.error(
                 new DomainError({
                     code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND,
-                    message: `No eligible group found for approver ${approver.id.toPlain()}`,
+                    message: `No eligible group found for approver ${approval.approverId.toPlain()}`,
                 })
             );
         }
 
-        const approvalResult = Approval.create({ approverId: approver.id, comment: null });
-
-        if (approvalResult.isError()) {
-            return Result.error(approvalResult.unwrapError());
-        }
-
-        const newApprovals = [...this.#approvals, approvalResult.unwrap()];
+        const newApprovals = [...this.#approvals, approval];
 
         const approversEmptyError = checkApproversNotEmpty(this.#approvers);
         if (approversEmptyError) {
