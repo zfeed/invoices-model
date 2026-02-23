@@ -1,12 +1,12 @@
-import { all, applySpec, prop } from 'ramda';
+import { all, applySpec, map, prop } from 'ramda';
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
 import { Approver } from '../approver/approver';
 import { Action } from '../action/action';
 import { createId, Id } from '../id/id';
-import { Range } from '../range/range';
-import { approveStep, hasEligibleApprover, Step } from '../step/step';
+import { PlainRange, Range, rangeToPlain } from '../range/range';
+import { approveStep, hasEligibleApprover, PlainStep, Step, stepToPlain } from '../step/step';
 import { noDuplicateStepOrders } from './checks/check-no-duplicate-step-orders';
 
 export type Authflow = {
@@ -42,6 +42,22 @@ const rebuildAuthflow = applySpec<Authflow>({
     range: prop('range'),
     isApproved: allStepsApproved,
     steps: prop('steps'),
+});
+
+export type PlainAuthflow = {
+    id: string;
+    action: string;
+    range: PlainRange;
+    isApproved: boolean;
+    steps: PlainStep[];
+};
+
+export const authflowToPlain = (authflow: Authflow): PlainAuthflow => ({
+    id: authflow.id,
+    action: authflow.action,
+    range: rangeToPlain(authflow.range),
+    isApproved: authflow.isApproved,
+    steps: map(stepToPlain, authflow.steps),
 });
 
 export const createAuthflow = (

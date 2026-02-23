@@ -1,4 +1,4 @@
-import { applySpec, prop } from 'ramda';
+import { applySpec, map, prop } from 'ramda';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
 import { WithEvents, withEvents } from '../../../../building-blocks/events/with-events';
@@ -8,7 +8,7 @@ import { Money } from '../money/money';
 import { Version } from '../version/version';
 import { Authflow } from './authflow';
 import { authflowFromTemplate } from './authflow-from-template';
-import { AuthflowTemplate } from './authflow-template';
+import { AuthflowTemplate, PlainAuthflowTemplate, authflowTemplateToPlain } from './authflow-template';
 import { noOverlappingRanges } from './checks/check-no-overlapping-ranges';
 import { templateInRange } from './checks/check-template-in-range';
 import { AuthflowPolicyCreatedEvent } from './events/authflow-policy-created.event';
@@ -39,6 +39,20 @@ const rebuildAuthflowPolicy = applySpec<AuthflowPolicy>({
     action: prop('action'),
     templates: prop('templates'),
     version: prop('version'),
+});
+
+export type PlainAuthflowPolicy = {
+    id: string;
+    action: string;
+    templates: PlainAuthflowTemplate[];
+    version: number;
+};
+
+export const authflowPolicyToPlain = (policy: AuthflowPolicy): PlainAuthflowPolicy => ({
+    id: policy.id,
+    action: policy.action,
+    templates: map(authflowTemplateToPlain, policy.templates),
+    version: policy.version,
 });
 
 export const createAuthflowPolicy = (

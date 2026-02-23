@@ -1,9 +1,9 @@
-import { applySpec, isNotEmpty, pipe, prop } from 'ramda';
+import { applySpec, isNotEmpty, map, pipe, prop } from 'ramda';
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
-import { Approval, createApproval } from '../approval/approval';
-import { Approver } from '../approver/approver';
+import { Approval, PlainApproval, approvalToPlain, createApproval } from '../approval/approval';
+import { Approver, PlainApprover, approverToPlain } from '../approver/approver';
 import { createId, Id } from '../id/id';
 import { approvalReferencesExistingApprover } from './checks/check-approver-exists';
 import { approversNotEmpty } from './checks/check-approvers-not-empty';
@@ -36,6 +36,20 @@ const rebuildGroup = applySpec<Group>({
     isApproved: pipe(prop('approvals'), isNotEmpty),
     approvers: prop('approvers'),
     approvals: prop('approvals'),
+});
+
+export type PlainGroup = {
+    id: string;
+    isApproved: boolean;
+    approvers: PlainApprover[];
+    approvals: PlainApproval[];
+};
+
+export const groupToPlain = (group: Group): PlainGroup => ({
+    id: group.id,
+    isApproved: group.isApproved,
+    approvers: map(approverToPlain, group.approvers),
+    approvals: map(approvalToPlain, group.approvals),
 });
 
 export const createGroup = (data: GroupInput): Result<DomainError, Group> =>

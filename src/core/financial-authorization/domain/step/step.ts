@@ -1,4 +1,4 @@
-import { applySpec, prop } from 'ramda';
+import { applySpec, map, prop } from 'ramda';
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
@@ -7,6 +7,8 @@ import {
     approveGroup,
     hasEligibleApprover as hasEligibleApproverInGroups,
     Group,
+    PlainGroup,
+    groupToPlain,
 } from '../groups/group';
 import { createId, Id } from '../id/id';
 import { Order } from '../order/order';
@@ -69,6 +71,20 @@ export const hasEligibleApprover = (steps: Step[], approverId: Id): boolean => {
 
     return hasEligibleApproverInGroups(result.unwrap().groups, approverId);
 };
+
+export type PlainStep = {
+    id: string;
+    order: number;
+    isApproved: boolean;
+    groups: PlainGroup[];
+};
+
+export const stepToPlain = (step: Step): PlainStep => ({
+    id: step.id,
+    order: step.order,
+    isApproved: step.isApproved,
+    groups: map(groupToPlain, step.groups),
+});
 
 export const createStep = (data: StepInput): Result<DomainError, Step> =>
     Result.ok<DomainError, StepInput>(data).map(buildStep);

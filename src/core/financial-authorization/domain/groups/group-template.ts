@@ -1,8 +1,8 @@
-import { applySpec, prop } from 'ramda';
+import { applySpec, map, prop } from 'ramda';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
 import { createGroup, Group } from './group';
-import { Approver } from '../approver/approver';
+import { Approver, PlainApprover, approverToPlain } from '../approver/approver';
 import { createId, Id } from '../id/id';
 import { templateApproversNotEmpty } from './checks/check-template-approvers-not-empty';
 import { templateApproversNotDuplicated } from './checks/check-template-no-duplicate-approvers';
@@ -26,6 +26,16 @@ const buildGroupTemplate = applySpec<GroupTemplate>({
 const rebuildGroupTemplate = applySpec<GroupTemplate>({
     id: prop('id'),
     approvers: prop('approvers'),
+});
+
+export type PlainGroupTemplate = {
+    id: string;
+    approvers: PlainApprover[];
+};
+
+export const groupTemplateToPlain = (template: GroupTemplate): PlainGroupTemplate => ({
+    id: template.id,
+    approvers: map(approverToPlain, template.approvers),
 });
 
 export const createGroupTemplate = (

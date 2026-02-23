@@ -1,7 +1,7 @@
-import { applySpec, prop } from 'ramda';
+import { applySpec, map, prop } from 'ramda';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
-import { GroupTemplate, groupsFromTemplates } from '../groups/group-template';
+import { GroupTemplate, PlainGroupTemplate, groupTemplateToPlain, groupsFromTemplates } from '../groups/group-template';
 import { createStep, Step } from './step';
 import { createId, Id } from '../id/id';
 import { Order } from '../order/order';
@@ -29,6 +29,18 @@ const rebuildStepTemplate = applySpec<StepTemplate>({
     id: prop('id'),
     order: prop('order'),
     groups: prop('groups'),
+});
+
+export type PlainStepTemplate = {
+    id: string;
+    order: number;
+    groups: PlainGroupTemplate[];
+};
+
+export const stepTemplateToPlain = (template: StepTemplate): PlainStepTemplate => ({
+    id: template.id,
+    order: template.order,
+    groups: map(groupTemplateToPlain, template.groups),
 });
 
 export const createStepTemplate = (

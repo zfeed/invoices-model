@@ -1,11 +1,11 @@
-import { applySpec, find, prop, propEq, propOr } from 'ramda';
+import { applySpec, find, map, prop, propEq, propOr } from 'ramda';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
 import { WithEvents, withEvents } from '../../../../building-blocks/events/with-events';
-import { Money } from '../money/money';
+import { Money, PlainMoney, moneyToPlain } from '../money/money';
 import { Approver } from '../approver/approver';
 import { Action } from '../action/action';
-import { Authflow, approveAuthflow, canApproverApprove as canApproverApproveAuthflow } from '../authflow/authflow';
+import { Authflow, PlainAuthflow, authflowToPlain, approveAuthflow, canApproverApprove as canApproverApproveAuthflow } from '../authflow/authflow';
 import { ReferenceId } from '../reference-id/reference-id';
 import { createId, Id } from '../id/id';
 import { Version } from '../version/version';
@@ -43,6 +43,22 @@ const rebuildDocument = applySpec<FinancialDocument>({
     value: prop('value'),
     authflows: prop('authflows'),
     version: prop('version'),
+});
+
+export type PlainFinancialDocument = {
+    id: string;
+    referenceId: string;
+    value: PlainMoney;
+    authflows: PlainAuthflow[];
+    version: number;
+};
+
+export const documentToPlain = (doc: FinancialDocument): PlainFinancialDocument => ({
+    id: doc.id,
+    referenceId: doc.referenceId,
+    value: moneyToPlain(doc.value),
+    authflows: map(authflowToPlain, doc.authflows),
+    version: doc.version,
 });
 
 export const createDocument = (

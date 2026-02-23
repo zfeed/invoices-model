@@ -1,7 +1,7 @@
 import { applySpec, prop } from 'ramda';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../building-blocks/result';
-import { Money } from '../money/money';
+import { Money, PlainMoney, moneyToPlain } from '../money/money';
 import { currenciesEqual } from './checks/check-currencies-equal';
 import { fromNotGreaterThanTo } from './checks/check-from-not-greater-than-to';
 
@@ -18,6 +18,16 @@ type RangeInput = {
 const buildRange = applySpec<Range>({
     from: prop('from'),
     to: prop('to'),
+});
+
+export type PlainRange = {
+    from: PlainMoney;
+    to: PlainMoney;
+};
+
+export const rangeToPlain = (range: Range): PlainRange => ({
+    from: moneyToPlain(range.from),
+    to: moneyToPlain(range.to),
 });
 
 export const createRange = (

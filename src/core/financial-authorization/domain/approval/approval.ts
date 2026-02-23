@@ -22,6 +22,18 @@ const buildApproval = applySpec<Approval>({
     comment: prop('comment'),
 });
 
+export type PlainApproval = {
+    approverId: string;
+    createdAt: string;
+    comment: string | null;
+};
+
+export const approvalToPlain = (approval: Approval): PlainApproval => ({
+    approverId: approval.approverId,
+    createdAt: approval.createdAt.toISOString(),
+    comment: approval.comment,
+});
+
 export const createApproval = (
     data: ApprovalInput
 ): Result<DomainError, Approval> =>

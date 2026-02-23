@@ -19,6 +19,16 @@ const buildMoney = applySpec<Money>({
     currency: prop('currency'),
 });
 
+export type PlainMoney = {
+    amount: string;
+    currency: string;
+};
+
+export const moneyToPlain = applySpec<PlainMoney>({
+    amount: prop('amount'),
+    currency: prop('currency'),
+});
+
 export const createMoney = (
     amount: string,
     currency: string

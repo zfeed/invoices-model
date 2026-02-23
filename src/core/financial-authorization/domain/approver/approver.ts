@@ -22,6 +22,18 @@ const buildApprover = applySpec<Approver>({
     email: prop('email'),
 });
 
+export type PlainApprover = {
+    id: string;
+    name: string;
+    email: string;
+};
+
+export const approverToPlain = applySpec<PlainApprover>({
+    id: prop('id'),
+    name: prop('name'),
+    email: prop('email'),
+});
+
 export const createApprover = (
     data: ApproverInput
 ): Result<DomainError, Approver> =>
