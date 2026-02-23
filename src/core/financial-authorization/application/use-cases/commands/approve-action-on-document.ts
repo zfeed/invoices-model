@@ -2,15 +2,15 @@ import { DOMAIN_ERROR_CODE } from '../../../../../building-blocks/errors/domain/
 import { DomainError } from '../../../../../building-blocks/errors/domain/domain.error';
 import { Result } from '../../../../../building-blocks/result';
 import { DomainEvents } from '../../../../shared/domain-events/domain-events.interface';
-import { Action, createAction } from '../../../domain/action/action';
+import { createAction } from '../../../domain/action/action';
 import { Approver } from '../../../domain/approver/approver';
 import { approveDocument, FinancialDocument } from '../../../domain/document/document';
-import { ReferenceId } from '../../../domain/reference-id/reference-id';
+import { createReferenceId } from '../../../domain/reference-id/reference-id';
 import { DocumentStorage } from '../../storage/document-storage.interface';
 
 type ApproveActionRequest = {
-    referenceId: ReferenceId;
-    action: Action;
+    referenceId: string;
+    action: string;
     approver: Approver;
 };
 
@@ -23,9 +23,16 @@ export const approveActionOnDocumentCommand =
         if (actionResult.isError()) {
             return Result.error(actionResult.unwrapError());
         }
+        const action = actionResult.unwrap();
+
+        const referenceIdResult = createReferenceId(request.referenceId);
+        if (referenceIdResult.isError()) {
+            return Result.error(referenceIdResult.unwrapError());
+        }
+        const referenceId = referenceIdResult.unwrap();
 
         const found = await documentStorage
-            .findByReferenceId(request.referenceId)
+            .findByReferenceId(referenceId)
             .run();
 
         const document = found.fold(
@@ -36,7 +43,7 @@ export const approveActionOnDocumentCommand =
         if (!document) {
             return Result.error(
                 new DomainError({
-                    message: `Document with reference ${request.referenceId} not found`,
+                    message: `Document with reference ${referenceId} not found`,
                     code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_DOCUMENT_NOT_FOUND,
                 })
             );
@@ -44,7 +51,7 @@ export const approveActionOnDocumentCommand =
 
         const result = approveDocument(
             document,
-            request.action,
+            action,
             request.approver
         );
 

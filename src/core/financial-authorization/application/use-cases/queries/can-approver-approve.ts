@@ -1,20 +1,30 @@
-import { Action, createAction } from '../../../domain/action/action';
+import { createAction } from '../../../domain/action/action';
 import { canApproverApprove } from '../../../domain/document/document';
-import { Id } from '../../../domain/id/id';
-import { ReferenceId } from '../../../domain/reference-id/reference-id';
+import { fromString } from '../../../domain/id/id';
+import { createReferenceId } from '../../../domain/reference-id/reference-id';
 import { DocumentStorage } from '../../storage/document-storage.interface';
 
 export type ApprovalAnswer = 'YES' | 'NO' | 'UNKNOWN';
 
 export const canApproverApproveQuery = (documentStorage: DocumentStorage) => ({
-    can: (approverId: Id) => ({
-        perform: (action: Action) => ({
-            on: (referenceId: ReferenceId) => ({
+    can: (approverId: string) => ({
+        perform: (action: string) => ({
+            on: (referenceId: string) => ({
                 ask: async (): Promise<ApprovalAnswer> => {
-                    const actionResult = createAction(action).unwrap();
+                    const approverIdResult = fromString(approverId);
+                    if (approverIdResult.isError()) return 'UNKNOWN';
+                    const validApproverId = approverIdResult.unwrap();
+
+                    const actionResult = createAction(action);
+                    if (actionResult.isError()) return 'UNKNOWN';
+                    const validAction = actionResult.unwrap();
+
+                    const referenceIdResult = createReferenceId(referenceId);
+                    if (referenceIdResult.isError()) return 'UNKNOWN';
+                    const validReferenceId = referenceIdResult.unwrap();
 
                     const found = await documentStorage
-                        .findByReferenceId(referenceId)
+                        .findByReferenceId(validReferenceId)
                         .run();
 
                     return found.fold(
@@ -22,8 +32,8 @@ export const canApproverApproveQuery = (documentStorage: DocumentStorage) => ({
                         (document): ApprovalAnswer =>
                             canApproverApprove({
                                 document,
-                                action,
-                                approverId,
+                                action: validAction,
+                                approverId: validApproverId,
                             })
                                 ? 'YES'
                                 : 'NO'
