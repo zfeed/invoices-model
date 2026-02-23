@@ -1,35 +1,17 @@
-import { ifElse, length, map, pipe, prop, uniq } from 'ramda';
 import { DOMAIN_ERROR_CODE } from '../../../../../building-blocks/errors/domain/domain-codes';
 import { DomainError } from '../../../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../../../building-blocks/result';
-import { Money } from '../../money/money';
 import { Authflow } from '../../authflow/authflow';
-import { ReferenceId } from '../../reference-id/reference-id';
 
-type DocumentInput = {
-    referenceId: ReferenceId;
-    value: Money;
-    authflows: Authflow[];
-};
+export function checkNoDuplicateAuthflowActions(authflows: Authflow[]): DomainError | null {
+    const actions = authflows.map((a) => a.action.toPlain());
+    const uniqueActions = new Set(actions);
 
-const getActions = (data: DocumentInput) => map(prop('action'), data.authflows);
-const hasDuplicates = <T>(items: T[]) => length(items) !== length(uniq(items));
-const authflowsHaveDuplicateActions = pipe(getActions, hasDuplicates);
-
-const createDuplicateActionsError = () =>
-    Result.error(
-        new DomainError({
+    if (actions.length !== uniqueActions.size) {
+        return new DomainError({
             message: 'Duplicate authflow actions found',
             code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_ACTION_DUPLICATE,
-        })
-    );
+        });
+    }
 
-export function noDuplicateAuthflowActions(data: DocumentInput) {
-    return Result.ok<DomainError, DocumentInput>(data).flatMap(
-        ifElse(
-            authflowsHaveDuplicateActions,
-            createDuplicateActionsError,
-            Result.ok
-        )
-    );
+    return null;
 }

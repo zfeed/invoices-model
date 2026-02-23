@@ -1,64 +1,62 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
-import { createApproval } from './approval';
+import { Id } from '../id/id';
+import { Approval } from './approval';
 
-describe('createApproval', () => {
+describe('Approval.create', () => {
     it('should create an approval with a comment', () => {
-        const data = {
-            approverId: '123',
-            comment: 'Looks good to me',
-        };
+        const approverId = Id.fromPlain('123');
 
-        const result = createApproval(data);
+        const result = Approval.create({
+            approverId,
+            comment: 'Looks good to me',
+        });
 
         expect(result.isOk()).toBe(true);
         const approval = result.unwrap();
-        expect(approval.approverId).toBe('123');
-        expect(approval.comment).toBe('Looks good to me');
-        expect(approval.createdAt).toBeInstanceOf(Date);
+        expect(approval.approverId.toPlain()).toBe('123');
+        expect(approval.comment.toPlain()).toBe('Looks good to me');
+        expect(typeof approval.createdAt.toPlain()).toBe('string');
     });
 
     it('should create an approval with null comment', () => {
-        const data = {
-            approverId: '456',
-            comment: null,
-        };
+        const approverId = Id.fromPlain('456');
 
-        const result = createApproval(data);
+        const result = Approval.create({
+            approverId,
+            comment: null,
+        });
 
         expect(result.isOk()).toBe(true);
         const approval = result.unwrap();
-        expect(approval.approverId).toBe('456');
-        expect(approval.comment).toBeNull();
-        expect(approval.createdAt).toBeInstanceOf(Date);
+        expect(approval.approverId.toPlain()).toBe('456');
+        expect(approval.comment.toPlain()).toBeNull();
+        expect(typeof approval.createdAt.toPlain()).toBe('string');
     });
 
     it('should set createdAt to current date', () => {
         const beforeCreation = new Date();
-        const data = {
-            approverId: '789',
-            comment: 'Approved',
-        };
+        const approverId = Id.fromPlain('789');
 
-        const result = createApproval(data);
+        const result = Approval.create({
+            approverId,
+            comment: 'Approved',
+        });
         const afterCreation = new Date();
 
         expect(result.isOk()).toBe(true);
         const approval = result.unwrap();
-        expect(approval.createdAt.getTime()).toBeGreaterThanOrEqual(
-            beforeCreation.getTime()
-        );
-        expect(approval.createdAt.getTime()).toBeLessThanOrEqual(
-            afterCreation.getTime()
-        );
+        const createdAtTime = new Date(approval.createdAt.toPlain()).getTime();
+        expect(createdAtTime).toBeGreaterThanOrEqual(beforeCreation.getTime());
+        expect(createdAtTime).toBeLessThanOrEqual(afterCreation.getTime());
     });
 
     it('should reject empty string comment', () => {
-        const data = {
-            approverId: 'user-001',
-            comment: '',
-        };
+        const approverId = Id.fromPlain('user-001');
 
-        const result = createApproval(data);
+        const result = Approval.create({
+            approverId,
+            comment: '',
+        });
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError().code).toBe(
@@ -67,12 +65,12 @@ describe('createApproval', () => {
     });
 
     it('should reject whitespace-only comment', () => {
-        const data = {
-            approverId: 'user-001',
-            comment: '   ',
-        };
+        const approverId = Id.fromPlain('user-001');
 
-        const result = createApproval(data);
+        const result = Approval.create({
+            approverId,
+            comment: '   ',
+        });
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError().code).toBe(

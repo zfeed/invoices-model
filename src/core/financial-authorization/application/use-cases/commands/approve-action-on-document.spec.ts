@@ -1,40 +1,43 @@
 import { DOMAIN_ERROR_CODE } from '../../../../../building-blocks/errors/domain/domain-codes';
 import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
-import { InMemoryDocumentStorage } from '../../../../../infrastructure/storage/in-memory.document-storage';
-import { InMemoryPolicyStorage } from '../../../../../infrastructure/storage/in-memory.policy-storage';
-import { createApprover } from '../../../domain/approver/approver';
-import { createAuthflowTemplate } from '../../../domain/authflow/authflow-template';
+import { InMemoryUnitOfWorkFactory } from '../../../../../infrastructure/unit-of-work/in-memory.unit-of-work';
+import { Approver } from '../../../domain/approver/approver';
+import { AuthflowTemplate } from '../../../domain/authflow/authflow-template';
+import { FinancialDocument } from '../../../domain/document/document';
 import { DocumentApprovedEvent } from '../../../domain/document/events/document-approved.event';
-import { createGroupTemplate } from '../../../domain/groups/group-template';
-import { createMoney } from '../../../domain/money/money';
-import { createRange } from '../../../domain/range/range';
-import { createStepTemplate } from '../../../domain/step/step-template';
+import { GroupTemplate } from '../../../domain/groups/group-template';
+import { Money } from '../../../domain/money/money';
+import { Name } from '../../../domain/name/name';
+import { Email } from '../../../domain/email/email';
+import { Order } from '../../../domain/order/order';
+import { Range } from '../../../domain/range/range';
+import { StepTemplate } from '../../../domain/step/step-template';
 import { InvoiceIssuedEvent } from '../../../../invoices/domain/invoice/events/invoice-issued.event';
-import { createAuthflowPolicyCommand } from './create-authflow-policy';
-import { onInvoiceIssued } from '../event-handlers/on-invoice-issued';
-import { approveActionOnDocumentCommand } from './approve-action-on-document';
+import { CreateAuthflowPolicy } from './create-authflow-policy';
+import { OnInvoiceIssued } from '../event-handlers/on-invoice-issued';
+import { ApproveActionOnDocument } from './approve-action-on-document';
 
-const approver = createApprover({
-    name: 'John Doe',
-    email: 'john@example.com',
+const approver = Approver.create({
+    name: Name.create('John Doe').unwrap(),
+    email: Email.create('john@example.com').unwrap(),
 }).unwrap();
 
 const range = (from: string, to: string) =>
-    createRange(
-        createMoney(from, 'USD').unwrap(),
-        createMoney(to, 'USD').unwrap()
+    Range.create(
+        Money.create(from, 'USD').unwrap(),
+        Money.create(to, 'USD').unwrap()
     ).unwrap();
 
-const groupTemplate = createGroupTemplate({
+const groupTemplate = GroupTemplate.create({
     approvers: [approver],
 }).unwrap();
 
-const stepTemplate = createStepTemplate({
-    order: 0,
+const stepTemplate = StepTemplate.create({
+    order: Order.create(0).unwrap(),
     groups: [groupTemplate],
 }).unwrap();
 
-const template = createAuthflowTemplate({
+const template = AuthflowTemplate.create({
     range: range('0', '10000'),
     steps: [stepTemplate],
 }).unwrap();
@@ -80,36 +83,32 @@ const INVOICE_DATA = {
 };
 
 describe('approveActionOnDocumentCommand', () => {
-    let documentStorage: InMemoryDocumentStorage;
-    let policyStorage: InMemoryPolicyStorage;
+    let unitOfWorkFactory: InMemoryUnitOfWorkFactory;
     let domainEvents: InMemoryDomainEvents;
-    let command: ReturnType<typeof approveActionOnDocumentCommand>;
+    let command: ApproveActionOnDocument;
 
     beforeEach(async () => {
-        documentStorage = new InMemoryDocumentStorage();
-        policyStorage = new InMemoryPolicyStorage();
+        unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         domainEvents = new InMemoryDomainEvents();
 
-        const createPolicy = createAuthflowPolicyCommand(
-            policyStorage,
-            domainEvents
-        );
-        await createPolicy({
+        const createPolicy = new CreateAuthflowPolicy(unitOfWorkFactory, domainEvents);
+        await createPolicy.execute({
             action: 'pay',
             templates: [template],
         });
 
-        await onInvoiceIssued(domainEvents, documentStorage, policyStorage);
+        const onInvoiceIssuedHandler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await onInvoiceIssuedHandler.register();
         await domainEvents.publishEvents({
             events: [new InvoiceIssuedEvent(INVOICE_DATA)],
         });
 
-        command = approveActionOnDocumentCommand(documentStorage, domainEvents);
+        command = new ApproveActionOnDocument(unitOfWorkFactory, domainEvents);
     });
 
     it('should throw when document is not found', async () => {
         await expect(
-            command({
+            command.execute({
                 referenceId: 'non-existing',
                 action: 'pay',
                 approver,
@@ -120,7 +119,7 @@ describe('approveActionOnDocumentCommand', () => {
     });
 
     it('should approve an action on a document', async () => {
-        const document = await command({
+        const document = await command.execute({
             referenceId: 'invoice-123',
             action: 'pay',
             approver,
@@ -132,23 +131,17 @@ describe('approveActionOnDocumentCommand', () => {
     });
 
     it('should persist the approved document', async () => {
-        await command({
+        await command.execute({
             referenceId: 'invoice-123',
             action: 'pay',
             approver,
         });
 
-        const found = await documentStorage
-            .findByReferenceId('invoice-123')
-            .run();
-
-        found.fold(
-            () => { throw new Error('Expected document to exist'); },
-            (doc) => {
-                const authflow = doc.authflows.find((a) => a.action === 'pay');
-                expect(authflow?.isApproved).toBe(true);
-            }
-        );
+        await unitOfWorkFactory.start(async (uow) => {
+            const doc = await uow.collection(FinancialDocument).findBy('referenceId', 'invoice-123');
+            const authflow = doc!.authflows.find((a) => a.action.toPlain() === 'pay');
+            expect(authflow?.isApproved).toBe(true);
+        });
     });
 
     it('should publish DocumentApprovedEvent', async () => {
@@ -160,7 +153,7 @@ describe('approveActionOnDocumentCommand', () => {
             }
         );
 
-        await command({
+        await command.execute({
             referenceId: 'invoice-123',
             action: 'pay',
             approver,
@@ -173,7 +166,7 @@ describe('approveActionOnDocumentCommand', () => {
 
     it('should throw when authflow for action is not found', async () => {
         await expect(
-            command({
+            command.execute({
                 referenceId: 'invoice-123',
                 action: 'unknown-action',
                 approver,
@@ -184,14 +177,14 @@ describe('approveActionOnDocumentCommand', () => {
     });
 
     it('should throw when approving already approved action', async () => {
-        await command({
+        await command.execute({
             referenceId: 'invoice-123',
             action: 'pay',
             approver,
         });
 
         await expect(
-            command({
+            command.execute({
                 referenceId: 'invoice-123',
                 action: 'pay',
                 approver,

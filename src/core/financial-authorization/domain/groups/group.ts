@@ -1,111 +1,135 @@
-import { applySpec, isNotEmpty, map, pipe, prop } from 'ramda';
-import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
-import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../../building-blocks/result';
-import { Approval, PlainApproval, approvalToPlain, createApproval } from '../approval/approval';
-import { Approver, PlainApprover, approverToPlain } from '../approver/approver';
-import { createId, Id } from '../id/id';
-import { approvalReferencesExistingApprover } from './checks/check-approver-exists';
-import { approversNotEmpty } from './checks/check-approvers-not-empty';
-import { approvalsNotDuplicated } from './checks/check-no-duplicate-approvals';
-import { approversNotDuplicated } from './checks/check-no-duplicate-approvers';
+import { DOMAIN_ERROR_CODE, DomainError, Mappable, Result } from '../../../../building-blocks';
+import { Approval } from '../approval/approval';
+import { Approver } from '../approver/approver';
+import { Id } from '../id/id';
+import { checkApproversNotEmpty } from './checks/check-approvers-not-empty';
+import { checkNoDuplicateApprovers } from './checks/check-no-duplicate-approvers';
+import { checkApproverExists } from './checks/check-approver-exists';
+import { checkNoDuplicateApprovals } from './checks/check-no-duplicate-approvals';
 
-export type Group = {
-    id: Id;
-    isApproved: boolean;
-    approvers: Approver[];
-    approvals: Approval[];
-};
+export class Group implements Mappable<ReturnType<Group['toPlain']>> {
+    #id: Id;
+    #approvers: Approver[];
+    #approvals: Approval[];
 
-type GroupInput = {
-    approvers: Approver[];
-    approvals: Approval[];
-};
+    protected constructor(id: Id, approvers: Approver[], approvals: Approval[]) {
+        this.#id = id;
+        this.#approvers = approvers;
+        this.#approvals = approvals;
+    }
 
-type RebuildGroupInput = GroupInput & { id: Id };
+    public get id(): Id {
+        return this.#id;
+    }
 
-const buildGroup = applySpec<Group>({
-    id: () => createId(),
-    isApproved: pipe(prop('approvals'), isNotEmpty),
-    approvers: prop('approvers'),
-    approvals: prop('approvals'),
-});
+    public get isApproved(): boolean {
+        return this.#approvals.length > 0;
+    }
 
-const rebuildGroup = applySpec<Group>({
-    id: prop('id'),
-    isApproved: pipe(prop('approvals'), isNotEmpty),
-    approvers: prop('approvers'),
-    approvals: prop('approvals'),
-});
+    public get approvers(): readonly Approver[] {
+        return this.#approvers;
+    }
 
-export type PlainGroup = {
-    id: string;
-    isApproved: boolean;
-    approvers: PlainApprover[];
-    approvals: PlainApproval[];
-};
+    public get approvals(): readonly Approval[] {
+        return this.#approvals;
+    }
 
-export const groupToPlain = (group: Group): PlainGroup => ({
-    id: group.id,
-    isApproved: group.isApproved,
-    approvers: map(approverToPlain, group.approvers),
-    approvals: map(approvalToPlain, group.approvals),
-});
+    static create(data: { approvers: Approver[]; approvals: Approval[] }) {
+        const approversEmptyError = checkApproversNotEmpty(data.approvers);
+        if (approversEmptyError) {
+            return Result.error(approversEmptyError);
+        }
 
-export const createGroup = (data: GroupInput): Result<DomainError, Group> =>
-    Result.ok<DomainError, GroupInput>(data)
-        .flatMap(approversNotEmpty)
-        .flatMap(approversNotDuplicated)
-        .flatMap(approvalReferencesExistingApprover)
-        .flatMap(approvalsNotDuplicated)
-        .map(buildGroup);
+        const duplicateApproversError = checkNoDuplicateApprovers(data.approvers);
+        if (duplicateApproversError) {
+            return Result.error(duplicateApproversError);
+        }
 
-const recreateGroup = (data: RebuildGroupInput): Result<DomainError, Group> =>
-    Result.ok<DomainError, RebuildGroupInput>(data)
-        .flatMap(approversNotEmpty)
-        .flatMap(approversNotDuplicated)
-        .flatMap(approvalReferencesExistingApprover)
-        .flatMap(approvalsNotDuplicated)
-        .map(rebuildGroup);
+        const approverExistsError = checkApproverExists(data.approvers, data.approvals);
+        if (approverExistsError) {
+            return Result.error(approverExistsError);
+        }
 
-const findGroup = (
-    groups: Group[],
-    approver: Approver
-): Result<DomainError, Group> => {
-    const group = groups.find(
-        (g) =>
-            !g.isApproved && g.approvers.some((a) => a.id === approver.id)
-    );
-    return group
-        ? Result.ok(group)
-        : Result.error(
-              new DomainError({
-                  code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND,
-                  message: `No eligible group found for approver ${approver.id}`,
-              })
-          );
-};
+        const duplicateApprovalsError = checkNoDuplicateApprovals(data.approvals);
+        if (duplicateApprovalsError) {
+            return Result.error(duplicateApprovalsError);
+        }
 
-export const hasEligibleApprover = (groups: Group[], approverId: Id): boolean =>
-    groups.some(
-        (g) => !g.isApproved && g.approvers.some((a) => a.id === approverId)
-    );
+        return Result.ok(new Group(Id.create().unwrap(), data.approvers, data.approvals));
+    }
 
-export const approveGroup = (
-    groups: Group[],
-    approver: Approver
-): Result<DomainError, Group[]> =>
-    findGroup(groups, approver).flatMap((group) =>
-        createApproval({ approverId: approver.id, comment: null }).flatMap(
-            (approval) =>
-                recreateGroup({
-                    id: group.id,
-                    approvers: group.approvers,
-                    approvals: [...group.approvals, approval],
-                }).map((updatedGroup) =>
-                    groups.map((g) =>
-                        g.id === group.id ? updatedGroup : g
-                    )
-                )
-        )
-    );
+    static fromPlain(plain: {
+        id: string;
+        approvers: { id: string; name: string; email: string }[];
+        approvals: { approverId: string; createdAt: string; comment: string | null }[];
+    }) {
+        return new Group(
+            Id.fromPlain(plain.id),
+            plain.approvers.map((a) => Approver.fromPlain(a)),
+            plain.approvals.map((a) => Approval.fromPlain(a)),
+        );
+    }
+
+    approve(approver: Approver): Result<DomainError, Group> {
+        if (this.isApproved) {
+            return Result.error(
+                new DomainError({
+                    code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND,
+                    message: `No eligible group found for approver ${approver.id.toPlain()}`,
+                })
+            );
+        }
+
+        if (!this.#approvers.some((a) => a.id.equals(approver.id))) {
+            return Result.error(
+                new DomainError({
+                    code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND,
+                    message: `No eligible group found for approver ${approver.id.toPlain()}`,
+                })
+            );
+        }
+
+        const approvalResult = Approval.create({ approverId: approver.id, comment: null });
+
+        if (approvalResult.isError()) {
+            return Result.error(approvalResult.unwrapError());
+        }
+
+        const newApprovals = [...this.#approvals, approvalResult.unwrap()];
+
+        const approversEmptyError = checkApproversNotEmpty(this.#approvers);
+        if (approversEmptyError) {
+            return Result.error(approversEmptyError);
+        }
+
+        const duplicateApproversError = checkNoDuplicateApprovers(this.#approvers);
+        if (duplicateApproversError) {
+            return Result.error(duplicateApproversError);
+        }
+
+        const approverExistsError = checkApproverExists(this.#approvers, newApprovals);
+        if (approverExistsError) {
+            return Result.error(approverExistsError);
+        }
+
+        const duplicateApprovalsError = checkNoDuplicateApprovals(newApprovals);
+        if (duplicateApprovalsError) {
+            return Result.error(duplicateApprovalsError);
+        }
+
+        return Result.ok(new Group(this.#id, this.#approvers, newApprovals));
+    }
+
+    hasEligibleApprover(approverId: Id): boolean {
+        return !this.isApproved && this.#approvers.some((a) => a.id.equals(approverId));
+    }
+
+    toPlain() {
+        return {
+            id: this.#id.toPlain(),
+            isApproved: this.isApproved,
+            approvers: this.#approvers.map((a) => a.toPlain()),
+            approvals: this.#approvals.map((a) => a.toPlain()),
+        };
+    }
+}

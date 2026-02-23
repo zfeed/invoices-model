@@ -1,18 +1,18 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
-import { createMoney } from '../money/money';
-import { createRange } from '../range/range';
+import { Money } from '../money/money';
+import { Range } from '../range/range';
 import { StepTemplate } from '../step/step-template';
-import { createAuthflowTemplate } from './authflow-template';
+import { AuthflowTemplate } from './authflow-template';
 
-const testRange = createRange(
-    createMoney('0', 'USD').unwrap(),
-    createMoney('100000', 'USD').unwrap()
+const testRange = Range.create(
+    Money.create('0', 'USD').unwrap(),
+    Money.create('100000', 'USD').unwrap()
 ).unwrap();
 
 describe('createAuthflowTemplate', () => {
     it('should create an authflow template successfully', () => {
         const steps: StepTemplate[] = [
-            {
+            StepTemplate.fromPlain({
                 id: 'step-1',
                 order: 0,
                 groups: [
@@ -27,8 +27,8 @@ describe('createAuthflowTemplate', () => {
                         ],
                     },
                 ],
-            },
-            {
+            }),
+            StepTemplate.fromPlain({
                 id: 'step-2',
                 order: 1,
                 groups: [
@@ -43,38 +43,38 @@ describe('createAuthflowTemplate', () => {
                         ],
                     },
                 ],
-            },
+            }),
         ];
 
-        const result = createAuthflowTemplate({
+        const result = AuthflowTemplate.create({
             range: testRange,
             steps,
         });
 
         expect(result.isOk()).toBe(true);
-        const authflow = result.unwrap();
-        expect(authflow.steps).toHaveLength(2);
-        expect(authflow.id).toBeDefined();
+        const template = result.unwrap();
+        expect(template.steps).toHaveLength(2);
+        expect(template.id).toBeDefined();
     });
 
     it('should create an authflow template with empty steps', () => {
-        const result = createAuthflowTemplate({
+        const result = AuthflowTemplate.create({
             range: testRange,
             steps: [],
         });
 
         expect(result.isOk()).toBe(true);
-        const authflow = result.unwrap();
-        expect(authflow.steps).toHaveLength(0);
+        const template = result.unwrap();
+        expect(template.steps).toHaveLength(0);
     });
 
     it('should fail with duplicate step orders', () => {
         const steps: StepTemplate[] = [
-            { id: 'step-1', order: 0, groups: [] },
-            { id: 'step-2', order: 0, groups: [] },
+            StepTemplate.fromPlain({ id: 'step-1', order: 0, groups: [] }),
+            StepTemplate.fromPlain({ id: 'step-2', order: 0, groups: [] }),
         ];
 
-        const result = createAuthflowTemplate({
+        const result = AuthflowTemplate.create({
             range: testRange,
             steps,
         });
@@ -89,44 +89,44 @@ describe('createAuthflowTemplate', () => {
 
     it('should create an authflow template with non-sequential but unique orders', () => {
         const steps: StepTemplate[] = [
-            { id: 'step-1', order: 5, groups: [] },
-            { id: 'step-2', order: 10, groups: [] },
-            { id: 'step-3', order: 15, groups: [] },
+            StepTemplate.fromPlain({ id: 'step-1', order: 5, groups: [] }),
+            StepTemplate.fromPlain({ id: 'step-2', order: 10, groups: [] }),
+            StepTemplate.fromPlain({ id: 'step-3', order: 15, groups: [] }),
         ];
 
-        const result = createAuthflowTemplate({
+        const result = AuthflowTemplate.create({
             range: testRange,
             steps,
         });
 
         expect(result.isOk()).toBe(true);
-        const authflow = result.unwrap();
-        expect(authflow.steps).toHaveLength(3);
+        const template = result.unwrap();
+        expect(template.steps).toHaveLength(3);
     });
 
     it('should generate a unique ID for each authflow template', () => {
-        const result1 = createAuthflowTemplate({
+        const result1 = AuthflowTemplate.create({
             range: testRange,
             steps: [],
         });
-        const result2 = createAuthflowTemplate({
+        const result2 = AuthflowTemplate.create({
             range: testRange,
             steps: [],
         });
 
         expect(result1.isOk()).toBe(true);
         expect(result2.isOk()).toBe(true);
-        expect(result1.unwrap().id).not.toBe(result2.unwrap().id);
+        expect(result1.unwrap().id.toPlain()).not.toBe(result2.unwrap().id.toPlain());
     });
 
     it('should not have isApproved property', () => {
-        const result = createAuthflowTemplate({
+        const result = AuthflowTemplate.create({
             range: testRange,
             steps: [],
         });
 
         expect(result.isOk()).toBe(true);
-        const authflow = result.unwrap();
-        expect(authflow).not.toHaveProperty('isApproved');
+        const template = result.unwrap();
+        expect(template).not.toHaveProperty('isApproved');
     });
 });

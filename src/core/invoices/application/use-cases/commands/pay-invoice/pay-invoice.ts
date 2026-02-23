@@ -1,7 +1,6 @@
 import { APPLICATION_ERROR_CODE } from '../../../../../../building-blocks/errors/application/application-codes';
 import { ApplicationError } from '../../../../../../building-blocks/errors/application/application.error';
-import { canApproverApproveQuery } from '../../../../../financial-authorization/application/use-cases/queries/can-approver-approve';
-import { DocumentStorage } from '../../../../../financial-authorization/application/storage/document-storage.interface';
+import { CanApproverApprove } from '../../../../../financial-authorization/application/use-cases/queries/can-approver-approve';
 import { Id } from '../../../../domain/id/id';
 import { Invoice } from '../../../../domain/invoice/invoice';
 import { DomainEvents } from '../../../../../shared/domain-events/domain-events.interface';
@@ -11,11 +10,11 @@ export class PayInvoice {
     constructor(
         private readonly unitOfWorkFactory: UnitOfWorkFactory,
         private readonly domainEvents: DomainEvents,
-        private readonly documentStorage: DocumentStorage
+        private readonly canApproverApprove: CanApproverApprove
     ) {}
 
     public async execute(request: { id: string; approverId: string }) {
-        const answer = await canApproverApproveQuery(this.documentStorage)
+        const answer = await this.canApproverApprove
             .can(request.approverId)
             .perform('pay')
             .on(request.id)

@@ -1,132 +1,134 @@
-import { all, applySpec, map, prop } from 'ramda';
-import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
-import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../../building-blocks/result';
-import { Approver } from '../approver/approver';
+import { DOMAIN_ERROR_CODE, DomainError, Mappable, Result } from '../../../../building-blocks';
 import { Action } from '../action/action';
-import { createId, Id } from '../id/id';
-import { PlainRange, Range, rangeToPlain } from '../range/range';
-import { approveStep, hasEligibleApprover, PlainStep, Step, stepToPlain } from '../step/step';
-import { noDuplicateStepOrders } from './checks/check-no-duplicate-step-orders';
+import { Approver } from '../approver/approver';
+import { Id } from '../id/id';
+import { Range } from '../range/range';
+import { Step } from '../step/step';
+import { checkNoDuplicateStepOrders } from './checks/check-no-duplicate-step-orders';
 
-export type Authflow = {
-    id: Id;
-    action: Action;
-    range: Range;
-    isApproved: boolean;
-    steps: Step[];
-};
+export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
+    #id: Id;
+    #action: Action;
+    #range: Range;
+    #steps: Step[];
 
-export type AuthflowInput = {
-    action: Action;
-    range: Range;
-    steps: Step[];
-};
-
-type RebuildAuthflowInput = AuthflowInput & { id: Id };
-
-const allStepsApproved = (data: AuthflowInput): boolean =>
-    all(prop('isApproved'), data.steps);
-
-const buildAuthflow = applySpec<Authflow>({
-    id: () => createId(),
-    action: prop('action'),
-    range: prop('range'),
-    isApproved: allStepsApproved,
-    steps: prop('steps'),
-});
-
-const rebuildAuthflow = applySpec<Authflow>({
-    id: prop('id'),
-    action: prop('action'),
-    range: prop('range'),
-    isApproved: allStepsApproved,
-    steps: prop('steps'),
-});
-
-export type PlainAuthflow = {
-    id: string;
-    action: string;
-    range: PlainRange;
-    isApproved: boolean;
-    steps: PlainStep[];
-};
-
-export const authflowToPlain = (authflow: Authflow): PlainAuthflow => ({
-    id: authflow.id,
-    action: authflow.action,
-    range: rangeToPlain(authflow.range),
-    isApproved: authflow.isApproved,
-    steps: map(stepToPlain, authflow.steps),
-});
-
-export const createAuthflow = (
-    data: AuthflowInput
-): Result<DomainError, Authflow> =>
-    Result.ok<DomainError, AuthflowInput>(data)
-        .flatMap(noDuplicateStepOrders)
-        .map(buildAuthflow);
-
-const recreateAuthflow = (
-    data: RebuildAuthflowInput
-): Result<DomainError, Authflow> =>
-    Result.ok<DomainError, RebuildAuthflowInput>(data)
-        .flatMap(noDuplicateStepOrders)
-        .map(rebuildAuthflow);
-
-export const findAuthflowByAction = (
-    authflows: Authflow[],
-    action: Action
-): Result<DomainError, Authflow> => {
-    const authflow = authflows.find((a) => a.action === action);
-    return authflow
-        ? Result.ok(authflow)
-        : Result.error(
-              new DomainError({
-                  code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_NOT_FOUND,
-                  message: `Authflow with action ${action} not found`,
-              })
-          );
-};
-
-type CanApproverApproveInput = {
-    authflows: Authflow[];
-    action: Action;
-    approverId: Id;
-};
-
-export const canApproverApprove = (
-    data: CanApproverApproveInput
-): boolean => {
-    const result = findAuthflowByAction(data.authflows, data.action);
-
-    if (result.isError()) {
-        return false;
+    protected constructor(id: Id, action: Action, range: Range, steps: Step[]) {
+        this.#id = id;
+        this.#action = action;
+        this.#range = range;
+        this.#steps = steps;
     }
 
-    const authflow = result.unwrap();
-
-    if (authflow.isApproved) {
-        return false;
+    public get id(): Id {
+        return this.#id;
     }
 
-    return hasEligibleApprover(authflow.steps, data.approverId);
-};
+    public get action(): Action {
+        return this.#action;
+    }
 
-export const approveAuthflow = (
-    authflows: Authflow[],
-    action: Action,
-    approver: Approver
-): Result<DomainError, Authflow> =>
-    findAuthflowByAction(authflows, action).flatMap((authflow) =>
-        approveStep(authflow.steps, approver).flatMap((updatedStep) =>
-            recreateAuthflow({
-                id: authflow.id,
-                action: authflow.action,
-                range: authflow.range,
-                steps: authflow.steps.map((s) =>
-                    s.order === updatedStep.order ? updatedStep : s
-                ),
-            })
-        )
-    );
+    public get range(): Range {
+        return this.#range;
+    }
+
+    public get isApproved(): boolean {
+        return this.#steps.every((s) => s.isApproved);
+    }
+
+    public get steps(): readonly Step[] {
+        return this.#steps;
+    }
+
+    static create(data: { action: Action; range: Range; steps: Step[] }) {
+        const error = checkNoDuplicateStepOrders(data.steps);
+        if (error) {
+            return Result.error(error);
+        }
+
+        return Result.ok(new Authflow(Id.create().unwrap(), data.action, data.range, data.steps));
+    }
+
+    static fromPlain(plain: {
+        id: string;
+        action: string;
+        range: { from: { amount: string; currency: string }; to: { amount: string; currency: string } };
+        steps: {
+            id: string;
+            order: number;
+            groups: {
+                id: string;
+                approvers: { id: string; name: string; email: string }[];
+                approvals: { approverId: string; createdAt: string; comment: string | null }[];
+            }[];
+        }[];
+    }) {
+        return new Authflow(
+            Id.fromPlain(plain.id),
+            Action.fromPlain(plain.action),
+            Range.fromPlain(plain.range),
+            plain.steps.map((s) => Step.fromPlain(s)),
+        );
+    }
+
+    approve(approver: Approver): Result<DomainError, Authflow> {
+        const currentStep = this.#steps
+            .filter((s) => !s.isApproved)
+            .sort((a, b) => a.order.toPlain() - b.order.toPlain())[0];
+
+        if (!currentStep) {
+            return Result.error(
+                new DomainError({
+                    code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NO_PENDING_STEPS,
+                    message: 'No pending steps found',
+                })
+            );
+        }
+
+        const stepResult = currentStep.approve(approver);
+
+        if (stepResult.isError()) {
+            return Result.error(stepResult.unwrapError());
+        }
+
+        const updatedSteps = this.#steps.map((s) =>
+            s.order.equals(currentStep.order) ? stepResult.unwrap() : s
+        );
+
+        const error = checkNoDuplicateStepOrders(updatedSteps);
+        if (error) {
+            return Result.error(error);
+        }
+
+        return Result.ok(new Authflow(this.#id, this.#action, this.#range, updatedSteps));
+    }
+
+    hasEligibleApprover(approverId: Id): boolean {
+        const currentStep = this.#steps
+            .filter((s) => !s.isApproved)
+            .sort((a, b) => a.order.toPlain() - b.order.toPlain())[0];
+
+        if (!currentStep) {
+            return false;
+        }
+
+        return currentStep.hasEligibleApprover(approverId);
+    }
+
+    canApproverApprove(approverId: Id): boolean {
+        if (this.isApproved) {
+            return false;
+        }
+
+        return this.hasEligibleApprover(approverId);
+    }
+
+    toPlain() {
+        return {
+            id: this.#id.toPlain(),
+            action: this.#action.toPlain(),
+            range: this.#range.toPlain(),
+            isApproved: this.isApproved,
+            steps: this.#steps.map((s) => s.toPlain()),
+        };
+    }
+}

@@ -1,84 +1,64 @@
-import { IO } from '../../../../../building-blocks/io';
-import { Some } from '../../../../../building-blocks/some';
 import { DomainEvents } from '../../../../shared/domain-events/domain-events.interface';
+import { UnitOfWorkFactory } from '../../../../shared/unit-of-work/unit-of-work.interface';
 import { InvoiceIssuedEvent } from '../../../../invoices/domain/invoice/events/invoice-issued.event';
-import {
-    createDocument,
-    FinancialDocument,
-} from '../../../domain/document/document';
-import { Money, createMoney } from '../../../domain/money/money';
-import { createReferenceId } from '../../../domain/reference-id/reference-id';
-import { selectAuthflow } from '../../../domain/authflow/authflow-policy';
-import { DocumentStorage } from '../../storage/document-storage.interface';
-import { PolicyStorage } from '../../storage/policy-storage.interface';
+import { AuthflowPolicy } from '../../../domain/authflow/authflow-policy';
+import { FinancialDocument } from '../../../domain/document/document';
+import { Money } from '../../../domain/money/money';
+import { ReferenceId } from '../../../domain/reference-id/reference-id';
 
-const extractReferenceId = (data: { id: string }) =>
-    createReferenceId(data.id).unwrap();
+export class OnInvoiceIssued {
+    constructor(
+        private readonly unitOfWorkFactory: UnitOfWorkFactory,
+        private readonly domainEvents: DomainEvents
+    ) {}
 
-const extractValue = (data: {
-    total: { amount: string; currency: string };
-}): Money => createMoney(data.total.amount, data.total.currency).unwrap();
+    public async register() {
+        await this.domainEvents.subscribeToEvent(
+            InvoiceIssuedEvent,
+            (event) => this.handle(event)
+        );
+    }
 
-const createNewDocument =
-    (policyStorage: PolicyStorage) => (referenceId: string, value: Money) =>
-        policyStorage.findByAction('pay').map((found) => {
-            const authflows = found.fold(
-                () => [],
-                (policy) => {
-                    const result = selectAuthflow(policy, value);
-                    return result.isOk() ? [result.unwrap()] : [];
-                }
-            );
-            return createDocument({ referenceId, value, authflows }).unwrap();
+    private async handle(event: InvoiceIssuedEvent): Promise<void> {
+        const referenceId = ReferenceId.create(event.data.id).unwrap();
+        const value = Money.create(
+            event.data.total.amount,
+            event.data.total.currency
+        ).unwrap();
+
+        const document = await this.unitOfWorkFactory.start(async (uow) => {
+            const existing = await uow
+                .collection(FinancialDocument)
+                .findBy('referenceId', referenceId.toPlain());
+
+            if (existing) {
+                return null;
+            }
+
+            const policy = await uow
+                .collection(AuthflowPolicy)
+                .findBy('action', 'pay');
+
+            const authflows = policy
+                ? (() => {
+                      const result = policy.selectAuthflow(value);
+                      return result.isOk() ? [result.unwrap()] : [];
+                  })()
+                : [];
+
+            const doc = FinancialDocument.create({
+                referenceId,
+                value,
+                authflows,
+            }).unwrap();
+
+            await uow.collection(FinancialDocument).add(doc);
+
+            return doc;
         });
 
-const saveNewDocument =
-    (storage: DocumentStorage, policyStorage: PolicyStorage) =>
-    (referenceId: string, value: Money) =>
-        createNewDocument(policyStorage)(referenceId, value).flatMap((doc) =>
-            storage.save(doc).map(() => doc)
-        );
-
-const orElseCreate =
-    (storage: DocumentStorage, policyStorage: PolicyStorage) =>
-    (referenceId: string, value: Money) =>
-    (found: Some<FinancialDocument>) =>
-        found.fold(
-            () =>
-                saveNewDocument(storage, policyStorage)(referenceId, value).map(
-                    Some.of
-                ),
-            () => IO.of(Some.none())
-        );
-
-const handleEvent =
-    (
-        domainEvents: DomainEvents,
-        storage: DocumentStorage,
-        policyStorage: PolicyStorage
-    ) =>
-    async (event: InvoiceIssuedEvent): Promise<void> => {
-        const referenceId = extractReferenceId(event.data);
-        const value = extractValue(event.data);
-
-        const result = await storage
-            .findByReferenceId(referenceId)
-            .flatMap(orElseCreate(storage, policyStorage)(referenceId, value))
-            .run();
-
-        await result.fold(
-            () => Promise.resolve(),
-            (doc) => domainEvents.publishEvents(doc)
-        );
-    };
-
-export const onInvoiceIssued = async (
-    domainEvents: DomainEvents,
-    storage: DocumentStorage,
-    policyStorage: PolicyStorage
-) => {
-    await domainEvents.subscribeToEvent(
-        InvoiceIssuedEvent,
-        handleEvent(domainEvents, storage, policyStorage)
-    );
-};
+        if (document) {
+            await this.domainEvents.publishEvents(document);
+        }
+    }
+}

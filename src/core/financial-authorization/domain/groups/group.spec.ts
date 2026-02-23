@@ -1,19 +1,19 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { Approval } from '../approval/approval';
 import { Approver } from '../approver/approver';
-import { createGroup, approveGroup } from './group';
+import { Group } from './group';
 
-describe('createGroup', () => {
+describe('Group.create', () => {
     it('should create a group successfully with unique approvers', () => {
-        const approvers: Approver[] = [
-            { id: '1', name: 'Alice', email: 'alice@example.com' },
-            { id: '2', name: 'Bob', email: 'bob@example.com' },
-            { id: '3', name: 'Charlie', email: 'charlie@example.com' },
+        const approvers = [
+            Approver.fromPlain({ id: '1', name: 'Alice', email: 'alice@example.com' }),
+            Approver.fromPlain({ id: '2', name: 'Bob', email: 'bob@example.com' }),
+            Approver.fromPlain({ id: '3', name: 'Charlie', email: 'charlie@example.com' }),
         ];
 
         const approvals: Approval[] = [];
 
-        const result = createGroup({
+        const result = Group.create({
             approvers,
             approvals,
         });
@@ -29,7 +29,7 @@ describe('createGroup', () => {
         const approvers: Approver[] = [];
         const approvals: Approval[] = [];
 
-        const result = createGroup({
+        const result = Group.create({
             approvers,
             approvals,
         });
@@ -43,15 +43,15 @@ describe('createGroup', () => {
     });
 
     it('should fail to create a group with duplicate approver IDs', () => {
-        const approvers: Approver[] = [
-            { id: '1', name: 'Alice', email: 'alice@example.com' },
-            { id: '2', name: 'Bob', email: 'bob@example.com' },
-            { id: '1', name: 'Alice Duplicate', email: 'alice2@example.com' },
+        const approvers = [
+            Approver.fromPlain({ id: '1', name: 'Alice', email: 'alice@example.com' }),
+            Approver.fromPlain({ id: '2', name: 'Bob', email: 'bob@example.com' }),
+            Approver.fromPlain({ id: '1', name: 'Alice Duplicate', email: 'alice2@example.com' }),
         ];
 
         const approvals: Approval[] = [];
 
-        const result = createGroup({
+        const result = Group.create({
             approvers,
             approvals,
         });
@@ -65,15 +65,15 @@ describe('createGroup', () => {
     });
 
     it('should fail when all approvers have the same ID', () => {
-        const approvers: Approver[] = [
-            { id: 'same-id', name: 'Alice', email: 'alice@example.com' },
-            { id: 'same-id', name: 'Bob', email: 'bob@example.com' },
-            { id: 'same-id', name: 'Charlie', email: 'charlie@example.com' },
+        const approvers = [
+            Approver.fromPlain({ id: 'same-id', name: 'Alice', email: 'alice@example.com' }),
+            Approver.fromPlain({ id: 'same-id', name: 'Bob', email: 'bob@example.com' }),
+            Approver.fromPlain({ id: 'same-id', name: 'Charlie', email: 'charlie@example.com' }),
         ];
 
         const approvals: Approval[] = [];
 
-        const result = createGroup({
+        const result = Group.create({
             approvers,
             approvals,
         });
@@ -87,17 +87,17 @@ describe('createGroup', () => {
     });
 
     it('should create a group successfully with unique approvals', () => {
-        const approvers: Approver[] = [
-            { id: '1', name: 'Alice', email: 'alice@example.com' },
-            { id: '2', name: 'Bob', email: 'bob@example.com' },
+        const approvers = [
+            Approver.fromPlain({ id: '1', name: 'Alice', email: 'alice@example.com' }),
+            Approver.fromPlain({ id: '2', name: 'Bob', email: 'bob@example.com' }),
         ];
 
-        const approvals: Approval[] = [
-            { approverId: '1', createdAt: new Date(), comment: 'Approved' },
-            { approverId: '2', createdAt: new Date(), comment: null },
+        const approvals = [
+            Approval.fromPlain({ approverId: '1', createdAt: new Date().toISOString(), comment: 'Approved' }),
+            Approval.fromPlain({ approverId: '2', createdAt: new Date().toISOString(), comment: null }),
         ];
 
-        const result = createGroup({
+        const result = Group.create({
             approvers,
             approvals,
         });
@@ -109,26 +109,26 @@ describe('createGroup', () => {
     });
 
     it('should fail to create a group with duplicate approval approver IDs', () => {
-        const approvers: Approver[] = [
-            { id: '1', name: 'Alice', email: 'alice@example.com' },
-            { id: '2', name: 'Bob', email: 'bob@example.com' },
+        const approvers = [
+            Approver.fromPlain({ id: '1', name: 'Alice', email: 'alice@example.com' }),
+            Approver.fromPlain({ id: '2', name: 'Bob', email: 'bob@example.com' }),
         ];
 
-        const approvals: Approval[] = [
-            {
+        const approvals = [
+            Approval.fromPlain({
                 approverId: '1',
-                createdAt: new Date(),
+                createdAt: new Date().toISOString(),
                 comment: 'Approved first time',
-            },
-            { approverId: '2', createdAt: new Date(), comment: 'Approved' },
-            {
+            }),
+            Approval.fromPlain({ approverId: '2', createdAt: new Date().toISOString(), comment: 'Approved' }),
+            Approval.fromPlain({
                 approverId: '1',
-                createdAt: new Date(),
+                createdAt: new Date().toISOString(),
                 comment: 'Approved second time',
-            },
+            }),
         ];
 
-        const result = createGroup({
+        const result = Group.create({
             approvers,
             approvals,
         });
@@ -142,29 +142,29 @@ describe('createGroup', () => {
     });
 
     it('should fail when all approvals have the same approver ID', () => {
-        const approvers: Approver[] = [
-            { id: '1', name: 'Alice', email: 'alice@example.com' },
+        const approvers = [
+            Approver.fromPlain({ id: '1', name: 'Alice', email: 'alice@example.com' }),
         ];
 
-        const approvals: Approval[] = [
-            {
+        const approvals = [
+            Approval.fromPlain({
                 approverId: '1',
-                createdAt: new Date(),
+                createdAt: new Date().toISOString(),
                 comment: 'First approval',
-            },
-            {
+            }),
+            Approval.fromPlain({
                 approverId: '1',
-                createdAt: new Date(),
+                createdAt: new Date().toISOString(),
                 comment: 'Second approval',
-            },
-            {
+            }),
+            Approval.fromPlain({
                 approverId: '1',
-                createdAt: new Date(),
+                createdAt: new Date().toISOString(),
                 comment: 'Third approval',
-            },
+            }),
         ];
 
-        const result = createGroup({
+        const result = Group.create({
             approvers,
             approvals,
         });
@@ -178,17 +178,17 @@ describe('createGroup', () => {
     });
 
     it('should fail when approval references non-existent approver', () => {
-        const approvers: Approver[] = [
-            { id: '1', name: 'Alice', email: 'alice@example.com' },
-            { id: '2', name: 'Bob', email: 'bob@example.com' },
+        const approvers = [
+            Approver.fromPlain({ id: '1', name: 'Alice', email: 'alice@example.com' }),
+            Approver.fromPlain({ id: '2', name: 'Bob', email: 'bob@example.com' }),
         ];
 
-        const approvals: Approval[] = [
-            { approverId: '1', createdAt: new Date(), comment: 'Approved' },
-            { approverId: '3', createdAt: new Date(), comment: 'Approved' },
+        const approvals = [
+            Approval.fromPlain({ approverId: '1', createdAt: new Date().toISOString(), comment: 'Approved' }),
+            Approval.fromPlain({ approverId: '3', createdAt: new Date().toISOString(), comment: 'Approved' }),
         ];
 
-        const result = createGroup({
+        const result = Group.create({
             approvers,
             approvals,
         });
@@ -204,20 +204,20 @@ describe('createGroup', () => {
     });
 
     it('should fail when all approvals reference non-existent approvers', () => {
-        const approvers: Approver[] = [
-            { id: '1', name: 'Alice', email: 'alice@example.com' },
+        const approvers = [
+            Approver.fromPlain({ id: '1', name: 'Alice', email: 'alice@example.com' }),
         ];
 
-        const approvals: Approval[] = [
-            { approverId: '99', createdAt: new Date(), comment: 'Approved' },
-            {
+        const approvals = [
+            Approval.fromPlain({ approverId: '99', createdAt: new Date().toISOString(), comment: 'Approved' }),
+            Approval.fromPlain({
                 approverId: '100',
-                createdAt: new Date(),
+                createdAt: new Date().toISOString(),
                 comment: 'Approved',
-            },
+            }),
         ];
 
-        const result = createGroup({
+        const result = Group.create({
             approvers,
             approvals,
         });
@@ -233,14 +233,14 @@ describe('createGroup', () => {
     });
 
     it('should create a group with empty approvals and non-empty approvers', () => {
-        const approvers: Approver[] = [
-            { id: '1', name: 'Alice', email: 'alice@example.com' },
-            { id: '2', name: 'Bob', email: 'bob@example.com' },
+        const approvers = [
+            Approver.fromPlain({ id: '1', name: 'Alice', email: 'alice@example.com' }),
+            Approver.fromPlain({ id: '2', name: 'Bob', email: 'bob@example.com' }),
         ];
 
         const approvals: Approval[] = [];
 
-        const result = createGroup({
+        const result = Group.create({
             approvers,
             approvals,
         });
@@ -254,11 +254,11 @@ describe('createGroup', () => {
     it('should fail when approvals exist but approvers array is empty', () => {
         const approvers: Approver[] = [];
 
-        const approvals: Approval[] = [
-            { approverId: '1', createdAt: new Date(), comment: 'Approved' },
+        const approvals = [
+            Approval.fromPlain({ approverId: '1', createdAt: new Date().toISOString(), comment: 'Approved' }),
         ];
 
-        const result = createGroup({
+        const result = Group.create({
             approvers,
             approvals,
         });
@@ -272,16 +272,16 @@ describe('createGroup', () => {
     });
 
     it('should fail when first approval is valid but second is invalid', () => {
-        const approvers: Approver[] = [
-            { id: '1', name: 'Alice', email: 'alice@example.com' },
+        const approvers = [
+            Approver.fromPlain({ id: '1', name: 'Alice', email: 'alice@example.com' }),
         ];
 
-        const approvals: Approval[] = [
-            { approverId: '1', createdAt: new Date(), comment: 'Valid' },
-            { approverId: '2', createdAt: new Date(), comment: 'Invalid' },
+        const approvals = [
+            Approval.fromPlain({ approverId: '1', createdAt: new Date().toISOString(), comment: 'Valid' }),
+            Approval.fromPlain({ approverId: '2', createdAt: new Date().toISOString(), comment: 'Invalid' }),
         ];
 
-        const result = createGroup({
+        const result = Group.create({
             approvers,
             approvals,
         });
@@ -297,17 +297,17 @@ describe('createGroup', () => {
     });
 
     it('should fail when multiple approvals reference non-existent approvers', () => {
-        const approvers: Approver[] = [
-            { id: '1', name: 'Alice', email: 'alice@example.com' },
+        const approvers = [
+            Approver.fromPlain({ id: '1', name: 'Alice', email: 'alice@example.com' }),
         ];
 
-        const approvals: Approval[] = [
-            { approverId: '1', createdAt: new Date(), comment: 'Valid' },
-            { approverId: '2', createdAt: new Date(), comment: 'Invalid' },
-            { approverId: '3', createdAt: new Date(), comment: 'Also invalid' },
+        const approvals = [
+            Approval.fromPlain({ approverId: '1', createdAt: new Date().toISOString(), comment: 'Valid' }),
+            Approval.fromPlain({ approverId: '2', createdAt: new Date().toISOString(), comment: 'Invalid' }),
+            Approval.fromPlain({ approverId: '3', createdAt: new Date().toISOString(), comment: 'Also invalid' }),
         ];
 
-        const result = createGroup({
+        const result = Group.create({
             approvers,
             approvals,
         });
@@ -323,17 +323,17 @@ describe('createGroup', () => {
     });
 
     it('should create a group when multiple valid approvers and only one is approved', () => {
-        const approvers: Approver[] = [
-            { id: '1', name: 'Alice', email: 'alice@example.com' },
-            { id: '2', name: 'Bob', email: 'bob@example.com' },
-            { id: '3', name: 'Charlie', email: 'charlie@example.com' },
+        const approvers = [
+            Approver.fromPlain({ id: '1', name: 'Alice', email: 'alice@example.com' }),
+            Approver.fromPlain({ id: '2', name: 'Bob', email: 'bob@example.com' }),
+            Approver.fromPlain({ id: '3', name: 'Charlie', email: 'charlie@example.com' }),
         ];
 
-        const approvals: Approval[] = [
-            { approverId: '2', createdAt: new Date(), comment: 'Approved' },
+        const approvals = [
+            Approval.fromPlain({ approverId: '2', createdAt: new Date().toISOString(), comment: 'Approved' }),
         ];
 
-        const result = createGroup({
+        const result = Group.create({
             approvers,
             approvals,
         });
@@ -345,19 +345,19 @@ describe('createGroup', () => {
     });
 
     it('should create a group when all approvers have approved', () => {
-        const approvers: Approver[] = [
-            { id: '1', name: 'Alice', email: 'alice@example.com' },
-            { id: '2', name: 'Bob', email: 'bob@example.com' },
-            { id: '3', name: 'Charlie', email: 'charlie@example.com' },
+        const approvers = [
+            Approver.fromPlain({ id: '1', name: 'Alice', email: 'alice@example.com' }),
+            Approver.fromPlain({ id: '2', name: 'Bob', email: 'bob@example.com' }),
+            Approver.fromPlain({ id: '3', name: 'Charlie', email: 'charlie@example.com' }),
         ];
 
-        const approvals: Approval[] = [
-            { approverId: '1', createdAt: new Date(), comment: 'Approved' },
-            { approverId: '2', createdAt: new Date(), comment: 'Looks good' },
-            { approverId: '3', createdAt: new Date(), comment: null },
+        const approvals = [
+            Approval.fromPlain({ approverId: '1', createdAt: new Date().toISOString(), comment: 'Approved' }),
+            Approval.fromPlain({ approverId: '2', createdAt: new Date().toISOString(), comment: 'Looks good' }),
+            Approval.fromPlain({ approverId: '3', createdAt: new Date().toISOString(), comment: null }),
         ];
 
-        const result = createGroup({
+        const result = Group.create({
             approvers,
             approvals,
         });
@@ -369,19 +369,19 @@ describe('createGroup', () => {
     });
 
     it('should fail when approver ID case does not match exactly', () => {
-        const approvers: Approver[] = [
-            { id: 'abc123', name: 'Alice', email: 'alice@example.com' },
+        const approvers = [
+            Approver.fromPlain({ id: 'abc123', name: 'Alice', email: 'alice@example.com' }),
         ];
 
-        const approvals: Approval[] = [
-            {
+        const approvals = [
+            Approval.fromPlain({
                 approverId: 'ABC123',
-                createdAt: new Date(),
+                createdAt: new Date().toISOString(),
                 comment: 'Approved',
-            },
+            }),
         ];
 
-        const result = createGroup({
+        const result = Group.create({
             approvers,
             approvals,
         });
@@ -397,68 +397,62 @@ describe('createGroup', () => {
     });
 });
 
-describe('approveGroup', () => {
-    const approver1: Approver = {
+describe('Group.approve', () => {
+    const approver1 = Approver.fromPlain({
         id: '1',
         name: 'Alice',
         email: 'alice@example.com',
-    };
+    });
 
-    const approver2: Approver = {
+    const approver2 = Approver.fromPlain({
         id: '2',
         name: 'Bob',
         email: 'bob@example.com',
-    };
+    });
 
-    const approver3: Approver = {
+    const approver3 = Approver.fromPlain({
         id: '3',
         name: 'Charlie',
         email: 'charlie@example.com',
-    };
+    });
 
     it('should successfully add approval from existing approver', () => {
-        const groupResult = createGroup({
+        const group = Group.create({
             approvers: [approver1, approver2],
             approvals: [],
-        });
-        const group = groupResult.unwrap();
+        }).unwrap();
 
-        const result = approveGroup([group], approver1);
+        const result = group.approve(approver1);
 
         expect(result.isOk()).toBe(true);
 
-        const approvedGroups = result.unwrap();
-        const approvedGroup = approvedGroups.find(
-            (g) => g.approvals.length > 0
-        )!;
+        const approvedGroup = result.unwrap();
         expect(approvedGroup.approvals).toHaveLength(1);
-        expect(approvedGroup.approvals[0].approverId).toBe(approver1.id);
-        expect(approvedGroup.approvals[0].comment).toBe(null);
-        expect(approvedGroup.approvals[0].createdAt).toBeInstanceOf(Date);
+        expect(approvedGroup.approvals[0].approverId.toPlain()).toBe(approver1.id.toPlain());
+        expect(approvedGroup.approvals[0].comment.toPlain()).toBe(null);
+        expect(typeof approvedGroup.approvals[0].createdAt.toPlain()).toBe('string');
         expect(approvedGroup.isApproved).toBe(true);
-        expect(approvedGroup.approvers).toHaveLength(2); // Should not change
+        expect(approvedGroup.approvers).toHaveLength(2);
     });
 
     it('should not approve a group that already has approvals (already approved)', () => {
-        const existingApproval: Approval = {
-            approverId: approver1.id,
-            createdAt: new Date(),
+        const existingApproval = Approval.fromPlain({
+            approverId: approver1.id.toPlain(),
+            createdAt: new Date().toISOString(),
             comment: 'First approval',
-        };
+        });
 
-        const groupResult = createGroup({
+        const group = Group.create({
             approvers: [approver1, approver2],
             approvals: [existingApproval],
-        });
-        const group = groupResult.unwrap();
+        }).unwrap();
 
-        // Group is already approved (has approvals), so findGroup skips it
-        const result = approveGroup([group], approver2);
+        const result = group.approve(approver2);
 
         expect(result.isError()).toBe(true);
         const error = result.unwrapError();
         expect(error.message).toBe(
-            `No eligible group found for approver ${approver2.id}`
+            `No eligible group found for approver ${approver2.id.toPlain()}`
         );
         expect(error.code).toBe(
             DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND
@@ -466,18 +460,17 @@ describe('approveGroup', () => {
     });
 
     it('should fail when approver is not in the group', () => {
-        const groupResult = createGroup({
+        const group = Group.create({
             approvers: [approver1, approver2],
             approvals: [],
-        });
-        const group = groupResult.unwrap();
+        }).unwrap();
 
-        const result = approveGroup([group], approver3);
+        const result = group.approve(approver3);
 
         expect(result.isError()).toBe(true);
         const error = result.unwrapError();
         expect(error.message).toBe(
-            `No eligible group found for approver ${approver3.id}`
+            `No eligible group found for approver ${approver3.id.toPlain()}`
         );
         expect(error.code).toBe(
             DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND
@@ -485,25 +478,23 @@ describe('approveGroup', () => {
     });
 
     it('should fail when approver tries to approve an already-approved group', () => {
-        const existingApproval: Approval = {
-            approverId: approver1.id,
-            createdAt: new Date(),
+        const existingApproval = Approval.fromPlain({
+            approverId: approver1.id.toPlain(),
+            createdAt: new Date().toISOString(),
             comment: 'First approval',
-        };
+        });
 
-        const groupResult = createGroup({
+        const group = Group.create({
             approvers: [approver1, approver2],
             approvals: [existingApproval],
-        });
-        const group = groupResult.unwrap();
+        }).unwrap();
 
-        // Group is already approved, so findGroup won't match it
-        const result = approveGroup([group], approver1);
+        const result = group.approve(approver1);
 
         expect(result.isError()).toBe(true);
         const error = result.unwrapError();
         expect(error.message).toBe(
-            `No eligible group found for approver ${approver1.id}`
+            `No eligible group found for approver ${approver1.id.toPlain()}`
         );
         expect(error.code).toBe(
             DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND
@@ -511,119 +502,104 @@ describe('approveGroup', () => {
     });
 
     it('should maintain immutability of original group', () => {
-        const groupResult = createGroup({
+        const originalGroup = Group.create({
             approvers: [approver1, approver2],
             approvals: [],
-        });
-        const originalGroup = groupResult.unwrap();
+        }).unwrap();
         const originalApprovalsLength = originalGroup.approvals.length;
         const originalApproversLength = originalGroup.approvers.length;
         const originalIsApproved = originalGroup.isApproved;
 
-        approveGroup([originalGroup], approver1);
+        originalGroup.approve(approver1);
 
-        // Original group should remain unchanged
         expect(originalGroup.approvals).toHaveLength(originalApprovalsLength);
         expect(originalGroup.approvers).toHaveLength(originalApproversLength);
         expect(originalGroup.isApproved).toBe(originalIsApproved);
     });
 
     it('should set correct timestamp on approval', () => {
-        const groupResult = createGroup({
+        const group = Group.create({
             approvers: [approver1, approver2],
             approvals: [],
-        });
-        const group = groupResult.unwrap();
+        }).unwrap();
 
         const beforeTime = new Date();
-        const result = approveGroup([group], approver1);
+        const result = group.approve(approver1);
         const afterTime = new Date();
 
         expect(result.isOk()).toBe(true);
 
-        const approvedGroups = result.unwrap();
-        const approval = approvedGroups[0].approvals[0];
-        expect(approval.createdAt).toBeInstanceOf(Date);
-        expect(approval.createdAt.getTime()).toBeGreaterThanOrEqual(
-            beforeTime.getTime()
-        );
-        expect(approval.createdAt.getTime()).toBeLessThanOrEqual(
-            afterTime.getTime()
-        );
+        const approvedGroup = result.unwrap();
+        const approval = approvedGroup.approvals[0];
+        const createdAtTime = new Date(approval.createdAt.toPlain()).getTime();
+        expect(createdAtTime).toBeGreaterThanOrEqual(beforeTime.getTime());
+        expect(createdAtTime).toBeLessThanOrEqual(afterTime.getTime());
     });
 
     it('should work with single approver group', () => {
-        const groupResult = createGroup({
+        const group = Group.create({
             approvers: [approver1],
             approvals: [],
-        });
-        const group = groupResult.unwrap();
+        }).unwrap();
 
-        const result = approveGroup([group], approver1);
+        const result = group.approve(approver1);
 
         expect(result.isOk()).toBe(true);
 
-        const approvedGroups = result.unwrap();
-        const approvedGroup = approvedGroups[0];
+        const approvedGroup = result.unwrap();
         expect(approvedGroup.approvals).toHaveLength(1);
-        expect(approvedGroup.approvals[0].approverId).toBe(approver1.id);
+        expect(approvedGroup.approvals[0].approverId.toPlain()).toBe(approver1.id.toPlain());
         expect(approvedGroup.isApproved).toBe(true);
         expect(approvedGroup.approvers).toHaveLength(1);
     });
 
     it('should work with multiple approvers in sequence', () => {
-        // Start with empty group
-        const groupResult = createGroup({
+        const group = Group.create({
             approvers: [approver1, approver2, approver3],
             approvals: [],
-        });
-        let currentGroups = [groupResult.unwrap()];
-        expect(currentGroups[0].isApproved).toBe(false);
+        }).unwrap();
+        expect(group.isApproved).toBe(false);
 
         // First approval
-        const firstApprovalResult = approveGroup(currentGroups, approver1);
+        const firstApprovalResult = group.approve(approver1);
         expect(firstApprovalResult.isOk()).toBe(true);
-        currentGroups = firstApprovalResult.unwrap();
-        expect(currentGroups[0].approvals).toHaveLength(1);
-        expect(currentGroups[0].isApproved).toBe(true);
+        const approvedGroup = firstApprovalResult.unwrap();
+        expect(approvedGroup.approvals).toHaveLength(1);
+        expect(approvedGroup.isApproved).toBe(true);
 
-        // Second approval — group is already approved, so approver2 won't find an eligible group
-        // The contract finds groups where !g.isApproved, so this should fail
-        const secondApprovalResult = approveGroup(currentGroups, approver2);
+        // Second approval -- group is already approved, so this should fail
+        const secondApprovalResult = approvedGroup.approve(approver2);
         expect(secondApprovalResult.isError()).toBe(true);
     });
 
     it('should preserve group id after approval', () => {
-        const groupResult = createGroup({
+        const group = Group.create({
             approvers: [approver1, approver2],
             approvals: [],
-        });
-        const group = groupResult.unwrap();
-        const originalId = group.id;
+        }).unwrap();
+        const originalId = group.id.toPlain();
 
-        const result = approveGroup([group], approver1);
+        const result = group.approve(approver1);
 
         expect(result.isOk()).toBe(true);
-        const approvedGroups = result.unwrap();
-        expect(approvedGroups[0].id).toBe(originalId);
+        const approvedGroup = result.unwrap();
+        expect(approvedGroup.id.toPlain()).toBe(originalId);
     });
 
     it('should preserve approver order when adding approval', () => {
-        const groupResult = createGroup({
+        const group = Group.create({
             approvers: [approver1, approver2, approver3],
             approvals: [],
-        });
-        const group = groupResult.unwrap();
+        }).unwrap();
 
-        const result = approveGroup([group], approver2);
+        const result = group.approve(approver2);
 
         expect(result.isOk()).toBe(true);
 
-        const approvedGroups = result.unwrap();
-        const approvedGroup = approvedGroups[0];
-        expect(approvedGroup.approvers[0].id).toBe(approver1.id);
-        expect(approvedGroup.approvers[1].id).toBe(approver2.id);
-        expect(approvedGroup.approvers[2].id).toBe(approver3.id);
-        expect(approvedGroup.approvals[0].approverId).toBe(approver2.id);
+        const approvedGroup = result.unwrap();
+        expect(approvedGroup.approvers[0].id.toPlain()).toBe(approver1.id.toPlain());
+        expect(approvedGroup.approvers[1].id.toPlain()).toBe(approver2.id.toPlain());
+        expect(approvedGroup.approvers[2].id.toPlain()).toBe(approver3.id.toPlain());
+        expect(approvedGroup.approvals[0].approverId.toPlain()).toBe(approver2.id.toPlain());
     });
 });

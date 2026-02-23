@@ -1,33 +1,17 @@
-import { ifElse, length, map, prop, uniq } from 'ramda';
 import { DOMAIN_ERROR_CODE } from '../../../../../building-blocks/errors/domain/domain-codes';
 import { DomainError } from '../../../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../../../building-blocks/result';
-import { Action } from '../../action/action';
-import { Range } from '../../range/range';
 import { Step } from '../../step/step';
 
-type AuthflowInput = {
-    action: Action;
-    range: Range;
-    steps: Step[];
-};
+export function checkNoDuplicateStepOrders(steps: Step[]): DomainError | null {
+    const orders = steps.map((s) => s.order.toPlain());
+    const uniqueOrders = new Set(orders);
 
-const hasDuplicateOrders = (data: AuthflowInput) => {
-    const stepOrders = map(prop('order'), data.steps);
-    const uniqueOrders = uniq(stepOrders);
-    return length(stepOrders) !== length(uniqueOrders);
-};
-
-const createDuplicateOrdersError = () =>
-    Result.error(
-        new DomainError({
+    if (orders.length !== uniqueOrders.size) {
+        return new DomainError({
             message: 'Duplicate step orders found',
             code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_STEP_ORDER_DUPLICATE,
-        })
-    );
+        });
+    }
 
-export function noDuplicateStepOrders(data: AuthflowInput) {
-    return Result.ok<DomainError, AuthflowInput>(data).flatMap(
-        ifElse(hasDuplicateOrders, createDuplicateOrdersError, Result.ok)
-    );
+    return null;
 }

@@ -1,33 +1,35 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
-import { createAction } from './action';
+import { Action } from './action';
 
-describe('createAction', () => {
-    it('should create an action from a valid string', () => {
-        const result = createAction('approve-invoice');
+describe('Action', () => {
+    describe('create', () => {
+        it('should create an action from a valid string', () => {
+            const result = Action.create('approve-invoice');
 
-        expect(result.isOk()).toBe(true);
-        expect(result.unwrap()).toBe('approve-invoice');
-    });
+            expect(result.isOk()).toBe(true);
+            expect(result.unwrap().toPlain()).toBe('approve-invoice');
+        });
 
-    it('should reject empty action', () => {
-        const result = createAction('');
+        it('should reject empty action', () => {
+            const result = Action.create('');
 
-        expect(result.isError()).toBe(true);
-        const error = result.unwrapError();
-        expect(error.message).toBe('Action cannot be blank');
-        expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_ACTION_BLANK
-        );
-    });
+            expect(result.isError()).toBe(true);
+            const error = result.unwrapError();
+            expect(error.message).toBe('Action cannot be blank');
+            expect(error.code).toBe(
+                DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_ACTION_BLANK
+            );
+        });
 
-    it('should reject whitespace-only action', () => {
-        const result = createAction('   ');
+        it('should reject whitespace-only action', () => {
+            const result = Action.create('   ');
 
-        expect(result.isError()).toBe(true);
-        const error = result.unwrapError();
-        expect(error.message).toBe('Action cannot be blank');
-        expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_ACTION_BLANK
-        );
+            expect(result.isError()).toBe(true);
+            const error = result.unwrapError();
+            expect(error.message).toBe('Action cannot be blank');
+            expect(error.code).toBe(
+                DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_ACTION_BLANK
+            );
+        });
     });
 });

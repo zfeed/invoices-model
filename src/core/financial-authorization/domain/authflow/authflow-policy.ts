@@ -1,95 +1,103 @@
-import { applySpec, map, prop } from 'ramda';
-import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../../building-blocks/result';
-import { WithEvents, withEvents } from '../../../../building-blocks/events/with-events';
+import { DomainError, Mappable, Result } from '../../../../building-blocks';
+import { DomainEvent } from '../../../../building-blocks/events/domain-event';
+import { PublishableEvents } from '../../../../building-blocks/events/event-publisher.interface';
 import { Action } from '../action/action';
-import { createId, Id } from '../id/id';
+import { Id } from '../id/id';
 import { Money } from '../money/money';
-import { Version } from '../version/version';
 import { Authflow } from './authflow';
-import { authflowFromTemplate } from './authflow-from-template';
-import { AuthflowTemplate, PlainAuthflowTemplate, authflowTemplateToPlain } from './authflow-template';
-import { noOverlappingRanges } from './checks/check-no-overlapping-ranges';
-import { templateInRange } from './checks/check-template-in-range';
+import { AuthflowTemplate } from './authflow-template';
+import { checkNoOverlappingRanges } from './checks/check-no-overlapping-ranges';
+import { checkTemplateInRange } from './checks/check-template-in-range';
 import { AuthflowPolicyCreatedEvent } from './events/authflow-policy-created.event';
 
-export type AuthflowPolicy = {
-    id: Id;
-    action: Action;
-    templates: AuthflowTemplate[];
-    version: Version;
-};
+export class AuthflowPolicy implements Mappable<ReturnType<AuthflowPolicy['toPlain']>>, PublishableEvents<DomainEvent<any>> {
+    #id: Id;
+    #action: Action;
+    #templates: AuthflowTemplate[];
+    #events: DomainEvent<any>[] = [];
 
-export type AuthflowPolicyInput = {
-    action: Action;
-    templates: AuthflowTemplate[];
-};
+    protected constructor(id: Id, action: Action, templates: AuthflowTemplate[]) {
+        this.#id = id;
+        this.#action = action;
+        this.#templates = templates;
+    }
 
-type RebuildAuthflowPolicyInput = AuthflowPolicyInput & { id: Id; version: Version };
+    public get id(): Id {
+        return this.#id;
+    }
 
-const buildAuthflowPolicy = applySpec<AuthflowPolicy>({
-    id: () => createId(),
-    action: prop('action'),
-    templates: prop('templates'),
-    version: () => 0,
-});
+    public get action(): Action {
+        return this.#action;
+    }
 
-const rebuildAuthflowPolicy = applySpec<AuthflowPolicy>({
-    id: prop('id'),
-    action: prop('action'),
-    templates: prop('templates'),
-    version: prop('version'),
-});
+    public get templates(): readonly AuthflowTemplate[] {
+        return this.#templates;
+    }
 
-export type PlainAuthflowPolicy = {
-    id: string;
-    action: string;
-    templates: PlainAuthflowTemplate[];
-    version: number;
-};
+    public get events(): ReadonlyArray<DomainEvent<any>> {
+        return this.#events;
+    }
 
-export const authflowPolicyToPlain = (policy: AuthflowPolicy): PlainAuthflowPolicy => ({
-    id: policy.id,
-    action: policy.action,
-    templates: map(authflowTemplateToPlain, policy.templates),
-    version: policy.version,
-});
+    static create(data: { action: Action; templates: AuthflowTemplate[] }) {
+        const error = checkNoOverlappingRanges(data.templates);
+        if (error) {
+            return Result.error(error);
+        }
 
-export const createAuthflowPolicy = (
-    data: AuthflowPolicyInput
-): Result<DomainError, WithEvents<AuthflowPolicy, AuthflowPolicyCreatedEvent>> =>
-    Result.ok<DomainError, AuthflowPolicyInput>(data)
-        .flatMap(noOverlappingRanges)
-        .map(buildAuthflowPolicy)
-        .map((policy) =>
-            withEvents(policy, [new AuthflowPolicyCreatedEvent(policy)])
+        const policy = new AuthflowPolicy(
+            Id.create().unwrap(),
+            data.action,
+            data.templates,
         );
 
-export const recreateAuthflowPolicy = (
-    data: RebuildAuthflowPolicyInput
-): Result<DomainError, AuthflowPolicy> =>
-    Result.ok<DomainError, RebuildAuthflowPolicyInput>(data)
-        .flatMap(noOverlappingRanges)
-        .map(rebuildAuthflowPolicy);
+        policy.#events.push(new AuthflowPolicyCreatedEvent(policy.toPlain()));
 
-type SelectAuthflowInput = {
-    policy: AuthflowPolicy;
-    amount: Money;
-};
+        return Result.ok(policy);
+    }
 
-const buildAuthflow = (data: SelectAuthflowInput): Result<DomainError, Authflow> => {
-    const matched = data.policy.templates.find(
-        (t) =>
-            Number(data.amount.amount) >= Number(t.range.from.amount) &&
-            Number(data.amount.amount) <= Number(t.range.to.amount)
-    )!;
-    return authflowFromTemplate(data.policy.action, matched);
-};
+    static fromPlain(plain: {
+        id: string;
+        action: string;
+        templates: {
+            id: string;
+            range: { from: { amount: string; currency: string }; to: { amount: string; currency: string } };
+            steps: {
+                id: string;
+                order: number;
+                groups: {
+                    id: string;
+                    approvers: { id: string; name: string; email: string }[];
+                }[];
+            }[];
+        }[];
+    }) {
+        return new AuthflowPolicy(
+            Id.fromPlain(plain.id),
+            Action.fromPlain(plain.action),
+            plain.templates.map((t) => AuthflowTemplate.fromPlain(t)),
+        );
+    }
 
-export const selectAuthflow = (
-    policy: AuthflowPolicy,
-    amount: Money
-): Result<DomainError, Authflow> =>
-    Result.ok<DomainError, SelectAuthflowInput>({ policy, amount })
-        .flatMap(templateInRange)
-        .flatMap(buildAuthflow);
+    selectAuthflow(amount: Money): Result<DomainError, Authflow> {
+        const rangeError = checkTemplateInRange(this.#templates, amount);
+        if (rangeError) {
+            return Result.error(rangeError);
+        }
+
+        const matched = this.#templates.find(
+            (t) =>
+                Number(amount.amount) >= Number(t.range.from.amount) &&
+                Number(amount.amount) <= Number(t.range.to.amount)
+        )!;
+
+        return matched.toAuthflow(this.#action);
+    }
+
+    toPlain() {
+        return {
+            id: this.#id.toPlain(),
+            action: this.#action.toPlain(),
+            templates: this.#templates.map((t) => t.toPlain()),
+        };
+    }
+}

@@ -1,18 +1,27 @@
-import { Id } from '../../core/invoices/domain/id/id';
 import {
     Collection,
     UnitOfWork,
     UnitOfWorkFactory,
-} from '../../core/invoices/application/unit-of-work/unit-of-work.interface';
+} from '../../core/shared/unit-of-work/unit-of-work.interface';
 import '../mappers/draft-invoice.mapper';
 import '../mappers/invoice.mapper';
-import { EntityClass, mappers, stores } from '../registry';
+import '../mappers/authflow-policy.mapper';
+import '../mappers/financial-document.mapper';
+import { EntityClass, mappers } from '../registry';
 import { OptimisticConcurrencyError } from '../../core/shared/optimistic-concurrency.error';
 import { Store } from '../store/store';
 
 export class InMemoryUnitOfWorkFactory implements UnitOfWorkFactory {
+    private readonly stores = new Map<EntityClass, Store<any>>();
+
+    constructor() {
+        for (const [entityClass] of mappers) {
+            this.stores.set(entityClass, new Store());
+        }
+    }
+
     async start<T>(callback: (uow: UnitOfWork) => Promise<T>): Promise<T> {
-        const uow = new InMemoryUnitOfWork(stores, mappers);
+        const uow = new InMemoryUnitOfWork(this.stores, mappers);
         const result = await callback(uow);
         await uow.finish();
         return result;
@@ -115,7 +124,7 @@ class InMemoryCollection {
         >
     ) {}
 
-    async get(id: Id): Promise<any | null> {
+    async get(id: { toString(): string }): Promise<any | null> {
         const key = id.toString();
 
         const item = this.identityMap.get(key);
@@ -142,6 +151,34 @@ class InMemoryCollection {
         this.readVersions.set(key, record.version);
 
         return entity;
+    }
+
+    async findBy(key: string, value: string): Promise<any | null> {
+        for (const [, cached] of this.identityMap) {
+            const mapper = this.mappers.get(this.entityClass)!;
+            const plain = mapper.toPlain(cached);
+            if (plain[key] === value) {
+                return cached;
+            }
+        }
+
+        const mapper = this.mappers.get(this.entityClass);
+
+        if (!mapper) {
+            throw new Error(`Mapper for ${this.entityClass.name} not found`);
+        }
+
+        for (const record of this.store.values()) {
+            if (record.value[key] === value) {
+                const entity = mapper.toDomain(record.value);
+                const entityKey = entity.id.toString();
+                this.identityMap.set(entityKey, entity);
+                this.readVersions.set(entityKey, record.version);
+                return entity;
+            }
+        }
+
+        return undefined;
     }
 
     async add(object: any): Promise<void> {

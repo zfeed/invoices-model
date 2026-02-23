@@ -1,59 +1,60 @@
 import { GroupTemplate } from '../groups/group-template';
-import { createStepTemplate } from './step-template';
+import { Order } from '../order/order';
+import { StepTemplate } from './step-template';
 
-describe('createStepTemplate', () => {
+describe('StepTemplate.create', () => {
     it('should create a step template successfully', () => {
-        const groups: GroupTemplate[] = [
-            {
+        const groups = [
+            GroupTemplate.fromPlain({
                 id: 'group-1',
                 approvers: [
                     { id: '1', name: 'Alice', email: 'alice@example.com' },
                 ],
-            },
-            {
+            }),
+            GroupTemplate.fromPlain({
                 id: 'group-2',
                 approvers: [
                     { id: '2', name: 'Bob', email: 'bob@example.com' },
                 ],
-            },
+            }),
         ];
 
-        const result = createStepTemplate({ order: 0, groups });
+        const result = StepTemplate.create({ order: Order.fromPlain(0), groups });
 
         expect(result.isOk()).toBe(true);
         const step = result.unwrap();
-        expect(step.order).toBe(0);
+        expect(step.order.toPlain()).toBe(0);
         expect(step.groups).toHaveLength(2);
         expect(step.id).toBeDefined();
     });
 
     it('should create a step template with empty groups array', () => {
-        const result = createStepTemplate({ order: 0, groups: [] });
+        const result = StepTemplate.create({ order: Order.fromPlain(0), groups: [] });
 
         expect(result.isOk()).toBe(true);
         const step = result.unwrap();
-        expect(step.order).toBe(0);
+        expect(step.order.toPlain()).toBe(0);
         expect(step.groups).toHaveLength(0);
     });
 
     it('should create a step template with large order number', () => {
-        const result = createStepTemplate({ order: 9999, groups: [] });
+        const result = StepTemplate.create({ order: Order.fromPlain(9999), groups: [] });
 
         expect(result.isOk()).toBe(true);
-        expect(result.unwrap().order).toBe(9999);
+        expect(result.unwrap().order.toPlain()).toBe(9999);
     });
 
     it('should generate a unique ID for each step template', () => {
-        const result1 = createStepTemplate({ order: 0, groups: [] });
-        const result2 = createStepTemplate({ order: 1, groups: [] });
+        const result1 = StepTemplate.create({ order: Order.fromPlain(0), groups: [] });
+        const result2 = StepTemplate.create({ order: Order.fromPlain(1), groups: [] });
 
         expect(result1.isOk()).toBe(true);
         expect(result2.isOk()).toBe(true);
-        expect(result1.unwrap().id).not.toBe(result2.unwrap().id);
+        expect(result1.unwrap().id.toPlain()).not.toBe(result2.unwrap().id.toPlain());
     });
 
     it('should not have isApproved property', () => {
-        const result = createStepTemplate({ order: 0, groups: [] });
+        const result = StepTemplate.create({ order: Order.fromPlain(0), groups: [] });
 
         expect(result.isOk()).toBe(true);
         const step = result.unwrap();

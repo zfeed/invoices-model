@@ -1,40 +1,59 @@
-import { applySpec, prop } from 'ramda';
-import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../../building-blocks/result';
-import { amountIsInteger, amountIsNonNegative } from './checks/check-amount';
-import { currencyIsISO4217 } from './checks/check-currency-code';
+import { Equatable, Mappable, Result } from '../../../../building-blocks';
+import { checkAmountIsInteger, checkAmountIsNonNegative } from './checks/check-amount';
+import { checkCurrencyCode } from './checks/check-currency-code';
 
-export type Money = {
-    amount: string;
-    currency: string;
-};
+export class Money implements Equatable<Money>, Mappable<ReturnType<Money['toPlain']>> {
+    #amount: string;
+    #currency: string;
 
-type MoneyInput = {
-    amount: string;
-    currency: string;
-};
+    protected constructor(amount: string, currency: string) {
+        this.#amount = amount;
+        this.#currency = currency;
+    }
 
-const buildMoney = applySpec<Money>({
-    amount: prop('amount'),
-    currency: prop('currency'),
-});
+    public get amount(): string {
+        return this.#amount;
+    }
 
-export type PlainMoney = {
-    amount: string;
-    currency: string;
-};
+    public get currency(): string {
+        return this.#currency;
+    }
 
-export const moneyToPlain = applySpec<PlainMoney>({
-    amount: prop('amount'),
-    currency: prop('currency'),
-});
+    static create(amount: string, currency: string) {
+        const intError = checkAmountIsInteger(amount);
+        if (intError) {
+            return Result.error(intError);
+        }
 
-export const createMoney = (
-    amount: string,
-    currency: string
-): Result<DomainError, Money> =>
-    Result.ok<DomainError, MoneyInput>({ amount, currency })
-        .flatMap(amountIsInteger)
-        .flatMap(amountIsNonNegative)
-        .flatMap(currencyIsISO4217)
-        .map(buildMoney);
+        const nonNegError = checkAmountIsNonNegative(amount);
+        if (nonNegError) {
+            return Result.error(nonNegError);
+        }
+
+        const currError = checkCurrencyCode(currency);
+        if (currError) {
+            return Result.error(currError);
+        }
+
+        return Result.ok(new Money(amount, currency));
+    }
+
+    static fromPlain(plain: { amount: string; currency: string }) {
+        return new Money(plain.amount, plain.currency);
+    }
+
+    equals(other: Money): boolean {
+        return this.#amount === other.#amount && this.#currency === other.#currency;
+    }
+
+    toPlain() {
+        return {
+            amount: this.#amount,
+            currency: this.#currency,
+        };
+    }
+
+    toString(): string {
+        return `${this.#amount} ${this.#currency}`;
+    }
+}

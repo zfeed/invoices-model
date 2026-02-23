@@ -1,74 +1,62 @@
-import { applySpec, map, prop } from 'ramda';
-import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../../building-blocks/result';
-import { createGroup, Group } from './group';
-import { Approver, PlainApprover, approverToPlain } from '../approver/approver';
-import { createId, Id } from '../id/id';
-import { templateApproversNotEmpty } from './checks/check-template-approvers-not-empty';
-import { templateApproversNotDuplicated } from './checks/check-template-no-duplicate-approvers';
+import { DomainError, Mappable, Result } from '../../../../building-blocks';
+import { Approver } from '../approver/approver';
+import { Id } from '../id/id';
+import { Group } from './group';
+import { checkTemplateApproversNotEmpty } from './checks/check-template-approvers-not-empty';
+import { checkTemplateNoDuplicateApprovers } from './checks/check-template-no-duplicate-approvers';
 
-export type GroupTemplate = {
-    id: Id;
-    approvers: Approver[];
-};
+export class GroupTemplate implements Mappable<ReturnType<GroupTemplate['toPlain']>> {
+    #id: Id;
+    #approvers: Approver[];
 
-export type GroupTemplateInput = {
-    approvers: Approver[];
-};
+    protected constructor(id: Id, approvers: Approver[]) {
+        this.#id = id;
+        this.#approvers = approvers;
+    }
 
-type RebuildGroupTemplateInput = GroupTemplateInput & { id: Id };
+    public get id(): Id {
+        return this.#id;
+    }
 
-const buildGroupTemplate = applySpec<GroupTemplate>({
-    id: () => createId(),
-    approvers: prop('approvers'),
-});
+    public get approvers(): readonly Approver[] {
+        return this.#approvers;
+    }
 
-const rebuildGroupTemplate = applySpec<GroupTemplate>({
-    id: prop('id'),
-    approvers: prop('approvers'),
-});
+    static create(data: { approvers: Approver[] }) {
+        const emptyError = checkTemplateApproversNotEmpty(data.approvers);
+        if (emptyError) {
+            return Result.error(emptyError);
+        }
 
-export type PlainGroupTemplate = {
-    id: string;
-    approvers: PlainApprover[];
-};
+        const duplicateError = checkTemplateNoDuplicateApprovers(data.approvers);
+        if (duplicateError) {
+            return Result.error(duplicateError);
+        }
 
-export const groupTemplateToPlain = (template: GroupTemplate): PlainGroupTemplate => ({
-    id: template.id,
-    approvers: map(approverToPlain, template.approvers),
-});
+        return Result.ok(new GroupTemplate(Id.create().unwrap(), data.approvers));
+    }
 
-export const createGroupTemplate = (
-    data: GroupTemplateInput
-): Result<DomainError, GroupTemplate> =>
-    Result.ok<DomainError, GroupTemplateInput>(data)
-        .flatMap(templateApproversNotEmpty)
-        .flatMap(templateApproversNotDuplicated)
-        .map(buildGroupTemplate);
+    static fromPlain(plain: {
+        id: string;
+        approvers: { id: string; name: string; email: string }[];
+    }) {
+        return new GroupTemplate(
+            Id.fromPlain(plain.id),
+            plain.approvers.map((a) => Approver.fromPlain(a)),
+        );
+    }
 
-export const recreateGroupTemplate = (
-    data: RebuildGroupTemplateInput
-): Result<DomainError, GroupTemplate> =>
-    Result.ok<DomainError, RebuildGroupTemplateInput>(data)
-        .flatMap(templateApproversNotEmpty)
-        .flatMap(templateApproversNotDuplicated)
-        .map(rebuildGroupTemplate);
+    toGroup(): Result<DomainError, Group> {
+        return Group.create({
+            approvers: this.#approvers,
+            approvals: [],
+        });
+    }
 
-export const groupFromTemplate = (
-    template: GroupTemplate
-): Result<DomainError, Group> =>
-    createGroup({
-        approvers: template.approvers,
-        approvals: [],
-    });
-
-export const groupsFromTemplates = (
-    templates: GroupTemplate[]
-): Result<DomainError, Group[]> =>
-    templates.reduce<Result<DomainError, Group[]>>(
-        (acc, template) =>
-            acc.flatMap((groups) =>
-                groupFromTemplate(template).map((group) => [...groups, group])
-            ),
-        Result.ok([])
-    );
+    toPlain() {
+        return {
+            id: this.#id.toPlain(),
+            approvers: this.#approvers.map((a) => a.toPlain()),
+        };
+    }
+}

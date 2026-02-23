@@ -1,74 +1,70 @@
-import { applySpec, map, prop } from 'ramda';
-import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../../building-blocks/result';
-import { GroupTemplate, PlainGroupTemplate, groupTemplateToPlain, groupsFromTemplates } from '../groups/group-template';
-import { createStep, Step } from './step';
-import { createId, Id } from '../id/id';
+import { DomainError, Mappable, Result } from '../../../../building-blocks';
+import { GroupTemplate } from '../groups/group-template';
+import { Id } from '../id/id';
 import { Order } from '../order/order';
+import { Step } from './step';
 
-export type StepTemplate = {
-    id: Id;
-    order: Order;
-    groups: GroupTemplate[];
-};
+export class StepTemplate implements Mappable<ReturnType<StepTemplate['toPlain']>> {
+    #id: Id;
+    #order: Order;
+    #groups: GroupTemplate[];
 
-export type StepTemplateInput = {
-    order: Order;
-    groups: GroupTemplate[];
-};
+    protected constructor(id: Id, order: Order, groups: GroupTemplate[]) {
+        this.#id = id;
+        this.#order = order;
+        this.#groups = groups;
+    }
 
-type RebuildStepTemplateInput = StepTemplateInput & { id: Id };
+    public get id(): Id {
+        return this.#id;
+    }
 
-const buildStepTemplate = applySpec<StepTemplate>({
-    id: () => createId(),
-    order: prop('order'),
-    groups: prop('groups'),
-});
+    public get order(): Order {
+        return this.#order;
+    }
 
-const rebuildStepTemplate = applySpec<StepTemplate>({
-    id: prop('id'),
-    order: prop('order'),
-    groups: prop('groups'),
-});
+    public get groups(): readonly GroupTemplate[] {
+        return this.#groups;
+    }
 
-export type PlainStepTemplate = {
-    id: string;
-    order: number;
-    groups: PlainGroupTemplate[];
-};
+    static create(data: { order: Order; groups: GroupTemplate[] }) {
+        return Result.ok(new StepTemplate(Id.create().unwrap(), data.order, data.groups));
+    }
 
-export const stepTemplateToPlain = (template: StepTemplate): PlainStepTemplate => ({
-    id: template.id,
-    order: template.order,
-    groups: map(groupTemplateToPlain, template.groups),
-});
+    static fromPlain(plain: {
+        id: string;
+        order: number;
+        groups: {
+            id: string;
+            approvers: { id: string; name: string; email: string }[];
+        }[];
+    }) {
+        return new StepTemplate(
+            Id.fromPlain(plain.id),
+            Order.fromPlain(plain.order),
+            plain.groups.map((g) => GroupTemplate.fromPlain(g)),
+        );
+    }
 
-export const createStepTemplate = (
-    data: StepTemplateInput
-): Result<DomainError, StepTemplate> =>
-    Result.ok<DomainError, StepTemplateInput>(data).map(buildStepTemplate);
+    toStep(): Result<DomainError, Step> {
+        const groupResults = this.#groups.reduce<Result<DomainError, import('../groups/group').Group[]>>(
+            (acc, template) =>
+                acc.flatMap((groups) =>
+                    template.toGroup().map((group) => [...groups, group])
+                ),
+            Result.ok([])
+        );
 
-export const recreateStepTemplate = (
-    data: RebuildStepTemplateInput
-): Result<DomainError, StepTemplate> =>
-    Result.ok<DomainError, RebuildStepTemplateInput>(data).map(
-        rebuildStepTemplate
-    );
+        return groupResults.flatMap((groups) =>
+            Step.create({ order: this.#order, groups })
+        );
+    }
 
-export const stepFromTemplate = (
-    template: StepTemplate
-): Result<DomainError, Step> =>
-    groupsFromTemplates(template.groups).flatMap((groups) =>
-        createStep({ order: template.order, groups })
-    );
-
-export const stepsFromTemplates = (
-    templates: StepTemplate[]
-): Result<DomainError, Step[]> =>
-    templates.reduce<Result<DomainError, Step[]>>(
-        (acc, template) =>
-            acc.flatMap((steps) =>
-                stepFromTemplate(template).map((step) => [...steps, step])
-            ),
-        Result.ok([])
-    );
+    toPlain() {
+        return {
+            id: this.#id.toPlain(),
+            order: this.#order.toPlain(),
+            groups: this.#groups.map((g) => g.toPlain()),
+        };
+    }
+}

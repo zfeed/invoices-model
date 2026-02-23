@@ -1,16 +1,16 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
-import { createEmail } from './email';
+import { Email } from './email';
 
 describe('Email', () => {
-    describe('createEmail', () => {
+    describe('create', () => {
         it('should create an email from a valid string', () => {
-            const result = createEmail('john@example.com');
+            const result = Email.create('john@example.com');
             expect(result.isOk()).toBe(true);
-            expect(result.unwrap()).toBe('john@example.com');
+            expect(result.unwrap().toPlain()).toBe('john@example.com');
         });
 
         it('should return an error for an invalid email', () => {
-            const result = createEmail('not-an-email');
+            const result = Email.create('not-an-email');
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
                 DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_EMAIL_INVALID_FORMAT
@@ -18,7 +18,7 @@ describe('Email', () => {
         });
 
         it('should return an error for an empty string', () => {
-            const result = createEmail('');
+            const result = Email.create('');
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
                 DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_EMAIL_INVALID_FORMAT

@@ -1,122 +1,153 @@
-import { applySpec, find, map, prop, propEq, propOr } from 'ramda';
-import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../../building-blocks/result';
-import { WithEvents, withEvents } from '../../../../building-blocks/events/with-events';
-import { Money, PlainMoney, moneyToPlain } from '../money/money';
-import { Approver } from '../approver/approver';
+import { DOMAIN_ERROR_CODE, DomainError, Mappable, Result } from '../../../../building-blocks';
+import { DomainEvent } from '../../../../building-blocks/events/domain-event';
+import { PublishableEvents } from '../../../../building-blocks/events/event-publisher.interface';
 import { Action } from '../action/action';
-import { Authflow, PlainAuthflow, authflowToPlain, approveAuthflow, canApproverApprove as canApproverApproveAuthflow } from '../authflow/authflow';
+import { Approver } from '../approver/approver';
+import { Authflow } from '../authflow/authflow';
+import { Id } from '../id/id';
+import { Money } from '../money/money';
 import { ReferenceId } from '../reference-id/reference-id';
-import { createId, Id } from '../id/id';
-import { Version } from '../version/version';
-import { noDuplicateAuthflowActions } from './checks/check-no-duplicate-authflow-actions';
-import { DocumentCreatedEvent } from './events/document-created.event';
+import { checkNoDuplicateAuthflowActions } from './checks/check-no-duplicate-authflow-actions';
 import { DocumentApprovedEvent } from './events/document-approved.event';
+import { DocumentCreatedEvent } from './events/document-created.event';
 
-export type FinancialDocument = {
-    id: Id;
-    referenceId: ReferenceId;
-    value: Money;
-    authflows: Authflow[];
-    version: Version;
-};
+export class FinancialDocument implements Mappable<ReturnType<FinancialDocument['toPlain']>>, PublishableEvents<DomainEvent<any>> {
+    #id: Id;
+    #referenceId: ReferenceId;
+    #value: Money;
+    #authflows: Authflow[];
+    #events: DomainEvent<any>[] = [];
 
-type DocumentInput = {
-    referenceId: ReferenceId;
-    value: Money;
-    authflows: Authflow[];
-};
+    protected constructor(
+        id: Id,
+        referenceId: ReferenceId,
+        value: Money,
+        authflows: Authflow[],
+    ) {
+        this.#id = id;
+        this.#referenceId = referenceId;
+        this.#value = value;
+        this.#authflows = authflows;
+    }
 
-type RebuildDocumentInput = DocumentInput & { id: Id; version: Version };
+    public get id(): Id {
+        return this.#id;
+    }
 
-const buildDocument = applySpec<FinancialDocument>({
-    id: () => createId(),
-    referenceId: prop('referenceId'),
-    value: prop('value'),
-    authflows: prop('authflows'),
-    version: () => 0,
-});
+    public get referenceId(): ReferenceId {
+        return this.#referenceId;
+    }
 
-const rebuildDocument = applySpec<FinancialDocument>({
-    id: prop('id'),
-    referenceId: prop('referenceId'),
-    value: prop('value'),
-    authflows: prop('authflows'),
-    version: prop('version'),
-});
+    public get value(): Money {
+        return this.#value;
+    }
 
-export type PlainFinancialDocument = {
-    id: string;
-    referenceId: string;
-    value: PlainMoney;
-    authflows: PlainAuthflow[];
-    version: number;
-};
+    public get authflows(): readonly Authflow[] {
+        return this.#authflows;
+    }
 
-export const documentToPlain = (doc: FinancialDocument): PlainFinancialDocument => ({
-    id: doc.id,
-    referenceId: doc.referenceId,
-    value: moneyToPlain(doc.value),
-    authflows: map(authflowToPlain, doc.authflows),
-    version: doc.version,
-});
+    public get events(): ReadonlyArray<DomainEvent<any>> {
+        return this.#events;
+    }
 
-export const createDocument = (
-    data: DocumentInput
-): Result<DomainError, WithEvents<FinancialDocument, DocumentCreatedEvent>> =>
-    Result.ok<DomainError, DocumentInput>(data)
-        .flatMap(noDuplicateAuthflowActions)
-        .map(buildDocument)
-        .map((doc) =>
-            withEvents(doc, [new DocumentCreatedEvent(doc)])
+    static create(data: { referenceId: ReferenceId; value: Money; authflows: Authflow[] }) {
+        const error = checkNoDuplicateAuthflowActions(data.authflows);
+        if (error) {
+            return Result.error(error);
+        }
+
+        const doc = new FinancialDocument(
+            Id.create().unwrap(),
+            data.referenceId,
+            data.value,
+            data.authflows,
         );
 
-const recreateDocument = (
-    data: RebuildDocumentInput
-): Result<DomainError, FinancialDocument> =>
-    Result.ok<DomainError, RebuildDocumentInput>(data)
-        .flatMap(noDuplicateAuthflowActions)
-        .map(rebuildDocument);
+        doc.#events.push(new DocumentCreatedEvent(doc.toPlain()));
 
-export const isActionApproved = (
-    document: FinancialDocument,
-    action: Action
-): boolean =>
-    propOr(
-        false,
-        'isApproved',
-        find(propEq(action, 'action'), document.authflows)
-    );
+        return Result.ok(doc);
+    }
 
-type CanApproverApproveInput = {
-    document: FinancialDocument;
-    action: Action;
-    approverId: Id;
-};
+    static fromPlain(plain: {
+        id: string;
+        referenceId: string;
+        value: { amount: string; currency: string };
+        authflows: {
+            id: string;
+            action: string;
+            range: { from: { amount: string; currency: string }; to: { amount: string; currency: string } };
+            steps: {
+                id: string;
+                order: number;
+                groups: {
+                    id: string;
+                    approvers: { id: string; name: string; email: string }[];
+                    approvals: { approverId: string; createdAt: string; comment: string | null }[];
+                }[];
+            }[];
+        }[];
+    }) {
+        return new FinancialDocument(
+            Id.fromPlain(plain.id),
+            ReferenceId.fromPlain(plain.referenceId),
+            Money.fromPlain(plain.value),
+            plain.authflows.map((a) => Authflow.fromPlain(a)),
+        );
+    }
 
-export const canApproverApprove = (
-    data: CanApproverApproveInput
-): boolean =>
-    canApproverApproveAuthflow({
-        authflows: data.document.authflows,
-        action: data.action,
-        approverId: data.approverId,
-    });
+    approve(action: Action, approver: Approver): Result<DomainError, undefined> {
+        const authflow = this.#authflows.find((a) => a.action.equals(action));
 
-export const approveDocument = (
-    document: FinancialDocument,
-    action: Action,
-    approver: Approver
-): Result<DomainError, WithEvents<FinancialDocument, DocumentApprovedEvent>> =>
-    approveAuthflow(document.authflows, action, approver).flatMap(
-        (updatedAuthflow) =>
-            recreateDocument({
-                id: document.id,
-                referenceId: document.referenceId,
-                value: document.value,
-                authflows: document.authflows.map((a) =>
-                    a.action === action ? updatedAuthflow : a
-                ),
-                version: document.version,
-            }).map((doc) => withEvents(doc, [new DocumentApprovedEvent(doc)]))
-    );
+        if (!authflow) {
+            return Result.error(
+                new DomainError({
+                    code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_NOT_FOUND,
+                    message: `Authflow with action ${action.toPlain()} not found`,
+                })
+            );
+        }
+
+        const authflowResult = authflow.approve(approver);
+
+        if (authflowResult.isError()) {
+            return Result.error(authflowResult.unwrapError());
+        }
+
+        this.#authflows = this.#authflows.map((a) =>
+            a.action.equals(action) ? authflowResult.unwrap() : a
+        );
+
+        const dupError = checkNoDuplicateAuthflowActions(this.#authflows);
+        if (dupError) {
+            return Result.error(dupError);
+        }
+
+        this.#events.push(new DocumentApprovedEvent(this.toPlain()));
+
+        return Result.ok(undefined);
+    }
+
+    isActionApproved(action: Action): boolean {
+        const authflow = this.#authflows.find((a) => a.action.equals(action));
+        return authflow ? authflow.isApproved : false;
+    }
+
+    canApproverApprove(action: Action, approverId: Id): boolean {
+        const authflow = this.#authflows.find((a) => a.action.equals(action));
+
+        if (!authflow) {
+            return false;
+        }
+
+        return authflow.canApproverApprove(approverId);
+    }
+
+    toPlain() {
+        return {
+            id: this.#id.toPlain(),
+            referenceId: this.#referenceId.toPlain(),
+            value: this.#value.toPlain(),
+            authflows: this.#authflows.map((a) => a.toPlain()),
+        };
+    }
+}

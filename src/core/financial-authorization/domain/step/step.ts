@@ -1,109 +1,102 @@
-import { applySpec, map, prop } from 'ramda';
-import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
-import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../../building-blocks/result';
+import { DOMAIN_ERROR_CODE, DomainError, Mappable, Result } from '../../../../building-blocks';
 import { Approver } from '../approver/approver';
-import {
-    approveGroup,
-    hasEligibleApprover as hasEligibleApproverInGroups,
-    Group,
-    PlainGroup,
-    groupToPlain,
-} from '../groups/group';
-import { createId, Id } from '../id/id';
+import { Group } from '../groups/group';
+import { Id } from '../id/id';
 import { Order } from '../order/order';
 
-export type Step = {
-    id: Id;
-    order: Order;
-    isApproved: boolean;
-    groups: Group[];
-};
+export class Step implements Mappable<ReturnType<Step['toPlain']>> {
+    #id: Id;
+    #order: Order;
+    #groups: Group[];
 
-type StepInput = {
-    order: Order;
-    groups: Group[];
-};
-
-type RebuildStepInput = StepInput & { id: Id };
-
-const allGroupsApproved = (data: StepInput) =>
-    data.groups.every((group) => group.isApproved);
-
-const buildStep = applySpec<Step>({
-    id: () => createId(),
-    order: prop('order'),
-    isApproved: allGroupsApproved,
-    groups: prop('groups'),
-});
-
-const rebuildStep = applySpec<Step>({
-    id: prop('id'),
-    order: prop('order'),
-    isApproved: allGroupsApproved,
-    groups: prop('groups'),
-});
-
-const findCurrentStep = (steps: Step[]): Result<DomainError, Step> => {
-    const step = steps
-        .filter((s) => !s.isApproved)
-        .sort((a, b) => a.order - b.order)[0];
-    return step
-        ? Result.ok(step)
-        : Result.error(
-              new DomainError({
-                  code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NO_PENDING_STEPS,
-                  message: 'No pending steps found',
-              })
-          );
-};
-
-export const hasEligibleApprover = (steps: Step[], approverId: Id): boolean => {
-    const result = findCurrentStep(steps);
-
-    if (
-        result.isError() &&
-        result.unwrapError().code ===
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NO_PENDING_STEPS
-    ) {
-        return false;
+    protected constructor(id: Id, order: Order, groups: Group[]) {
+        this.#id = id;
+        this.#order = order;
+        this.#groups = groups;
     }
 
-    return hasEligibleApproverInGroups(result.unwrap().groups, approverId);
-};
+    public get id(): Id {
+        return this.#id;
+    }
 
-export type PlainStep = {
-    id: string;
-    order: number;
-    isApproved: boolean;
-    groups: PlainGroup[];
-};
+    public get order(): Order {
+        return this.#order;
+    }
 
-export const stepToPlain = (step: Step): PlainStep => ({
-    id: step.id,
-    order: step.order,
-    isApproved: step.isApproved,
-    groups: map(groupToPlain, step.groups),
-});
+    public get isApproved(): boolean {
+        return this.#groups.every((g) => g.isApproved);
+    }
 
-export const createStep = (data: StepInput): Result<DomainError, Step> =>
-    Result.ok<DomainError, StepInput>(data).map(buildStep);
+    public get groups(): readonly Group[] {
+        return this.#groups;
+    }
 
-const recreateStep = (
-    data: RebuildStepInput
-): Result<DomainError, Step> =>
-    Result.ok<DomainError, RebuildStepInput>(data).map(rebuildStep);
+    static create(data: { order: Order; groups: Group[] }) {
+        return Result.ok(new Step(Id.create().unwrap(), data.order, data.groups));
+    }
 
-export const approveStep = (
-    steps: Step[],
-    approver: Approver
-): Result<DomainError, Step> =>
-    findCurrentStep(steps).flatMap((step) =>
-        approveGroup(step.groups, approver).flatMap((updatedGroups) =>
-            recreateStep({
-                id: step.id,
-                order: step.order,
-                groups: updatedGroups,
-            })
-        )
-    );
+    static fromPlain(plain: {
+        id: string;
+        order: number;
+        groups: {
+            id: string;
+            approvers: { id: string; name: string; email: string }[];
+            approvals: { approverId: string; createdAt: string; comment: string | null }[];
+        }[];
+    }) {
+        return new Step(
+            Id.fromPlain(plain.id),
+            Order.fromPlain(plain.order),
+            plain.groups.map((g) => Group.fromPlain(g)),
+        );
+    }
+
+    approve(approver: Approver): Result<DomainError, Step> {
+        if (this.isApproved) {
+            return Result.error(
+                new DomainError({
+                    code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NO_PENDING_STEPS,
+                    message: 'No pending steps found',
+                })
+            );
+        }
+
+        const groupIndex = this.#groups.findIndex(
+            (g) => !g.isApproved && g.approvers.some((a) => a.id.equals(approver.id))
+        );
+
+        if (groupIndex === -1) {
+            return Result.error(
+                new DomainError({
+                    code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND,
+                    message: `No eligible group found for approver ${approver.id.toPlain()}`,
+                })
+            );
+        }
+
+        const groupResult = this.#groups[groupIndex].approve(approver);
+
+        if (groupResult.isError()) {
+            return Result.error(groupResult.unwrapError());
+        }
+
+        const updatedGroups = this.#groups.map((g, i) =>
+            i === groupIndex ? groupResult.unwrap() : g
+        );
+
+        return Result.ok(new Step(this.#id, this.#order, updatedGroups));
+    }
+
+    hasEligibleApprover(approverId: Id): boolean {
+        return this.#groups.some((g) => g.hasEligibleApprover(approverId));
+    }
+
+    toPlain() {
+        return {
+            id: this.#id.toPlain(),
+            order: this.#order.toPlain(),
+            isApproved: this.isApproved,
+            groups: this.#groups.map((g) => g.toPlain()),
+        };
+    }
+}

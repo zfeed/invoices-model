@@ -1,26 +1,25 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
-import { createMoney } from './money';
+import { Money } from './money';
 
 describe('Money', () => {
-    describe('createMoney', () => {
+    describe('create', () => {
         it('should create money with amount and currency', () => {
-            const result = createMoney('10000', 'USD');
+            const result = Money.create('10000', 'USD');
 
             expect(result.isOk()).toBe(true);
             const money = result.unwrap();
-            expect(money.amount).toBe('10000');
-            expect(money.currency).toBe('USD');
+            expect(money.toPlain()).toEqual({ amount: '10000', currency: 'USD' });
         });
 
         it('should create money with zero amount', () => {
-            const result = createMoney('0', 'EUR');
+            const result = Money.create('0', 'EUR');
 
             expect(result.isOk()).toBe(true);
-            expect(result.unwrap().amount).toBe('0');
+            expect(result.unwrap().toPlain().amount).toBe('0');
         });
 
         it('should fail when amount is not an integer', () => {
-            const result = createMoney('100.50', 'USD');
+            const result = Money.create('100.50', 'USD');
 
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
@@ -29,7 +28,7 @@ describe('Money', () => {
         });
 
         it('should fail when amount is not a number', () => {
-            const result = createMoney('abc', 'USD');
+            const result = Money.create('abc', 'USD');
 
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
@@ -38,7 +37,7 @@ describe('Money', () => {
         });
 
         it('should fail when amount is negative', () => {
-            const result = createMoney('-100', 'USD');
+            const result = Money.create('-100', 'USD');
 
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
@@ -47,7 +46,7 @@ describe('Money', () => {
         });
 
         it('should fail when currency is not a valid ISO 4217 code', () => {
-            const result = createMoney('100', 'ABC');
+            const result = Money.create('100', 'ABC');
 
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
@@ -56,7 +55,7 @@ describe('Money', () => {
         });
 
         it('should fail when currency is empty', () => {
-            const result = createMoney('100', '');
+            const result = Money.create('100', '');
 
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
@@ -65,7 +64,7 @@ describe('Money', () => {
         });
 
         it('should fail when currency has wrong length', () => {
-            const result = createMoney('100', 'US');
+            const result = Money.create('100', 'US');
 
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(

@@ -5,8 +5,6 @@ import { bootstrap } from '../core/bootstrap';
 import { ValidationError } from './validation';
 import { InMemoryUnitOfWorkFactory } from '../infrastructure/unit-of-work/in-memory.unit-of-work';
 import { InMemoryDomainEvents } from '../infrastructure/domain-events/in-memory-domain-events';
-import { InMemoryDocumentStorage } from '../infrastructure/storage/in-memory.document-storage';
-import { InMemoryPolicyStorage } from '../infrastructure/storage/in-memory.policy-storage';
 import { createDraftInvoiceRoute } from './routes/create-draft-invoice';
 import { updateDraftInvoiceRoute } from './routes/update-draft-invoice';
 import { calculateDraftInvoiceRoute } from './routes/calculate-draft-invoice';
@@ -24,8 +22,6 @@ export const createApp = async () => {
     const commands = await bootstrap({
         unitOfWorkFactory: new InMemoryUnitOfWorkFactory(),
         domainEvents: new InMemoryDomainEvents(),
-        documentStorage: new InMemoryDocumentStorage(),
-        policyStorage: new InMemoryPolicyStorage(),
     });
 
     const app = Fastify();

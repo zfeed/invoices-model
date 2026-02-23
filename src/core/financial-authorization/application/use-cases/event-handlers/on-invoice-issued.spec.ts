@@ -1,13 +1,14 @@
-import { InMemoryDocumentStorage } from '../../../../../infrastructure/storage/in-memory.document-storage';
-import { InMemoryPolicyStorage } from '../../../../../infrastructure/storage/in-memory.policy-storage';
+import { InMemoryUnitOfWorkFactory } from '../../../../../infrastructure/unit-of-work/in-memory.unit-of-work';
 import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
 import { InvoiceIssuedEvent } from '../../../../invoices/domain/invoice/events/invoice-issued.event';
-import { createMoney } from '../../../domain/money/money';
-import { createRange } from '../../../domain/range/range';
-import { createAuthflowTemplate } from '../../../domain/authflow/authflow-template';
-import { createAuthflowPolicy } from '../../../domain/authflow/authflow-policy';
-import { createDocument } from '../../../domain/document/document';
-import { onInvoiceIssued } from './on-invoice-issued';
+import { Money } from '../../../domain/money/money';
+import { Range } from '../../../domain/range/range';
+import { AuthflowTemplate } from '../../../domain/authflow/authflow-template';
+import { AuthflowPolicy } from '../../../domain/authflow/authflow-policy';
+import { Action } from '../../../domain/action/action';
+import { FinancialDocument } from '../../../domain/document/document';
+import { ReferenceId } from '../../../domain/reference-id/reference-id';
+import { OnInvoiceIssued } from './on-invoice-issued';
 
 const createInvoiceEvent = (id: string, amount = '100', currency = 'USD') =>
     new InvoiceIssuedEvent({
@@ -51,27 +52,29 @@ const createInvoiceEvent = (id: string, amount = '100', currency = 'USD') =>
     });
 
 const range = (from: string, to: string) =>
-    createRange(
-        createMoney(from, 'USD').unwrap(),
-        createMoney(to, 'USD').unwrap()
+    Range.create(
+        Money.create(from, 'USD').unwrap(),
+        Money.create(to, 'USD').unwrap()
     ).unwrap();
 
 const template = (from: string, to: string) =>
-    createAuthflowTemplate({
+    AuthflowTemplate.create({
         range: range(from, to),
         steps: [],
     }).unwrap();
 
-const seedPolicy = async (policyStorage: InMemoryPolicyStorage) => {
-    const policy = createAuthflowPolicy({
-        action: 'pay',
+const seedPolicy = async (unitOfWorkFactory: InMemoryUnitOfWorkFactory) => {
+    const policy = AuthflowPolicy.create({
+        action: Action.create('pay').unwrap(),
         templates: [
             template('0', '999'),
             template('1000', '9999'),
             template('10000', '100000'),
         ],
     }).unwrap();
-    await policyStorage.save(policy).run();
+    await unitOfWorkFactory.start(async (uow) => {
+        await uow.collection(AuthflowPolicy).add(policy);
+    });
 };
 
 const publishEvent = async (
@@ -83,257 +86,194 @@ const publishEvent = async (
 
 describe('onInvoiceIssued', () => {
     it('should create a new financial document when invoice is created', async () => {
-        const storage = new InMemoryDocumentStorage();
-        const policyStorage = new InMemoryPolicyStorage();
+        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
-        await seedPolicy(policyStorage);
-        await onInvoiceIssued(domainEvents, storage, policyStorage);
+        await seedPolicy(unitOfWorkFactory);
+        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
-        const result = await storage.findByReferenceId('INV-001').run();
+        const result = await unitOfWorkFactory.start(async (uow) => {
+            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+        });
 
-        expect(result.isSome()).toBe(true);
-        result.fold(
-            () => { throw new Error('Expected document to exist'); },
-            (doc) => {
-                expect(doc.referenceId).toBe('INV-001');
-            }
-        );
+        expect(result).toBeDefined();
+        expect(result!.referenceId.toPlain()).toBe('INV-001');
     });
 
     it('should create a document with an authflow selected from the policy', async () => {
-        const storage = new InMemoryDocumentStorage();
-        const policyStorage = new InMemoryPolicyStorage();
+        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
-        await seedPolicy(policyStorage);
-        await onInvoiceIssued(domainEvents, storage, policyStorage);
+        await seedPolicy(unitOfWorkFactory);
+        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001', '500'));
 
-        const result = await storage.findByReferenceId('INV-001').run();
+        const result = await unitOfWorkFactory.start(async (uow) => {
+            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+        });
 
-        result.fold(
-            () => { throw new Error('Expected document to exist'); },
-            (doc) => {
-                expect(doc.authflows).toHaveLength(1);
-                expect(doc.authflows[0].action).toBe('pay');
-                expect(doc.authflows[0].range.from.amount).toBe('0');
-                expect(doc.authflows[0].range.to.amount).toBe('999');
-            }
-        );
+        expect(result!.authflows).toHaveLength(1);
+        expect(result!.authflows[0].action.toPlain()).toBe('pay');
+        expect(result!.authflows[0].range.from.amount).toBe('0');
+        expect(result!.authflows[0].range.to.amount).toBe('999');
     });
 
     it('should select the correct authflow range for the invoice amount', async () => {
-        const storage = new InMemoryDocumentStorage();
-        const policyStorage = new InMemoryPolicyStorage();
+        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
-        await seedPolicy(policyStorage);
-        await onInvoiceIssued(domainEvents, storage, policyStorage);
+        await seedPolicy(unitOfWorkFactory);
+        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001', '5000'));
 
-        const result = await storage.findByReferenceId('INV-001').run();
+        const result = await unitOfWorkFactory.start(async (uow) => {
+            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+        });
 
-        result.fold(
-            () => { throw new Error('Expected document to exist'); },
-            (doc) => {
-                expect(doc.authflows).toHaveLength(1);
-                expect(doc.authflows[0].range.from.amount).toBe('1000');
-                expect(doc.authflows[0].range.to.amount).toBe('9999');
-            }
-        );
+        expect(result!.authflows).toHaveLength(1);
+        expect(result!.authflows[0].range.from.amount).toBe('1000');
+        expect(result!.authflows[0].range.to.amount).toBe('9999');
     });
 
     it('should create a document with empty authflows when no policy exists', async () => {
-        const storage = new InMemoryDocumentStorage();
-        const policyStorage = new InMemoryPolicyStorage();
+        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
-        await onInvoiceIssued(domainEvents, storage, policyStorage);
+        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
-        const result = await storage.findByReferenceId('INV-001').run();
+        const result = await unitOfWorkFactory.start(async (uow) => {
+            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+        });
 
-        result.fold(
-            () => { throw new Error('Expected document to exist'); },
-            (doc) => {
-                expect(doc.authflows).toEqual([]);
-            }
-        );
+        expect(result!.authflows).toEqual([]);
     });
 
     it('should create a document with empty authflows when amount is outside policy ranges', async () => {
-        const storage = new InMemoryDocumentStorage();
-        const policyStorage = new InMemoryPolicyStorage();
+        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
-        await seedPolicy(policyStorage);
-        await onInvoiceIssued(domainEvents, storage, policyStorage);
+        await seedPolicy(unitOfWorkFactory);
+        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await handler.register();
         await publishEvent(
             domainEvents,
             createInvoiceEvent('INV-001', '999999')
         );
 
-        const result = await storage.findByReferenceId('INV-001').run();
+        const result = await unitOfWorkFactory.start(async (uow) => {
+            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+        });
 
-        result.fold(
-            () => { throw new Error('Expected document to exist'); },
-            (doc) => {
-                expect(doc.authflows).toEqual([]);
-            }
-        );
+        expect(result!.authflows).toEqual([]);
     });
 
     it('should create documents with different referenceIds for different invoices', async () => {
-        const storage = new InMemoryDocumentStorage();
-        const policyStorage = new InMemoryPolicyStorage();
+        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
-        await seedPolicy(policyStorage);
-        await onInvoiceIssued(domainEvents, storage, policyStorage);
+        await seedPolicy(unitOfWorkFactory);
+        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
         await publishEvent(domainEvents, createInvoiceEvent('INV-002'));
 
-        const result1 = await storage.findByReferenceId('INV-001').run();
-        const result2 = await storage.findByReferenceId('INV-002').run();
+        const result1 = await unitOfWorkFactory.start(async (uow) => {
+            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+        });
+        const result2 = await unitOfWorkFactory.start(async (uow) => {
+            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-002');
+        });
 
-        expect(result1.isSome()).toBe(true);
-        expect(result2.isSome()).toBe(true);
+        expect(result1).toBeDefined();
+        expect(result2).toBeDefined();
 
-        const id1 = result1.fold(
-            () => null,
-            (doc) => doc.id
-        );
-        const id2 = result2.fold(
-            () => null,
-            (doc) => doc.id
-        );
+        const id1 = result1?.id.toPlain();
+        const id2 = result2?.id.toPlain();
 
         expect(id1).not.toBe(id2);
     });
 
     it('should not create a duplicate document when invoice with same id is created twice', async () => {
-        const storage = new InMemoryDocumentStorage();
-        const policyStorage = new InMemoryPolicyStorage();
+        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
-        await seedPolicy(policyStorage);
-        await onInvoiceIssued(domainEvents, storage, policyStorage);
+        await seedPolicy(unitOfWorkFactory);
+        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
-        const firstResult = await storage.findByReferenceId('INV-001').run();
-        const firstId = firstResult.fold(
-            () => null,
-            (doc) => doc.id
-        );
+        const firstResult = await unitOfWorkFactory.start(async (uow) => {
+            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+        });
+        const firstId = firstResult?.id.toPlain();
 
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
-        const secondResult = await storage.findByReferenceId('INV-001').run();
-        const secondId = secondResult.fold(
-            () => null,
-            (doc) => doc.id
-        );
+        const secondResult = await unitOfWorkFactory.start(async (uow) => {
+            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+        });
+        const secondId = secondResult?.id.toPlain();
 
         expect(firstId).toBe(secondId);
     });
 
     it('should not create a document when no event is published', async () => {
-        const storage = new InMemoryDocumentStorage();
-        const policyStorage = new InMemoryPolicyStorage();
+        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
-        await onInvoiceIssued(domainEvents, storage, policyStorage);
+        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await handler.register();
 
-        const result = await storage.findByReferenceId('INV-001').run();
+        const result = await unitOfWorkFactory.start(async (uow) => {
+            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+        });
 
-        expect(result.isNone()).toBe(true);
-    });
-
-    it('should create a document with version 1 after save', async () => {
-        const storage = new InMemoryDocumentStorage();
-        const policyStorage = new InMemoryPolicyStorage();
-        const domainEvents = new InMemoryDomainEvents();
-
-        await seedPolicy(policyStorage);
-        await onInvoiceIssued(domainEvents, storage, policyStorage);
-        await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
-
-        const result = await storage.findByReferenceId('INV-001').run();
-
-        result.fold(
-            () => { throw new Error('Expected document to exist'); },
-            (doc) => {
-                expect(doc.version).toBe(1);
-            }
-        );
-    });
-
-    it('should not modify an existing document version on duplicate event', async () => {
-        const storage = new InMemoryDocumentStorage();
-        const policyStorage = new InMemoryPolicyStorage();
-        const domainEvents = new InMemoryDomainEvents();
-
-        await seedPolicy(policyStorage);
-        await onInvoiceIssued(domainEvents, storage, policyStorage);
-        await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
-
-        await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
-
-        const result = await storage.findByReferenceId('INV-001').run();
-
-        result.fold(
-            () => { throw new Error('Expected document to exist'); },
-            (doc) => {
-                expect(doc.version).toBe(1);
-            }
-        );
+        expect(result).toBeUndefined();
     });
 
     it('should use event data id as the document referenceId', async () => {
-        const storage = new InMemoryDocumentStorage();
-        const policyStorage = new InMemoryPolicyStorage();
+        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
-        await seedPolicy(policyStorage);
-        await onInvoiceIssued(domainEvents, storage, policyStorage);
+        await seedPolicy(unitOfWorkFactory);
+        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await handler.register();
         await publishEvent(
             domainEvents,
             createInvoiceEvent('my-custom-ref-123')
         );
 
-        const result = await storage
-            .findByReferenceId('my-custom-ref-123')
-            .run();
+        const result = await unitOfWorkFactory.start(async (uow) => {
+            return uow.collection(FinancialDocument).findBy('referenceId', 'my-custom-ref-123');
+        });
 
-        expect(result.isSome()).toBe(true);
-        result.fold(
-            () => { throw new Error('Expected document to exist'); },
-            (doc) => {
-                expect(doc.referenceId).toBe('my-custom-ref-123');
-            }
-        );
+        expect(result).toBeDefined();
+        expect(result!.referenceId.toPlain()).toBe('my-custom-ref-123');
     });
 
     it('should generate a unique document id for each new document', async () => {
-        const storage = new InMemoryDocumentStorage();
-        const policyStorage = new InMemoryPolicyStorage();
+        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
-        await seedPolicy(policyStorage);
-        await onInvoiceIssued(domainEvents, storage, policyStorage);
+        await seedPolicy(unitOfWorkFactory);
+        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
         await publishEvent(domainEvents, createInvoiceEvent('INV-002'));
         await publishEvent(domainEvents, createInvoiceEvent('INV-003'));
 
         const ids = await Promise.all(
             ['INV-001', 'INV-002', 'INV-003'].map(async (ref) => {
-                const result = await storage.findByReferenceId(ref).run();
-                return result.fold(
-                    () => null,
-                    (doc) => doc.id
-                );
+                const result = await unitOfWorkFactory.start(async (uow) => {
+                    return uow.collection(FinancialDocument).findBy('referenceId', ref);
+                });
+                return result?.id.toPlain();
             })
         );
 
@@ -342,38 +282,37 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should not overwrite a pre-existing document in storage', async () => {
-        const storage = new InMemoryDocumentStorage();
-        const policyStorage = new InMemoryPolicyStorage();
+        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
-        const existing = createDocument({
-            referenceId: 'INV-001',
-            value: createMoney('100', 'USD').unwrap(),
+        const existing = FinancialDocument.create({
+            referenceId: ReferenceId.fromPlain('INV-001'),
+            value: Money.create('100', 'USD').unwrap(),
             authflows: [],
         }).unwrap();
-        await storage.save(existing).run();
+        await unitOfWorkFactory.start(async (uow) => {
+            await uow.collection(FinancialDocument).add(existing);
+        });
 
-        await seedPolicy(policyStorage);
-        await onInvoiceIssued(domainEvents, storage, policyStorage);
+        await seedPolicy(unitOfWorkFactory);
+        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
-        const result = await storage.findByReferenceId('INV-001').run();
+        const result = await unitOfWorkFactory.start(async (uow) => {
+            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+        });
 
-        result.fold(
-            () => { throw new Error('Expected document to exist'); },
-            (doc) => {
-                expect(doc.id).toBe(existing.id);
-            }
-        );
+        expect(result!.id.toPlain()).toBe(existing.id.toPlain());
     });
 
     it('should handle many events for different invoices', async () => {
-        const storage = new InMemoryDocumentStorage();
-        const policyStorage = new InMemoryPolicyStorage();
+        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
-        await seedPolicy(policyStorage);
-        await onInvoiceIssued(domainEvents, storage, policyStorage);
+        await seedPolicy(unitOfWorkFactory);
+        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await handler.register();
 
         const count = 50;
         for (let i = 0; i < count; i++) {
@@ -381,44 +320,54 @@ describe('onInvoiceIssued', () => {
         }
 
         for (let i = 0; i < count; i++) {
-            const result = await storage.findByReferenceId(`INV-${i}`).run();
-            expect(result.isSome()).toBe(true);
+            const result = await unitOfWorkFactory.start(async (uow) => {
+                return uow.collection(FinancialDocument).findBy('referenceId', `INV-${i}`);
+            });
+            expect(result).toBeDefined();
         }
     });
 
     it('should only react to events published after subscription', async () => {
-        const storage = new InMemoryDocumentStorage();
-        const policyStorage = new InMemoryPolicyStorage();
+        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
         await publishEvent(domainEvents, createInvoiceEvent('INV-BEFORE'));
 
-        await seedPolicy(policyStorage);
-        await onInvoiceIssued(domainEvents, storage, policyStorage);
+        await seedPolicy(unitOfWorkFactory);
+        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await handler.register();
 
         await publishEvent(domainEvents, createInvoiceEvent('INV-AFTER'));
 
-        const before = await storage.findByReferenceId('INV-BEFORE').run();
-        const after = await storage.findByReferenceId('INV-AFTER').run();
+        const before = await unitOfWorkFactory.start(async (uow) => {
+            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-BEFORE');
+        });
+        const after = await unitOfWorkFactory.start(async (uow) => {
+            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-AFTER');
+        });
 
-        expect(before.isNone()).toBe(true);
-        expect(after.isSome()).toBe(true);
+        expect(before).toBeUndefined();
+        expect(after).toBeDefined();
     });
 
-    it('should isolate documents across separate storage instances', async () => {
-        const storage1 = new InMemoryDocumentStorage();
-        const storage2 = new InMemoryDocumentStorage();
-        const policyStorage = new InMemoryPolicyStorage();
+    it('should isolate documents across separate UoW factory instances', async () => {
+        const unitOfWorkFactory1 = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory2 = new InMemoryUnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
-        await seedPolicy(policyStorage);
-        await onInvoiceIssued(domainEvents, storage1, policyStorage);
+        await seedPolicy(unitOfWorkFactory1);
+        const handler = new OnInvoiceIssued(unitOfWorkFactory1, domainEvents);
+        await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
-        const inStorage1 = await storage1.findByReferenceId('INV-001').run();
-        const inStorage2 = await storage2.findByReferenceId('INV-001').run();
+        const inFactory1 = await unitOfWorkFactory1.start(async (uow) => {
+            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+        });
+        const inFactory2 = await unitOfWorkFactory2.start(async (uow) => {
+            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+        });
 
-        expect(inStorage1.isSome()).toBe(true);
-        expect(inStorage2.isNone()).toBe(true);
+        expect(inFactory1).toBeDefined();
+        expect(inFactory2).toBeUndefined();
     });
 });

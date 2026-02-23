@@ -1,13 +1,34 @@
 import { randomUUID } from 'crypto';
-import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../../building-blocks/result';
-import { idIsNotBlank } from './checks/check-id-not-blank';
+import { Equatable, Mappable, Result } from '../../../../building-blocks';
 
-export type Id = string;
+export class Id implements Equatable<Id>, Mappable<string> {
+    #value: string;
 
-export function createId(): Id {
-    return randomUUID();
+    protected constructor(value: string) {
+        this.#value = value;
+    }
+
+    static create() {
+        return Result.ok(new Id(randomUUID()));
+    }
+
+    static fromPlain(value: string) {
+        return new Id(value);
+    }
+
+    static fromString(value: string) {
+        return Id.fromPlain(value);
+    }
+
+    equals(other: Id): boolean {
+        return this.#value === other.#value;
+    }
+
+    toPlain(): string {
+        return this.#value;
+    }
+
+    toString(): string {
+        return this.#value;
+    }
 }
-
-export const fromString = (value: string): Result<DomainError, Id> =>
-    Result.ok<DomainError, string>(value).flatMap(idIsNotBlank);

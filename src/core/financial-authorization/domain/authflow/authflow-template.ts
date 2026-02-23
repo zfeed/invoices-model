@@ -1,58 +1,81 @@
-import { applySpec, map, prop } from 'ramda';
-import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../../building-blocks/result';
-import { createId, Id } from '../id/id';
-import { PlainRange, Range, rangeToPlain } from '../range/range';
-import { PlainStepTemplate, StepTemplate, stepTemplateToPlain } from '../step/step-template';
-import { templateNoDuplicateStepOrders } from './checks/check-template-no-duplicate-step-orders';
+import { DomainError, Mappable, Result } from '../../../../building-blocks';
+import { Action } from '../action/action';
+import { Id } from '../id/id';
+import { Range } from '../range/range';
+import { StepTemplate } from '../step/step-template';
+import { Authflow } from './authflow';
+import { checkTemplateNoDuplicateStepOrders } from './checks/check-template-no-duplicate-step-orders';
 
-export type AuthflowTemplate = {
-    id: Id;
-    range: Range;
-    steps: StepTemplate[];
-};
+export class AuthflowTemplate implements Mappable<ReturnType<AuthflowTemplate['toPlain']>> {
+    #id: Id;
+    #range: Range;
+    #steps: StepTemplate[];
 
-export type AuthflowTemplateInput = {
-    range: Range;
-    steps: StepTemplate[];
-};
+    protected constructor(id: Id, range: Range, steps: StepTemplate[]) {
+        this.#id = id;
+        this.#range = range;
+        this.#steps = steps;
+    }
 
-type RebuildAuthflowTemplateInput = AuthflowTemplateInput & { id: Id };
+    public get id(): Id {
+        return this.#id;
+    }
 
-const buildAuthflowTemplate = applySpec<AuthflowTemplate>({
-    id: () => createId(),
-    range: prop('range'),
-    steps: prop('steps'),
-});
+    public get range(): Range {
+        return this.#range;
+    }
 
-const rebuildAuthflowTemplate = applySpec<AuthflowTemplate>({
-    id: prop('id'),
-    range: prop('range'),
-    steps: prop('steps'),
-});
+    public get steps(): readonly StepTemplate[] {
+        return this.#steps;
+    }
 
-export type PlainAuthflowTemplate = {
-    id: string;
-    range: PlainRange;
-    steps: PlainStepTemplate[];
-};
+    static create(data: { range: Range; steps: StepTemplate[] }) {
+        const error = checkTemplateNoDuplicateStepOrders(data.steps);
+        if (error) {
+            return Result.error(error);
+        }
 
-export const authflowTemplateToPlain = (template: AuthflowTemplate): PlainAuthflowTemplate => ({
-    id: template.id,
-    range: rangeToPlain(template.range),
-    steps: map(stepTemplateToPlain, template.steps),
-});
+        return Result.ok(new AuthflowTemplate(Id.create().unwrap(), data.range, data.steps));
+    }
 
-export const createAuthflowTemplate = (
-    data: AuthflowTemplateInput
-): Result<DomainError, AuthflowTemplate> =>
-    Result.ok<DomainError, AuthflowTemplateInput>(data)
-        .flatMap(templateNoDuplicateStepOrders)
-        .map(buildAuthflowTemplate);
+    static fromPlain(plain: {
+        id: string;
+        range: { from: { amount: string; currency: string }; to: { amount: string; currency: string } };
+        steps: {
+            id: string;
+            order: number;
+            groups: {
+                id: string;
+                approvers: { id: string; name: string; email: string }[];
+            }[];
+        }[];
+    }) {
+        return new AuthflowTemplate(
+            Id.fromPlain(plain.id),
+            Range.fromPlain(plain.range),
+            plain.steps.map((s) => StepTemplate.fromPlain(s)),
+        );
+    }
 
-export const recreateAuthflowTemplate = (
-    data: RebuildAuthflowTemplateInput
-): Result<DomainError, AuthflowTemplate> =>
-    Result.ok<DomainError, RebuildAuthflowTemplateInput>(data)
-        .flatMap(templateNoDuplicateStepOrders)
-        .map(rebuildAuthflowTemplate);
+    toAuthflow(action: Action): Result<DomainError, Authflow> {
+        const stepsResult = this.#steps.reduce<Result<DomainError, import('../step/step').Step[]>>(
+            (acc, template) =>
+                acc.flatMap((steps) =>
+                    template.toStep().map((step) => [...steps, step])
+                ),
+            Result.ok([])
+        );
+
+        return stepsResult.flatMap((steps) =>
+            Authflow.create({ action, range: this.#range, steps })
+        );
+    }
+
+    toPlain() {
+        return {
+            id: this.#id.toPlain(),
+            range: this.#range.toPlain(),
+            steps: this.#steps.map((s) => s.toPlain()),
+        };
+    }
+}

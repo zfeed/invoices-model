@@ -1,16 +1,16 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { Approver } from '../approver/approver';
-import { createGroupTemplate } from './group-template';
+import { GroupTemplate } from './group-template';
 
-describe('createGroupTemplate', () => {
+describe('GroupTemplate.create', () => {
     it('should create a group template successfully with unique approvers', () => {
-        const approvers: Approver[] = [
-            { id: '1', name: 'Alice', email: 'alice@example.com' },
-            { id: '2', name: 'Bob', email: 'bob@example.com' },
-            { id: '3', name: 'Charlie', email: 'charlie@example.com' },
+        const approvers = [
+            Approver.fromPlain({ id: '1', name: 'Alice', email: 'alice@example.com' }),
+            Approver.fromPlain({ id: '2', name: 'Bob', email: 'bob@example.com' }),
+            Approver.fromPlain({ id: '3', name: 'Charlie', email: 'charlie@example.com' }),
         ];
 
-        const result = createGroupTemplate({ approvers });
+        const result = GroupTemplate.create({ approvers });
 
         expect(result.isOk()).toBe(true);
         const group = result.unwrap();
@@ -19,7 +19,7 @@ describe('createGroupTemplate', () => {
     });
 
     it('should fail to create a group template with empty approvers array', () => {
-        const result = createGroupTemplate({ approvers: [] });
+        const result = GroupTemplate.create({ approvers: [] });
 
         expect(result.isError()).toBe(true);
         const error = result.unwrapError();
@@ -30,13 +30,13 @@ describe('createGroupTemplate', () => {
     });
 
     it('should fail to create a group template with duplicate approver IDs', () => {
-        const approvers: Approver[] = [
-            { id: '1', name: 'Alice', email: 'alice@example.com' },
-            { id: '2', name: 'Bob', email: 'bob@example.com' },
-            { id: '1', name: 'Alice Duplicate', email: 'alice2@example.com' },
+        const approvers = [
+            Approver.fromPlain({ id: '1', name: 'Alice', email: 'alice@example.com' }),
+            Approver.fromPlain({ id: '2', name: 'Bob', email: 'bob@example.com' }),
+            Approver.fromPlain({ id: '1', name: 'Alice Duplicate', email: 'alice2@example.com' }),
         ];
 
-        const result = createGroupTemplate({ approvers });
+        const result = GroupTemplate.create({ approvers });
 
         expect(result.isError()).toBe(true);
         const error = result.unwrapError();
@@ -47,24 +47,24 @@ describe('createGroupTemplate', () => {
     });
 
     it('should generate a unique ID for each group template', () => {
-        const approvers: Approver[] = [
-            { id: '1', name: 'Alice', email: 'alice@example.com' },
+        const approvers = [
+            Approver.fromPlain({ id: '1', name: 'Alice', email: 'alice@example.com' }),
         ];
 
-        const result1 = createGroupTemplate({ approvers });
-        const result2 = createGroupTemplate({ approvers });
+        const result1 = GroupTemplate.create({ approvers });
+        const result2 = GroupTemplate.create({ approvers });
 
         expect(result1.isOk()).toBe(true);
         expect(result2.isOk()).toBe(true);
-        expect(result1.unwrap().id).not.toBe(result2.unwrap().id);
+        expect(result1.unwrap().id.toPlain()).not.toBe(result2.unwrap().id.toPlain());
     });
 
     it('should not have isApproved or approvals properties', () => {
-        const approvers: Approver[] = [
-            { id: '1', name: 'Alice', email: 'alice@example.com' },
+        const approvers = [
+            Approver.fromPlain({ id: '1', name: 'Alice', email: 'alice@example.com' }),
         ];
 
-        const result = createGroupTemplate({ approvers });
+        const result = GroupTemplate.create({ approvers });
 
         expect(result.isOk()).toBe(true);
         const group = result.unwrap();

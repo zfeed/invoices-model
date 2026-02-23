@@ -1,8 +1,36 @@
-import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../../building-blocks/result';
-import { actionIsNotBlank } from './checks/check-action-not-blank';
+import { Equatable, Mappable, Result } from '../../../../building-blocks';
+import { checkActionNotBlank } from './checks/check-action-not-blank';
 
-export type Action = string;
+export class Action implements Equatable<Action>, Mappable<string> {
+    #value: string;
 
-export const createAction = (value: string): Result<DomainError, Action> =>
-    Result.ok<DomainError, string>(value).flatMap(actionIsNotBlank);
+    protected constructor(value: string) {
+        this.#value = value;
+    }
+
+    static create(value: string) {
+        const error = checkActionNotBlank(value);
+
+        if (error) {
+            return Result.error(error);
+        }
+
+        return Result.ok(new Action(value));
+    }
+
+    static fromPlain(value: string) {
+        return new Action(value);
+    }
+
+    equals(other: Action): boolean {
+        return this.#value === other.#value;
+    }
+
+    toPlain(): string {
+        return this.#value;
+    }
+
+    toString(): string {
+        return this.#value;
+    }
+}

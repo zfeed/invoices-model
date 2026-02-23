@@ -1,42 +1,56 @@
-import { applySpec, prop } from 'ramda';
-import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../../building-blocks/result';
-import { createComment, Comment } from '../comment/comment';
-import { Timestamp, createTimestamp } from '../timestamp/timestamp';
+import { Mappable, Result } from '../../../../building-blocks';
+import { Comment } from '../comment/comment';
 import { Id } from '../id/id';
+import { Timestamp } from '../timestamp/timestamp';
 
-export type Approval = {
-    approverId: Id;
-    createdAt: Timestamp;
-    comment: Comment;
-};
+export class Approval implements Mappable<ReturnType<Approval['toPlain']>> {
+    #approverId: Id;
+    #createdAt: Timestamp;
+    #comment: Comment;
 
-type ApprovalInput = {
-    approverId: Id;
-    comment: string | null;
-};
+    protected constructor(approverId: Id, createdAt: Timestamp, comment: Comment) {
+        this.#approverId = approverId;
+        this.#createdAt = createdAt;
+        this.#comment = comment;
+    }
 
-const buildApproval = applySpec<Approval>({
-    approverId: prop('approverId'),
-    createdAt: () => createTimestamp(),
-    comment: prop('comment'),
-});
+    public get approverId(): Id {
+        return this.#approverId;
+    }
 
-export type PlainApproval = {
-    approverId: string;
-    createdAt: string;
-    comment: string | null;
-};
+    public get createdAt(): Timestamp {
+        return this.#createdAt;
+    }
 
-export const approvalToPlain = (approval: Approval): PlainApproval => ({
-    approverId: approval.approverId,
-    createdAt: approval.createdAt.toISOString(),
-    comment: approval.comment,
-});
+    public get comment(): Comment {
+        return this.#comment;
+    }
 
-export const createApproval = (
-    data: ApprovalInput
-): Result<DomainError, Approval> =>
-    createComment(data.comment)
-        .map((comment) => ({ approverId: data.approverId, comment }))
-        .map(buildApproval);
+    static create(data: { approverId: Id; comment: string | null }) {
+        const commentResult = Comment.create(data.comment);
+
+        if (commentResult.isError()) {
+            return Result.error(commentResult.unwrapError());
+        }
+
+        return Result.ok(
+            new Approval(data.approverId, Timestamp.create(), commentResult.unwrap())
+        );
+    }
+
+    static fromPlain(plain: { approverId: string; createdAt: string; comment: string | null }) {
+        return new Approval(
+            Id.fromPlain(plain.approverId),
+            Timestamp.fromPlain(plain.createdAt),
+            Comment.fromPlain(plain.comment),
+        );
+    }
+
+    toPlain() {
+        return {
+            approverId: this.#approverId.toPlain(),
+            createdAt: this.#createdAt.toPlain(),
+            comment: this.#comment.toPlain(),
+        };
+    }
+}

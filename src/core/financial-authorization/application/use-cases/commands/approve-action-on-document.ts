@@ -1,11 +1,11 @@
 import { DOMAIN_ERROR_CODE } from '../../../../../building-blocks/errors/domain/domain-codes';
 import { DomainError } from '../../../../../building-blocks/errors/domain/domain.error';
 import { DomainEvents } from '../../../../shared/domain-events/domain-events.interface';
-import { createAction } from '../../../domain/action/action';
+import { UnitOfWorkFactory } from '../../../../shared/unit-of-work/unit-of-work.interface';
+import { Action } from '../../../domain/action/action';
 import { Approver } from '../../../domain/approver/approver';
-import { approveDocument, documentToPlain, PlainFinancialDocument } from '../../../domain/document/document';
-import { createReferenceId } from '../../../domain/reference-id/reference-id';
-import { DocumentStorage } from '../../storage/document-storage.interface';
+import { FinancialDocument } from '../../../domain/document/document';
+import { ReferenceId } from '../../../domain/reference-id/reference-id';
 
 type ApproveActionRequest = {
     referenceId: string;
@@ -13,39 +13,35 @@ type ApproveActionRequest = {
     approver: Approver;
 };
 
-export const approveActionOnDocumentCommand =
-    (documentStorage: DocumentStorage, domainEvents: DomainEvents) =>
-    async (
-        request: ApproveActionRequest
-    ): Promise<PlainFinancialDocument> => {
-        const action = createAction(request.action).unwrap();
-        const referenceId = createReferenceId(request.referenceId).unwrap();
+export class ApproveActionOnDocument {
+    constructor(
+        private readonly unitOfWorkFactory: UnitOfWorkFactory,
+        private readonly domainEvents: DomainEvents
+    ) {}
 
-        const found = await documentStorage
-            .findByReferenceId(referenceId)
-            .run();
+    public async execute(request: ApproveActionRequest) {
+        const action = Action.create(request.action).unwrap();
+        const referenceId = ReferenceId.create(request.referenceId).unwrap();
 
-        const document = found.fold(
-            () => null,
-            (doc) => doc
-        );
+        const document = await this.unitOfWorkFactory.start(async (uow) => {
+            const document = await uow
+                .collection(FinancialDocument)
+                .findBy('referenceId', referenceId.toPlain());
 
-        if (!document) {
-            throw new DomainError({
-                message: `Document with reference ${referenceId} not found`,
-                code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_DOCUMENT_NOT_FOUND,
-            });
-        }
+            if (!document) {
+                throw new DomainError({
+                    message: `Document with reference ${referenceId.toPlain()} not found`,
+                    code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_DOCUMENT_NOT_FOUND,
+                });
+            }
 
-        const approved = approveDocument(
-            document,
-            action,
-            request.approver
-        ).unwrap();
+            document.approve(action, request.approver).unwrap();
 
-        const saved = await documentStorage.save(approved).run();
+            return document;
+        });
 
-        await domainEvents.publishEvents(approved);
+        await this.domainEvents.publishEvents(document);
 
-        return saved.map(documentToPlain).unwrap();
-    };
+        return document.toPlain();
+    }
+}

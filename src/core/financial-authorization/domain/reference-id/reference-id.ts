@@ -1,10 +1,36 @@
-import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../../building-blocks/result';
-import { referenceIdIsNotBlank } from './checks/check-reference-id-not-blank';
+import { Equatable, Mappable, Result } from '../../../../building-blocks';
+import { checkReferenceIdNotBlank } from './checks/check-reference-id-not-blank';
 
-export type ReferenceId = string;
+export class ReferenceId implements Equatable<ReferenceId>, Mappable<string> {
+    #value: string;
 
-export const createReferenceId = (
-    value: string
-): Result<DomainError, ReferenceId> =>
-    Result.ok<DomainError, string>(value).flatMap(referenceIdIsNotBlank);
+    protected constructor(value: string) {
+        this.#value = value;
+    }
+
+    static create(value: string) {
+        const error = checkReferenceIdNotBlank(value);
+
+        if (error) {
+            return Result.error(error);
+        }
+
+        return Result.ok(new ReferenceId(value));
+    }
+
+    static fromPlain(value: string) {
+        return new ReferenceId(value);
+    }
+
+    equals(other: ReferenceId): boolean {
+        return this.#value === other.#value;
+    }
+
+    toPlain(): string {
+        return this.#value;
+    }
+
+    toString(): string {
+        return this.#value;
+    }
+}

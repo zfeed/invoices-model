@@ -1,31 +1,34 @@
 import { DomainEvents } from '../../../../shared/domain-events/domain-events.interface';
-import { createAction } from '../../../domain/action/action';
-import {
-    authflowPolicyToPlain,
-    createAuthflowPolicy,
-    PlainAuthflowPolicy,
-} from '../../../domain/authflow/authflow-policy';
+import { UnitOfWorkFactory } from '../../../../shared/unit-of-work/unit-of-work.interface';
+import { Action } from '../../../domain/action/action';
+import { AuthflowPolicy } from '../../../domain/authflow/authflow-policy';
 import { AuthflowTemplate } from '../../../domain/authflow/authflow-template';
-import { PolicyStorage } from '../../storage/policy-storage.interface';
 
 type CreateAuthflowPolicyRequest = {
     action: string;
     templates: AuthflowTemplate[];
 };
 
-export const createAuthflowPolicyCommand =
-    (policyStorage: PolicyStorage, domainEvents: DomainEvents) =>
-    async (request: CreateAuthflowPolicyRequest): Promise<PlainAuthflowPolicy> => {
-        const action = createAction(request.action).unwrap();
+export class CreateAuthflowPolicy {
+    constructor(
+        private readonly unitOfWorkFactory: UnitOfWorkFactory,
+        private readonly domainEvents: DomainEvents
+    ) {}
 
-        const policy = createAuthflowPolicy({
+    public async execute(request: CreateAuthflowPolicyRequest) {
+        const action = Action.create(request.action).unwrap();
+
+        const policy = AuthflowPolicy.create({
             action,
             templates: request.templates,
         }).unwrap();
 
-        const saved = await policyStorage.save(policy).run();
+        await this.unitOfWorkFactory.start(async (uow) => {
+            await uow.collection(AuthflowPolicy).add(policy);
+        });
 
-        await domainEvents.publishEvents(policy);
+        await this.domainEvents.publishEvents(policy);
 
-        return saved.map(authflowPolicyToPlain).unwrap();
-    };
+        return policy.toPlain();
+    }
+}

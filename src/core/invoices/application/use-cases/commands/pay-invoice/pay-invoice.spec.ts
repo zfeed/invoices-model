@@ -1,7 +1,10 @@
 import { InMemoryUnitOfWorkFactory } from '../../../../../../infrastructure/unit-of-work/in-memory.unit-of-work';
 import { InMemoryDomainEvents } from '../../../../../../infrastructure/domain-events/in-memory-domain-events';
-import { InMemoryDocumentStorage } from '../../../../../../infrastructure/storage/in-memory.document-storage';
-import { createDocument } from '../../../../../financial-authorization/domain/document/document';
+import { CanApproverApprove } from '../../../../../financial-authorization/application/use-cases/queries/can-approver-approve';
+import { FinancialDocument } from '../../../../../financial-authorization/domain/document/document';
+import { Authflow } from '../../../../../financial-authorization/domain/authflow/authflow';
+import { Money } from '../../../../../financial-authorization/domain/money/money';
+import { ReferenceId } from '../../../../../financial-authorization/domain/reference-id/reference-id';
 import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice';
 import { CompleteDraftInvoice } from '../complete-draft-invoice/complete-draft-invoice';
 import { ProcessInvoice } from '../process-invoice/process-invoice';
@@ -44,27 +47,24 @@ const COMPLETE_DRAFT_REQUEST = {
 };
 
 const createAuthorizationDocument = (referenceId: string) =>
-    createDocument({
-        referenceId,
-        value: { amount: '220', currency: 'USD' },
+    FinancialDocument.create({
+        referenceId: ReferenceId.fromPlain(referenceId),
+        value: Money.fromPlain({ amount: '220', currency: 'USD' }),
         authflows: [
-            {
+            Authflow.fromPlain({
                 id: 'authflow-1',
                 action: 'pay',
                 range: {
                     from: { amount: '0', currency: 'USD' },
                     to: { amount: '100000', currency: 'USD' },
                 },
-                isApproved: false,
                 steps: [
                     {
                         id: 'step-1',
                         order: 0,
-                        isApproved: false,
                         groups: [
                             {
                                 id: 'group-1',
-                                isApproved: false,
                                 approvers: [
                                     {
                                         id: 'approver-1',
@@ -77,14 +77,13 @@ const createAuthorizationDocument = (referenceId: string) =>
                         ],
                     },
                 ],
-            },
+            }),
         ],
     }).unwrap();
 
 describe('PayInvoice', () => {
     let unitOfWorkFactory: InMemoryUnitOfWorkFactory;
     let domainEvents: InMemoryDomainEvents;
-    let documentStorage: InMemoryDocumentStorage;
     let createCommand: CreateDraftInvoice;
     let completeCommand: CompleteDraftInvoice;
     let processCommand: ProcessInvoice;
@@ -93,7 +92,7 @@ describe('PayInvoice', () => {
     beforeEach(() => {
         unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         domainEvents = new InMemoryDomainEvents();
-        documentStorage = new InMemoryDocumentStorage();
+        const canApproverApprove = new CanApproverApprove(unitOfWorkFactory);
         createCommand = new CreateDraftInvoice(unitOfWorkFactory, domainEvents);
         completeCommand = new CompleteDraftInvoice(
             unitOfWorkFactory,
@@ -103,7 +102,7 @@ describe('PayInvoice', () => {
         payCommand = new PayInvoice(
             unitOfWorkFactory,
             domainEvents,
-            documentStorage
+            canApproverApprove
         );
     });
 
@@ -124,7 +123,9 @@ describe('PayInvoice', () => {
         await processCommand.execute(invoice.id);
 
         const document = createAuthorizationDocument(invoice.id);
-        await documentStorage.save(document).run();
+        await unitOfWorkFactory.start(async (uow) => {
+            await uow.collection(FinancialDocument).add(document);
+        });
 
         await expect(
             payCommand.execute({
@@ -142,7 +143,9 @@ describe('PayInvoice', () => {
         await processCommand.execute(invoice.id);
 
         const document = createAuthorizationDocument(invoice.id);
-        await documentStorage.save(document).run();
+        await unitOfWorkFactory.start(async (uow) => {
+            await uow.collection(FinancialDocument).add(document);
+        });
 
         const result = await payCommand.execute({
             id: invoice.id,
@@ -166,7 +169,9 @@ describe('PayInvoice', () => {
         await processCommand.execute(invoice.id);
 
         const document = createAuthorizationDocument(invoice.id);
-        await documentStorage.save(document).run();
+        await unitOfWorkFactory.start(async (uow) => {
+            await uow.collection(FinancialDocument).add(document);
+        });
 
         await payCommand.execute({
             id: invoice.id,

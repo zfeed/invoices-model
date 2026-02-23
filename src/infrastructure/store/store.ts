@@ -18,6 +18,10 @@ export class Store<T> {
         return this.data.get(key);
     }
 
+    public values() {
+        return this.data.values();
+    }
+
     public setIfVersion(
         key: string,
         value: T,

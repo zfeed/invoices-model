@@ -1,16 +1,16 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
-import { createName } from './name';
+import { Name } from './name';
 
 describe('Name', () => {
-    describe('createName', () => {
+    describe('create', () => {
         it('should create a name from a string', () => {
-            const result = createName('John Doe');
+            const result = Name.create('John Doe');
             expect(result.isOk()).toBe(true);
-            expect(result.unwrap()).toBe('John Doe');
+            expect(result.unwrap().toPlain()).toBe('John Doe');
         });
 
         it('should return an error for an empty string', () => {
-            const result = createName('');
+            const result = Name.create('');
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
                 DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NAME_BLANK
@@ -18,7 +18,7 @@ describe('Name', () => {
         });
 
         it('should return an error for a whitespace-only string', () => {
-            const result = createName('   ');
+            const result = Name.create('   ');
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
                 DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NAME_BLANK

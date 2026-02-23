@@ -1,8 +1,36 @@
-import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../../building-blocks/result';
-import { emailHasValidFormat } from './checks/check-email-format';
+import { Equatable, Mappable, Result } from '../../../../building-blocks';
+import { checkEmailFormat } from './checks/check-email-format';
 
-export type Email = string;
+export class Email implements Equatable<Email>, Mappable<string> {
+    #value: string;
 
-export const createEmail = (value: string): Result<DomainError, Email> =>
-    Result.ok<DomainError, string>(value).flatMap(emailHasValidFormat);
+    protected constructor(value: string) {
+        this.#value = value;
+    }
+
+    static create(value: string) {
+        const error = checkEmailFormat(value);
+
+        if (error) {
+            return Result.error(error);
+        }
+
+        return Result.ok(new Email(value));
+    }
+
+    static fromPlain(value: string) {
+        return new Email(value);
+    }
+
+    equals(other: Email): boolean {
+        return this.#value === other.#value;
+    }
+
+    toPlain(): string {
+        return this.#value;
+    }
+
+    toString(): string {
+        return this.#value;
+    }
+}

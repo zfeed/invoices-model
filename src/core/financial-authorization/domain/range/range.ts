@@ -1,40 +1,55 @@
-import { applySpec, prop } from 'ramda';
-import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../../building-blocks/result';
-import { Money, PlainMoney, moneyToPlain } from '../money/money';
-import { currenciesEqual } from './checks/check-currencies-equal';
-import { fromNotGreaterThanTo } from './checks/check-from-not-greater-than-to';
+import { Equatable, Mappable, Result } from '../../../../building-blocks';
+import { Money } from '../money/money';
+import { checkCurrenciesEqual } from './checks/check-currencies-equal';
+import { checkFromNotGreaterThanTo } from './checks/check-from-not-greater-than-to';
 
-export type Range = {
-    from: Money;
-    to: Money;
-};
+export class Range implements Equatable<Range>, Mappable<ReturnType<Range['toPlain']>> {
+    #from: Money;
+    #to: Money;
 
-type RangeInput = {
-    from: Money;
-    to: Money;
-};
+    protected constructor(from: Money, to: Money) {
+        this.#from = from;
+        this.#to = to;
+    }
 
-const buildRange = applySpec<Range>({
-    from: prop('from'),
-    to: prop('to'),
-});
+    public get from(): Money {
+        return this.#from;
+    }
 
-export type PlainRange = {
-    from: PlainMoney;
-    to: PlainMoney;
-};
+    public get to(): Money {
+        return this.#to;
+    }
 
-export const rangeToPlain = (range: Range): PlainRange => ({
-    from: moneyToPlain(range.from),
-    to: moneyToPlain(range.to),
-});
+    static create(from: Money, to: Money) {
+        const currError = checkCurrenciesEqual(from, to);
+        if (currError) {
+            return Result.error(currError);
+        }
 
-export const createRange = (
-    from: Money,
-    to: Money
-): Result<DomainError, Range> =>
-    Result.ok<DomainError, RangeInput>({ from, to })
-        .flatMap(currenciesEqual)
-        .flatMap(fromNotGreaterThanTo)
-        .map(buildRange);
+        const rangeError = checkFromNotGreaterThanTo(from, to);
+        if (rangeError) {
+            return Result.error(rangeError);
+        }
+
+        return Result.ok(new Range(from, to));
+    }
+
+    static fromPlain(plain: { from: { amount: string; currency: string }; to: { amount: string; currency: string } }) {
+        return new Range(Money.fromPlain(plain.from), Money.fromPlain(plain.to));
+    }
+
+    equals(other: Range): boolean {
+        return this.#from.equals(other.#from) && this.#to.equals(other.#to);
+    }
+
+    toPlain() {
+        return {
+            from: this.#from.toPlain(),
+            to: this.#to.toPlain(),
+        };
+    }
+
+    toString(): string {
+        return `${this.#from.toString()} - ${this.#to.toString()}`;
+    }
+}
