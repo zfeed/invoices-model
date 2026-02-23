@@ -1,7 +1,6 @@
 import { DOMAIN_ERROR_CODE, DomainError, Mappable, Result } from '../../../../building-blocks';
 import { Action } from '../action/action';
 import { Approval } from '../approval/approval';
-import { Approver } from '../approver/approver';
 import { Id } from '../id/id';
 import { Range } from '../range/range';
 import { Step } from '../step/step';
@@ -72,7 +71,7 @@ export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
         );
     }
 
-    approve(approver: Approver): Result<DomainError, Authflow> {
+    apply(approval: Approval): Result<DomainError, Authflow> {
         const currentStep = this.#steps
             .filter((s) => !s.isApproved)
             .sort((a, b) => a.order.toPlain() - b.order.toPlain())[0];
@@ -86,13 +85,7 @@ export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
             );
         }
 
-        const approvalResult = Approval.create({ approverId: approver.id, comment: null });
-
-        if (approvalResult.isError()) {
-            return Result.error(approvalResult.unwrapError());
-        }
-
-        const stepResult = currentStep.apply(approvalResult.unwrap());
+        const stepResult = currentStep.apply(approval);
 
         if (stepResult.isError()) {
             return Result.error(stepResult.unwrapError());
