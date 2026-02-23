@@ -1,4 +1,9 @@
-import { DOMAIN_ERROR_CODE, DomainError, Mappable, Result } from '../../../../building-blocks';
+import {
+    DOMAIN_ERROR_CODE,
+    DomainError,
+    Mappable,
+    Result,
+} from '../../../../building-blocks';
 import { Approval } from '../approval/approval';
 import { Approver } from '../approver/approver';
 import { Group } from '../groups/group';
@@ -11,7 +16,12 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
     #isApproved: boolean;
     #groups: Group[];
 
-    protected constructor(id: Id, order: Order, isApproved: boolean, groups: Group[]) {
+    protected constructor(
+        id: Id,
+        order: Order,
+        isApproved: boolean,
+        groups: Group[]
+    ) {
         this.#id = id;
         this.#order = order;
         this.#isApproved = isApproved;
@@ -35,7 +45,14 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
     }
 
     static create(data: { order: Order; groups: Group[] }) {
-        return Result.ok(new Step(Id.create().unwrap(), data.order, data.groups.every((g) => g.isApproved), data.groups));
+        return Result.ok(
+            new Step(
+                Id.create().unwrap(),
+                data.order,
+                data.groups.every((g) => g.isApproved),
+                data.groups
+            )
+        );
     }
 
     static fromPlain(plain: {
@@ -45,7 +62,11 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
             id: string;
             requiredApprovals: number;
             approvers: { id: string; name: string; email: string }[];
-            approvals: { approverId: string; createdAt: string; comment: string | null }[];
+            approvals: {
+                approverId: string;
+                createdAt: string;
+                comment: string | null;
+            }[];
         }[];
     }) {
         const groups = plain.groups.map((g) => Group.fromPlain(g));
@@ -53,7 +74,7 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
             Id.fromPlain(plain.id),
             Order.fromPlain(plain.order),
             groups.every((g) => g.isApproved),
-            groups,
+            groups
         );
     }
 
@@ -67,8 +88,8 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
             );
         }
 
-        const groupIndex = this.#groups.findIndex(
-            (g) => !g.isApproved && g.approvers.some((a) => a.id.equals(approver.id))
+        const groupIndex = this.#groups.findIndex((g) =>
+            g.hasEligibleApprover(approver.id)
         );
 
         if (groupIndex === -1) {
@@ -80,13 +101,18 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
             );
         }
 
-        const approvalResult = Approval.create({ approverId: approver.id, comment: null });
+        const approvalResult = Approval.create({
+            approverId: approver.id,
+            comment: null,
+        });
 
         if (approvalResult.isError()) {
             return Result.error(approvalResult.unwrapError());
         }
 
-        const groupResult = this.#groups[groupIndex].apply(approvalResult.unwrap());
+        const groupResult = this.#groups[groupIndex].apply(
+            approvalResult.unwrap()
+        );
 
         if (groupResult.isError()) {
             return Result.error(groupResult.unwrapError());
@@ -96,7 +122,14 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
             i === groupIndex ? groupResult.unwrap() : g
         );
 
-        return Result.ok(new Step(this.#id, this.#order, updatedGroups.every((g) => g.isApproved), updatedGroups));
+        return Result.ok(
+            new Step(
+                this.#id,
+                this.#order,
+                updatedGroups.every((g) => g.isApproved),
+                updatedGroups
+            )
+        );
     }
 
     hasEligibleApprover(approverId: Id): boolean {
