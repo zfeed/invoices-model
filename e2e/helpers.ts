@@ -51,6 +51,11 @@ export const setupApp = () => {
 
     beforeEach(async () => {
         app = await createApp();
+        await app.ready();
+    });
+
+    afterEach(async () => {
+        await app.close();
     });
 
     const postJson = async (

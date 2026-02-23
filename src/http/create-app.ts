@@ -62,18 +62,20 @@ export const createApp = async () => {
                 error: { message: error.message, code: error.code },
             });
         }
-        throw error;
+        return reply.code(500).send({
+            error: { message: 'Internal Server Error' },
+        });
     });
 
-    createDraftInvoiceRoute(app, commands);
-    updateDraftInvoiceRoute(app, commands);
-    calculateDraftInvoiceRoute(app, commands);
-    completeDraftInvoiceRoute(app, commands);
-    archiveDraftInvoiceRoute(app, commands);
-    draftDraftInvoiceRoute(app, commands);
-    processInvoiceRoute(app, commands);
-    cancelInvoiceRoute(app, commands);
-    payInvoiceRoute(app, commands);
+    app.register(createDraftInvoiceRoute(commands));
+    app.register(updateDraftInvoiceRoute(commands));
+    app.register(calculateDraftInvoiceRoute(commands));
+    app.register(completeDraftInvoiceRoute(commands));
+    app.register(archiveDraftInvoiceRoute(commands));
+    app.register(draftDraftInvoiceRoute(commands));
+    app.register(processInvoiceRoute(commands));
+    app.register(cancelInvoiceRoute(commands));
+    app.register(payInvoiceRoute(commands));
 
     return app;
 };

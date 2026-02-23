@@ -1,14 +1,13 @@
 import { FastifyInstance } from 'fastify';
-import { bootstrap } from '../../core/bootstrap';
+import { Commands } from '../types';
 import { parse } from '../validation';
 import { draftInvoiceSchema } from '../schemas/draft-invoice';
 
-type Commands = Awaited<ReturnType<typeof bootstrap>>;
-
-export const createDraftInvoiceRoute = (app: FastifyInstance, commands: Commands) => {
-    app.post('/invoices/drafts', async (request) => {
-        const data = parse(draftInvoiceSchema, request.body);
-        const result = await commands.createDraftInvoice.execute(data);
-        return { data: result };
-    });
-};
+export const createDraftInvoiceRoute = (commands: Commands) =>
+    async (app: FastifyInstance) => {
+        app.post('/invoices/drafts', async (request) => {
+            const data = parse(draftInvoiceSchema, request.body);
+            const result = await commands.createDraftInvoice.execute(data);
+            return { data: result };
+        });
+    };
