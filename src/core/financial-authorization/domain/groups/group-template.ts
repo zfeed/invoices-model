@@ -7,10 +7,12 @@ import { checkTemplateNoDuplicateApprovers } from './checks/check-template-no-du
 
 export class GroupTemplate implements Mappable<ReturnType<GroupTemplate['toPlain']>> {
     #id: Id;
+    #requiredApprovals: number;
     #approvers: Approver[];
 
-    protected constructor(id: Id, approvers: Approver[]) {
+    protected constructor(id: Id, requiredApprovals: number, approvers: Approver[]) {
         this.#id = id;
+        this.#requiredApprovals = requiredApprovals;
         this.#approvers = approvers;
     }
 
@@ -18,11 +20,15 @@ export class GroupTemplate implements Mappable<ReturnType<GroupTemplate['toPlain
         return this.#id;
     }
 
+    public get requiredApprovals(): number {
+        return this.#requiredApprovals;
+    }
+
     public get approvers(): readonly Approver[] {
         return this.#approvers;
     }
 
-    static create(data: { approvers: Approver[] }) {
+    static create(data: { requiredApprovals: number; approvers: Approver[] }) {
         const emptyError = checkTemplateApproversNotEmpty(data.approvers);
         if (emptyError) {
             return Result.error(emptyError);
@@ -33,21 +39,24 @@ export class GroupTemplate implements Mappable<ReturnType<GroupTemplate['toPlain
             return Result.error(duplicateError);
         }
 
-        return Result.ok(new GroupTemplate(Id.create().unwrap(), data.approvers));
+        return Result.ok(new GroupTemplate(Id.create().unwrap(), data.requiredApprovals, data.approvers));
     }
 
     static fromPlain(plain: {
         id: string;
+        requiredApprovals: number;
         approvers: { id: string; name: string; email: string }[];
     }) {
         return new GroupTemplate(
             Id.fromPlain(plain.id),
+            plain.requiredApprovals,
             plain.approvers.map((a) => Approver.fromPlain(a)),
         );
     }
 
     toGroup(): Result<DomainError, Group> {
         return Group.create({
+            requiredApprovals: this.#requiredApprovals,
             approvers: this.#approvers,
             approvals: [],
         });
@@ -56,6 +65,7 @@ export class GroupTemplate implements Mappable<ReturnType<GroupTemplate['toPlain
     toPlain() {
         return {
             id: this.#id.toPlain(),
+            requiredApprovals: this.#requiredApprovals,
             approvers: this.#approvers.map((a) => a.toPlain()),
         };
     }

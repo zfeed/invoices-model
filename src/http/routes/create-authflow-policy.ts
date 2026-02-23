@@ -18,6 +18,7 @@ const approverSchema = z.object({
 });
 
 const groupSchema = z.object({
+    requiredApprovals: z.number(),
     approvers: z.array(approverSchema),
 });
 
@@ -52,6 +53,7 @@ const buildApprover = (data: z.infer<typeof approverSchema>) =>
 
 const buildGroupTemplate = (data: z.infer<typeof groupSchema>) =>
     GroupTemplate.create({
+        requiredApprovals: data.requiredApprovals,
         approvers: data.approvers.map(buildApprover),
     }).unwrap();
 

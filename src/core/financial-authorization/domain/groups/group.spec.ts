@@ -14,6 +14,7 @@ describe('Group.create', () => {
         const approvals: Approval[] = [];
 
         const result = Group.create({
+            requiredApprovals: 1,
             approvers,
             approvals,
         });
@@ -30,6 +31,7 @@ describe('Group.create', () => {
         const approvals: Approval[] = [];
 
         const result = Group.create({
+            requiredApprovals: 1,
             approvers,
             approvals,
         });
@@ -52,6 +54,7 @@ describe('Group.create', () => {
         const approvals: Approval[] = [];
 
         const result = Group.create({
+            requiredApprovals: 1,
             approvers,
             approvals,
         });
@@ -74,6 +77,7 @@ describe('Group.create', () => {
         const approvals: Approval[] = [];
 
         const result = Group.create({
+            requiredApprovals: 1,
             approvers,
             approvals,
         });
@@ -98,6 +102,7 @@ describe('Group.create', () => {
         ];
 
         const result = Group.create({
+            requiredApprovals: 1,
             approvers,
             approvals,
         });
@@ -129,6 +134,7 @@ describe('Group.create', () => {
         ];
 
         const result = Group.create({
+            requiredApprovals: 1,
             approvers,
             approvals,
         });
@@ -165,6 +171,7 @@ describe('Group.create', () => {
         ];
 
         const result = Group.create({
+            requiredApprovals: 1,
             approvers,
             approvals,
         });
@@ -189,6 +196,7 @@ describe('Group.create', () => {
         ];
 
         const result = Group.create({
+            requiredApprovals: 1,
             approvers,
             approvals,
         });
@@ -218,6 +226,7 @@ describe('Group.create', () => {
         ];
 
         const result = Group.create({
+            requiredApprovals: 1,
             approvers,
             approvals,
         });
@@ -241,6 +250,7 @@ describe('Group.create', () => {
         const approvals: Approval[] = [];
 
         const result = Group.create({
+            requiredApprovals: 1,
             approvers,
             approvals,
         });
@@ -259,6 +269,7 @@ describe('Group.create', () => {
         ];
 
         const result = Group.create({
+            requiredApprovals: 1,
             approvers,
             approvals,
         });
@@ -282,6 +293,7 @@ describe('Group.create', () => {
         ];
 
         const result = Group.create({
+            requiredApprovals: 1,
             approvers,
             approvals,
         });
@@ -308,6 +320,7 @@ describe('Group.create', () => {
         ];
 
         const result = Group.create({
+            requiredApprovals: 1,
             approvers,
             approvals,
         });
@@ -334,6 +347,7 @@ describe('Group.create', () => {
         ];
 
         const result = Group.create({
+            requiredApprovals: 1,
             approvers,
             approvals,
         });
@@ -358,6 +372,7 @@ describe('Group.create', () => {
         ];
 
         const result = Group.create({
+            requiredApprovals: 1,
             approvers,
             approvals,
         });
@@ -382,6 +397,7 @@ describe('Group.create', () => {
         ];
 
         const result = Group.create({
+            requiredApprovals: 1,
             approvers,
             approvals,
         });
@@ -421,6 +437,7 @@ describe('Group.apply', () => {
 
     it('should successfully add approval from existing approver', () => {
         const group = Group.create({
+            requiredApprovals: 1,
             approvers: [approver1, approver2],
             approvals: [],
         }).unwrap();
@@ -447,6 +464,7 @@ describe('Group.apply', () => {
         });
 
         const group = Group.create({
+            requiredApprovals: 1,
             approvers: [approver1, approver2],
             approvals: [existingApproval],
         }).unwrap();
@@ -466,6 +484,7 @@ describe('Group.apply', () => {
 
     it('should fail when approver is not in the group', () => {
         const group = Group.create({
+            requiredApprovals: 1,
             approvers: [approver1, approver2],
             approvals: [],
         }).unwrap();
@@ -491,6 +510,7 @@ describe('Group.apply', () => {
         });
 
         const group = Group.create({
+            requiredApprovals: 1,
             approvers: [approver1, approver2],
             approvals: [existingApproval],
         }).unwrap();
@@ -510,6 +530,7 @@ describe('Group.apply', () => {
 
     it('should maintain immutability of original group', () => {
         const originalGroup = Group.create({
+            requiredApprovals: 1,
             approvers: [approver1, approver2],
             approvals: [],
         }).unwrap();
@@ -527,6 +548,7 @@ describe('Group.apply', () => {
 
     it('should set correct timestamp on approval', () => {
         const group = Group.create({
+            requiredApprovals: 1,
             approvers: [approver1, approver2],
             approvals: [],
         }).unwrap();
@@ -547,6 +569,7 @@ describe('Group.apply', () => {
 
     it('should work with single approver group', () => {
         const group = Group.create({
+            requiredApprovals: 1,
             approvers: [approver1],
             approvals: [],
         }).unwrap();
@@ -565,6 +588,7 @@ describe('Group.apply', () => {
 
     it('should work with multiple approvers in sequence', () => {
         const group = Group.create({
+            requiredApprovals: 1,
             approvers: [approver1, approver2, approver3],
             approvals: [],
         }).unwrap();
@@ -586,6 +610,7 @@ describe('Group.apply', () => {
 
     it('should preserve group id after approval', () => {
         const group = Group.create({
+            requiredApprovals: 1,
             approvers: [approver1, approver2],
             approvals: [],
         }).unwrap();
@@ -601,6 +626,7 @@ describe('Group.apply', () => {
 
     it('should preserve approver order when adding approval', () => {
         const group = Group.create({
+            requiredApprovals: 1,
             approvers: [approver1, approver2, approver3],
             approvals: [],
         }).unwrap();

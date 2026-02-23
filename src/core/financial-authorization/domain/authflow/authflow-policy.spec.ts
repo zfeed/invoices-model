@@ -182,6 +182,7 @@ describe('selectAuthflow', () => {
             groups: [
                 {
                     id: 'group-1',
+                    requiredApprovals: 1,
                     approvers: [
                         { id: '1', name: 'Alice', email: 'alice@example.com' },
                     ],

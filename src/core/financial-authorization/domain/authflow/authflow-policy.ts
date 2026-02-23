@@ -66,6 +66,7 @@ export class AuthflowPolicy implements Mappable<ReturnType<AuthflowPolicy['toPla
                 order: number;
                 groups: {
                     id: string;
+                    requiredApprovals: number;
                     approvers: { id: string; name: string; email: string }[];
                 }[];
             }[];

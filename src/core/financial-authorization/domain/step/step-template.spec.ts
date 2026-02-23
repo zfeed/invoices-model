@@ -7,12 +7,14 @@ describe('StepTemplate.create', () => {
         const groups = [
             GroupTemplate.fromPlain({
                 id: 'group-1',
+                requiredApprovals: 1,
                 approvers: [
                     { id: '1', name: 'Alice', email: 'alice@example.com' },
                 ],
             }),
             GroupTemplate.fromPlain({
                 id: 'group-2',
+                requiredApprovals: 1,
                 approvers: [
                     { id: '2', name: 'Bob', email: 'bob@example.com' },
                 ],

@@ -31,7 +31,7 @@ describe('CanApproverApprove', () => {
                     order: 0,
                     groups: [{
                         id: 'group-1',
-                        isApproved: false,
+                        requiredApprovals: 1,
                         approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
                         approvals: [],
                     }],
@@ -70,7 +70,7 @@ describe('CanApproverApprove', () => {
                     order: 0,
                     groups: [{
                         id: 'group-1',
-                        isApproved: false,
+                        requiredApprovals: 1,
                         approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
                         approvals: [],
                     }],
@@ -109,7 +109,7 @@ describe('CanApproverApprove', () => {
                     order: 0,
                     groups: [{
                         id: 'group-1',
-                        isApproved: true,
+                        requiredApprovals: 1,
                         approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
                         approvals: [{ approverId: 'approver-1', createdAt: new Date().toISOString(), comment: null }],
                     }],
@@ -148,7 +148,7 @@ describe('CanApproverApprove', () => {
                     order: 0,
                     groups: [{
                         id: 'group-1',
-                        isApproved: false,
+                        requiredApprovals: 1,
                         approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
                         approvals: [],
                     }],
@@ -188,7 +188,7 @@ describe('CanApproverApprove', () => {
                         order: 0,
                         groups: [{
                             id: 'group-1',
-                            isApproved: false,
+                            requiredApprovals: 1,
                             approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
                             approvals: [],
                         }],
@@ -198,7 +198,7 @@ describe('CanApproverApprove', () => {
                         order: 1,
                         groups: [{
                             id: 'group-2',
-                            isApproved: false,
+                            requiredApprovals: 1,
                             approvers: [{ id: 'approver-2', name: 'Bob', email: 'bob@example.com' }],
                             approvals: [],
                         }],

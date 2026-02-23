@@ -46,6 +46,7 @@ export class AuthflowTemplate implements Mappable<ReturnType<AuthflowTemplate['t
             order: number;
             groups: {
                 id: string;
+                requiredApprovals: number;
                 approvers: { id: string; name: string; email: string }[];
             }[];
         }[];

@@ -20,6 +20,7 @@ describe('authflowFromTemplate', () => {
                     groups: [
                         {
                             id: 'group-1',
+                            requiredApprovals: 1,
                             approvers: [
                                 {
                                     id: '1',
@@ -72,6 +73,7 @@ describe('authflowFromTemplate', () => {
                     groups: [
                         {
                             id: 'group-1',
+                            requiredApprovals: 1,
                             approvers: [
                                 {
                                     id: '1',
@@ -82,6 +84,7 @@ describe('authflowFromTemplate', () => {
                         },
                         {
                             id: 'group-2',
+                            requiredApprovals: 1,
                             approvers: [
                                 {
                                     id: '2',
@@ -98,6 +101,7 @@ describe('authflowFromTemplate', () => {
                     groups: [
                         {
                             id: 'group-3',
+                            requiredApprovals: 1,
                             approvers: [
                                 {
                                     id: '3',
@@ -150,6 +154,7 @@ describe('authflowFromTemplate', () => {
                     groups: [
                         {
                             id: 'group-1',
+                            requiredApprovals: 1,
                             approvers: [
                                 {
                                     id: '1',

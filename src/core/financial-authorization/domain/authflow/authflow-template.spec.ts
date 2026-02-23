@@ -18,6 +18,7 @@ describe('createAuthflowTemplate', () => {
                 groups: [
                     {
                         id: 'group-1',
+                        requiredApprovals: 1,
                         approvers: [
                             {
                                 id: '1',
@@ -34,6 +35,7 @@ describe('createAuthflowTemplate', () => {
                 groups: [
                     {
                         id: 'group-2',
+                        requiredApprovals: 1,
                         approvers: [
                             {
                                 id: '2',

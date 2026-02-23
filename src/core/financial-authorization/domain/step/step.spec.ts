@@ -7,7 +7,7 @@ describe('Step.create', () => {
         const groups = [
             Group.fromPlain({
                 id: 'group-1',
-                isApproved: true,
+                requiredApprovals: 1,
                 approvers: [
                     { id: '1', name: 'Alice', email: 'alice@example.com' },
                 ],
@@ -21,7 +21,7 @@ describe('Step.create', () => {
             }),
             Group.fromPlain({
                 id: 'group-2',
-                isApproved: true,
+                requiredApprovals: 1,
                 approvers: [{ id: '2', name: 'Bob', email: 'bob@example.com' }],
                 approvals: [
                     {
@@ -50,7 +50,7 @@ describe('Step.create', () => {
         const groups = [
             Group.fromPlain({
                 id: 'group-1',
-                isApproved: true,
+                requiredApprovals: 1,
                 approvers: [
                     { id: '1', name: 'Alice', email: 'alice@example.com' },
                 ],
@@ -64,7 +64,7 @@ describe('Step.create', () => {
             }),
             Group.fromPlain({
                 id: 'group-2',
-                isApproved: false,
+                requiredApprovals: 1,
                 approvers: [{ id: '2', name: 'Bob', email: 'bob@example.com' }],
                 approvals: [],
             }),
@@ -86,7 +86,7 @@ describe('Step.create', () => {
         const groups = [
             Group.fromPlain({
                 id: 'group-1',
-                isApproved: false,
+                requiredApprovals: 1,
                 approvers: [
                     { id: '1', name: 'Alice', email: 'alice@example.com' },
                 ],
@@ -94,7 +94,7 @@ describe('Step.create', () => {
             }),
             Group.fromPlain({
                 id: 'group-2',
-                isApproved: false,
+                requiredApprovals: 1,
                 approvers: [{ id: '2', name: 'Bob', email: 'bob@example.com' }],
                 approvals: [],
             }),
@@ -131,7 +131,7 @@ describe('Step.create', () => {
         const groups = [
             Group.fromPlain({
                 id: 'group-1',
-                isApproved: true,
+                requiredApprovals: 1,
                 approvers: [
                     { id: '1', name: 'Alice', email: 'alice@example.com' },
                 ],
@@ -160,7 +160,7 @@ describe('Step.create', () => {
         const groups = [
             Group.fromPlain({
                 id: 'group-1',
-                isApproved: false,
+                requiredApprovals: 1,
                 approvers: [
                     { id: '1', name: 'Alice', email: 'alice@example.com' },
                 ],
@@ -183,7 +183,7 @@ describe('Step.create', () => {
         const groups = [
             Group.fromPlain({
                 id: 'group-1',
-                isApproved: true,
+                requiredApprovals: 1,
                 approvers: [
                     { id: '1', name: 'Alice', email: 'alice@example.com' },
                 ],
@@ -213,7 +213,7 @@ describe('Step.create', () => {
         const groups = [
             Group.fromPlain({
                 id: 'group-1',
-                isApproved: false,
+                requiredApprovals: 1,
                 approvers: [
                     { id: '1', name: 'Alice', email: 'alice@example.com' },
                     { id: '2', name: 'Bob', email: 'bob@example.com' },
@@ -238,7 +238,7 @@ describe('Step.create', () => {
         const groups = [
             Group.fromPlain({
                 id: 'group-1',
-                isApproved: true,
+                requiredApprovals: 1,
                 approvers: [
                     { id: '1', name: 'Alice', email: 'alice@example.com' },
                 ],
@@ -252,7 +252,7 @@ describe('Step.create', () => {
             }),
             Group.fromPlain({
                 id: 'group-2',
-                isApproved: true,
+                requiredApprovals: 1,
                 approvers: [{ id: '2', name: 'Bob', email: 'bob@example.com' }],
                 approvals: [
                     {
@@ -264,7 +264,7 @@ describe('Step.create', () => {
             }),
             Group.fromPlain({
                 id: 'group-3',
-                isApproved: false,
+                requiredApprovals: 1,
                 approvers: [
                     { id: '3', name: 'Charlie', email: 'charlie@example.com' },
                 ],
@@ -288,7 +288,7 @@ describe('Step.create', () => {
         const groups = [
             Group.fromPlain({
                 id: 'group-1',
-                isApproved: true,
+                requiredApprovals: 1,
                 approvers: [
                     { id: '1', name: 'Alice', email: 'alice@example.com' },
                 ],

@@ -41,7 +41,7 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
         order: number;
         groups: {
             id: string;
-            isApproved: boolean;
+            requiredApprovals: number;
             approvers: { id: string; name: string; email: string }[];
             approvals: { approverId: string; createdAt: string; comment: string | null }[];
         }[];

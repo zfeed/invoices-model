@@ -10,7 +10,7 @@ describe('GroupTemplate.create', () => {
             Approver.fromPlain({ id: '3', name: 'Charlie', email: 'charlie@example.com' }),
         ];
 
-        const result = GroupTemplate.create({ approvers });
+        const result = GroupTemplate.create({ requiredApprovals: 1, approvers });
 
         expect(result.isOk()).toBe(true);
         const group = result.unwrap();
@@ -19,7 +19,7 @@ describe('GroupTemplate.create', () => {
     });
 
     it('should fail to create a group template with empty approvers array', () => {
-        const result = GroupTemplate.create({ approvers: [] });
+        const result = GroupTemplate.create({ requiredApprovals: 1, approvers: [] });
 
         expect(result.isError()).toBe(true);
         const error = result.unwrapError();
@@ -36,7 +36,7 @@ describe('GroupTemplate.create', () => {
             Approver.fromPlain({ id: '1', name: 'Alice Duplicate', email: 'alice2@example.com' }),
         ];
 
-        const result = GroupTemplate.create({ approvers });
+        const result = GroupTemplate.create({ requiredApprovals: 1, approvers });
 
         expect(result.isError()).toBe(true);
         const error = result.unwrapError();
@@ -51,8 +51,8 @@ describe('GroupTemplate.create', () => {
             Approver.fromPlain({ id: '1', name: 'Alice', email: 'alice@example.com' }),
         ];
 
-        const result1 = GroupTemplate.create({ approvers });
-        const result2 = GroupTemplate.create({ approvers });
+        const result1 = GroupTemplate.create({ requiredApprovals: 1, approvers });
+        const result2 = GroupTemplate.create({ requiredApprovals: 1, approvers });
 
         expect(result1.isOk()).toBe(true);
         expect(result2.isOk()).toBe(true);
@@ -64,7 +64,7 @@ describe('GroupTemplate.create', () => {
             Approver.fromPlain({ id: '1', name: 'Alice', email: 'alice@example.com' }),
         ];
 
-        const result = GroupTemplate.create({ approvers });
+        const result = GroupTemplate.create({ requiredApprovals: 1, approvers });
 
         expect(result.isOk()).toBe(true);
         const group = result.unwrap();

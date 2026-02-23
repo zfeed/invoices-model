@@ -9,13 +9,13 @@ import { checkNoDuplicateApprovals } from './checks/check-no-duplicate-approvals
 
 export class Group implements Mappable<ReturnType<Group['toPlain']>> {
     #id: Id;
-    #isApproved: boolean;
+    #requiredApprovals: number;
     #approvers: Approver[];
     #approvals: Approval[];
 
-    protected constructor(id: Id, isApproved: boolean, approvers: Approver[], approvals: Approval[]) {
+    protected constructor(id: Id, requiredApprovals: number, approvers: Approver[], approvals: Approval[]) {
         this.#id = id;
-        this.#isApproved = isApproved;
+        this.#requiredApprovals = requiredApprovals;
         this.#approvers = approvers;
         this.#approvals = approvals;
     }
@@ -24,8 +24,12 @@ export class Group implements Mappable<ReturnType<Group['toPlain']>> {
         return this.#id;
     }
 
+    public get requiredApprovals(): number {
+        return this.#requiredApprovals;
+    }
+
     public get isApproved(): boolean {
-        return this.#isApproved;
+        return this.#approvals.length >= this.#requiredApprovals;
     }
 
     public get approvers(): readonly Approver[] {
@@ -36,7 +40,7 @@ export class Group implements Mappable<ReturnType<Group['toPlain']>> {
         return this.#approvals;
     }
 
-    static create(data: { approvers: Approver[]; approvals: Approval[] }) {
+    static create(data: { requiredApprovals: number; approvers: Approver[]; approvals: Approval[] }) {
         const approversEmptyError = checkApproversNotEmpty(data.approvers);
         if (approversEmptyError) {
             return Result.error(approversEmptyError);
@@ -57,18 +61,18 @@ export class Group implements Mappable<ReturnType<Group['toPlain']>> {
             return Result.error(duplicateApprovalsError);
         }
 
-        return Result.ok(new Group(Id.create().unwrap(), data.approvals.length > 0, data.approvers, data.approvals));
+        return Result.ok(new Group(Id.create().unwrap(), data.requiredApprovals, data.approvers, data.approvals));
     }
 
     static fromPlain(plain: {
         id: string;
-        isApproved: boolean;
+        requiredApprovals: number;
         approvers: { id: string; name: string; email: string }[];
         approvals: { approverId: string; createdAt: string; comment: string | null }[];
     }) {
         return new Group(
             Id.fromPlain(plain.id),
-            plain.isApproved,
+            plain.requiredApprovals,
             plain.approvers.map((a) => Approver.fromPlain(a)),
             plain.approvals.map((a) => Approval.fromPlain(a)),
         );
@@ -115,7 +119,7 @@ export class Group implements Mappable<ReturnType<Group['toPlain']>> {
             return Result.error(duplicateApprovalsError);
         }
 
-        return Result.ok(new Group(this.#id, true, this.#approvers, newApprovals));
+        return Result.ok(new Group(this.#id, this.#requiredApprovals, this.#approvers, newApprovals));
     }
 
     hasEligibleApprover(approverId: Id): boolean {
@@ -125,6 +129,7 @@ export class Group implements Mappable<ReturnType<Group['toPlain']>> {
     toPlain() {
         return {
             id: this.#id.toPlain(),
+            requiredApprovals: this.#requiredApprovals,
             isApproved: this.isApproved,
             approvers: this.#approvers.map((a) => a.toPlain()),
             approvals: this.#approvals.map((a) => a.toPlain()),

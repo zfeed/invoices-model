@@ -29,6 +29,7 @@ const range = (from: string, to: string) =>
     ).unwrap();
 
 const groupTemplate = GroupTemplate.create({
+    requiredApprovals: 1,
     approvers: [approver],
 }).unwrap();
 
