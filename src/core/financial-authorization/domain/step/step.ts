@@ -8,11 +8,13 @@ import { Order } from '../order/order';
 export class Step implements Mappable<ReturnType<Step['toPlain']>> {
     #id: Id;
     #order: Order;
+    #isApproved: boolean;
     #groups: Group[];
 
-    protected constructor(id: Id, order: Order, groups: Group[]) {
+    protected constructor(id: Id, order: Order, isApproved: boolean, groups: Group[]) {
         this.#id = id;
         this.#order = order;
+        this.#isApproved = isApproved;
         this.#groups = groups;
     }
 
@@ -25,7 +27,7 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
     }
 
     public get isApproved(): boolean {
-        return this.#groups.every((g) => g.isApproved);
+        return this.#isApproved;
     }
 
     public get groups(): readonly Group[] {
@@ -33,7 +35,7 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
     }
 
     static create(data: { order: Order; groups: Group[] }) {
-        return Result.ok(new Step(Id.create().unwrap(), data.order, data.groups));
+        return Result.ok(new Step(Id.create().unwrap(), data.order, data.groups.every((g) => g.isApproved), data.groups));
     }
 
     static fromPlain(plain: {
@@ -46,10 +48,12 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
             approvals: { approverId: string; createdAt: string; comment: string | null }[];
         }[];
     }) {
+        const groups = plain.groups.map((g) => Group.fromPlain(g));
         return new Step(
             Id.fromPlain(plain.id),
             Order.fromPlain(plain.order),
-            plain.groups.map((g) => Group.fromPlain(g)),
+            groups.every((g) => g.isApproved),
+            groups,
         );
     }
 
@@ -92,7 +96,7 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
             i === groupIndex ? groupResult.unwrap() : g
         );
 
-        return Result.ok(new Step(this.#id, this.#order, updatedGroups));
+        return Result.ok(new Step(this.#id, this.#order, updatedGroups.every((g) => g.isApproved), updatedGroups));
     }
 
     hasEligibleApprover(approverId: Id): boolean {
