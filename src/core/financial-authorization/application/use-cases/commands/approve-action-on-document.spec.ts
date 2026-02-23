@@ -107,29 +107,25 @@ describe('approveActionOnDocumentCommand', () => {
         command = approveActionOnDocumentCommand(documentStorage, domainEvents);
     });
 
-    it('should return error when document is not found', async () => {
-        const result = await command({
-            referenceId: 'non-existing',
-            action: 'pay',
-            approver,
+    it('should throw when document is not found', async () => {
+        await expect(
+            command({
+                referenceId: 'non-existing',
+                action: 'pay',
+                approver,
+            })
+        ).rejects.toMatchObject({
+            code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_DOCUMENT_NOT_FOUND,
         });
-
-        expect(result.isError()).toBe(true);
-        expect(result.unwrapError().code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_DOCUMENT_NOT_FOUND
-        );
     });
 
     it('should approve an action on a document', async () => {
-        const result = await command({
+        const document = await command({
             referenceId: 'invoice-123',
             action: 'pay',
             approver,
         });
 
-        expect(result.isOk()).toBe(true);
-
-        const document = result.unwrap();
         const authflow = document.authflows.find((a) => a.action === 'pay');
 
         expect(authflow?.isApproved).toBe(true);
@@ -175,32 +171,31 @@ describe('approveActionOnDocumentCommand', () => {
         expect(approvedEvents[0].data.referenceId).toBe('invoice-123');
     });
 
-    it('should return error when authflow for action is not found', async () => {
-        const result = await command({
-            referenceId: 'invoice-123',
-            action: 'unknown-action',
-            approver,
+    it('should throw when authflow for action is not found', async () => {
+        await expect(
+            command({
+                referenceId: 'invoice-123',
+                action: 'unknown-action',
+                approver,
+            })
+        ).rejects.toMatchObject({
+            code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_NOT_FOUND,
         });
-
-        expect(result.isError()).toBe(true);
-        expect(result.unwrapError().code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_NOT_FOUND
-        );
     });
 
-    it('should return error when approving already approved action', async () => {
+    it('should throw when approving already approved action', async () => {
         await command({
             referenceId: 'invoice-123',
             action: 'pay',
             approver,
         });
 
-        const result = await command({
-            referenceId: 'invoice-123',
-            action: 'pay',
-            approver,
-        });
-
-        expect(result.isError()).toBe(true);
+        await expect(
+            command({
+                referenceId: 'invoice-123',
+                action: 'pay',
+                approver,
+            })
+        ).rejects.toThrow();
     });
 });

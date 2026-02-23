@@ -1,10 +1,9 @@
 import { DOMAIN_ERROR_CODE } from '../../../../../building-blocks/errors/domain/domain-codes';
 import { DomainError } from '../../../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../../../building-blocks/result';
 import { DomainEvents } from '../../../../shared/domain-events/domain-events.interface';
 import { createAction } from '../../../domain/action/action';
 import { Approver } from '../../../domain/approver/approver';
-import { approveDocument, FinancialDocument } from '../../../domain/document/document';
+import { approveDocument, documentToPlain, PlainFinancialDocument } from '../../../domain/document/document';
 import { createReferenceId } from '../../../domain/reference-id/reference-id';
 import { DocumentStorage } from '../../storage/document-storage.interface';
 
@@ -18,18 +17,9 @@ export const approveActionOnDocumentCommand =
     (documentStorage: DocumentStorage, domainEvents: DomainEvents) =>
     async (
         request: ApproveActionRequest
-    ): Promise<Result<DomainError, FinancialDocument>> => {
-        const actionResult = createAction(request.action);
-        if (actionResult.isError()) {
-            return Result.error(actionResult.unwrapError());
-        }
-        const action = actionResult.unwrap();
-
-        const referenceIdResult = createReferenceId(request.referenceId);
-        if (referenceIdResult.isError()) {
-            return Result.error(referenceIdResult.unwrapError());
-        }
-        const referenceId = referenceIdResult.unwrap();
+    ): Promise<PlainFinancialDocument> => {
+        const action = createAction(request.action).unwrap();
+        const referenceId = createReferenceId(request.referenceId).unwrap();
 
         const found = await documentStorage
             .findByReferenceId(referenceId)
@@ -41,28 +31,21 @@ export const approveActionOnDocumentCommand =
         );
 
         if (!document) {
-            return Result.error(
-                new DomainError({
-                    message: `Document with reference ${referenceId} not found`,
-                    code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_DOCUMENT_NOT_FOUND,
-                })
-            );
+            throw new DomainError({
+                message: `Document with reference ${referenceId} not found`,
+                code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_DOCUMENT_NOT_FOUND,
+            });
         }
 
-        const result = approveDocument(
+        const approved = approveDocument(
             document,
             action,
             request.approver
-        );
+        ).unwrap();
 
-        if (result.isError()) {
-            return result.error();
-        }
-
-        const approved = result.unwrap();
         const saved = await documentStorage.save(approved).run();
 
         await domainEvents.publishEvents(approved);
 
-        return saved;
+        return saved.map(documentToPlain).unwrap();
     };

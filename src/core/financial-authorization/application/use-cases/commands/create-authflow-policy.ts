@@ -1,10 +1,9 @@
-import { DomainError } from '../../../../../building-blocks/errors/domain/domain.error';
-import { Result } from '../../../../../building-blocks/result';
 import { DomainEvents } from '../../../../shared/domain-events/domain-events.interface';
 import { createAction } from '../../../domain/action/action';
 import {
-    AuthflowPolicy,
+    authflowPolicyToPlain,
     createAuthflowPolicy,
+    PlainAuthflowPolicy,
 } from '../../../domain/authflow/authflow-policy';
 import { AuthflowTemplate } from '../../../domain/authflow/authflow-template';
 import { PolicyStorage } from '../../storage/policy-storage.interface';
@@ -16,26 +15,17 @@ type CreateAuthflowPolicyRequest = {
 
 export const createAuthflowPolicyCommand =
     (policyStorage: PolicyStorage, domainEvents: DomainEvents) =>
-    async (request: CreateAuthflowPolicyRequest): Promise<Result<DomainError, AuthflowPolicy>> => {
-        const actionResult = createAction(request.action);
-        if (actionResult.isError()) {
-            return Result.error(actionResult.unwrapError());
-        }
-        const action = actionResult.unwrap();
+    async (request: CreateAuthflowPolicyRequest): Promise<PlainAuthflowPolicy> => {
+        const action = createAction(request.action).unwrap();
 
-        const result = createAuthflowPolicy({
+        const policy = createAuthflowPolicy({
             action,
             templates: request.templates,
-        });
+        }).unwrap();
 
-        if (result.isError()) {
-            return result.error();
-        }
-
-        const policy = result.unwrap();
         const saved = await policyStorage.save(policy).run();
 
         await domainEvents.publishEvents(policy);
 
-        return saved;
+        return saved.map(authflowPolicyToPlain).unwrap();
     };

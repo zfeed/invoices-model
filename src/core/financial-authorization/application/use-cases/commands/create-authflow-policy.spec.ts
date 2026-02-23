@@ -25,7 +25,7 @@ describe('createAuthflowPolicyCommand', () => {
         const domainEvents = new InMemoryDomainEvents();
         const command = createAuthflowPolicyCommand(policyStorage, domainEvents);
 
-        const result = await command({
+        const policy = await command({
             action: 'approve-invoice',
             templates: [
                 template('0', '999'),
@@ -34,9 +34,8 @@ describe('createAuthflowPolicyCommand', () => {
             ],
         });
 
-        expect(result.isOk()).toBe(true);
-        expect(result.unwrap().action).toBe('approve-invoice');
-        expect(result.unwrap().templates).toHaveLength(3);
+        expect(policy.action).toBe('approve-invoice');
+        expect(policy.templates).toHaveLength(3);
     });
 
     it('should persist the policy in storage', async () => {
@@ -44,7 +43,7 @@ describe('createAuthflowPolicyCommand', () => {
         const domainEvents = new InMemoryDomainEvents();
         const command = createAuthflowPolicyCommand(policyStorage, domainEvents);
 
-        const result = await command({
+        const policy = await command({
             action: 'approve-invoice',
             templates: [template('0', '10000')],
         });
@@ -54,8 +53,8 @@ describe('createAuthflowPolicyCommand', () => {
         expect(found.isSome()).toBe(true);
         found.fold(
             () => { throw new Error('Expected policy to exist'); },
-            (policy) => {
-                expect(policy.id).toBe(result.unwrap().id);
+            (stored) => {
+                expect(stored.id).toBe(policy.id);
             }
         );
     });
@@ -83,23 +82,22 @@ describe('createAuthflowPolicyCommand', () => {
         expect(published[0].data.action).toBe('approve-invoice');
     });
 
-    it('should return an error when ranges overlap', async () => {
+    it('should throw when ranges overlap', async () => {
         const policyStorage = new InMemoryPolicyStorage();
         const domainEvents = new InMemoryDomainEvents();
         const command = createAuthflowPolicyCommand(policyStorage, domainEvents);
 
-        const result = await command({
-            action: 'approve-invoice',
-            templates: [
-                template('0', '5000'),
-                template('3000', '10000'),
-            ],
+        await expect(
+            command({
+                action: 'approve-invoice',
+                templates: [
+                    template('0', '5000'),
+                    template('3000', '10000'),
+                ],
+            })
+        ).rejects.toMatchObject({
+            code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_POLICY_RANGES_OVERLAP,
         });
-
-        expect(result.isError()).toBe(true);
-        expect(result.unwrapError().code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_POLICY_RANGES_OVERLAP
-        );
     });
 
     it('should not persist the policy when validation fails', async () => {
@@ -113,7 +111,7 @@ describe('createAuthflowPolicyCommand', () => {
                 template('0', '5000'),
                 template('3000', '10000'),
             ],
-        });
+        }).catch(() => {});
 
         const found = await policyStorage.findByAction('approve-invoice').run();
 
@@ -139,7 +137,7 @@ describe('createAuthflowPolicyCommand', () => {
                 template('0', '5000'),
                 template('3000', '10000'),
             ],
-        });
+        }).catch(() => {});
 
         expect(published).toHaveLength(0);
     });
@@ -149,12 +147,11 @@ describe('createAuthflowPolicyCommand', () => {
         const domainEvents = new InMemoryDomainEvents();
         const command = createAuthflowPolicyCommand(policyStorage, domainEvents);
 
-        const result = await command({
+        const policy = await command({
             action: 'approve-invoice',
             templates: [template('0', '10000')],
         });
 
-        expect(result.isOk()).toBe(true);
-        expect(result.unwrap().version).toBe(1);
+        expect(policy.version).toBe(1);
     });
 });
