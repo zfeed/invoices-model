@@ -3,7 +3,7 @@ import { DomainError } from '../../../../building-blocks/errors/domain/domain.er
 import { Result } from '../../../../building-blocks/result';
 import { createComment, Comment } from '../comment/comment';
 import { Timestamp, createTimestamp } from '../timestamp/timestamp';
-import { fromString, Id } from '../id/id';
+import { Id } from '../id/id';
 
 export type Approval = {
     approverId: Id;
@@ -12,7 +12,7 @@ export type Approval = {
 };
 
 type ApprovalInput = {
-    approverId: string;
+    approverId: Id;
     comment: string | null;
 };
 
@@ -25,8 +25,6 @@ const buildApproval = applySpec<Approval>({
 export const createApproval = (
     data: ApprovalInput
 ): Result<DomainError, Approval> =>
-    fromString(data.approverId).flatMap((approverId) =>
-        createComment(data.comment)
-            .map((comment) => ({ approverId, comment }))
-            .map(buildApproval)
-    );
+    createComment(data.comment)
+        .map((comment) => ({ approverId: data.approverId, comment }))
+        .map(buildApproval);

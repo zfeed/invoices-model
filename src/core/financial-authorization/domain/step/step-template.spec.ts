@@ -1,4 +1,3 @@
-import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { GroupTemplate } from '../groups/group-template';
 import { createStepTemplate } from './step-template';
 
@@ -35,26 +34,6 @@ describe('createStepTemplate', () => {
         const step = result.unwrap();
         expect(step.order).toBe(0);
         expect(step.groups).toHaveLength(0);
-    });
-
-    it('should fail to create a step template with negative order', () => {
-        const groups: GroupTemplate[] = [
-            {
-                id: 'group-1',
-                approvers: [
-                    { id: '1', name: 'Alice', email: 'alice@example.com' },
-                ],
-            },
-        ];
-
-        const result = createStepTemplate({ order: -1, groups });
-
-        expect(result.isError()).toBe(true);
-        const error = result.unwrapError();
-        expect(error.message).toBe('Step order must be non-negative');
-        expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_STEP_ORDER_NEGATIVE
-        );
     });
 
     it('should create a step template with large order number', () => {

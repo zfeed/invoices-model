@@ -1,4 +1,3 @@
-import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { Group } from '../groups/group';
 import { Step } from '../step/step';
 import { createStep } from './step';
@@ -126,53 +125,6 @@ describe('createStep', () => {
         expect(step.order).toBe(0);
         expect(step.isApproved).toBe(true); // all([]) returns true
         expect(step.groups).toHaveLength(0);
-    });
-
-    it('should fail to create a step with negative order number', () => {
-        const groups: Group[] = [
-            {
-                id: 'group-1',
-                isApproved: true,
-                approvers: [
-                    { id: '1', name: 'Alice', email: 'alice@example.com' },
-                ],
-                approvals: [
-                    {
-                        approverId: '1',
-                        createdAt: new Date(),
-                        comment: 'Approved',
-                    },
-                ],
-            },
-        ];
-
-        const result = createStep({
-            order: -1,
-            groups,
-        });
-
-        expect(result.isError()).toBe(true);
-        const error = result.unwrapError();
-        expect(error.message).toBe('Step order must be non-negative');
-        expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_STEP_ORDER_NEGATIVE
-        );
-    });
-
-    it('should fail to create a step with large negative order number', () => {
-        const groups: Group[] = [];
-
-        const result = createStep({
-            order: -999,
-            groups,
-        });
-
-        expect(result.isError()).toBe(true);
-        const error = result.unwrapError();
-        expect(error.message).toBe('Step order must be non-negative');
-        expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_STEP_ORDER_NEGATIVE
-        );
     });
 
     it('should create a step successfully with order 0', () => {

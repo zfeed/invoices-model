@@ -9,7 +9,7 @@ import {
     Group,
 } from '../groups/group';
 import { createId, Id } from '../id/id';
-import { createOrder, Order } from '../order/order';
+import { Order } from '../order/order';
 
 export type Step = {
     id: Id;
@@ -19,18 +19,13 @@ export type Step = {
 };
 
 type StepInput = {
-    order: number;
-    groups: Group[];
-};
-
-type ValidatedStepInput = {
     order: Order;
     groups: Group[];
 };
 
-type RebuildStepInput = ValidatedStepInput & { id: Id };
+type RebuildStepInput = StepInput & { id: Id };
 
-const allGroupsApproved = (data: ValidatedStepInput) =>
+const allGroupsApproved = (data: StepInput) =>
     data.groups.every((group) => group.isApproved);
 
 const buildStep = applySpec<Step>({
@@ -76,16 +71,12 @@ export const hasEligibleApprover = (steps: Step[], approverId: Id): boolean => {
 };
 
 export const createStep = (data: StepInput): Result<DomainError, Step> =>
-    createOrder(data.order)
-        .map((order): ValidatedStepInput => ({ order, groups: data.groups }))
-        .map(buildStep);
+    Result.ok<DomainError, StepInput>(data).map(buildStep);
 
 const recreateStep = (
     data: RebuildStepInput
 ): Result<DomainError, Step> =>
-    createOrder(data.order)
-        .map((order): RebuildStepInput => ({ ...data, order }))
-        .map(rebuildStep);
+    Result.ok<DomainError, RebuildStepInput>(data).map(rebuildStep);
 
 export const approveStep = (
     steps: Step[],

@@ -4,7 +4,7 @@ import { Result } from '../../../../building-blocks/result';
 import { GroupTemplate, groupsFromTemplates } from '../groups/group-template';
 import { createStep, Step } from './step';
 import { createId, Id } from '../id/id';
-import { createOrder, Order } from '../order/order';
+import { Order } from '../order/order';
 
 export type StepTemplate = {
     id: Id;
@@ -13,16 +13,11 @@ export type StepTemplate = {
 };
 
 export type StepTemplateInput = {
-    order: number;
-    groups: GroupTemplate[];
-};
-
-type ValidatedStepTemplateInput = {
     order: Order;
     groups: GroupTemplate[];
 };
 
-type RebuildStepTemplateInput = ValidatedStepTemplateInput & { id: Id };
+type RebuildStepTemplateInput = StepTemplateInput & { id: Id };
 
 const buildStepTemplate = applySpec<StepTemplate>({
     id: () => createId(),
@@ -39,21 +34,14 @@ const rebuildStepTemplate = applySpec<StepTemplate>({
 export const createStepTemplate = (
     data: StepTemplateInput
 ): Result<DomainError, StepTemplate> =>
-    createOrder(data.order)
-        .map(
-            (order): ValidatedStepTemplateInput => ({
-                order,
-                groups: data.groups,
-            })
-        )
-        .map(buildStepTemplate);
+    Result.ok<DomainError, StepTemplateInput>(data).map(buildStepTemplate);
 
 export const recreateStepTemplate = (
     data: RebuildStepTemplateInput
 ): Result<DomainError, StepTemplate> =>
-    createOrder(data.order)
-        .map((order): RebuildStepTemplateInput => ({ ...data, order }))
-        .map(rebuildStepTemplate);
+    Result.ok<DomainError, RebuildStepTemplateInput>(data).map(
+        rebuildStepTemplate
+    );
 
 export const stepFromTemplate = (
     template: StepTemplate
