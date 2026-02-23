@@ -23,9 +23,8 @@
         "vitest": "^4.0.18"
     },
     "dependencies": {
-        "@hono/node-server": "^1.19.9",
         "decimal.js": "^10.6.0",
-        "hono": "^4.12.1",
+        "fastify": "^5.7.4",
         "rambda": "^10.3.4",
         "ramda": "^0.32.0",
         "validator": "^13.15.15",

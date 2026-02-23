@@ -1,12 +1,12 @@
-import { Hono } from 'hono';
+import { FastifyInstance } from 'fastify';
 import { bootstrap } from '../../core/bootstrap';
 
 type Commands = Awaited<ReturnType<typeof bootstrap>>;
 
-export const completeDraftInvoiceRoute = (app: Hono, commands: Commands) => {
-    app.post('/invoices/drafts/:id/complete', async (c) => {
-        const id = c.req.param('id');
+export const completeDraftInvoiceRoute = (app: FastifyInstance, commands: Commands) => {
+    app.post<{ Params: { id: string } }>('/invoices/drafts/:id/complete', async (request) => {
+        const id = request.params.id;
         const result = await commands.completeDraftInvoice.execute(id);
-        return c.json({ data: result });
+        return { data: result };
     });
 };

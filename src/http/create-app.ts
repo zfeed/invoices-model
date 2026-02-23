@@ -1,4 +1,4 @@
-import { Hono } from 'hono';
+import Fastify from 'fastify';
 import { DomainError } from '../building-blocks/errors/domain/domain.error';
 import { ApplicationError } from '../building-blocks/errors/application/application.error';
 import { bootstrap } from '../core/bootstrap';
@@ -25,29 +25,42 @@ export const createApp = async () => {
         policyStorage: new InMemoryPolicyStorage(),
     });
 
-    const app = new Hono();
+    const app = Fastify();
 
-    app.onError((error, c) => {
+    app.addContentTypeParser(
+        'application/json',
+        { parseAs: 'string' },
+        (_req, body, done) => {
+            try {
+                done(null, JSON.parse(body as string));
+            } catch (err) {
+                (err as any).statusCode = 400;
+                done(err as Error, undefined);
+            }
+        }
+    );
+
+    app.setErrorHandler((error, _request, reply) => {
         if (error instanceof SyntaxError) {
-            return c.json(
-                { error: { message: 'Invalid JSON', issues: [] } },
-                400
-            );
+            return reply
+                .code(400)
+                .send({ error: { message: 'Invalid JSON', issues: [] } });
         }
         if (error instanceof ValidationError) {
-            return c.json(
-                { error: { message: 'Validation failed', issues: error.issues } },
-                400
-            );
+            return reply.code(400).send({
+                error: {
+                    message: 'Validation failed',
+                    issues: error.issues,
+                },
+            });
         }
         if (
             error instanceof DomainError ||
             error instanceof ApplicationError
         ) {
-            return c.json(
-                { error: { message: error.message, code: error.code } },
-                422
-            );
+            return reply.code(422).send({
+                error: { message: error.message, code: error.code },
+            });
         }
         throw error;
     });

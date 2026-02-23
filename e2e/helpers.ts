@@ -1,4 +1,4 @@
-import { Hono } from 'hono';
+import { FastifyInstance } from 'fastify';
 import { createApp } from '../src/http/create-app';
 
 export const COMPLETE_DRAFT_REQUEST = {
@@ -33,30 +33,61 @@ export const COMPLETE_DRAFT_REQUEST = {
     },
 };
 
+type TestResponse = {
+    status: number;
+    json: () => Promise<any>;
+};
+
+const toTestResponse = (res: {
+    statusCode: number;
+    json: () => any;
+}): TestResponse => ({
+    status: res.statusCode,
+    json: () => Promise.resolve(res.json()),
+});
+
 export const setupApp = () => {
-    let app: Hono;
+    let app: FastifyInstance;
 
     beforeEach(async () => {
         app = await createApp();
     });
 
-    const postJson = (path: string, body: unknown) =>
-        app.request(path, {
+    const postJson = async (
+        path: string,
+        body: unknown
+    ): Promise<TestResponse> => {
+        const res = await app.inject({
             method: 'POST',
+            url: path,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
+            payload: JSON.stringify(body),
         });
+        return toTestResponse(res);
+    };
 
-    const postRaw = (path: string, body: string) =>
-        app.request(path, {
+    const postRaw = async (
+        path: string,
+        body: string
+    ): Promise<TestResponse> => {
+        const res = await app.inject({
             method: 'POST',
+            url: path,
             headers: { 'Content-Type': 'application/json' },
-            body,
+            payload: body,
         });
+        return toTestResponse(res);
+    };
 
-    const post = (path: string) => app.request(path, { method: 'POST' });
+    const post = async (path: string): Promise<TestResponse> => {
+        const res = await app.inject({
+            method: 'POST',
+            url: path,
+        });
+        return toTestResponse(res);
+    };
 
-    const getData = async (res: Response) => (await res.json()).data;
+    const getData = async (res: TestResponse) => (await res.json()).data;
 
     const createDraft = async (body: unknown = {}) => {
         const res = await postJson('/invoices/drafts', body);
@@ -87,7 +118,7 @@ export const setupApp = () => {
 };
 
 export const expectError = async (
-    res: Response,
+    res: TestResponse,
     status: number,
     messageCheck?: string
 ) => {

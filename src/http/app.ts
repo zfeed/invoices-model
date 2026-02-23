@@ -1,11 +1,14 @@
-import { serve } from '@hono/node-server';
 import { createApp } from './create-app';
 
 const main = async () => {
     const app = await createApp();
 
-    serve({ fetch: app.fetch, port: 3000 }, (info) => {
-        console.log(`Server running on http://localhost:${info.port}`);
+    app.listen({ port: 3000 }, (err, address) => {
+        if (err) {
+            console.error(err);
+            process.exit(1);
+        }
+        console.log(`Server running on ${address}`);
     });
 };
 
