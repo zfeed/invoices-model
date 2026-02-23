@@ -5,7 +5,6 @@ import {
     Result,
 } from '../../../../building-blocks';
 import { Approval } from '../approval/approval';
-import { Approver } from '../approver/approver';
 import { Group } from '../groups/group';
 import { Id } from '../id/id';
 import { Order } from '../order/order';
@@ -78,7 +77,7 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
         );
     }
 
-    approve(approver: Approver): Result<DomainError, Step> {
+    apply(approval: Approval): Result<DomainError, Step> {
         if (this.isApproved) {
             return Result.error(
                 new DomainError({
@@ -89,30 +88,19 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
         }
 
         const groupIndex = this.#groups.findIndex((g) =>
-            g.hasEligibleApprover(approver.id)
+            g.hasEligibleApprover(approval.approverId)
         );
 
         if (groupIndex === -1) {
             return Result.error(
                 new DomainError({
                     code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND,
-                    message: `No eligible group found for approver ${approver.id.toPlain()}`,
+                    message: `No eligible group found for approver ${approval.approverId.toPlain()}`,
                 })
             );
         }
 
-        const approvalResult = Approval.create({
-            approverId: approver.id,
-            comment: null,
-        });
-
-        if (approvalResult.isError()) {
-            return Result.error(approvalResult.unwrapError());
-        }
-
-        const groupResult = this.#groups[groupIndex].apply(
-            approvalResult.unwrap()
-        );
+        const groupResult = this.#groups[groupIndex].apply(approval);
 
         if (groupResult.isError()) {
             return Result.error(groupResult.unwrapError());
@@ -133,7 +121,10 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
     }
 
     hasEligibleApprover(approverId: Id): boolean {
-        return this.#groups.some((g) => g.hasEligibleApprover(approverId));
+        return (
+            !this.#isApproved &&
+            this.#groups.some((g) => g.hasEligibleApprover(approverId))
+        );
     }
 
     toPlain() {
