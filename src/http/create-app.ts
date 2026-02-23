@@ -16,6 +16,9 @@ import { draftDraftInvoiceRoute } from './routes/draft-draft-invoice';
 import { processInvoiceRoute } from './routes/process-invoice';
 import { cancelInvoiceRoute } from './routes/cancel-invoice';
 import { payInvoiceRoute } from './routes/pay-invoice';
+import { createAuthflowPolicyRoute } from './routes/create-authflow-policy';
+import { approveActionOnDocumentRoute } from './routes/approve-action-on-document';
+import { canApproverApproveRoute } from './routes/can-approver-approve';
 
 export const createApp = async () => {
     const commands = await bootstrap({
@@ -76,6 +79,9 @@ export const createApp = async () => {
     app.register(processInvoiceRoute(commands));
     app.register(cancelInvoiceRoute(commands));
     app.register(payInvoiceRoute(commands));
+    app.register(createAuthflowPolicyRoute(commands));
+    app.register(approveActionOnDocumentRoute(commands));
+    app.register(canApproverApproveRoute(commands));
 
     return app;
 };

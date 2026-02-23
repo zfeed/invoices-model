@@ -92,6 +92,14 @@ export const setupApp = () => {
         return toTestResponse(res);
     };
 
+    const get = async (path: string): Promise<TestResponse> => {
+        const res = await app.inject({
+            method: 'GET',
+            url: path,
+        });
+        return toTestResponse(res);
+    };
+
     const getData = async (res: TestResponse) => (await res.json()).data;
 
     const createDraft = async (body: unknown = {}) => {
@@ -115,6 +123,7 @@ export const setupApp = () => {
         postJson,
         postRaw,
         post,
+        get,
         getData,
         createDraft,
         createIssuedInvoice,
