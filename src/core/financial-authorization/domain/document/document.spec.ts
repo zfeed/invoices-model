@@ -1,6 +1,6 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { Action } from '../action/action';
-import { Approver } from '../approver/approver';
+import { Approval } from '../approval/approval';
 import { Authflow } from '../authflow/authflow';
 import { Id } from '../id/id';
 import { Money } from '../money/money';
@@ -292,17 +292,8 @@ describe('createDocument', () => {
 });
 
 describe('approveDocument', () => {
-    const approver1 = Approver.fromPlain({
-        id: 'approver-1',
-        name: 'Alice',
-        email: 'alice@example.com',
-    });
-
-    const approver2 = Approver.fromPlain({
-        id: 'approver-2',
-        name: 'Bob',
-        email: 'bob@example.com',
-    });
+    const approval1 = Approval.create({ approverId: Id.fromPlain('approver-1'), comment: null }).unwrap();
+    const approval2 = Approval.create({ approverId: Id.fromPlain('approver-2'), comment: null }).unwrap();
 
     const makeGroupPlain = (
         id: string,
@@ -360,7 +351,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step]);
         const document = makeDocument([authflow]);
 
-        const result = document.approve(Action.fromPlain('submit'), approver1);
+        const result = document.apply(Action.fromPlain('submit'), approval1);
 
         expect(result.isOk()).toBe(true);
         expect(document.authflows[0].isApproved).toBe(true);
@@ -376,7 +367,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step1, step2]);
         const document = makeDocument([authflow]);
 
-        const result = document.approve(Action.fromPlain('submit'), approver1);
+        const result = document.apply(Action.fromPlain('submit'), approval1);
 
         expect(result.isOk()).toBe(true);
         expect(document.authflows[0].steps[0].isApproved).toBe(true);
@@ -393,7 +384,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step1, step2]);
         const document = makeDocument([authflow]);
 
-        const result = document.approve(Action.fromPlain('submit'), approver1);
+        const result = document.apply(Action.fromPlain('submit'), approval1);
 
         expect(result.isOk()).toBe(true);
         // step2 (order 2) should be approved, step1 (order 5) should remain
@@ -416,7 +407,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step1, step2]);
         const document = makeDocument([authflow]);
 
-        const result = document.approve(Action.fromPlain('submit'), approver1);
+        const result = document.apply(Action.fromPlain('submit'), approval1);
 
         expect(result.isOk()).toBe(true);
         expect(document.authflows[0].isApproved).toBe(true);
@@ -434,7 +425,7 @@ describe('approveDocument', () => {
         const authflow2 = makeAuthflowPlain('authflow-2', 'review', [step2]);
         const document = makeDocument([authflow1, authflow2]);
 
-        const result = document.approve(Action.fromPlain('submit'), approver1);
+        const result = document.apply(Action.fromPlain('submit'), approval1);
 
         expect(result.isOk()).toBe(true);
         expect(document.authflows[0].isApproved).toBe(true);
@@ -449,7 +440,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step]);
         const document = makeDocument([authflow]);
 
-        const result = document.approve(Action.fromPlain('non-existent'), approver1);
+        const result = document.apply(Action.fromPlain('non-existent'), approval1);
 
         expect(result.isError()).toBe(true);
         const error = result.unwrapError();
@@ -468,7 +459,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step]);
         const document = makeDocument([authflow]);
 
-        const result = document.approve(Action.fromPlain('submit'), approver1);
+        const result = document.apply(Action.fromPlain('submit'), approval1);
 
         expect(result.isError()).toBe(true);
         const error = result.unwrapError();
@@ -485,7 +476,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step]);
         const document = makeDocument([authflow]);
 
-        const result = document.approve(Action.fromPlain('submit'), approver2);
+        const result = document.apply(Action.fromPlain('submit'), approval2);
 
         expect(result.isError()).toBe(true);
         const error = result.unwrapError();
@@ -501,7 +492,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step]);
         const document = makeDocument([authflow]);
 
-        const result = document.approve(Action.fromPlain('submit'), approver1);
+        const result = document.apply(Action.fromPlain('submit'), approval1);
 
         expect(result.isOk()).toBe(true);
         expect(document.id.toPlain()).toBe('doc-1');
@@ -514,7 +505,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step]);
         const document = makeDocument([authflow]);
 
-        const result = document.approve(Action.fromPlain('submit'), approver1);
+        const result = document.apply(Action.fromPlain('submit'), approval1);
 
         expect(result.isOk()).toBe(true);
         expect(document.id.toPlain()).toBe('doc-1');
@@ -532,7 +523,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step1, step2]);
         const document = makeDocument([authflow]);
 
-        const result1 = document.approve(Action.fromPlain('submit'), approver1);
+        const result1 = document.apply(Action.fromPlain('submit'), approval1);
 
         expect(result1.isOk()).toBe(true);
         expect(document.id.toPlain()).toBe('doc-1');
@@ -540,7 +531,7 @@ describe('approveDocument', () => {
         expect(document.authflows[0].steps[0].id.toPlain()).toBe('step-1');
         expect(document.authflows[0].steps[1].id.toPlain()).toBe('step-2');
 
-        const result2 = document.approve(Action.fromPlain('submit'), approver1);
+        const result2 = document.apply(Action.fromPlain('submit'), approval1);
 
         expect(result2.isOk()).toBe(true);
         expect(document.id.toPlain()).toBe('doc-1');
@@ -559,7 +550,7 @@ describe('approveDocument', () => {
         const authflow2 = makeAuthflowPlain('authflow-2', 'review', [step2]);
         const document = makeDocument([authflow1, authflow2]);
 
-        const result = document.approve(Action.fromPlain('submit'), approver1);
+        const result = document.apply(Action.fromPlain('submit'), approval1);
 
         expect(result.isOk()).toBe(true);
         expect(document.authflows[0].id.toPlain()).toBe('authflow-1');
@@ -575,7 +566,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step]);
         const document = makeDocument([authflow]);
 
-        const result = document.approve(Action.fromPlain('submit'), approver1);
+        const result = document.apply(Action.fromPlain('submit'), approval1);
 
         expect(result.isOk()).toBe(true);
         expect(document.referenceId.toPlain()).toBe('INV-001');
@@ -591,7 +582,7 @@ describe('approveDocument', () => {
         const document = makeDocument([authflow]);
 
         // First approval -- step 1
-        const result1 = document.approve(Action.fromPlain('submit'), approver1);
+        const result1 = document.apply(Action.fromPlain('submit'), approval1);
 
         expect(result1.isOk()).toBe(true);
         expect(document.authflows[0].steps[0].isApproved).toBe(true);
@@ -599,7 +590,7 @@ describe('approveDocument', () => {
         expect(document.authflows[0].isApproved).toBe(false);
 
         // Second approval -- step 2
-        const result2 = document.approve(Action.fromPlain('submit'), approver1);
+        const result2 = document.apply(Action.fromPlain('submit'), approval1);
 
         expect(result2.isOk()).toBe(true);
         expect(document.authflows[0].steps[0].isApproved).toBe(true);
@@ -617,14 +608,14 @@ describe('approveDocument', () => {
         const document = makeDocument([authflow]);
 
         // Approve first group
-        const result1 = document.approve(Action.fromPlain('submit'), approver1);
+        const result1 = document.apply(Action.fromPlain('submit'), approval1);
 
         expect(result1.isOk()).toBe(true);
         // Step has 2 groups, only 1 approved
         expect(document.authflows[0].steps[0].groups).toHaveLength(2);
 
         // Approve second group
-        const result2 = document.approve(Action.fromPlain('submit'), approver2);
+        const result2 = document.apply(Action.fromPlain('submit'), approval2);
 
         expect(result2.isOk()).toBe(true);
         expect(document.authflows[0].isApproved).toBe(true);
@@ -637,7 +628,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step]);
         const document = makeDocument([authflow]);
 
-        const result = document.approve(Action.fromPlain('submit'), approver1);
+        const result = document.apply(Action.fromPlain('submit'), approval1);
 
         expect(result.isOk()).toBe(true);
         expect(document.events).toHaveLength(1);
@@ -651,7 +642,7 @@ describe('approveDocument', () => {
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step]);
         const document = makeDocument([authflow]);
 
-        const result = document.approve(Action.fromPlain('submit'), approver1);
+        const result = document.apply(Action.fromPlain('submit'), approval1);
 
         expect(result.isOk()).toBe(true);
         const event = document.events[0];

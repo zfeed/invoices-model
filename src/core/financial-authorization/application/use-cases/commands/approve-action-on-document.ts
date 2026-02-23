@@ -3,6 +3,7 @@ import { DomainError } from '../../../../../building-blocks/errors/domain/domain
 import { DomainEvents } from '../../../../shared/domain-events/domain-events.interface';
 import { UnitOfWorkFactory } from '../../../../shared/unit-of-work/unit-of-work.interface';
 import { Action } from '../../../domain/action/action';
+import { Approval } from '../../../domain/approval/approval';
 import { Approver } from '../../../domain/approver/approver';
 import { FinancialDocument } from '../../../domain/document/document';
 import { ReferenceId } from '../../../domain/reference-id/reference-id';
@@ -35,7 +36,8 @@ export class ApproveActionOnDocument {
                 });
             }
 
-            document.approve(action, request.approver).unwrap();
+            const approval = Approval.create({ approverId: request.approver.id, comment: null }).unwrap();
+            document.apply(action, approval).unwrap();
 
             return document;
         });

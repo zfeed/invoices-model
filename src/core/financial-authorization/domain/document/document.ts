@@ -3,7 +3,6 @@ import { DomainEvent } from '../../../../building-blocks/events/domain-event';
 import { PublishableEvents } from '../../../../building-blocks/events/event-publisher.interface';
 import { Action } from '../action/action';
 import { Approval } from '../approval/approval';
-import { Approver } from '../approver/approver';
 import { Authflow } from '../authflow/authflow';
 import { Id } from '../id/id';
 import { Money } from '../money/money';
@@ -97,7 +96,7 @@ export class FinancialDocument implements Mappable<ReturnType<FinancialDocument[
         );
     }
 
-    approve(action: Action, approver: Approver): Result<DomainError, undefined> {
+    apply(action: Action, approval: Approval): Result<DomainError, undefined> {
         const authflow = this.#authflows.find((a) => a.action.equals(action));
 
         if (!authflow) {
@@ -109,13 +108,7 @@ export class FinancialDocument implements Mappable<ReturnType<FinancialDocument[
             );
         }
 
-        const approvalResult = Approval.create({ approverId: approver.id, comment: null });
-
-        if (approvalResult.isError()) {
-            return Result.error(approvalResult.unwrapError());
-        }
-
-        const authflowResult = authflow.apply(approvalResult.unwrap());
+        const authflowResult = authflow.apply(approval);
 
         if (authflowResult.isError()) {
             return Result.error(authflowResult.unwrapError());

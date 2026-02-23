@@ -11,12 +11,14 @@ export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
     #action: Action;
     #range: Range;
     #steps: Step[];
+    #currentStep: Step | undefined;
 
     protected constructor(id: Id, action: Action, range: Range, steps: Step[]) {
         this.#id = id;
         this.#action = action;
         this.#range = range;
-        this.#steps = steps;
+        this.#steps = [...steps].sort((a, b) => a.order.toPlain() - b.order.toPlain());
+        this.#currentStep = this.#steps.find((s) => !s.isApproved);
     }
 
     public get id(): Id {
@@ -32,7 +34,7 @@ export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
     }
 
     public get isApproved(): boolean {
-        return this.#steps.every((s) => s.isApproved);
+        return this.#currentStep === undefined;
     }
 
     public get steps(): readonly Step[] {
@@ -72,11 +74,7 @@ export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
     }
 
     apply(approval: Approval): Result<DomainError, Authflow> {
-        const currentStep = this.#steps
-            .filter((s) => !s.isApproved)
-            .sort((a, b) => a.order.toPlain() - b.order.toPlain())[0];
-
-        if (!currentStep) {
+        if (!this.#currentStep) {
             return Result.error(
                 new DomainError({
                     code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NO_PENDING_STEPS,
@@ -92,7 +90,7 @@ export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
         }
 
         const updatedSteps = this.#steps.map((s) =>
-            s.order.equals(currentStep.order) ? stepResult.unwrap() : s
+            s.order.equals(this.#currentStep!.order) ? stepResult.unwrap() : s
         );
 
         const error = checkNoDuplicateStepOrders(updatedSteps);
@@ -104,15 +102,11 @@ export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
     }
 
     hasEligibleApprover(approverId: Id): boolean {
-        const currentStep = this.#steps
-            .filter((s) => !s.isApproved)
-            .sort((a, b) => a.order.toPlain() - b.order.toPlain())[0];
-
-        if (!currentStep) {
+        if (!this.#currentStep) {
             return false;
         }
 
-        return currentStep.hasEligibleApprover(approverId);
+        return this.#currentStep.hasEligibleApprover(approverId);
     }
 
     canApproverApprove(approverId: Id): boolean {
