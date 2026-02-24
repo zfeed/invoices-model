@@ -15,6 +15,7 @@ const POLICY_REQUEST = {
                     order: 0,
                     groups: [
                         {
+                            requiredApprovals: 1,
                             approvers: [
                                 { name: 'Alice', email: 'alice@example.com' },
                             ],
