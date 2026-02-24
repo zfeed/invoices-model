@@ -1,5 +1,5 @@
 import { z } from 'zod';
 
 export const payInvoiceSchema = z.object({
-    approverId: z.string(),
+    approverId: z.string().max(36),
 });

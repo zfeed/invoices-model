@@ -1,4 +1,4 @@
-import { setupApp, expectError } from './helpers';
+import { setupApp, expectError, tooLong, expectValidationError } from './helpers';
 
 const { postJson, postRaw, createDraft } = setupApp();
 
@@ -25,6 +25,28 @@ describe('POST /invoices/drafts/:id/update', () => {
         const draft = await createDraft();
         const res = await postJson(`/invoices/drafts/${draft.id}/update`, {});
         expect(res.status).toBe(200);
+    });
+
+    it('returns 400 when string fields exceed max length', async () => {
+        const draft = await createDraft();
+        const res = await postJson(`/invoices/drafts/${draft.id}/update`, {
+            lineItems: [
+                {
+                    description: tooLong(255),
+                    price: { amount: tooLong(20), currency: tooLong(3) },
+                    quantity: tooLong(20),
+                },
+            ],
+            vatRate: tooLong(6),
+        });
+        await expectValidationError(
+            res,
+            ['lineItems', 0, 'description'],
+            ['lineItems', 0, 'price', 'amount'],
+            ['lineItems', 0, 'price', 'currency'],
+            ['lineItems', 0, 'quantity'],
+            ['vatRate']
+        );
     });
 
     it('returns 422 for non-existent draft', async () => {

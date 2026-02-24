@@ -1,4 +1,4 @@
-import { setupApp, expectError, resolveByPath } from './helpers';
+import { setupApp, expectError, resolveByPath, tooLong, expectValidationError } from './helpers';
 
 const { postJson, postRaw, createProcessingInvoice } = setupApp();
 
@@ -56,6 +56,13 @@ describe('POST /invoices/:id/pay', () => {
             expect(parent).toBeDefined();
             expect(resolveByPath(body, issue.path)).toBeUndefined();
         }
+    });
+
+    it('returns 400 when approverId exceeds max length', async () => {
+        const res = await postJson('/invoices/some-id/pay', {
+            approverId: tooLong(36),
+        });
+        await expectValidationError(res, ['approverId']);
     });
 
     it('returns 422 for non-existent invoice', async () => {

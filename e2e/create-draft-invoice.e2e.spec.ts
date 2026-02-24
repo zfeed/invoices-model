@@ -1,4 +1,4 @@
-import { setupApp, expectError, resolveByPath } from './helpers';
+import { setupApp, expectError, resolveByPath, tooLong, expectValidationError } from './helpers';
 
 const { postJson, postRaw } = setupApp();
 
@@ -88,12 +88,172 @@ describe('POST /invoices/drafts', () => {
         }
     });
 
+    it('returns 400 when line item description exceeds max length', async () => {
+        const res = await postJson('/invoices/drafts', {
+            lineItems: [
+                {
+                    description: tooLong(255),
+                    price: { amount: '100', currency: 'USD' },
+                    quantity: '1',
+                },
+            ],
+        });
+        await expectValidationError(res, ['lineItems', 0, 'description']);
+    });
+
+    it('returns 400 when line item price amount exceeds max length', async () => {
+        const res = await postJson('/invoices/drafts', {
+            lineItems: [
+                {
+                    description: 'Item',
+                    price: { amount: tooLong(20), currency: 'USD' },
+                    quantity: '1',
+                },
+            ],
+        });
+        await expectValidationError(res, ['lineItems', 0, 'price', 'amount']);
+    });
+
+    it('returns 400 when line item price currency exceeds max length', async () => {
+        const res = await postJson('/invoices/drafts', {
+            lineItems: [
+                {
+                    description: 'Item',
+                    price: { amount: '100', currency: tooLong(3) },
+                    quantity: '1',
+                },
+            ],
+        });
+        await expectValidationError(res, ['lineItems', 0, 'price', 'currency']);
+    });
+
+    it('returns 400 when line item quantity exceeds max length', async () => {
+        const res = await postJson('/invoices/drafts', {
+            lineItems: [
+                {
+                    description: 'Item',
+                    price: { amount: '100', currency: 'USD' },
+                    quantity: tooLong(20),
+                },
+            ],
+        });
+        await expectValidationError(res, ['lineItems', 0, 'quantity']);
+    });
+
+    it('returns 400 when vatRate exceeds max length', async () => {
+        const res = await postJson('/invoices/drafts', {
+            vatRate: tooLong(6),
+        });
+        await expectValidationError(res, ['vatRate']);
+    });
+
+    it('returns 400 when issueDate exceeds max length', async () => {
+        const res = await postJson('/invoices/drafts', {
+            issueDate: tooLong(10),
+        });
+        await expectValidationError(res, ['issueDate']);
+    });
+
+    it('returns 400 when dueDate exceeds max length', async () => {
+        const res = await postJson('/invoices/drafts', {
+            dueDate: tooLong(10),
+        });
+        await expectValidationError(res, ['dueDate']);
+    });
+
+    it('returns 400 when issuer fields exceed max length', async () => {
+        const res = await postJson('/invoices/drafts', {
+            issuer: {
+                type: 'COMPANY',
+                name: tooLong(255),
+                address: tooLong(500),
+                taxId: tooLong(50),
+                email: tooLong(320),
+            },
+        });
+        await expectValidationError(
+            res,
+            ['issuer', 'name'],
+            ['issuer', 'address'],
+            ['issuer', 'taxId'],
+            ['issuer', 'email']
+        );
+    });
+
+    it('returns 400 when recipient fields exceed max length', async () => {
+        const res = await postJson('/invoices/drafts', {
+            recipient: {
+                type: 'INDIVIDUAL',
+                name: tooLong(255),
+                address: tooLong(500),
+                taxId: tooLong(50),
+                email: tooLong(320),
+                taxResidenceCountry: tooLong(2),
+                billing: { type: 'PAYPAL', email: 'ok@example.com' },
+            },
+        });
+        await expectValidationError(
+            res,
+            ['recipient', 'name'],
+            ['recipient', 'address'],
+            ['recipient', 'taxId'],
+            ['recipient', 'email'],
+            ['recipient', 'taxResidenceCountry']
+        );
+    });
+
+    it('returns 400 when paypal billing email exceeds max length', async () => {
+        const res = await postJson('/invoices/drafts', {
+            recipient: {
+                type: 'INDIVIDUAL',
+                name: 'Jane',
+                address: '123 St',
+                taxId: 'TAX1',
+                email: 'jane@example.com',
+                taxResidenceCountry: 'US',
+                billing: { type: 'PAYPAL', email: tooLong(320) },
+            },
+        });
+        await expectValidationError(res, ['recipient', 'billing', 'email']);
+    });
+
+    it('returns 400 when wire billing fields exceed max length', async () => {
+        const res = await postJson('/invoices/drafts', {
+            recipient: {
+                type: 'INDIVIDUAL',
+                name: 'Jane',
+                address: '123 St',
+                taxId: 'TAX1',
+                email: 'jane@example.com',
+                taxResidenceCountry: 'US',
+                billing: {
+                    type: 'WIRE',
+                    swift: tooLong(11),
+                    accountNumber: tooLong(34),
+                    accountHolderName: tooLong(255),
+                    bankName: tooLong(255),
+                    bankAddress: tooLong(500),
+                    bankCountry: tooLong(2),
+                },
+            },
+        });
+        await expectValidationError(
+            res,
+            ['recipient', 'billing', 'swift'],
+            ['recipient', 'billing', 'accountNumber'],
+            ['recipient', 'billing', 'accountHolderName'],
+            ['recipient', 'billing', 'bankName'],
+            ['recipient', 'billing', 'bankAddress'],
+            ['recipient', 'billing', 'bankCountry']
+        );
+    });
+
     it('returns 422 for domain error', async () => {
         const res = await postJson('/invoices/drafts', {
             lineItems: [
                 {
                     description: 'Item',
-                    price: { amount: '100', currency: 'INVALID' },
+                    price: { amount: '100', currency: 'ZZZ' },
                     quantity: '1',
                 },
             ],

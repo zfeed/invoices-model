@@ -1,17 +1,17 @@
 import { z } from 'zod';
 
 export const approveActionSchema = z.object({
-    action: z.string(),
+    action: z.string().max(10),
     approver: z.object({
-        id: z.string(),
-        name: z.string(),
-        email: z.string(),
+        id: z.string().max(36),
+        name: z.string().max(255),
+        email: z.string().max(320),
     }),
 });
 
 export const approverSchema = z.object({
-    name: z.string(),
-    email: z.string(),
+    name: z.string().max(255),
+    email: z.string().max(320),
 });
 
 export const groupSchema = z.object({
@@ -25,8 +25,8 @@ export const stepSchema = z.object({
 });
 
 export const moneySchema = z.object({
-    amount: z.string(),
-    currency: z.string(),
+    amount: z.string().max(20),
+    currency: z.string().max(3),
 });
 
 export const templateSchema = z.object({
@@ -38,6 +38,6 @@ export const templateSchema = z.object({
 });
 
 export const createAuthflowPolicySchema = z.object({
-    action: z.string(),
+    action: z.string().max(10),
     templates: z.array(templateSchema),
 });

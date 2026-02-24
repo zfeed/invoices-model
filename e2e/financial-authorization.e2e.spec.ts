@@ -1,4 +1,4 @@
-import { setupApp, COMPLETE_DRAFT_REQUEST, expectError, resolveByPath } from './helpers';
+import { setupApp, COMPLETE_DRAFT_REQUEST, expectError, resolveByPath, tooLong, expectValidationError } from './helpers';
 
 const { postJson, postRaw, post, get, getData } = setupApp();
 
@@ -106,6 +106,69 @@ describe('POST /authflow-policies', () => {
         }
     });
 
+    it('returns 400 when action exceeds max length', async () => {
+        const res = await postJson('/authflow-policies', {
+            action: tooLong(10),
+            templates: [],
+        });
+        await expectValidationError(res, ['action']);
+    });
+
+    it('returns 400 when approver fields exceed max length', async () => {
+        const res = await postJson('/authflow-policies', {
+            action: 'pay',
+            templates: [
+                {
+                    range: {
+                        from: { amount: '0', currency: 'USD' },
+                        to: { amount: '1000', currency: 'USD' },
+                    },
+                    steps: [
+                        {
+                            order: 0,
+                            groups: [
+                                {
+                                    requiredApprovals: 1,
+                                    approvers: [
+                                        {
+                                            name: tooLong(255),
+                                            email: tooLong(320),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        });
+        await expectValidationError(
+            res,
+            ['templates', 0, 'steps', 0, 'groups', 0, 'approvers', 0, 'name'],
+            ['templates', 0, 'steps', 0, 'groups', 0, 'approvers', 0, 'email']
+        );
+    });
+
+    it('returns 400 when money fields exceed max length', async () => {
+        const res = await postJson('/authflow-policies', {
+            action: 'pay',
+            templates: [
+                {
+                    range: {
+                        from: { amount: tooLong(20), currency: tooLong(3) },
+                        to: { amount: '1000', currency: 'USD' },
+                    },
+                    steps: [],
+                },
+            ],
+        });
+        await expectValidationError(
+            res,
+            ['templates', 0, 'range', 'from', 'amount'],
+            ['templates', 0, 'range', 'from', 'currency']
+        );
+    });
+
     it('returns 422 for overlapping ranges', async () => {
         const res = await postJson('/authflow-policies', {
             action: 'pay',
@@ -164,6 +227,31 @@ describe('POST /documents/:referenceId/approve', () => {
                 expect(['string', 'number']).toContain(typeof segment);
             }
         }
+    });
+
+    it('returns 400 when action exceeds max length', async () => {
+        const res = await postJson('/documents/some-ref/approve', {
+            action: tooLong(10),
+            approver: { id: 'some-id', name: 'Alice', email: 'alice@example.com' },
+        });
+        await expectValidationError(res, ['action']);
+    });
+
+    it('returns 400 when approver fields exceed max length', async () => {
+        const res = await postJson('/documents/some-ref/approve', {
+            action: 'pay',
+            approver: {
+                id: tooLong(36),
+                name: tooLong(255),
+                email: tooLong(320),
+            },
+        });
+        await expectValidationError(
+            res,
+            ['approver', 'id'],
+            ['approver', 'name'],
+            ['approver', 'email']
+        );
     });
 
     it('returns 422 for non-existent document', async () => {

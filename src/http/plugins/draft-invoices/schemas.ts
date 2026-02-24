@@ -6,42 +6,48 @@ export const draftInvoiceSchema = z.object({
     lineItems: z
         .array(
             z.object({
-                description: z.string(),
-                price: z.object({ amount: z.string(), currency: z.string() }),
-                quantity: z.string(),
+                description: z.string().max(255),
+                price: z.object({
+                    amount: z.string().max(20),
+                    currency: z.string().max(3),
+                }),
+                quantity: z.string().max(20),
             })
         )
         .optional(),
-    vatRate: z.string().optional(),
-    issueDate: z.string().optional(),
-    dueDate: z.string().optional(),
+    vatRate: z.string().max(6).optional(),
+    issueDate: z.string().max(10).optional(),
+    dueDate: z.string().max(10).optional(),
     issuer: z
         .object({
             type: z.nativeEnum(ISSUER_TYPE),
-            name: z.string(),
-            address: z.string(),
-            taxId: z.string(),
-            email: z.string(),
+            name: z.string().max(255),
+            address: z.string().max(500),
+            taxId: z.string().max(50),
+            email: z.string().max(320),
         })
         .optional(),
     recipient: z
         .object({
             type: z.nativeEnum(RECIPIENT_TYPE),
-            name: z.string(),
-            address: z.string(),
-            taxId: z.string(),
-            email: z.string(),
-            taxResidenceCountry: z.string(),
+            name: z.string().max(255),
+            address: z.string().max(500),
+            taxId: z.string().max(50),
+            email: z.string().max(320),
+            taxResidenceCountry: z.string().max(2),
             billing: z.discriminatedUnion('type', [
-                z.object({ type: z.literal('PAYPAL'), email: z.string() }),
+                z.object({
+                    type: z.literal('PAYPAL'),
+                    email: z.string().max(320),
+                }),
                 z.object({
                     type: z.literal('WIRE'),
-                    swift: z.string(),
-                    accountNumber: z.string(),
-                    accountHolderName: z.string(),
-                    bankName: z.string(),
-                    bankAddress: z.string(),
-                    bankCountry: z.string(),
+                    swift: z.string().max(11),
+                    accountNumber: z.string().max(34),
+                    accountHolderName: z.string().max(255),
+                    bankName: z.string().max(255),
+                    bankAddress: z.string().max(500),
+                    bankCountry: z.string().max(2),
                 }),
             ]),
         })
