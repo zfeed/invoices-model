@@ -1,14 +1,14 @@
-import { DraftInvoice } from '../../domain/draft-invoice/draft-invoice';
-import { Id } from '../../domain/id/id';
-import { LineItem } from '../../domain/line-item/line-item';
-import { InMemoryUnitOfWorkFactory } from '../../../../infrastructure/unit-of-work/in-memory.unit-of-work';
-import { OptimisticConcurrencyError } from '../../../shared/optimistic-concurrency.error';
-import { Invoice } from '../../domain/invoice/invoice';
-import { CalendarDate } from '../../domain/calendar-date/calendar-date';
-import { Issuer, ISSUER_TYPE } from '../../domain/issuer/issuer';
-import { Recipient, RECIPIENT_TYPE } from '../../domain/recipient/recipient';
-import { Paypal } from '../../domain/billing/paypal/paypal';
-import { UnitDescription } from '../../domain/line-item/unit-description/unit-description';
+import { DraftInvoice } from '../../invoices/domain/draft-invoice/draft-invoice';
+import { Id } from '../../invoices/domain/id/id';
+import { LineItem } from '../../invoices/domain/line-item/line-item';
+import { InMemoryUnitOfWorkFactory } from '../../../infrastructure/unit-of-work/in-memory.unit-of-work';
+import { OptimisticConcurrencyError } from '../optimistic-concurrency.error';
+import { Invoice } from '../../invoices/domain/invoice/invoice';
+import { CalendarDate } from '../../invoices/domain/calendar-date/calendar-date';
+import { Issuer, ISSUER_TYPE } from '../../invoices/domain/issuer/issuer';
+import { Recipient, RECIPIENT_TYPE } from '../../invoices/domain/recipient/recipient';
+import { Paypal } from '../../invoices/domain/billing/paypal/paypal';
+import { UnitDescription } from '../../invoices/domain/line-item/unit-description/unit-description';
 
 describe('UnitOfWork contract (InMemory)', () => {
     describe('Collection.get', () => {
