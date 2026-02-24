@@ -26,21 +26,14 @@ export const createApp = async () => {
 
     const app = Fastify();
 
-    app.addContentTypeParser(
-        'application/json',
-        { parseAs: 'string' },
-        (_req, body, done) => {
-            try {
-                done(null, JSON.parse(body as string));
-            } catch (err) {
-                (err as any).statusCode = 400;
-                done(err as Error, undefined);
-            }
-        }
-    );
+    const isFastifyError = (err: unknown): err is Error & { code: string } =>
+        err instanceof Error && 'code' in err;
 
     app.setErrorHandler((error, _request, reply) => {
-        if (error instanceof SyntaxError) {
+        if (
+            isFastifyError(error) &&
+            error.code === 'FST_ERR_CTP_INVALID_JSON_BODY'
+        ) {
             return reply
                 .code(400)
                 .send({ error: { message: 'Invalid JSON', issues: [] } });
@@ -53,10 +46,7 @@ export const createApp = async () => {
                 },
             });
         }
-        if (
-            error instanceof DomainError ||
-            error instanceof ApplicationError
-        ) {
+        if (error instanceof DomainError || error instanceof ApplicationError) {
             return reply.code(422).send({
                 error: { message: error.message, code: error.code },
             });
