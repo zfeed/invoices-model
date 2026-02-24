@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { v7 as uuidv7 } from 'uuid';
 import { Equatable, Mappable, Result } from '../../../../building-blocks';
 
 export class Id implements Equatable<Id>, Mappable<string> {
@@ -9,7 +9,7 @@ export class Id implements Equatable<Id>, Mappable<string> {
     }
 
     static create() {
-        return Result.ok(new Id(randomUUID()));
+        return Result.ok(new Id(uuidv7()));
     }
 
     static fromPlain(value: string) {

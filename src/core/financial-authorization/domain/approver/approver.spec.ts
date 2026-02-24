@@ -43,7 +43,7 @@ describe('Approver.create', () => {
         expect(result.isOk()).toBe(true);
         const approver = result.unwrap();
         const uuidRegex =
-            /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+            /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
         expect(approver.id.toPlain()).toMatch(uuidRegex);
     });
 });
