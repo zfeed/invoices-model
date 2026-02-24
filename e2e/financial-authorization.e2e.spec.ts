@@ -53,12 +53,45 @@ describe('POST /authflow-policies', () => {
 
     it('returns 400 for invalid JSON', async () => {
         const res = await postRaw('/authflow-policies', 'not json');
-        await expectError(res, 400, 'Invalid JSON');
+        expect(res.status).toBe(400);
+        const json = await res.json();
+        expect(json).toEqual({
+            error: {
+                message: expect.any(String),
+                issues: expect.any(Array),
+            },
+        });
+        for (const issue of json.error.issues) {
+            expect(issue).toEqual({
+                path: expect.any(Array),
+                message: expect.any(String),
+            });
+            for (const segment of issue.path) {
+                expect(['string', 'number']).toContain(typeof segment);
+            }
+        }
     });
 
     it('returns 400 for missing action', async () => {
         const res = await postJson('/authflow-policies', { templates: [] });
-        await expectError(res, 400, 'Validation failed');
+        expect(res.status).toBe(400);
+        const json = await res.json();
+        expect(json).toEqual({
+            error: {
+                message: expect.any(String),
+                issues: expect.any(Array),
+            },
+        });
+        expect(json.error.issues.length).toBeGreaterThan(0);
+        for (const issue of json.error.issues) {
+            expect(issue).toEqual({
+                path: expect.any(Array),
+                message: expect.any(String),
+            });
+            for (const segment of issue.path) {
+                expect(['string', 'number']).toContain(typeof segment);
+            }
+        }
     });
 
     it('returns 422 for overlapping ranges', async () => {
@@ -100,6 +133,27 @@ describe('POST /documents/:referenceId/approve', () => {
         expect(authflow.isApproved).toBe(true);
     });
 
+    it('returns 400 for invalid JSON', async () => {
+        const res = await postRaw('/documents/some-ref/approve', 'not json');
+        expect(res.status).toBe(400);
+        const json = await res.json();
+        expect(json).toEqual({
+            error: {
+                message: expect.any(String),
+                issues: expect.any(Array),
+            },
+        });
+        for (const issue of json.error.issues) {
+            expect(issue).toEqual({
+                path: expect.any(Array),
+                message: expect.any(String),
+            });
+            for (const segment of issue.path) {
+                expect(['string', 'number']).toContain(typeof segment);
+            }
+        }
+    });
+
     it('returns 422 for non-existent document', async () => {
         const res = await postJson('/documents/non-existent/approve', {
             action: 'pay',
@@ -112,7 +166,24 @@ describe('POST /documents/:referenceId/approve', () => {
         const res = await postJson('/documents/some-ref/approve', {
             approver: { id: 'some-id', name: 'Alice', email: 'alice@example.com' },
         });
-        await expectError(res, 400, 'Validation failed');
+        expect(res.status).toBe(400);
+        const json = await res.json();
+        expect(json).toEqual({
+            error: {
+                message: expect.any(String),
+                issues: expect.any(Array),
+            },
+        });
+        expect(json.error.issues.length).toBeGreaterThan(0);
+        for (const issue of json.error.issues) {
+            expect(issue).toEqual({
+                path: expect.any(Array),
+                message: expect.any(String),
+            });
+            for (const segment of issue.path) {
+                expect(['string', 'number']).toContain(typeof segment);
+            }
+        }
     });
 
     it('returns 422 when approving already approved action', async () => {

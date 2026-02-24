@@ -37,7 +37,23 @@ describe('POST /invoices/drafts/calculate', () => {
 
     it('returns 400 for invalid JSON', async () => {
         const res = await postRaw('/invoices/drafts/calculate', 'not json');
-        await expectError(res, 400, 'Invalid JSON');
+        expect(res.status).toBe(400);
+        const json = await res.json();
+        expect(json).toEqual({
+            error: {
+                message: expect.any(String),
+                issues: expect.any(Array),
+            },
+        });
+        for (const issue of json.error.issues) {
+            expect(issue).toEqual({
+                path: expect.any(Array),
+                message: expect.any(String),
+            });
+            for (const segment of issue.path) {
+                expect(['string', 'number']).toContain(typeof segment);
+            }
+        }
     });
 
     it('returns 422 for domain error', async () => {
