@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { ISSUER_TYPE } from '../../core/invoices/domain/issuer/issuer';
-import { RECIPIENT_TYPE } from '../../core/invoices/domain/recipient/recipient';
+import { ISSUER_TYPE } from '../../../core/invoices/domain/issuer/issuer';
+import { RECIPIENT_TYPE } from '../../../core/invoices/domain/recipient/recipient';
 
 export const draftInvoiceSchema = z.object({
     lineItems: z

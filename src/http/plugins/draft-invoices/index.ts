@@ -1,0 +1,1 @@
+export { draftInvoicesPlugin } from './routes';

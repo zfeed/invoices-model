@@ -1,0 +1,1 @@
+export { invoicesPlugin } from './routes';

@@ -1,0 +1,1 @@
+export { financialAuthorizationPlugin } from './routes';
