@@ -10,7 +10,7 @@ import { Wire } from '../../../../domain/billing/wire/wire';
 import { Recipient, RECIPIENT_TYPE } from '../../../../domain/recipient/recipient';
 import { VatRate } from '../../../../domain/vat-rate/vat-rate';
 import { DomainEvents } from '../../../../../shared/domain-events/domain-events.interface';
-import { UnitOfWorkFactory } from '../../../unit-of-work/unit-of-work.interface';
+import { UnitOfWorkFactory } from '../../../../../shared/unit-of-work/unit-of-work.interface';
 
 export class UpdateDraftInvoice {
     constructor(

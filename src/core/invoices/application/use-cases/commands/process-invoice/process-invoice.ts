@@ -3,7 +3,7 @@ import { ApplicationError } from '../../../../../../building-blocks/errors/appli
 import { Id } from '../../../../domain/id/id';
 import { Invoice } from '../../../../domain/invoice/invoice';
 import { DomainEvents } from '../../../../../shared/domain-events/domain-events.interface';
-import { UnitOfWorkFactory } from '../../../unit-of-work/unit-of-work.interface';
+import { UnitOfWorkFactory } from '../../../../../shared/unit-of-work/unit-of-work.interface';
 
 export class ProcessInvoice {
     constructor(
