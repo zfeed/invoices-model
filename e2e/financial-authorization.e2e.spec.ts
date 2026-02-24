@@ -1,4 +1,4 @@
-import { setupApp, COMPLETE_DRAFT_REQUEST, expectError } from './helpers';
+import { setupApp, COMPLETE_DRAFT_REQUEST, expectError, resolveByPath } from './helpers';
 
 const { postJson, postRaw, post, get, getData } = setupApp();
 
@@ -94,6 +94,17 @@ describe('POST /authflow-policies', () => {
         }
     });
 
+    it('returns issue paths that resolve to the input object', async () => {
+        const body = { templates: [] };
+        const res = await postJson('/authflow-policies', body);
+        const json = await res.json();
+        for (const issue of json.error.issues) {
+            const parent = resolveByPath(body, issue.path.slice(0, -1));
+            expect(parent).toBeDefined();
+            expect(resolveByPath(body, issue.path)).toBeUndefined();
+        }
+    });
+
     it('returns 422 for overlapping ranges', async () => {
         const res = await postJson('/authflow-policies', {
             action: 'pay',
@@ -183,6 +194,19 @@ describe('POST /documents/:referenceId/approve', () => {
             for (const segment of issue.path) {
                 expect(['string', 'number']).toContain(typeof segment);
             }
+        }
+    });
+
+    it('returns issue paths that resolve to the input object', async () => {
+        const body = {
+            approver: { id: 'some-id', name: 'Alice', email: 'alice@example.com' },
+        };
+        const res = await postJson('/documents/some-ref/approve', body);
+        const json = await res.json();
+        for (const issue of json.error.issues) {
+            const parent = resolveByPath(body, issue.path.slice(0, -1));
+            expect(parent).toBeDefined();
+            expect(resolveByPath(body, issue.path)).toBeUndefined();
         }
     });
 

@@ -1,4 +1,4 @@
-import { setupApp, expectError } from './helpers';
+import { setupApp, expectError, resolveByPath } from './helpers';
 
 const { postJson, postRaw } = setupApp();
 
@@ -72,6 +72,19 @@ describe('POST /invoices/drafts', () => {
             for (const segment of issue.path) {
                 expect(['string', 'number']).toContain(typeof segment);
             }
+        }
+    });
+
+    it('returns issue paths that resolve to the input object', async () => {
+        const body = {
+            lineItems: [{ description: 'Item', price: { amount: '100' } }],
+        };
+        const res = await postJson('/invoices/drafts', body);
+        const json = await res.json();
+        for (const issue of json.error.issues) {
+            const parent = resolveByPath(body, issue.path.slice(0, -1));
+            expect(parent).toBeDefined();
+            expect(resolveByPath(body, issue.path)).toBeUndefined();
         }
     });
 

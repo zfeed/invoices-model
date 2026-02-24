@@ -131,6 +131,9 @@ export const setupApp = () => {
     };
 };
 
+export const resolveByPath = (obj: any, path: (string | number)[]): any =>
+    path.reduce((acc, segment) => acc?.[segment], obj);
+
 export const expectError = async (
     res: TestResponse,
     status: number,
