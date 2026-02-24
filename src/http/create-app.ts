@@ -1,8 +1,5 @@
 import Fastify from 'fastify';
-import { DomainError } from '../building-blocks/errors/domain/domain.error';
-import { ApplicationError } from '../building-blocks/errors/application/application.error';
 import { bootstrap } from '../core/bootstrap';
-import { ValidationError } from './validation';
 import { InMemoryUnitOfWorkFactory } from '../infrastructure/unit-of-work/in-memory.unit-of-work';
 import { InMemoryDomainEvents } from '../infrastructure/domain-events/in-memory-domain-events';
 import { createDraftInvoiceRoute } from './routes/create-draft-invoice';
@@ -17,6 +14,7 @@ import { payInvoiceRoute } from './routes/pay-invoice';
 import { createAuthflowPolicyRoute } from './routes/create-authflow-policy';
 import { approveActionOnDocumentRoute } from './routes/approve-action-on-document';
 import { canApproverApproveRoute } from './routes/can-approver-approve';
+import { errorHandler } from './error-handler';
 
 export const createApp = async () => {
     const commands = await bootstrap({
@@ -26,35 +24,7 @@ export const createApp = async () => {
 
     const app = Fastify();
 
-    const isFastifyError = (err: unknown): err is Error & { code: string } =>
-        err instanceof Error && 'code' in err;
-
-    app.setErrorHandler((error, _request, reply) => {
-        if (
-            isFastifyError(error) &&
-            error.code === 'FST_ERR_CTP_INVALID_JSON_BODY'
-        ) {
-            return reply
-                .code(400)
-                .send({ error: { message: 'Invalid JSON', issues: [] } });
-        }
-        if (error instanceof ValidationError) {
-            return reply.code(400).send({
-                error: {
-                    message: 'Validation failed',
-                    issues: error.issues,
-                },
-            });
-        }
-        if (error instanceof DomainError || error instanceof ApplicationError) {
-            return reply.code(422).send({
-                error: { message: error.message, code: error.code },
-            });
-        }
-        return reply.code(500).send({
-            error: { message: 'Internal Server Error' },
-        });
-    });
+    app.setErrorHandler(errorHandler);
 
     app.register(createDraftInvoiceRoute(commands));
     app.register(updateDraftInvoiceRoute(commands));

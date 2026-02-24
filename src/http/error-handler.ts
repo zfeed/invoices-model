@@ -1,0 +1,38 @@
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { DomainError } from '../building-blocks/errors/domain/domain.error';
+import { ApplicationError } from '../building-blocks/errors/application/application.error';
+import { ValidationError } from './validation';
+
+const isFastifyError = (err: unknown): err is Error & { code: string } =>
+    err instanceof Error && 'code' in err;
+
+export const errorHandler = (
+    error: unknown,
+    _request: FastifyRequest,
+    reply: FastifyReply
+) => {
+    if (
+        isFastifyError(error) &&
+        error.code === 'FST_ERR_CTP_INVALID_JSON_BODY'
+    ) {
+        return reply
+            .code(400)
+            .send({ error: { message: 'Invalid JSON', issues: [] } });
+    }
+    if (error instanceof ValidationError) {
+        return reply.code(400).send({
+            error: {
+                message: 'Validation failed',
+                issues: error.issues,
+            },
+        });
+    }
+    if (error instanceof DomainError || error instanceof ApplicationError) {
+        return reply.code(422).send({
+            error: { message: error.message, code: error.code },
+        });
+    }
+    return reply.code(500).send({
+        error: { message: 'Internal Server Error' },
+    });
+};
