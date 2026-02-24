@@ -152,6 +152,162 @@ export const expectValidationError = async (
     }
 };
 
+// --- Response shape matchers ---
+
+const money = { amount: expect.any(String), currency: expect.any(String) };
+
+const lineItem = {
+    description: expect.any(String),
+    price: money,
+    quantity: expect.any(String),
+    total: money,
+};
+
+const issuer = {
+    type: expect.any(String),
+    name: expect.any(String),
+    address: expect.any(String),
+    taxId: expect.any(String),
+    email: expect.any(String),
+};
+
+const billing = {
+    type: expect.any(String),
+    data: expect.any(Object),
+};
+
+const recipient = {
+    type: expect.any(String),
+    name: expect.any(String),
+    address: expect.any(String),
+    taxId: expect.any(String),
+    email: expect.any(String),
+    taxResidenceCountry: expect.any(String),
+    billing,
+};
+
+export const EMPTY_DRAFT_SHAPE = {
+    id: expect.any(String),
+    status: expect.any(String),
+    lineItems: null,
+    total: null,
+    vatRate: null,
+    vatAmount: null,
+    issueDate: null,
+    dueDate: null,
+    issuer: null,
+    recipient: null,
+};
+
+export const POPULATED_DRAFT_SHAPE = {
+    id: expect.any(String),
+    status: expect.any(String),
+    lineItems: {
+        items: expect.arrayContaining([expect.objectContaining(lineItem)]),
+        subtotal: money,
+    },
+    total: money,
+    vatRate: expect.any(String),
+    vatAmount: money,
+    issueDate: expect.any(String),
+    dueDate: expect.any(String),
+    issuer: expect.objectContaining(issuer),
+    recipient: expect.objectContaining(recipient),
+};
+
+export const INVOICE_SHAPE = {
+    id: expect.any(String),
+    status: expect.any(String),
+    lineItems: {
+        items: expect.arrayContaining([expect.objectContaining(lineItem)]),
+        subtotal: money,
+    },
+    total: money,
+    vatRate: expect.toSatisfy(
+        (v: unknown) => typeof v === 'string' || v === null
+    ),
+    vatAmount: expect.toSatisfy(
+        (v: unknown) =>
+            v === null ||
+            (typeof v === 'object' &&
+                v !== null &&
+                'amount' in v &&
+                'currency' in v)
+    ),
+    issueDate: expect.any(String),
+    dueDate: expect.any(String),
+    issuer: expect.objectContaining(issuer),
+    recipient: expect.objectContaining(recipient),
+};
+
+const approver = {
+    id: expect.any(String),
+    name: expect.any(String),
+    email: expect.any(String),
+};
+
+const groupTemplate = {
+    id: expect.any(String),
+    requiredApprovals: expect.any(Number),
+    approvers: expect.arrayContaining([expect.objectContaining(approver)]),
+};
+
+const stepTemplate = {
+    id: expect.any(String),
+    order: expect.any(Number),
+    groups: expect.arrayContaining([expect.objectContaining(groupTemplate)]),
+};
+
+const templateShape = {
+    id: expect.any(String),
+    range: { from: money, to: money },
+    steps: expect.any(Array),
+};
+
+export const AUTHFLOW_POLICY_SHAPE = {
+    id: expect.any(String),
+    action: expect.any(String),
+    templates: expect.any(Array),
+};
+
+const approval = {
+    approverId: expect.any(String),
+    createdAt: expect.any(String),
+    comment: expect.toSatisfy(
+        (v: unknown) => typeof v === 'string' || v === null
+    ),
+};
+
+const group = {
+    id: expect.any(String),
+    requiredApprovals: expect.any(Number),
+    isApproved: expect.any(Boolean),
+    approvers: expect.any(Array),
+    approvals: expect.any(Array),
+};
+
+const step = {
+    id: expect.any(String),
+    order: expect.any(Number),
+    isApproved: expect.any(Boolean),
+    groups: expect.arrayContaining([expect.objectContaining(group)]),
+};
+
+const authflow = {
+    id: expect.any(String),
+    action: expect.any(String),
+    range: { from: money, to: money },
+    isApproved: expect.any(Boolean),
+    steps: expect.arrayContaining([expect.objectContaining(step)]),
+};
+
+export const DOCUMENT_SHAPE = {
+    id: expect.any(String),
+    referenceId: expect.any(String),
+    value: money,
+    authflows: expect.arrayContaining([expect.objectContaining(authflow)]),
+};
+
 export const expectError = async (
     res: TestResponse,
     status: number,

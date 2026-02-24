@@ -1,4 +1,4 @@
-import { setupApp, expectError } from './helpers';
+import { setupApp, expectError, EMPTY_DRAFT_SHAPE } from './helpers';
 
 const { post, createDraft } = setupApp();
 
@@ -8,6 +8,7 @@ describe('POST /invoices/drafts/:id/archive', () => {
         const res = await post(`/invoices/drafts/${draft.id}/archive`);
         expect(res.status).toBe(200);
         const json = await res.json();
+        expect(json.data).toEqual({ ...EMPTY_DRAFT_SHAPE, id: draft.id });
         expect(json.data.status).toBe('ARCHIVED');
     });
 

@@ -1,4 +1,4 @@
-import { setupApp, COMPLETE_DRAFT_REQUEST, expectError } from './helpers';
+import { setupApp, COMPLETE_DRAFT_REQUEST, expectError, INVOICE_SHAPE } from './helpers';
 
 const { post, createDraft } = setupApp();
 
@@ -8,7 +8,12 @@ describe('POST /invoices/drafts/:id/complete', () => {
         const res = await post(`/invoices/drafts/${draft.id}/complete`);
         expect(res.status).toBe(200);
         const json = await res.json();
+        expect(json.data).toEqual(INVOICE_SHAPE);
         expect(json.data.status).toBe('ISSUED');
+        expect(json.data.id).toEqual(expect.any(String));
+        expect(json.data.lineItems.items).toHaveLength(1);
+        expect(json.data.issueDate).toBe('2025-01-01');
+        expect(json.data.dueDate).toBe('2025-02-01');
     });
 
     it('returns 422 for incomplete draft', async () => {

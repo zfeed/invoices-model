@@ -1,4 +1,4 @@
-import { setupApp, COMPLETE_DRAFT_REQUEST, expectError } from './helpers';
+import { setupApp, COMPLETE_DRAFT_REQUEST, expectError, EMPTY_DRAFT_SHAPE, POPULATED_DRAFT_SHAPE, INVOICE_SHAPE } from './helpers';
 
 const { postJson, post, getData } = setupApp();
 
@@ -8,6 +8,7 @@ describe('Invoice lifecycle flows', () => {
             const createRes = await postJson('/invoices/drafts', {});
             expect(createRes.status).toBe(200);
             const draft = await getData(createRes);
+            expect(draft).toEqual(EMPTY_DRAFT_SHAPE);
             expect(draft.status).toBe('DRAFT');
 
             const updateRes = await postJson(
@@ -16,6 +17,7 @@ describe('Invoice lifecycle flows', () => {
             );
             expect(updateRes.status).toBe(200);
             const updated = await getData(updateRes);
+            expect(updated).toEqual(POPULATED_DRAFT_SHAPE);
             expect(updated.lineItems.items).toHaveLength(1);
 
             const completeRes = await post(
@@ -23,6 +25,7 @@ describe('Invoice lifecycle flows', () => {
             );
             expect(completeRes.status).toBe(200);
             const invoice = await getData(completeRes);
+            expect(invoice).toEqual(INVOICE_SHAPE);
             expect(invoice.status).toBe('ISSUED');
 
             const processRes = await post(
@@ -30,6 +33,7 @@ describe('Invoice lifecycle flows', () => {
             );
             expect(processRes.status).toBe(200);
             const processed = await getData(processRes);
+            expect(processed).toEqual(INVOICE_SHAPE);
             expect(processed.status).toBe('PROCESSING');
         });
     });
@@ -42,12 +46,14 @@ describe('Invoice lifecycle flows', () => {
             );
             expect(createRes.status).toBe(200);
             const draft = await getData(createRes);
+            expect(draft).toEqual(POPULATED_DRAFT_SHAPE);
 
             const completeRes = await post(
                 `/invoices/drafts/${draft.id}/complete`
             );
             expect(completeRes.status).toBe(200);
             const invoice = await getData(completeRes);
+            expect(invoice).toEqual(INVOICE_SHAPE);
             expect(invoice.status).toBe('ISSUED');
 
             const cancelRes = await post(
@@ -55,6 +61,7 @@ describe('Invoice lifecycle flows', () => {
             );
             expect(cancelRes.status).toBe(200);
             const cancelled = await getData(cancelRes);
+            expect(cancelled).toEqual(INVOICE_SHAPE);
             expect(cancelled.status).toBe('CANCELLED');
         });
     });
@@ -64,6 +71,7 @@ describe('Invoice lifecycle flows', () => {
             const createRes = await postJson('/invoices/drafts', {});
             expect(createRes.status).toBe(200);
             const draft = await getData(createRes);
+            expect(draft).toEqual(EMPTY_DRAFT_SHAPE);
             expect(draft.status).toBe('DRAFT');
 
             const archiveRes = await post(
@@ -71,6 +79,7 @@ describe('Invoice lifecycle flows', () => {
             );
             expect(archiveRes.status).toBe(200);
             const archived = await getData(archiveRes);
+            expect(archived).toEqual({ ...EMPTY_DRAFT_SHAPE, id: draft.id });
             expect(archived.status).toBe('ARCHIVED');
 
             const draftRes = await post(
@@ -78,6 +87,7 @@ describe('Invoice lifecycle flows', () => {
             );
             expect(draftRes.status).toBe(200);
             const unarchived = await getData(draftRes);
+            expect(unarchived).toEqual({ ...EMPTY_DRAFT_SHAPE, id: draft.id });
             expect(unarchived.status).toBe('DRAFT');
         });
     });

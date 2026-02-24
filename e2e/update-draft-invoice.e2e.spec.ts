@@ -1,4 +1,4 @@
-import { setupApp, expectError, tooLong, expectValidationError } from './helpers';
+import { setupApp, expectError, tooLong, expectValidationError, EMPTY_DRAFT_SHAPE } from './helpers';
 
 const { postJson, postRaw, createDraft } = setupApp();
 
@@ -17,14 +17,27 @@ describe('POST /invoices/drafts/:id/update', () => {
         });
         expect(res.status).toBe(200);
         const json = await res.json();
+        expect(json.data.id).toBe(draft.id);
+        expect(json.data.status).toBe('DRAFT');
         expect(json.data.lineItems.items).toHaveLength(1);
-        expect(json.data.lineItems.items[0].description).toBe('Consulting');
+        expect(json.data.lineItems.items[0]).toEqual({
+            description: 'Consulting',
+            price: { amount: '100', currency: 'USD' },
+            quantity: '2',
+            total: { amount: '200', currency: 'USD' },
+        });
+        expect(json.data.lineItems.subtotal).toEqual({ amount: '200', currency: 'USD' });
+        expect(json.data.vatRate).toBe('0.2');
+        expect(json.data.vatAmount).toEqual({ amount: '40', currency: 'USD' });
+        expect(json.data.total).toEqual({ amount: '240', currency: 'USD' });
     });
 
     it('updates with empty body', async () => {
         const draft = await createDraft();
         const res = await postJson(`/invoices/drafts/${draft.id}/update`, {});
         expect(res.status).toBe(200);
+        const json = await res.json();
+        expect(json.data).toEqual({ ...EMPTY_DRAFT_SHAPE, id: draft.id });
     });
 
     it('returns 400 when string fields exceed max length', async () => {

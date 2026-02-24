@@ -1,4 +1,4 @@
-import { setupApp, COMPLETE_DRAFT_REQUEST, expectError, resolveByPath, tooLong, expectValidationError } from './helpers';
+import { setupApp, COMPLETE_DRAFT_REQUEST, expectError, resolveByPath, tooLong, expectValidationError, AUTHFLOW_POLICY_SHAPE, DOCUMENT_SHAPE } from './helpers';
 
 const { postJson, postRaw, post, get, getData } = setupApp();
 
@@ -47,9 +47,26 @@ describe('POST /authflow-policies', () => {
         const res = await postJson('/authflow-policies', POLICY_REQUEST);
         expect(res.status).toBe(200);
         const json = await res.json();
+        expect(json.data).toEqual(AUTHFLOW_POLICY_SHAPE);
         expect(json.data.action).toBe('pay');
         expect(json.data.templates).toHaveLength(1);
-        expect(json.data.id).toBeDefined();
+        const template = json.data.templates[0];
+        expect(template.id).toEqual(expect.any(String));
+        expect(template.range).toEqual({
+            from: { amount: '0', currency: 'USD' },
+            to: { amount: '100000', currency: 'USD' },
+        });
+        expect(template.steps).toHaveLength(1);
+        expect(template.steps[0].order).toBe(0);
+        expect(template.steps[0].groups).toHaveLength(1);
+        const group = template.steps[0].groups[0];
+        expect(group.requiredApprovals).toBe(1);
+        expect(group.approvers).toHaveLength(1);
+        expect(group.approvers[0]).toEqual({
+            id: expect.any(String),
+            name: 'Alice',
+            email: 'alice@example.com',
+        });
     });
 
     it('returns 400 for invalid JSON', async () => {
@@ -202,10 +219,21 @@ describe('POST /documents/:referenceId/approve', () => {
         });
         expect(res.status).toBe(200);
         const json = await res.json();
+        expect(json.data).toEqual(DOCUMENT_SHAPE);
+        expect(json.data.referenceId).toBe(invoice.id);
+        expect(json.data.value).toEqual({ amount: expect.any(String), currency: 'USD' });
         const authflow = json.data.authflows.find(
             (a: any) => a.action === 'pay'
         );
         expect(authflow.isApproved).toBe(true);
+        expect(authflow.steps[0].isApproved).toBe(true);
+        expect(authflow.steps[0].groups[0].isApproved).toBe(true);
+        expect(authflow.steps[0].groups[0].approvals).toHaveLength(1);
+        expect(authflow.steps[0].groups[0].approvals[0]).toEqual({
+            approverId,
+            createdAt: expect.any(String),
+            comment: null,
+        });
     });
 
     it('returns 400 for invalid JSON', async () => {
@@ -321,7 +349,7 @@ describe('GET /documents/:referenceId/can-approve', () => {
         );
         expect(res.status).toBe(200);
         const json = await res.json();
-        expect(json.data.answer).toBe('YES');
+        expect(json.data).toEqual({ answer: 'YES' });
     });
 
     it('returns NO for unknown approver', async () => {
@@ -331,7 +359,7 @@ describe('GET /documents/:referenceId/can-approve', () => {
         );
         expect(res.status).toBe(200);
         const json = await res.json();
-        expect(json.data.answer).toBe('NO');
+        expect(json.data).toEqual({ answer: 'NO' });
     });
 
     it('returns UNKNOWN for non-existent document', async () => {
@@ -340,6 +368,6 @@ describe('GET /documents/:referenceId/can-approve', () => {
         );
         expect(res.status).toBe(200);
         const json = await res.json();
-        expect(json.data.answer).toBe('UNKNOWN');
+        expect(json.data).toEqual({ answer: 'UNKNOWN' });
     });
 });

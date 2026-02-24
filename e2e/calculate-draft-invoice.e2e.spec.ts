@@ -1,4 +1,4 @@
-import { setupApp, expectError, tooLong, expectValidationError } from './helpers';
+import { setupApp, expectError, tooLong, expectValidationError, EMPTY_DRAFT_SHAPE } from './helpers';
 
 const { postJson, postRaw } = setupApp();
 
@@ -16,23 +16,30 @@ describe('POST /invoices/drafts/calculate', () => {
         });
         expect(res.status).toBe(200);
         const json = await res.json();
-        expect(json.data.lineItems.subtotal).toEqual({
-            amount: '600',
-            currency: 'USD',
+        expect(json.data.id).toEqual(expect.any(String));
+        expect(json.data.status).toBe('DRAFT');
+        expect(json.data.lineItems.items).toHaveLength(1);
+        expect(json.data.lineItems.items[0]).toEqual({
+            description: 'Service',
+            price: { amount: '200', currency: 'USD' },
+            quantity: '3',
+            total: { amount: '600', currency: 'USD' },
         });
-        expect(json.data.vatAmount).toEqual({
-            amount: '60',
-            currency: 'USD',
-        });
-        expect(json.data.total).toEqual({
-            amount: '660',
-            currency: 'USD',
-        });
+        expect(json.data.lineItems.subtotal).toEqual({ amount: '600', currency: 'USD' });
+        expect(json.data.vatRate).toBe('0.1');
+        expect(json.data.vatAmount).toEqual({ amount: '60', currency: 'USD' });
+        expect(json.data.total).toEqual({ amount: '660', currency: 'USD' });
+        expect(json.data.issueDate).toBeNull();
+        expect(json.data.dueDate).toBeNull();
+        expect(json.data.issuer).toBeNull();
+        expect(json.data.recipient).toBeNull();
     });
 
     it('calculates with empty body', async () => {
         const res = await postJson('/invoices/drafts/calculate', {});
         expect(res.status).toBe(200);
+        const json = await res.json();
+        expect(json.data).toEqual(EMPTY_DRAFT_SHAPE);
     });
 
     it('returns 400 for invalid JSON', async () => {
