@@ -78,19 +78,19 @@ export class LineItem implements Equatable<LineItem>, Mappable<ReturnType<LineIt
         const unitDescriptionResult = UnitDescription.create(description);
 
         if (unitDescriptionResult.isError()) {
-            return Result.error(unitDescriptionResult.unwrapError());
+            return unitDescriptionResult.error();
         }
 
         const unitQuantityResult = UnitQuantity.create(quantity);
 
         if (unitQuantityResult.isError()) {
-            return Result.error(unitQuantityResult.unwrapError());
+            return unitQuantityResult.error();
         }
 
         const moneyResult = Money.create(price.amount, price.currency);
 
         if (moneyResult.isError()) {
-            return Result.error(moneyResult.unwrapError());
+            return moneyResult.error();
         }
 
         const unitDescription = unitDescriptionResult.unwrap();

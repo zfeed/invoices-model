@@ -111,7 +111,7 @@ export class FinancialDocument implements Mappable<ReturnType<FinancialDocument[
         const authflowResult = authflow.apply(approval);
 
         if (authflowResult.isError()) {
-            return Result.error(authflowResult.unwrapError());
+            return authflowResult.error();
         }
 
         this.#authflows = this.#authflows.map((a) =>

@@ -5,7 +5,9 @@ import { Currency } from '../currency/currency';
 import { checkEqualCurrencies } from './checks/check-equal-currencies';
 import { checkMinorUnits } from './checks/check-minor-units';
 
-export class Money implements Equatable<Money>, Mappable<ReturnType<Money['toPlain']>> {
+export class Money
+    implements Equatable<Money>, Mappable<ReturnType<Money['toPlain']>>
+{
     #amount: Numeric;
     #currency: Currency;
 
@@ -61,7 +63,10 @@ export class Money implements Equatable<Money>, Mappable<ReturnType<Money['toPla
     }
 
     static fromPlain(plain: { amount: string; currency: string }) {
-        return new Money(Numeric.create(plain.amount).unwrap(), Currency.fromPlain(plain.currency));
+        return new Money(
+            Numeric.create(plain.amount).unwrap(),
+            Currency.fromPlain(plain.currency)
+        );
     }
 
     static create(amount: string, currency: string) {
@@ -76,7 +81,7 @@ export class Money implements Equatable<Money>, Mappable<ReturnType<Money['toPla
         const currencyResult = Currency.create(currency);
 
         if (currencyResult.isError()) {
-            return Result.error(currencyResult.unwrapError());
+            return currencyResult.error();
         }
 
         return Result.ok(new Money(numericValue, currencyResult.unwrap()));

@@ -30,7 +30,7 @@ export class Approval implements Mappable<ReturnType<Approval['toPlain']>> {
         const commentResult = Comment.create(data.comment);
 
         if (commentResult.isError()) {
-            return Result.error(commentResult.unwrapError());
+            return commentResult.error();
         }
 
         return Result.ok(

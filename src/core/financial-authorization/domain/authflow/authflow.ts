@@ -86,7 +86,7 @@ export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
         const stepResult = this.#currentStep.apply(approval);
 
         if (stepResult.isError()) {
-            return Result.error(stepResult.unwrapError());
+            return stepResult.error();
         }
 
         const updatedSteps = this.#steps.map((s) =>

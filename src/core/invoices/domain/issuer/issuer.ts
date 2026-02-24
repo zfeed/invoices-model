@@ -109,7 +109,7 @@ export class Issuer implements Equatable<Issuer>, Mappable<ReturnType<Issuer['to
         const emailResult = Email.create(email);
 
         if (emailResult.isError()) {
-            return Result.error(emailResult.unwrapError());
+            return emailResult.error();
         }
 
         const issueEmail = emailResult.unwrap();
