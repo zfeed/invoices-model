@@ -131,7 +131,7 @@ export class FinancialDocument
         const authflowResult = authflow.apply(approval);
 
         if (authflowResult.isError()) {
-            return authflowResult.error();
+            return Result.error(authflowResult.unwrapError());
         }
 
         this.#authflows = this.#authflows.map((a) =>

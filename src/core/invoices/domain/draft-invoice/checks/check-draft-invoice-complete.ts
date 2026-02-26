@@ -3,11 +3,10 @@ import { CalendarDate } from '../../calendar-date/calendar-date';
 import { Issuer } from '../../issuer/issuer';
 import { LineItems } from '../../line-items/line-items';
 import { Money } from '../../money/money/money';
-import { IBilling } from '../../billing/billing.interface';
 import { Recipient } from '../../recipient/recipient';
 import { VatRate } from '../../vat-rate/vat-rate';
 
-export function checkDraftInvoiceComplete<T, D, B extends IBilling<T, D>>({
+export function checkDraftInvoiceComplete({
     total,
     vatRate,
     vatAmount,

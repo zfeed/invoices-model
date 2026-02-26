@@ -103,7 +103,7 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
         const groupResult = this.#groups[groupIndex].apply(approval);
 
         if (groupResult.isError()) {
-            return groupResult.error();
+            return Result.error(groupResult.unwrapError());
         }
 
         const updatedGroups = this.#groups.map((g, i) =>
