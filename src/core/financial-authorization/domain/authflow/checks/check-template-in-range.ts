@@ -3,7 +3,10 @@ import { DomainError } from '../../../../../building-blocks/errors/domain/domain
 import { Money } from '../../money/money';
 import { AuthflowTemplate } from '../authflow-template';
 
-export function checkTemplateInRange(templates: AuthflowTemplate[], amount: Money): DomainError | null {
+export function checkTemplateInRange(
+    templates: AuthflowTemplate[],
+    amount: Money
+): DomainError | null {
     const found = templates.some(
         (t) =>
             Number(amount.amount) >= Number(t.range.from.amount) &&

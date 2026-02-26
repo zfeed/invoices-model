@@ -10,7 +10,11 @@ import { VatRate } from '../vat-rate/vat-rate';
 import { InvoiceStatus } from '../status/invoice-status';
 import { Invoice } from './invoice';
 
-const createLineItem = (description = 'Item 1', amount = '50', quantity = '2') =>
+const createLineItem = (
+    description = 'Item 1',
+    amount = '50',
+    quantity = '2'
+) =>
     LineItem.create({
         description,
         price: { amount, currency: 'USD' },
@@ -39,7 +43,10 @@ const createRecipient = () => {
     }).unwrap();
 };
 
-const createIssuedInvoice = (options?: { vatRate?: VatRate | null; items?: LineItem[] }) => {
+const createIssuedInvoice = (options?: {
+    vatRate?: VatRate | null;
+    items?: LineItem[];
+}) => {
     const items = options?.items ?? [createLineItem()];
     const lineItems = LineItems.create({ items }).unwrap();
     return Invoice.create({
@@ -61,7 +68,9 @@ describe('Invoice', () => {
         const dueDate = CalendarDate.create('2028-01-01').unwrap();
         const issuer = createIssuer();
         const recipient = createRecipient();
-        const lineItems = LineItems.create({ items: [lineItem1, lineItem2] }).unwrap();
+        const lineItems = LineItems.create({
+            items: [lineItem1, lineItem2],
+        }).unwrap();
         const vatRate = VatRate.create('10').unwrap();
         const vatAmount = Money.create('20', 'USD').unwrap();
 
@@ -75,11 +84,17 @@ describe('Invoice', () => {
             recipient,
         }).unwrap();
 
-        expect(invoice.total.equals(Money.create('220', 'USD').unwrap())).toBe(true);
+        expect(invoice.total.equals(Money.create('220', 'USD').unwrap())).toBe(
+            true
+        );
         expect(
-            invoice.lineItems.subtotal.equals(Money.create('200', 'USD').unwrap())
+            invoice.lineItems.subtotal.equals(
+                Money.create('200', 'USD').unwrap()
+            )
         ).toBe(true);
-        expect(invoice.vatRate!.equals(VatRate.create('10').unwrap())).toBe(true);
+        expect(invoice.vatRate!.equals(VatRate.create('10').unwrap())).toBe(
+            true
+        );
         expect(
             invoice.vatAmount!.equals(Money.create('20', 'USD').unwrap())
         ).toBe(true);
@@ -300,7 +315,9 @@ describe('Invoice', () => {
     it('should not create an invoice when due date is before issue date', () => {
         const lineItem1 = createLineItem('Item 1', '50', '2');
         const lineItem2 = createLineItem('Item 2', '100', '1');
-        const lineItems = LineItems.create({ items: [lineItem1, lineItem2] }).unwrap();
+        const lineItems = LineItems.create({
+            items: [lineItem1, lineItem2],
+        }).unwrap();
         const vatRate = VatRate.create('10').unwrap();
 
         const invoice = Invoice.create({

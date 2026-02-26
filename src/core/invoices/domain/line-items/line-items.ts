@@ -5,7 +5,11 @@ import { checkNoDuplicate } from './checks/check-no-duplicate';
 import { checkNonEmpty } from './checks/check-non-empty';
 import { checkSameCurrency } from './checks/check-same-currency';
 
-export class LineItems implements Equatable<ReadOnlyLineItems>, Mappable<ReturnType<LineItems['toPlain']>> {
+export class LineItems
+    implements
+        Equatable<ReadOnlyLineItems>,
+        Mappable<ReturnType<LineItems['toPlain']>>
+{
     #items: LineItem[];
     #subtotal: Money;
 
@@ -71,7 +75,7 @@ export class LineItems implements Equatable<ReadOnlyLineItems>, Mappable<ReturnT
     static fromPlain(plain: ReturnType<LineItems['toPlain']>) {
         return new LineItems(
             plain.items.map((item) => LineItem.fromPlain(item)),
-            Money.fromPlain(plain.subtotal),
+            Money.fromPlain(plain.subtotal)
         );
     }
 

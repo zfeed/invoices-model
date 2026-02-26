@@ -145,9 +145,7 @@ export const expectValidationError = async (
     expect(json.error.message).toBe('Validation failed');
     for (const path of paths) {
         expect(json.error.issues).toEqual(
-            expect.arrayContaining([
-                expect.objectContaining({ path }),
-            ])
+            expect.arrayContaining([expect.objectContaining({ path })])
         );
     }
 };

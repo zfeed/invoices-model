@@ -96,12 +96,8 @@ export class CreateDraftInvoice {
                 if (request.recipient) {
                     const billing =
                         request.recipient.billing.type === 'PAYPAL'
-                            ? Paypal.create(
-                                  request.recipient.billing
-                              ).unwrap()
-                            : Wire.create(
-                                  request.recipient.billing
-                              ).unwrap();
+                            ? Paypal.create(request.recipient.billing).unwrap()
+                            : Wire.create(request.recipient.billing).unwrap();
 
                     const recipient = Recipient.create({
                         type: request.recipient.type,

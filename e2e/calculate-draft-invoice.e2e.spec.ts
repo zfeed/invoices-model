@@ -1,4 +1,10 @@
-import { setupApp, expectError, tooLong, expectValidationError, EMPTY_DRAFT_SHAPE } from './helpers';
+import {
+    setupApp,
+    expectError,
+    tooLong,
+    expectValidationError,
+    EMPTY_DRAFT_SHAPE,
+} from './helpers';
 
 const { postJson, postRaw } = setupApp();
 
@@ -25,7 +31,10 @@ describe('POST /invoices/drafts/calculate', () => {
             quantity: '3',
             total: { amount: '600', currency: 'USD' },
         });
-        expect(json.data.lineItems.subtotal).toEqual({ amount: '600', currency: 'USD' });
+        expect(json.data.lineItems.subtotal).toEqual({
+            amount: '600',
+            currency: 'USD',
+        });
         expect(json.data.vatRate).toBe('0.1');
         expect(json.data.vatAmount).toEqual({ amount: '60', currency: 'USD' });
         expect(json.data.total).toEqual({ amount: '660', currency: 'USD' });

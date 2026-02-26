@@ -7,7 +7,9 @@ export enum ISSUER_TYPE {
     COMPANY = 'COMPANY',
 }
 
-export class Issuer implements Equatable<Issuer>, Mappable<ReturnType<Issuer['toPlain']>> {
+export class Issuer
+    implements Equatable<Issuer>, Mappable<ReturnType<Issuer['toPlain']>>
+{
     #type: ISSUER_TYPE;
     #name: string;
     #address: string;
@@ -74,7 +76,7 @@ export class Issuer implements Equatable<Issuer>, Mappable<ReturnType<Issuer['to
             plain.name,
             plain.address,
             plain.taxId,
-            Email.fromPlain(plain.email),
+            Email.fromPlain(plain.email)
         );
     }
 

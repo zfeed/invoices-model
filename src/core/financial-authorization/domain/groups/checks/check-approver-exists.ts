@@ -3,7 +3,10 @@ import { DomainError } from '../../../../../building-blocks/errors/domain/domain
 import { Approval } from '../../approval/approval';
 import { Approver } from '../../approver/approver';
 
-export function checkApproverExists(approvers: Approver[], approvals: Approval[]): DomainError | null {
+export function checkApproverExists(
+    approvers: Approver[],
+    approvals: Approval[]
+): DomainError | null {
     const approverIds = approvers.map((a) => a.id.toPlain());
 
     for (const approval of approvals) {

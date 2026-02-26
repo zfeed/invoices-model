@@ -28,7 +28,7 @@ describe('Paypal', () => {
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError()).toEqual(
-            expect.objectContaining({ code: '6000' }),
+            expect.objectContaining({ code: '6000' })
         );
     });
 

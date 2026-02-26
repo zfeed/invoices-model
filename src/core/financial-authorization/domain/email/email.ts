@@ -15,7 +15,7 @@ export class Email implements Equatable<Email>, Mappable<string> {
             return Result.error(error);
         }
 
-        return Result.ok(new Email(value));
+        return Result.ok(new Email(value.toLowerCase()));
     }
 
     static fromPlain(value: string) {

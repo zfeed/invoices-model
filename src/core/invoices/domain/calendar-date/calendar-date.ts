@@ -1,8 +1,16 @@
-import { Comparable, Equatable, Mappable, Result } from '../../../../building-blocks';
+import {
+    Comparable,
+    Equatable,
+    Mappable,
+    Result,
+} from '../../../../building-blocks';
 import { checkIsISO8601Date } from './checks/check-iso8601-date';
 
 export class CalendarDate
-    implements Equatable<CalendarDate>, Comparable<CalendarDate>, Mappable<string>
+    implements
+        Equatable<CalendarDate>,
+        Comparable<CalendarDate>,
+        Mappable<string>
 {
     #value: string;
 

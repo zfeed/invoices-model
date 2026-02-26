@@ -2,7 +2,9 @@ import { DOMAIN_ERROR_CODE } from '../../../../../building-blocks/errors/domain/
 import { DomainError } from '../../../../../building-blocks/errors/domain/domain.error';
 import { StepTemplate } from '../../step/step-template';
 
-export function checkTemplateNoDuplicateStepOrders(steps: StepTemplate[]): DomainError | null {
+export function checkTemplateNoDuplicateStepOrders(
+    steps: StepTemplate[]
+): DomainError | null {
     const orders = steps.map((s) => s.order.toPlain());
     const uniqueOrders = new Set(orders);
 

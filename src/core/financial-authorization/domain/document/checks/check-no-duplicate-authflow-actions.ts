@@ -2,7 +2,9 @@ import { DOMAIN_ERROR_CODE } from '../../../../../building-blocks/errors/domain/
 import { DomainError } from '../../../../../building-blocks/errors/domain/domain.error';
 import { Authflow } from '../../authflow/authflow';
 
-export function checkNoDuplicateAuthflowActions(authflows: Authflow[]): DomainError | null {
+export function checkNoDuplicateAuthflowActions(
+    authflows: Authflow[]
+): DomainError | null {
     const actions = authflows.map((a) => a.action.toPlain());
     const uniqueActions = new Set(actions);
 

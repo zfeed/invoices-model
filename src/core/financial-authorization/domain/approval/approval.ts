@@ -8,7 +8,11 @@ export class Approval implements Mappable<ReturnType<Approval['toPlain']>> {
     #createdAt: Timestamp;
     #comment: Comment;
 
-    protected constructor(approverId: Id, createdAt: Timestamp, comment: Comment) {
+    protected constructor(
+        approverId: Id,
+        createdAt: Timestamp,
+        comment: Comment
+    ) {
         this.#approverId = approverId;
         this.#createdAt = createdAt;
         this.#comment = comment;
@@ -34,15 +38,23 @@ export class Approval implements Mappable<ReturnType<Approval['toPlain']>> {
         }
 
         return Result.ok(
-            new Approval(data.approverId, Timestamp.create(), commentResult.unwrap())
+            new Approval(
+                data.approverId,
+                Timestamp.create(),
+                commentResult.unwrap()
+            )
         );
     }
 
-    static fromPlain(plain: { approverId: string; createdAt: string; comment: string | null }) {
+    static fromPlain(plain: {
+        approverId: string;
+        createdAt: string;
+        comment: string | null;
+    }) {
         return new Approval(
             Id.fromPlain(plain.approverId),
             Timestamp.fromPlain(plain.createdAt),
-            Comment.fromPlain(plain.comment),
+            Comment.fromPlain(plain.comment)
         );
     }
 

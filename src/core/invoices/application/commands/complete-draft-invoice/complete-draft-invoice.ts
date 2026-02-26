@@ -13,8 +13,8 @@ export class CompleteDraftInvoice {
     ) {}
 
     public async execute(id: string) {
-        const { draftInvoice, invoice } =
-            await this.unitOfWorkFactory.start(async (unitOfWork) => {
+        const { draftInvoice, invoice } = await this.unitOfWorkFactory.start(
+            async (unitOfWork) => {
                 const draftInvoice = await unitOfWork
                     .collection(DraftInvoice)
                     .get(Id.fromString(id));
@@ -31,7 +31,8 @@ export class CompleteDraftInvoice {
                 await unitOfWork.collection(Invoice).add(invoice);
 
                 return { draftInvoice, invoice };
-            });
+            }
+        );
 
         await this.domainEvents.publishEvents(draftInvoice, invoice);
 

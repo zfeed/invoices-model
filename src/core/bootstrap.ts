@@ -20,23 +20,57 @@ type Infrastructure = {
 };
 
 export const bootstrap = async (infra: Infrastructure) => {
-    const onInvoiceIssued = new OnInvoiceIssued(infra.unitOfWorkFactory, infra.domainEvents);
+    const onInvoiceIssued = new OnInvoiceIssued(
+        infra.unitOfWorkFactory,
+        infra.domainEvents
+    );
     await onInvoiceIssued.register();
 
     const canApproverApprove = new CanApproverApprove(infra.unitOfWorkFactory);
 
     return {
-        createDraftInvoice: new CreateDraftInvoice(infra.unitOfWorkFactory, infra.domainEvents),
-        updateDraftInvoice: new UpdateDraftInvoice(infra.unitOfWorkFactory, infra.domainEvents),
+        createDraftInvoice: new CreateDraftInvoice(
+            infra.unitOfWorkFactory,
+            infra.domainEvents
+        ),
+        updateDraftInvoice: new UpdateDraftInvoice(
+            infra.unitOfWorkFactory,
+            infra.domainEvents
+        ),
         calculateDraftInvoice: new CalculateDraftInvoice(),
-        completeDraftInvoice: new CompleteDraftInvoice(infra.unitOfWorkFactory, infra.domainEvents),
-        archiveDraftInvoice: new ArchiveDraftInvoice(infra.unitOfWorkFactory, infra.domainEvents),
-        draftDraftInvoice: new DraftDraftInvoice(infra.unitOfWorkFactory, infra.domainEvents),
-        processInvoice: new ProcessInvoice(infra.unitOfWorkFactory, infra.domainEvents),
-        cancelInvoice: new CancelInvoice(infra.unitOfWorkFactory, infra.domainEvents),
-        payInvoice: new PayInvoice(infra.unitOfWorkFactory, infra.domainEvents, canApproverApprove),
-        createAuthflowPolicy: new CreateAuthflowPolicy(infra.unitOfWorkFactory, infra.domainEvents),
-        approveActionOnDocument: new ApproveActionOnDocument(infra.unitOfWorkFactory, infra.domainEvents),
+        completeDraftInvoice: new CompleteDraftInvoice(
+            infra.unitOfWorkFactory,
+            infra.domainEvents
+        ),
+        archiveDraftInvoice: new ArchiveDraftInvoice(
+            infra.unitOfWorkFactory,
+            infra.domainEvents
+        ),
+        draftDraftInvoice: new DraftDraftInvoice(
+            infra.unitOfWorkFactory,
+            infra.domainEvents
+        ),
+        processInvoice: new ProcessInvoice(
+            infra.unitOfWorkFactory,
+            infra.domainEvents
+        ),
+        cancelInvoice: new CancelInvoice(
+            infra.unitOfWorkFactory,
+            infra.domainEvents
+        ),
+        payInvoice: new PayInvoice(
+            infra.unitOfWorkFactory,
+            infra.domainEvents,
+            canApproverApprove
+        ),
+        createAuthflowPolicy: new CreateAuthflowPolicy(
+            infra.unitOfWorkFactory,
+            infra.domainEvents
+        ),
+        approveActionOnDocument: new ApproveActionOnDocument(
+            infra.unitOfWorkFactory,
+            infra.domainEvents
+        ),
         canApproverApprove,
     };
 };

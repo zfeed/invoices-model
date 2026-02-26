@@ -2,7 +2,9 @@ import { DOMAIN_ERROR_CODE } from '../../../../../building-blocks/errors/domain/
 import { DomainError } from '../../../../../building-blocks/errors/domain/domain.error';
 import { Approver } from '../../approver/approver';
 
-export function checkTemplateApproversNotEmpty(approvers: Approver[]): DomainError | null {
+export function checkTemplateApproversNotEmpty(
+    approvers: Approver[]
+): DomainError | null {
     if (approvers.length === 0) {
         return new DomainError({
             message: 'Approvers array cannot be empty',

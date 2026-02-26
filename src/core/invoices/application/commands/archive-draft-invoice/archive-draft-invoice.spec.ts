@@ -15,7 +15,10 @@ describe('ArchiveDraftInvoice', () => {
         unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         domainEvents = new InMemoryDomainEvents();
         createCommand = new CreateDraftInvoice(unitOfWorkFactory, domainEvents);
-        archiveCommand = new ArchiveDraftInvoice(unitOfWorkFactory, domainEvents);
+        archiveCommand = new ArchiveDraftInvoice(
+            unitOfWorkFactory,
+            domainEvents
+        );
     });
 
     it('should throw ITEM_NOT_FOUND when draft invoice does not exist', async () => {

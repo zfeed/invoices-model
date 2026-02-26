@@ -1,5 +1,8 @@
 import { isBIC } from 'validator';
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../../building-blocks';
+import {
+    DOMAIN_ERROR_CODE,
+    DomainError,
+} from '../../../../../../building-blocks';
 
 export function checkSwift(value: string): DomainError | null {
     if (!isBIC(value)) {

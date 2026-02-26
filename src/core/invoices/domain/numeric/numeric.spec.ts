@@ -23,7 +23,10 @@ describe('Numeric', () => {
             Numeric.create('50.25').unwrap(),
             Numeric.create('100.75').unwrap(),
         ],
-        createEqual: () => [Numeric.create('42.42').unwrap(), Numeric.create('42.42').unwrap()],
+        createEqual: () => [
+            Numeric.create('42.42').unwrap(),
+            Numeric.create('42.42').unwrap(),
+        ],
     });
 
     test.each([
@@ -90,7 +93,9 @@ describe('Numeric', () => {
         const a = Numeric.create('1000000000000000000').unwrap();
         const b = Numeric.create('2').unwrap();
         const result = a.multiplyBy(b);
-        expect(result.equals(Numeric.create('2000000000000000000').unwrap())).toBe(true);
+        expect(
+            result.equals(Numeric.create('2000000000000000000').unwrap())
+        ).toBe(true);
     });
 
     it('should return error for division by zero', () => {
@@ -98,20 +103,19 @@ describe('Numeric', () => {
         const b = Numeric.create('0').unwrap();
         const result = a.divideBy(b);
         expect(result.unwrapError()).toEqual(
-            expect.objectContaining({ code: '12001' }),
+            expect.objectContaining({ code: '12001' })
         );
     });
 
-    test.each([
-        ['abc'],
-        [''],
-        ['12.34.56'],
-    ])('should return error for invalid value: %s', (value) => {
-        const result = Numeric.create(value);
-        expect(result.unwrapError()).toEqual(
-            expect.objectContaining({ code: '12000' }),
-        );
-    });
+    test.each([['abc'], [''], ['12.34.56']])(
+        'should return error for invalid value: %s',
+        (value) => {
+            const result = Numeric.create(value);
+            expect(result.unwrapError()).toEqual(
+                expect.objectContaining({ code: '12000' })
+            );
+        }
+    );
 
     describe('toDecimalPlaces', () => {
         test.each([
@@ -119,7 +123,9 @@ describe('Numeric', () => {
             ['1.2', 0, '2'],
             ['1.005', 2, '1.01'],
         ])('rounds %s to %s decimal places (up)', (value, places, expected) => {
-            const result = Numeric.create(value).unwrap().toDecimalPlaces(places);
+            const result = Numeric.create(value)
+                .unwrap()
+                .toDecimalPlaces(places);
             expect(result.equals(Numeric.create(expected).unwrap())).toBe(true);
         });
     });

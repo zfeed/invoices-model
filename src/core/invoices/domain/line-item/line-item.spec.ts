@@ -51,7 +51,9 @@ describe('LineItem', () => {
 
         expect(lineItem.price.equals(price)).toBe(true);
         expect(
-            lineItem.description.equals(UnitDescription.create('Product 1').unwrap())
+            lineItem.description.equals(
+                UnitDescription.create('Product 1').unwrap()
+            )
         ).toBe(true);
         expect(
             lineItem.quantity.equals(UnitQuantity.create('4').unwrap())
@@ -107,7 +109,9 @@ describe('LineItem', () => {
             quantity: '3',
         }).unwrap();
 
-        expect(lineItem.total.equals(Money.create('750', 'EUR').unwrap())).toBe(true);
+        expect(lineItem.total.equals(Money.create('750', 'EUR').unwrap())).toBe(
+            true
+        );
     });
 
     describe('toPlain / fromPlain', () => {

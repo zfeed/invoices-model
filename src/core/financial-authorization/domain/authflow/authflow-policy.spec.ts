@@ -73,10 +73,7 @@ describe('createAuthflowPolicy', () => {
     it('should fail when ranges overlap', () => {
         const result = AuthflowPolicy.create({
             action: Action.create('approve-invoice').unwrap(),
-            templates: [
-                template('0', '5000'),
-                template('3000', '10000'),
-            ],
+            templates: [template('0', '5000'), template('3000', '10000')],
         });
 
         expect(result.isError()).toBe(true);
@@ -88,10 +85,7 @@ describe('createAuthflowPolicy', () => {
     it('should fail when ranges share a boundary point', () => {
         const result = AuthflowPolicy.create({
             action: Action.create('approve-invoice').unwrap(),
-            templates: [
-                template('0', '5000'),
-                template('5000', '10000'),
-            ],
+            templates: [template('0', '5000'), template('5000', '10000')],
         });
 
         expect(result.isError()).toBe(true);
@@ -103,10 +97,7 @@ describe('createAuthflowPolicy', () => {
     it('should fail when one range is contained within another', () => {
         const result = AuthflowPolicy.create({
             action: Action.create('approve-invoice').unwrap(),
-            templates: [
-                template('0', '10000'),
-                template('2000', '5000'),
-            ],
+            templates: [template('0', '10000'), template('2000', '5000')],
         });
 
         expect(result.isError()).toBe(true);
@@ -118,10 +109,7 @@ describe('createAuthflowPolicy', () => {
     it('should fail when identical ranges exist', () => {
         const result = AuthflowPolicy.create({
             action: Action.create('approve-invoice').unwrap(),
-            templates: [
-                template('0', '5000'),
-                template('0', '5000'),
-            ],
+            templates: [template('0', '5000'), template('0', '5000')],
         });
 
         expect(result.isError()).toBe(true);
@@ -142,7 +130,9 @@ describe('createAuthflowPolicy', () => {
 
         expect(result1.isOk()).toBe(true);
         expect(result2.isOk()).toBe(true);
-        expect(result1.unwrap().id.toPlain()).not.toBe(result2.unwrap().id.toPlain());
+        expect(result1.unwrap().id.toPlain()).not.toBe(
+            result2.unwrap().id.toPlain()
+        );
     });
 
     it('should produce an AuthflowPolicyCreatedEvent', () => {
@@ -159,10 +149,7 @@ describe('createAuthflowPolicy', () => {
     it('should include policy data in the AuthflowPolicyCreatedEvent', () => {
         const result = AuthflowPolicy.create({
             action: Action.create('approve-invoice').unwrap(),
-            templates: [
-                template('0', '1000'),
-                template('1001', '5000'),
-            ],
+            templates: [template('0', '1000'), template('1001', '5000')],
         });
 
         const policy = result.unwrap();
@@ -260,10 +247,7 @@ describe('selectAuthflow', () => {
     it('should fail when amount falls in a gap between ranges', () => {
         const gapPolicy = AuthflowPolicy.create({
             action: Action.create('approve-invoice').unwrap(),
-            templates: [
-                template('0', '100'),
-                template('200', '300'),
-            ],
+            templates: [template('0', '100'), template('200', '300')],
         }).unwrap();
 
         const amount = Money.create('150', 'USD').unwrap();

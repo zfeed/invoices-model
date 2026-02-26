@@ -6,7 +6,10 @@ import { OptimisticConcurrencyError } from '../optimistic-concurrency.error';
 import { Invoice } from '../../invoices/domain/invoice/invoice';
 import { CalendarDate } from '../../invoices/domain/calendar-date/calendar-date';
 import { Issuer, ISSUER_TYPE } from '../../invoices/domain/issuer/issuer';
-import { Recipient, RECIPIENT_TYPE } from '../../invoices/domain/recipient/recipient';
+import {
+    Recipient,
+    RECIPIENT_TYPE,
+} from '../../invoices/domain/recipient/recipient';
 import { Paypal } from '../../invoices/domain/billing/paypal/paypal';
 import { UnitDescription } from '../../invoices/domain/line-item/unit-description/unit-description';
 

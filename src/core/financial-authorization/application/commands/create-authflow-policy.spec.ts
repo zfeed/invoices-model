@@ -24,7 +24,10 @@ describe('createAuthflowPolicyCommand', () => {
     it('should create and save a policy', async () => {
         const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
-        const command = new CreateAuthflowPolicy(unitOfWorkFactory, domainEvents);
+        const command = new CreateAuthflowPolicy(
+            unitOfWorkFactory,
+            domainEvents
+        );
 
         const policy = await command.execute({
             action: 'approve-invoice',
@@ -42,7 +45,10 @@ describe('createAuthflowPolicyCommand', () => {
     it('should persist the policy in storage', async () => {
         const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
-        const command = new CreateAuthflowPolicy(unitOfWorkFactory, domainEvents);
+        const command = new CreateAuthflowPolicy(
+            unitOfWorkFactory,
+            domainEvents
+        );
 
         const policy = await command.execute({
             action: 'approve-invoice',
@@ -50,7 +56,9 @@ describe('createAuthflowPolicyCommand', () => {
         });
 
         await unitOfWorkFactory.start(async (uow) => {
-            const found = await uow.collection(AuthflowPolicy).findBy('action', 'approve-invoice');
+            const found = await uow
+                .collection(AuthflowPolicy)
+                .findBy('action', 'approve-invoice');
             expect(found).not.toBeUndefined();
             expect(found!.id.toPlain()).toBe(policy.id);
         });
@@ -59,7 +67,10 @@ describe('createAuthflowPolicyCommand', () => {
     it('should publish an AuthflowPolicyCreatedEvent', async () => {
         const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
-        const command = new CreateAuthflowPolicy(unitOfWorkFactory, domainEvents);
+        const command = new CreateAuthflowPolicy(
+            unitOfWorkFactory,
+            domainEvents
+        );
 
         const published: AuthflowPolicyCreatedEvent[] = [];
         await domainEvents.subscribeToEvent(
@@ -82,15 +93,15 @@ describe('createAuthflowPolicyCommand', () => {
     it('should throw when ranges overlap', async () => {
         const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
-        const command = new CreateAuthflowPolicy(unitOfWorkFactory, domainEvents);
+        const command = new CreateAuthflowPolicy(
+            unitOfWorkFactory,
+            domainEvents
+        );
 
         await expect(
             command.execute({
                 action: 'approve-invoice',
-                templates: [
-                    template('0', '5000'),
-                    template('3000', '10000'),
-                ],
+                templates: [template('0', '5000'), template('3000', '10000')],
             })
         ).rejects.toMatchObject({
             code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_POLICY_RANGES_OVERLAP,
@@ -100,18 +111,22 @@ describe('createAuthflowPolicyCommand', () => {
     it('should not persist the policy when validation fails', async () => {
         const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
-        const command = new CreateAuthflowPolicy(unitOfWorkFactory, domainEvents);
+        const command = new CreateAuthflowPolicy(
+            unitOfWorkFactory,
+            domainEvents
+        );
 
-        await command.execute({
-            action: 'approve-invoice',
-            templates: [
-                template('0', '5000'),
-                template('3000', '10000'),
-            ],
-        }).catch(() => {});
+        await command
+            .execute({
+                action: 'approve-invoice',
+                templates: [template('0', '5000'), template('3000', '10000')],
+            })
+            .catch(() => {});
 
         await unitOfWorkFactory.start(async (uow) => {
-            const found = await uow.collection(AuthflowPolicy).findBy('action', 'approve-invoice');
+            const found = await uow
+                .collection(AuthflowPolicy)
+                .findBy('action', 'approve-invoice');
             expect(found).toBeUndefined();
         });
     });
@@ -119,7 +134,10 @@ describe('createAuthflowPolicyCommand', () => {
     it('should not publish events when validation fails', async () => {
         const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
-        const command = new CreateAuthflowPolicy(unitOfWorkFactory, domainEvents);
+        const command = new CreateAuthflowPolicy(
+            unitOfWorkFactory,
+            domainEvents
+        );
 
         const published: AuthflowPolicyCreatedEvent[] = [];
         await domainEvents.subscribeToEvent(
@@ -129,13 +147,12 @@ describe('createAuthflowPolicyCommand', () => {
             }
         );
 
-        await command.execute({
-            action: 'approve-invoice',
-            templates: [
-                template('0', '5000'),
-                template('3000', '10000'),
-            ],
-        }).catch(() => {});
+        await command
+            .execute({
+                action: 'approve-invoice',
+                templates: [template('0', '5000'), template('3000', '10000')],
+            })
+            .catch(() => {});
 
         expect(published).toHaveLength(0);
     });

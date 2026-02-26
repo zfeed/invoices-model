@@ -16,7 +16,9 @@ describe('Recipient', () => {
                 address: '123 Main St',
                 taxId: 'TAX123',
                 email: 'info@company.com',
-                billing: Paypal.create({ email: 'billing@company.com' }).unwrap(),
+                billing: Paypal.create({
+                    email: 'billing@company.com',
+                }).unwrap(),
             }).unwrap(),
             Recipient.create({
                 type: RECIPIENT_TYPE.INDIVIDUAL,
@@ -25,7 +27,9 @@ describe('Recipient', () => {
                 address: '123 Main St',
                 taxId: 'TAX123',
                 email: 'info@company.com',
-                billing: Paypal.create({ email: 'billing@company.com' }).unwrap(),
+                billing: Paypal.create({
+                    email: 'billing@company.com',
+                }).unwrap(),
             }).unwrap(),
             Recipient.create({
                 type: RECIPIENT_TYPE.INDIVIDUAL,
@@ -34,7 +38,9 @@ describe('Recipient', () => {
                 address: '123 Main St',
                 taxId: 'TAX123',
                 email: 'info@company.com',
-                billing: Paypal.create({ email: 'billing@company.com' }).unwrap(),
+                billing: Paypal.create({
+                    email: 'billing@company.com',
+                }).unwrap(),
             }).unwrap(),
         ],
         createDifferent: () => {
@@ -92,9 +98,7 @@ describe('Recipient', () => {
         expect(recipient.taxId).toBe('TAX123456');
         expect(recipient.type).toBe('INDIVIDUAL');
         expect(
-            recipient.taxResidenceCountry.equals(
-                Country.create('US').unwrap()
-            )
+            recipient.taxResidenceCountry.equals(Country.create('US').unwrap())
         ).toBe(true);
         expect(recipient.billing.type).toBe('PAYPAL');
     });
@@ -138,7 +142,7 @@ describe('Recipient', () => {
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError()).toEqual(
-            expect.objectContaining({ code: '14000' }),
+            expect.objectContaining({ code: '14000' })
         );
     });
 
@@ -155,7 +159,7 @@ describe('Recipient', () => {
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError()).toEqual(
-            expect.objectContaining({ code: '14000' }),
+            expect.objectContaining({ code: '14000' })
         );
     });
 
@@ -172,7 +176,7 @@ describe('Recipient', () => {
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError()).toEqual(
-            expect.objectContaining({ code: '14000' }),
+            expect.objectContaining({ code: '14000' })
         );
     });
 

@@ -1,4 +1,9 @@
-import { DOMAIN_ERROR_CODE, DomainError, Mappable, Result } from '../../../../building-blocks';
+import {
+    DOMAIN_ERROR_CODE,
+    DomainError,
+    Mappable,
+    Result,
+} from '../../../../building-blocks';
 import { Action } from '../action/action';
 import { Approval } from '../approval/approval';
 import { Id } from '../id/id';
@@ -17,7 +22,9 @@ export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
         this.#id = id;
         this.#action = action;
         this.#range = range;
-        this.#steps = [...steps].sort((a, b) => a.order.toPlain() - b.order.toPlain());
+        this.#steps = [...steps].sort(
+            (a, b) => a.order.toPlain() - b.order.toPlain()
+        );
         this.#currentStep = this.#steps.find((s) => !s.isApproved);
     }
 
@@ -47,13 +54,23 @@ export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
             return Result.error(error);
         }
 
-        return Result.ok(new Authflow(Id.create().unwrap(), data.action, data.range, data.steps));
+        return Result.ok(
+            new Authflow(
+                Id.create().unwrap(),
+                data.action,
+                data.range,
+                data.steps
+            )
+        );
     }
 
     static fromPlain(plain: {
         id: string;
         action: string;
-        range: { from: { amount: string; currency: string }; to: { amount: string; currency: string } };
+        range: {
+            from: { amount: string; currency: string };
+            to: { amount: string; currency: string };
+        };
         steps: {
             id: string;
             order: number;
@@ -61,7 +78,11 @@ export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
                 id: string;
                 requiredApprovals: number;
                 approvers: { id: string; name: string; email: string }[];
-                approvals: { approverId: string; createdAt: string; comment: string | null }[];
+                approvals: {
+                    approverId: string;
+                    createdAt: string;
+                    comment: string | null;
+                }[];
             }[];
         }[];
     }) {
@@ -69,7 +90,7 @@ export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
             Id.fromPlain(plain.id),
             Action.fromPlain(plain.action),
             Range.fromPlain(plain.range),
-            plain.steps.map((s) => Step.fromPlain(s)),
+            plain.steps.map((s) => Step.fromPlain(s))
         );
     }
 
@@ -98,7 +119,9 @@ export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
             return Result.error(error);
         }
 
-        return Result.ok(new Authflow(this.#id, this.#action, this.#range, updatedSteps));
+        return Result.ok(
+            new Authflow(this.#id, this.#action, this.#range, updatedSteps)
+        );
     }
 
     hasEligibleApprover(approverId: Id): boolean {

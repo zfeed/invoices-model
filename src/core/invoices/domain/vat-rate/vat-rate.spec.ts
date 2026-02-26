@@ -25,7 +25,9 @@ describe('VatRate', () => {
 
         it('should create vat from decimal input', () => {
             const vat = VatRate.create('0.5').unwrap();
-            expect(vat.rate.equals(Numeric.create('0.005').unwrap())).toBe(true);
+            expect(vat.rate.equals(Numeric.create('0.005').unwrap())).toBe(
+                true
+            );
         });
 
         it('should not create vat when not numeric input', () => {
@@ -94,7 +96,9 @@ describe('VatRate', () => {
             const result = vat.addTo(money);
 
             expect(result.isOk()).toBe(true);
-            expect(result.unwrap().equals(Money.create('12000', 'EUR').unwrap())).toBe(true);
+            expect(
+                result.unwrap().equals(Money.create('12000', 'EUR').unwrap())
+            ).toBe(true);
         });
 
         it('applies 0% vat rate to money', () => {

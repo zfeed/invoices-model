@@ -13,9 +13,8 @@ export class OnInvoiceIssued {
     ) {}
 
     public async register() {
-        await this.domainEvents.subscribeToEvent(
-            InvoiceIssuedEvent,
-            (event) => this.handle(event)
+        await this.domainEvents.subscribeToEvent(InvoiceIssuedEvent, (event) =>
+            this.handle(event)
         );
     }
 

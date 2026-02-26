@@ -1,4 +1,9 @@
-import { DOMAIN_ERROR_CODE, DomainError, Mappable, Result } from '../../../../building-blocks';
+import {
+    DOMAIN_ERROR_CODE,
+    DomainError,
+    Mappable,
+    Result,
+} from '../../../../building-blocks';
 import { Issuer } from '../issuer/issuer';
 import { Money } from '../money/money/money';
 import { Recipient } from '../recipient/recipient';
@@ -20,7 +25,11 @@ export class Invoice
     implements
         Mappable<ReturnType<Invoice['toPlain']>>,
         PublishableEvents<
-            InvoiceIssuedEvent | InvoiceProcessingEvent | InvoiceCancelledEvent | InvoicePaidEvent | InvoiceFailedEvent
+            | InvoiceIssuedEvent
+            | InvoiceProcessingEvent
+            | InvoiceCancelledEvent
+            | InvoicePaidEvent
+            | InvoiceFailedEvent
         >
 {
     #id: Id;
@@ -50,7 +59,11 @@ export class Invoice
     }
 
     public get events(): ReadonlyArray<
-        InvoiceIssuedEvent | InvoiceProcessingEvent | InvoiceCancelledEvent | InvoicePaidEvent | InvoiceFailedEvent
+        | InvoiceIssuedEvent
+        | InvoiceProcessingEvent
+        | InvoiceCancelledEvent
+        | InvoicePaidEvent
+        | InvoiceFailedEvent
     > {
         return this.#events;
     }
@@ -117,7 +130,9 @@ export class Invoice
         const lineItems = LineItems.fromPlain(plain.lineItems);
         const vatRate = plain.vatRate ? VatRate.fromPlain(plain.vatRate) : null;
         const total = Money.fromPlain(plain.total);
-        const vatAmount = plain.vatAmount ? Money.fromPlain(plain.vatAmount) : null;
+        const vatAmount = plain.vatAmount
+            ? Money.fromPlain(plain.vatAmount)
+            : null;
         const issueDate = CalendarDate.fromPlain(plain.issueDate);
         const dueDate = CalendarDate.fromPlain(plain.dueDate);
         const issuer = Issuer.fromPlain(plain.issuer);
@@ -133,7 +148,7 @@ export class Invoice
             issueDate,
             dueDate,
             issuer,
-            recipient,
+            recipient
         );
     }
 

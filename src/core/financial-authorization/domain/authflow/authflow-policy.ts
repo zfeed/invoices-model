@@ -10,13 +10,21 @@ import { checkNoOverlappingRanges } from './checks/check-no-overlapping-ranges';
 import { checkTemplateInRange } from './checks/check-template-in-range';
 import { AuthflowPolicyCreatedEvent } from './events/authflow-policy-created.event';
 
-export class AuthflowPolicy implements Mappable<ReturnType<AuthflowPolicy['toPlain']>>, PublishableEvents<DomainEvent<any>> {
+export class AuthflowPolicy
+    implements
+        Mappable<ReturnType<AuthflowPolicy['toPlain']>>,
+        PublishableEvents<DomainEvent<any>>
+{
     #id: Id;
     #action: Action;
     #templates: AuthflowTemplate[];
     #events: DomainEvent<any>[] = [];
 
-    protected constructor(id: Id, action: Action, templates: AuthflowTemplate[]) {
+    protected constructor(
+        id: Id,
+        action: Action,
+        templates: AuthflowTemplate[]
+    ) {
         this.#id = id;
         this.#action = action;
         this.#templates = templates;
@@ -47,7 +55,7 @@ export class AuthflowPolicy implements Mappable<ReturnType<AuthflowPolicy['toPla
         const policy = new AuthflowPolicy(
             Id.create().unwrap(),
             data.action,
-            data.templates,
+            data.templates
         );
 
         policy.#events.push(new AuthflowPolicyCreatedEvent(policy.toPlain()));
@@ -60,7 +68,10 @@ export class AuthflowPolicy implements Mappable<ReturnType<AuthflowPolicy['toPla
         action: string;
         templates: {
             id: string;
-            range: { from: { amount: string; currency: string }; to: { amount: string; currency: string } };
+            range: {
+                from: { amount: string; currency: string };
+                to: { amount: string; currency: string };
+            };
             steps: {
                 id: string;
                 order: number;
@@ -75,7 +86,7 @@ export class AuthflowPolicy implements Mappable<ReturnType<AuthflowPolicy['toPla
         return new AuthflowPolicy(
             Id.fromPlain(plain.id),
             Action.fromPlain(plain.action),
-            plain.templates.map((t) => AuthflowTemplate.fromPlain(t)),
+            plain.templates.map((t) => AuthflowTemplate.fromPlain(t))
         );
     }
 

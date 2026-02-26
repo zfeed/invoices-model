@@ -1,4 +1,9 @@
-import { DOMAIN_ERROR_CODE, DomainError, Mappable, Result } from '../../../../building-blocks';
+import {
+    DOMAIN_ERROR_CODE,
+    DomainError,
+    Mappable,
+    Result,
+} from '../../../../building-blocks';
 import { DomainEvent } from '../../../../building-blocks/events/domain-event';
 import { PublishableEvents } from '../../../../building-blocks/events/event-publisher.interface';
 import { Action } from '../action/action';
@@ -11,7 +16,11 @@ import { checkNoDuplicateAuthflowActions } from './checks/check-no-duplicate-aut
 import { DocumentApprovedEvent } from './events/document-approved.event';
 import { DocumentCreatedEvent } from './events/document-created.event';
 
-export class FinancialDocument implements Mappable<ReturnType<FinancialDocument['toPlain']>>, PublishableEvents<DomainEvent<any>> {
+export class FinancialDocument
+    implements
+        Mappable<ReturnType<FinancialDocument['toPlain']>>,
+        PublishableEvents<DomainEvent<any>>
+{
     #id: Id;
     #referenceId: ReferenceId;
     #value: Money;
@@ -22,7 +31,7 @@ export class FinancialDocument implements Mappable<ReturnType<FinancialDocument[
         id: Id,
         referenceId: ReferenceId,
         value: Money,
-        authflows: Authflow[],
+        authflows: Authflow[]
     ) {
         this.#id = id;
         this.#referenceId = referenceId;
@@ -50,7 +59,11 @@ export class FinancialDocument implements Mappable<ReturnType<FinancialDocument[
         return this.#events;
     }
 
-    static create(data: { referenceId: ReferenceId; value: Money; authflows: Authflow[] }) {
+    static create(data: {
+        referenceId: ReferenceId;
+        value: Money;
+        authflows: Authflow[];
+    }) {
         const error = checkNoDuplicateAuthflowActions(data.authflows);
         if (error) {
             return Result.error(error);
@@ -60,7 +73,7 @@ export class FinancialDocument implements Mappable<ReturnType<FinancialDocument[
             Id.create().unwrap(),
             data.referenceId,
             data.value,
-            data.authflows,
+            data.authflows
         );
 
         doc.#events.push(new DocumentCreatedEvent(doc.toPlain()));
@@ -75,7 +88,10 @@ export class FinancialDocument implements Mappable<ReturnType<FinancialDocument[
         authflows: {
             id: string;
             action: string;
-            range: { from: { amount: string; currency: string }; to: { amount: string; currency: string } };
+            range: {
+                from: { amount: string; currency: string };
+                to: { amount: string; currency: string };
+            };
             steps: {
                 id: string;
                 order: number;
@@ -83,7 +99,11 @@ export class FinancialDocument implements Mappable<ReturnType<FinancialDocument[
                     id: string;
                     requiredApprovals: number;
                     approvers: { id: string; name: string; email: string }[];
-                    approvals: { approverId: string; createdAt: string; comment: string | null }[];
+                    approvals: {
+                        approverId: string;
+                        createdAt: string;
+                        comment: string | null;
+                    }[];
                 }[];
             }[];
         }[];
@@ -92,7 +112,7 @@ export class FinancialDocument implements Mappable<ReturnType<FinancialDocument[
             Id.fromPlain(plain.id),
             ReferenceId.fromPlain(plain.referenceId),
             Money.fromPlain(plain.value),
-            plain.authflows.map((a) => Authflow.fromPlain(a)),
+            plain.authflows.map((a) => Authflow.fromPlain(a))
         );
     }
 

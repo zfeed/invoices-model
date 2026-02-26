@@ -1,4 +1,7 @@
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../../building-blocks';
+import {
+    DOMAIN_ERROR_CODE,
+    DomainError,
+} from '../../../../../../building-blocks';
 import { Currency } from '../../currency/currency';
 
 export function checkEqualCurrencies(

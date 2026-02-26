@@ -92,13 +92,19 @@ describe('approveActionOnDocumentCommand', () => {
         unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         domainEvents = new InMemoryDomainEvents();
 
-        const createPolicy = new CreateAuthflowPolicy(unitOfWorkFactory, domainEvents);
+        const createPolicy = new CreateAuthflowPolicy(
+            unitOfWorkFactory,
+            domainEvents
+        );
         await createPolicy.execute({
             action: 'pay',
             templates: [template],
         });
 
-        const onInvoiceIssuedHandler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        const onInvoiceIssuedHandler = new OnInvoiceIssued(
+            unitOfWorkFactory,
+            domainEvents
+        );
         await onInvoiceIssuedHandler.register();
         await domainEvents.publishEvents({
             events: [new InvoiceIssuedEvent(INVOICE_DATA)],
@@ -139,8 +145,12 @@ describe('approveActionOnDocumentCommand', () => {
         });
 
         await unitOfWorkFactory.start(async (uow) => {
-            const doc = await uow.collection(FinancialDocument).findBy('referenceId', 'invoice-123');
-            const authflow = doc!.authflows.find((a) => a.action.toPlain() === 'pay');
+            const doc = await uow
+                .collection(FinancialDocument)
+                .findBy('referenceId', 'invoice-123');
+            const authflow = doc!.authflows.find(
+                (a) => a.action.toPlain() === 'pay'
+            );
             expect(authflow?.isApproved).toBe(true);
         });
     });

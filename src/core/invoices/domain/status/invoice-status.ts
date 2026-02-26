@@ -1,4 +1,8 @@
-import { DOMAIN_ERROR_CODE, DomainError, Result } from '../../../../building-blocks';
+import {
+    DOMAIN_ERROR_CODE,
+    DomainError,
+    Result,
+} from '../../../../building-blocks';
 import { INVOICE_STATUS, Status } from './status';
 
 export class InvoiceStatus extends Status<INVOICE_STATUS> {
@@ -27,7 +31,10 @@ export class InvoiceStatus extends Status<INVOICE_STATUS> {
     }
 
     static fromString(value: string): Result<DomainError, InvoiceStatus> {
-        return Status.parseEnum(INVOICE_STATUS, value, DOMAIN_ERROR_CODE.INVOICE_INVALID_STATUS)
-            .map((s) => new InvoiceStatus(s));
+        return Status.parseEnum(
+            INVOICE_STATUS,
+            value,
+            DOMAIN_ERROR_CODE.INVOICE_INVALID_STATUS
+        ).map((s) => new InvoiceStatus(s));
     }
 }

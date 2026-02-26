@@ -13,8 +13,12 @@ describe('Timestamp', () => {
             const timestamp = Timestamp.create();
             const after = new Date();
             const timestampDate = new Date(timestamp.toPlain());
-            expect(timestampDate.getTime()).toBeGreaterThanOrEqual(before.getTime());
-            expect(timestampDate.getTime()).toBeLessThanOrEqual(after.getTime());
+            expect(timestampDate.getTime()).toBeGreaterThanOrEqual(
+                before.getTime()
+            );
+            expect(timestampDate.getTime()).toBeLessThanOrEqual(
+                after.getTime()
+            );
         });
     });
 });

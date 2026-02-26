@@ -484,7 +484,11 @@ describe('createAuthflow', () => {
                         id: 'group-1',
                         requiredApprovals: 1,
                         approvers: [
-                            { id: '1', name: 'Alice', email: 'alice@example.com' },
+                            {
+                                id: '1',
+                                name: 'Alice',
+                                email: 'alice@example.com',
+                            },
                         ],
                         approvals: [],
                     },
@@ -515,7 +519,11 @@ describe('createAuthflow', () => {
                         id: 'group-1',
                         requiredApprovals: 1,
                         approvers: [
-                            { id: '1', name: 'Alice', email: 'alice@example.com' },
+                            {
+                                id: '1',
+                                name: 'Alice',
+                                email: 'alice@example.com',
+                            },
                         ],
                         approvals: [],
                     },
@@ -781,8 +789,14 @@ describe('findAuthflowByAction', () => {
 });
 
 describe('approveAuthflow', () => {
-    const approval1 = Approval.create({ approverId: Id.fromPlain('approver-1'), comment: null }).unwrap();
-    const approval2 = Approval.create({ approverId: Id.fromPlain('approver-2'), comment: null }).unwrap();
+    const approval1 = Approval.create({
+        approverId: Id.fromPlain('approver-1'),
+        comment: null,
+    }).unwrap();
+    const approval2 = Approval.create({
+        approverId: Id.fromPlain('approver-2'),
+        comment: null,
+    }).unwrap();
 
     const makeAuthflow = (
         id: string,
@@ -794,7 +808,11 @@ describe('approveAuthflow', () => {
                 id: string;
                 requiredApprovals: number;
                 approvers: { id: string; name: string; email: string }[];
-                approvals: { approverId: string; createdAt: string; comment: string | null }[];
+                approvals: {
+                    approverId: string;
+                    createdAt: string;
+                    comment: string | null;
+                }[];
             }[];
         }[]
     ): Authflow =>
@@ -833,7 +851,11 @@ describe('approveAuthflow', () => {
     });
 
     it('should approve the first unapproved step', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group = makeGroupPlain('group-1', [approver1Plain], false);
         const step = makeStepPlain('step-1', 0, [group]);
         const authflow = makeAuthflow('authflow-1', 'submit', [step]);
@@ -847,7 +869,11 @@ describe('approveAuthflow', () => {
     });
 
     it('should approve only the current step and leave later steps unapproved', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group1 = makeGroupPlain('group-1', [approver1Plain], false);
         const group2 = makeGroupPlain('group-2', [approver1Plain], false);
         const step1 = makeStepPlain('step-1', 0, [group1]);
@@ -864,7 +890,11 @@ describe('approveAuthflow', () => {
     });
 
     it('should fully approve authflow when last step is approved', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group1 = makeGroupPlain('group-1', [approver1Plain], true);
         const group2 = makeGroupPlain('group-2', [approver1Plain], false);
         const step1 = makeStepPlain('step-1', 0, [group1]);
@@ -879,7 +909,11 @@ describe('approveAuthflow', () => {
     });
 
     it('should fail when all steps are already approved', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group = makeGroupPlain('group-1', [approver1Plain], true);
         const step = makeStepPlain('step-1', 0, [group]);
         const authflow = makeAuthflow('authflow-1', 'submit', [step]);
@@ -893,7 +927,11 @@ describe('approveAuthflow', () => {
     });
 
     it('should fail when approver is not in any group', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group = makeGroupPlain('group-1', [approver1Plain], false);
         const step = makeStepPlain('step-1', 0, [group]);
         const authflow = makeAuthflow('authflow-1', 'submit', [step]);
@@ -907,7 +945,11 @@ describe('approveAuthflow', () => {
     });
 
     it('should support sequential approvals across steps', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group1 = makeGroupPlain('group-1', [approver1Plain], false);
         const group2 = makeGroupPlain('group-2', [approver1Plain], false);
         const step1 = makeStepPlain('step-1', 0, [group1]);
@@ -930,7 +972,11 @@ describe('approveAuthflow', () => {
     });
 
     it('should preserve authflow id after approval', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group = makeGroupPlain('group-1', [approver1Plain], false);
         const step = makeStepPlain('step-1', 0, [group]);
         const authflow = makeAuthflow('authflow-1', 'submit', [step]);
@@ -943,7 +989,11 @@ describe('approveAuthflow', () => {
     });
 
     it('should preserve step and group ids after approval', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group = makeGroupPlain('group-1', [approver1Plain], false);
         const step = makeStepPlain('step-1', 0, [group]);
         const authflow = makeAuthflow('authflow-1', 'submit', [step]);
@@ -957,7 +1007,11 @@ describe('approveAuthflow', () => {
     });
 
     it('should preserve all ids across sequential approvals', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group1 = makeGroupPlain('group-1', [approver1Plain], false);
         const group2 = makeGroupPlain('group-2', [approver1Plain], false);
         const step1 = makeStepPlain('step-1', 0, [group1]);
@@ -982,7 +1036,11 @@ describe('approveAuthflow', () => {
     });
 
     it('should preserve the action name after approval', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group = makeGroupPlain('group-1', [approver1Plain], false);
         const step = makeStepPlain('step-1', 0, [group]);
         const authflow = makeAuthflow('authflow-1', 'submit', [step]);

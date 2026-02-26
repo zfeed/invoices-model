@@ -4,7 +4,9 @@ import { Id } from '../id/id';
 import { Order } from '../order/order';
 import { Step } from './step';
 
-export class StepTemplate implements Mappable<ReturnType<StepTemplate['toPlain']>> {
+export class StepTemplate
+    implements Mappable<ReturnType<StepTemplate['toPlain']>>
+{
     #id: Id;
     #order: Order;
     #groups: GroupTemplate[];
@@ -28,7 +30,9 @@ export class StepTemplate implements Mappable<ReturnType<StepTemplate['toPlain']
     }
 
     static create(data: { order: Order; groups: GroupTemplate[] }) {
-        return Result.ok(new StepTemplate(Id.create().unwrap(), data.order, data.groups));
+        return Result.ok(
+            new StepTemplate(Id.create().unwrap(), data.order, data.groups)
+        );
     }
 
     static fromPlain(plain: {
@@ -43,12 +47,14 @@ export class StepTemplate implements Mappable<ReturnType<StepTemplate['toPlain']
         return new StepTemplate(
             Id.fromPlain(plain.id),
             Order.fromPlain(plain.order),
-            plain.groups.map((g) => GroupTemplate.fromPlain(g)),
+            plain.groups.map((g) => GroupTemplate.fromPlain(g))
         );
     }
 
     toStep(): Result<DomainError, Step> {
-        const groupResults = this.#groups.reduce<Result<DomainError, import('../groups/group').Group[]>>(
+        const groupResults = this.#groups.reduce<
+            Result<DomainError, import('../groups/group').Group[]>
+        >(
             (acc, template) =>
                 acc.flatMap((groups) =>
                     template.toGroup().map((group) => [...groups, group])

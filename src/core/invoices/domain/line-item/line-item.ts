@@ -3,7 +3,9 @@ import { Money } from '../money/money/money';
 import { UnitDescription } from './unit-description/unit-description';
 import { UnitQuantity } from './unit-quantity/unit-quantity';
 
-export class LineItem implements Equatable<LineItem>, Mappable<ReturnType<LineItem['toPlain']>> {
+export class LineItem
+    implements Equatable<LineItem>, Mappable<ReturnType<LineItem['toPlain']>>
+{
     #price: Money;
     #description: UnitDescription;
     #quantity: UnitQuantity;
@@ -59,7 +61,7 @@ export class LineItem implements Equatable<LineItem>, Mappable<ReturnType<LineIt
             UnitDescription.fromPlain(plain.description),
             Money.fromPlain(plain.price),
             UnitQuantity.fromPlain(plain.quantity),
-            Money.fromPlain(plain.total),
+            Money.fromPlain(plain.total)
         );
     }
 

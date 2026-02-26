@@ -1,7 +1,9 @@
 import { Equatable, Mappable, Result } from '../../../../../building-blocks';
 import { checkDescriptionNonEmpty } from './checks/check-description-non-empty';
 
-export class UnitDescription implements Equatable<UnitDescription>, Mappable<string> {
+export class UnitDescription
+    implements Equatable<UnitDescription>, Mappable<string>
+{
     #value: string;
 
     protected constructor(value: string) {

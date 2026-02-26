@@ -26,7 +26,11 @@ const makeAuthflow = (
             id: string;
             requiredApprovals: number;
             approvers: { id: string; name: string; email: string }[];
-            approvals: { approverId: string; createdAt: string; comment: string | null }[];
+            approvals: {
+                approverId: string;
+                createdAt: string;
+                comment: string | null;
+            }[];
         }[];
     }[] = []
 ): Authflow =>
@@ -75,9 +79,7 @@ describe('createDocument', () => {
     });
 
     it('should create a document successfully with a single authflow', () => {
-        const authflows: Authflow[] = [
-            makeAuthflow('1', 'approve'),
-        ];
+        const authflows: Authflow[] = [makeAuthflow('1', 'approve')];
 
         const result = FinancialDocument.create({
             referenceId: ReferenceId.fromPlain('INV-003'),
@@ -174,9 +176,7 @@ describe('createDocument', () => {
     });
 
     it('should generate a unique id for the document', () => {
-        const authflows: Authflow[] = [
-            makeAuthflow('1', 'approve'),
-        ];
+        const authflows: Authflow[] = [makeAuthflow('1', 'approve')];
 
         const result1 = FinancialDocument.create({
             referenceId: ReferenceId.fromPlain('INV-008'),
@@ -231,7 +231,9 @@ describe('createDocument', () => {
         });
 
         const result2 = FinancialDocument.create({
-            referenceId: ReferenceId.fromPlain('invoice-2024-001-special-chars_test'),
+            referenceId: ReferenceId.fromPlain(
+                'invoice-2024-001-special-chars_test'
+            ),
             value: testMoney,
             authflows,
         });
@@ -254,9 +256,7 @@ describe('createDocument', () => {
     });
 
     it('should produce a DocumentCreatedEvent', () => {
-        const authflows: Authflow[] = [
-            makeAuthflow('1', 'approve'),
-        ];
+        const authflows: Authflow[] = [makeAuthflow('1', 'approve')];
 
         const result = FinancialDocument.create({
             referenceId: ReferenceId.fromPlain('INV-001'),
@@ -292,8 +292,14 @@ describe('createDocument', () => {
 });
 
 describe('approveDocument', () => {
-    const approval1 = Approval.create({ approverId: Id.fromPlain('approver-1'), comment: null }).unwrap();
-    const approval2 = Approval.create({ approverId: Id.fromPlain('approver-2'), comment: null }).unwrap();
+    const approval1 = Approval.create({
+        approverId: Id.fromPlain('approver-1'),
+        comment: null,
+    }).unwrap();
+    const approval2 = Approval.create({
+        approverId: Id.fromPlain('approver-2'),
+        comment: null,
+    }).unwrap();
 
     const makeGroupPlain = (
         id: string,
@@ -341,11 +347,14 @@ describe('approveDocument', () => {
             referenceId: 'INV-001',
             value: testMoney.toPlain(),
             authflows: authflowsPlain,
-
         });
 
     it('should approve a document with a single step and single group', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group = makeGroupPlain('group-1', [approver1Plain], false);
         const step = makeStepPlain('step-1', 0, [group]);
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step]);
@@ -359,12 +368,19 @@ describe('approveDocument', () => {
     });
 
     it('should approve only the first unapproved step by order', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group1 = makeGroupPlain('group-1', [approver1Plain], false);
         const group2 = makeGroupPlain('group-2', [approver1Plain], false);
         const step1 = makeStepPlain('step-1', 0, [group1]);
         const step2 = makeStepPlain('step-2', 1, [group2]);
-        const authflow = makeAuthflowPlain('authflow-1', 'submit', [step1, step2]);
+        const authflow = makeAuthflowPlain('authflow-1', 'submit', [
+            step1,
+            step2,
+        ]);
         const document = makeDocument([authflow]);
 
         const result = document.apply(Action.fromPlain('submit'), approval1);
@@ -376,12 +392,19 @@ describe('approveDocument', () => {
     });
 
     it('should pick the lowest-order unapproved step regardless of array order', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group1 = makeGroupPlain('group-1', [approver1Plain], false);
         const group2 = makeGroupPlain('group-2', [approver1Plain], false);
         const step1 = makeStepPlain('step-1', 5, [group1]);
         const step2 = makeStepPlain('step-2', 2, [group2]);
-        const authflow = makeAuthflowPlain('authflow-1', 'submit', [step1, step2]);
+        const authflow = makeAuthflowPlain('authflow-1', 'submit', [
+            step1,
+            step2,
+        ]);
         const document = makeDocument([authflow]);
 
         const result = document.apply(Action.fromPlain('submit'), approval1);
@@ -399,12 +422,19 @@ describe('approveDocument', () => {
     });
 
     it('should fully approve authflow when last step is approved', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group1 = makeGroupPlain('group-1', [approver1Plain], true);
         const group2 = makeGroupPlain('group-2', [approver1Plain], false);
         const step1 = makeStepPlain('step-1', 0, [group1]);
         const step2 = makeStepPlain('step-2', 1, [group2]);
-        const authflow = makeAuthflowPlain('authflow-1', 'submit', [step1, step2]);
+        const authflow = makeAuthflowPlain('authflow-1', 'submit', [
+            step1,
+            step2,
+        ]);
         const document = makeDocument([authflow]);
 
         const result = document.apply(Action.fromPlain('submit'), approval1);
@@ -416,7 +446,11 @@ describe('approveDocument', () => {
     });
 
     it('should not affect other authflows when approving one', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group1 = makeGroupPlain('group-1', [approver1Plain], false);
         const group2 = makeGroupPlain('group-2', [approver1Plain], false);
         const step1 = makeStepPlain('step-1', 0, [group1]);
@@ -434,13 +468,20 @@ describe('approveDocument', () => {
     });
 
     it('should fail when action is not found', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group = makeGroupPlain('group-1', [approver1Plain], false);
         const step = makeStepPlain('step-1', 0, [group]);
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step]);
         const document = makeDocument([authflow]);
 
-        const result = document.apply(Action.fromPlain('non-existent'), approval1);
+        const result = document.apply(
+            Action.fromPlain('non-existent'),
+            approval1
+        );
 
         expect(result.isError()).toBe(true);
         const error = result.unwrapError();
@@ -453,7 +494,11 @@ describe('approveDocument', () => {
     });
 
     it('should fail when all steps are already approved', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group = makeGroupPlain('group-1', [approver1Plain], true);
         const step = makeStepPlain('step-1', 0, [group]);
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step]);
@@ -470,7 +515,11 @@ describe('approveDocument', () => {
     });
 
     it('should fail when approver is not in any group', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group = makeGroupPlain('group-1', [approver1Plain], false);
         const step = makeStepPlain('step-1', 0, [group]);
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step]);
@@ -486,7 +535,11 @@ describe('approveDocument', () => {
     });
 
     it('should preserve document id after approval', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group = makeGroupPlain('group-1', [approver1Plain], false);
         const step = makeStepPlain('step-1', 0, [group]);
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step]);
@@ -499,7 +552,11 @@ describe('approveDocument', () => {
     });
 
     it('should preserve all nested ids after approval', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group = makeGroupPlain('group-1', [approver1Plain], false);
         const step = makeStepPlain('step-1', 0, [group]);
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step]);
@@ -511,16 +568,25 @@ describe('approveDocument', () => {
         expect(document.id.toPlain()).toBe('doc-1');
         expect(document.authflows[0].id.toPlain()).toBe('authflow-1');
         expect(document.authflows[0].steps[0].id.toPlain()).toBe('step-1');
-        expect(document.authflows[0].steps[0].groups[0].id.toPlain()).toBe('group-1');
+        expect(document.authflows[0].steps[0].groups[0].id.toPlain()).toBe(
+            'group-1'
+        );
     });
 
     it('should preserve all ids across sequential approvals', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group1 = makeGroupPlain('group-1', [approver1Plain], false);
         const group2 = makeGroupPlain('group-2', [approver1Plain], false);
         const step1 = makeStepPlain('step-1', 0, [group1]);
         const step2 = makeStepPlain('step-2', 1, [group2]);
-        const authflow = makeAuthflowPlain('authflow-1', 'submit', [step1, step2]);
+        const authflow = makeAuthflowPlain('authflow-1', 'submit', [
+            step1,
+            step2,
+        ]);
         const document = makeDocument([authflow]);
 
         const result1 = document.apply(Action.fromPlain('submit'), approval1);
@@ -541,7 +607,11 @@ describe('approveDocument', () => {
     });
 
     it('should preserve ids of unaffected authflows after approval', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group1 = makeGroupPlain('group-1', [approver1Plain], false);
         const group2 = makeGroupPlain('group-2', [approver1Plain], false);
         const step1 = makeStepPlain('step-1', 0, [group1]);
@@ -556,11 +626,17 @@ describe('approveDocument', () => {
         expect(document.authflows[0].id.toPlain()).toBe('authflow-1');
         expect(document.authflows[1].id.toPlain()).toBe('authflow-2');
         expect(document.authflows[1].steps[0].id.toPlain()).toBe('step-2');
-        expect(document.authflows[1].steps[0].groups[0].id.toPlain()).toBe('group-2');
+        expect(document.authflows[1].steps[0].groups[0].id.toPlain()).toBe(
+            'group-2'
+        );
     });
 
     it('should preserve document referenceId after approval', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group = makeGroupPlain('group-1', [approver1Plain], false);
         const step = makeStepPlain('step-1', 0, [group]);
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step]);
@@ -573,12 +649,19 @@ describe('approveDocument', () => {
     });
 
     it('should support sequential approvals across steps', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group1 = makeGroupPlain('group-1', [approver1Plain], false);
         const group2 = makeGroupPlain('group-2', [approver1Plain], false);
         const step1 = makeStepPlain('step-1', 0, [group1]);
         const step2 = makeStepPlain('step-2', 1, [group2]);
-        const authflow = makeAuthflowPlain('authflow-1', 'submit', [step1, step2]);
+        const authflow = makeAuthflowPlain('authflow-1', 'submit', [
+            step1,
+            step2,
+        ]);
         const document = makeDocument([authflow]);
 
         // First approval -- step 1
@@ -599,8 +682,16 @@ describe('approveDocument', () => {
     });
 
     it('should handle multiple groups in a single step', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
-        const approver2Plain = { id: 'approver-2', name: 'Bob', email: 'bob@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
+        const approver2Plain = {
+            id: 'approver-2',
+            name: 'Bob',
+            email: 'bob@example.com',
+        };
         const group1 = makeGroupPlain('group-1', [approver1Plain], false);
         const group2 = makeGroupPlain('group-2', [approver2Plain], false);
         const step = makeStepPlain('step-1', 0, [group1, group2]);
@@ -622,7 +713,11 @@ describe('approveDocument', () => {
     });
 
     it('should produce a DocumentApprovedEvent', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group = makeGroupPlain('group-1', [approver1Plain], false);
         const step = makeStepPlain('step-1', 0, [group]);
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step]);
@@ -636,7 +731,11 @@ describe('approveDocument', () => {
     });
 
     it('should include approval data in the DocumentApprovedEvent', () => {
-        const approver1Plain = { id: 'approver-1', name: 'Alice', email: 'alice@example.com' };
+        const approver1Plain = {
+            id: 'approver-1',
+            name: 'Alice',
+            email: 'alice@example.com',
+        };
         const group = makeGroupPlain('group-1', [approver1Plain], false);
         const step = makeStepPlain('step-1', 0, [group]);
         const authflow = makeAuthflowPlain('authflow-1', 'submit', [step]);
@@ -661,21 +760,36 @@ describe('canApproverApprove', () => {
             referenceId: 'INV-001',
             value: { amount: '10000', currency: 'USD' },
 
-            authflows: [{
-                id: 'authflow-1',
-                action: 'pay',
-                range: { from: { amount: '0', currency: 'USD' }, to: { amount: '100000', currency: 'USD' } },
-                steps: [{
-                    id: 'step-1',
-                    order: 0,
-                    groups: [{
-                        id: 'group-1',
-                        requiredApprovals: 1,
-                        approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
-                        approvals: [],
-                    }],
-                }],
-            }],
+            authflows: [
+                {
+                    id: 'authflow-1',
+                    action: 'pay',
+                    range: {
+                        from: { amount: '0', currency: 'USD' },
+                        to: { amount: '100000', currency: 'USD' },
+                    },
+                    steps: [
+                        {
+                            id: 'step-1',
+                            order: 0,
+                            groups: [
+                                {
+                                    id: 'group-1',
+                                    requiredApprovals: 1,
+                                    approvers: [
+                                        {
+                                            id: 'approver-1',
+                                            name: 'Alice',
+                                            email: 'alice@example.com',
+                                        },
+                                    ],
+                                    approvals: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         });
 
         const result = document.canApproverApprove(
@@ -692,21 +806,36 @@ describe('canApproverApprove', () => {
             referenceId: 'INV-001',
             value: { amount: '10000', currency: 'USD' },
 
-            authflows: [{
-                id: 'authflow-1',
-                action: 'pay',
-                range: { from: { amount: '0', currency: 'USD' }, to: { amount: '100000', currency: 'USD' } },
-                steps: [{
-                    id: 'step-1',
-                    order: 0,
-                    groups: [{
-                        id: 'group-1',
-                        requiredApprovals: 1,
-                        approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
-                        approvals: [],
-                    }],
-                }],
-            }],
+            authflows: [
+                {
+                    id: 'authflow-1',
+                    action: 'pay',
+                    range: {
+                        from: { amount: '0', currency: 'USD' },
+                        to: { amount: '100000', currency: 'USD' },
+                    },
+                    steps: [
+                        {
+                            id: 'step-1',
+                            order: 0,
+                            groups: [
+                                {
+                                    id: 'group-1',
+                                    requiredApprovals: 1,
+                                    approvers: [
+                                        {
+                                            id: 'approver-1',
+                                            name: 'Alice',
+                                            email: 'alice@example.com',
+                                        },
+                                    ],
+                                    approvals: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         });
 
         const result = document.canApproverApprove(
@@ -723,21 +852,42 @@ describe('canApproverApprove', () => {
             referenceId: 'INV-001',
             value: { amount: '10000', currency: 'USD' },
 
-            authflows: [{
-                id: 'authflow-1',
-                action: 'pay',
-                range: { from: { amount: '0', currency: 'USD' }, to: { amount: '100000', currency: 'USD' } },
-                steps: [{
-                    id: 'step-1',
-                    order: 0,
-                    groups: [{
-                        id: 'group-1',
-                        requiredApprovals: 1,
-                        approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
-                        approvals: [{ approverId: 'approver-1', createdAt: new Date().toISOString(), comment: null }],
-                    }],
-                }],
-            }],
+            authflows: [
+                {
+                    id: 'authflow-1',
+                    action: 'pay',
+                    range: {
+                        from: { amount: '0', currency: 'USD' },
+                        to: { amount: '100000', currency: 'USD' },
+                    },
+                    steps: [
+                        {
+                            id: 'step-1',
+                            order: 0,
+                            groups: [
+                                {
+                                    id: 'group-1',
+                                    requiredApprovals: 1,
+                                    approvers: [
+                                        {
+                                            id: 'approver-1',
+                                            name: 'Alice',
+                                            email: 'alice@example.com',
+                                        },
+                                    ],
+                                    approvals: [
+                                        {
+                                            approverId: 'approver-1',
+                                            createdAt: new Date().toISOString(),
+                                            comment: null,
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         });
 
         const result = document.canApproverApprove(
@@ -754,33 +904,54 @@ describe('canApproverApprove', () => {
             referenceId: 'INV-001',
             value: { amount: '10000', currency: 'USD' },
 
-            authflows: [{
-                id: 'authflow-1',
-                action: 'pay',
-                range: { from: { amount: '0', currency: 'USD' }, to: { amount: '100000', currency: 'USD' } },
-                steps: [
-                    {
-                        id: 'step-1',
-                        order: 0,
-                        groups: [{
-                            id: 'group-1',
-                            requiredApprovals: 1,
-                            approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
-                            approvals: [],
-                        }],
+            authflows: [
+                {
+                    id: 'authflow-1',
+                    action: 'pay',
+                    range: {
+                        from: { amount: '0', currency: 'USD' },
+                        to: { amount: '100000', currency: 'USD' },
                     },
-                    {
-                        id: 'step-2',
-                        order: 1,
-                        groups: [{
-                            id: 'group-2',
-                            requiredApprovals: 1,
-                            approvers: [{ id: 'approver-2', name: 'Bob', email: 'bob@example.com' }],
-                            approvals: [],
-                        }],
-                    },
-                ],
-            }],
+                    steps: [
+                        {
+                            id: 'step-1',
+                            order: 0,
+                            groups: [
+                                {
+                                    id: 'group-1',
+                                    requiredApprovals: 1,
+                                    approvers: [
+                                        {
+                                            id: 'approver-1',
+                                            name: 'Alice',
+                                            email: 'alice@example.com',
+                                        },
+                                    ],
+                                    approvals: [],
+                                },
+                            ],
+                        },
+                        {
+                            id: 'step-2',
+                            order: 1,
+                            groups: [
+                                {
+                                    id: 'group-2',
+                                    requiredApprovals: 1,
+                                    approvers: [
+                                        {
+                                            id: 'approver-2',
+                                            name: 'Bob',
+                                            email: 'bob@example.com',
+                                        },
+                                    ],
+                                    approvals: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         });
 
         const result = document.canApproverApprove(
@@ -797,33 +968,60 @@ describe('canApproverApprove', () => {
             referenceId: 'INV-001',
             value: { amount: '10000', currency: 'USD' },
 
-            authflows: [{
-                id: 'authflow-1',
-                action: 'pay',
-                range: { from: { amount: '0', currency: 'USD' }, to: { amount: '100000', currency: 'USD' } },
-                steps: [
-                    {
-                        id: 'step-1',
-                        order: 0,
-                        groups: [{
-                            id: 'group-1',
-                            requiredApprovals: 1,
-                            approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
-                            approvals: [{ approverId: 'approver-1', createdAt: new Date().toISOString(), comment: null }],
-                        }],
+            authflows: [
+                {
+                    id: 'authflow-1',
+                    action: 'pay',
+                    range: {
+                        from: { amount: '0', currency: 'USD' },
+                        to: { amount: '100000', currency: 'USD' },
                     },
-                    {
-                        id: 'step-2',
-                        order: 1,
-                        groups: [{
-                            id: 'group-2',
-                            requiredApprovals: 1,
-                            approvers: [{ id: 'approver-2', name: 'Bob', email: 'bob@example.com' }],
-                            approvals: [],
-                        }],
-                    },
-                ],
-            }],
+                    steps: [
+                        {
+                            id: 'step-1',
+                            order: 0,
+                            groups: [
+                                {
+                                    id: 'group-1',
+                                    requiredApprovals: 1,
+                                    approvers: [
+                                        {
+                                            id: 'approver-1',
+                                            name: 'Alice',
+                                            email: 'alice@example.com',
+                                        },
+                                    ],
+                                    approvals: [
+                                        {
+                                            approverId: 'approver-1',
+                                            createdAt: new Date().toISOString(),
+                                            comment: null,
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            id: 'step-2',
+                            order: 1,
+                            groups: [
+                                {
+                                    id: 'group-2',
+                                    requiredApprovals: 1,
+                                    approvers: [
+                                        {
+                                            id: 'approver-2',
+                                            name: 'Bob',
+                                            email: 'bob@example.com',
+                                        },
+                                    ],
+                                    approvals: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         });
 
         const result = document.canApproverApprove(
@@ -840,21 +1038,36 @@ describe('canApproverApprove', () => {
             referenceId: 'INV-001',
             value: { amount: '10000', currency: 'USD' },
 
-            authflows: [{
-                id: 'authflow-1',
-                action: 'pay',
-                range: { from: { amount: '0', currency: 'USD' }, to: { amount: '100000', currency: 'USD' } },
-                steps: [{
-                    id: 'step-1',
-                    order: 0,
-                    groups: [{
-                        id: 'group-1',
-                        requiredApprovals: 1,
-                        approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
-                        approvals: [],
-                    }],
-                }],
-            }],
+            authflows: [
+                {
+                    id: 'authflow-1',
+                    action: 'pay',
+                    range: {
+                        from: { amount: '0', currency: 'USD' },
+                        to: { amount: '100000', currency: 'USD' },
+                    },
+                    steps: [
+                        {
+                            id: 'step-1',
+                            order: 0,
+                            groups: [
+                                {
+                                    id: 'group-1',
+                                    requiredApprovals: 1,
+                                    approvers: [
+                                        {
+                                            id: 'approver-1',
+                                            name: 'Alice',
+                                            email: 'alice@example.com',
+                                        },
+                                    ],
+                                    approvals: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         });
 
         const result = document.canApproverApprove(
@@ -871,21 +1084,42 @@ describe('canApproverApprove', () => {
             referenceId: 'INV-001',
             value: { amount: '10000', currency: 'USD' },
 
-            authflows: [{
-                id: 'authflow-1',
-                action: 'pay',
-                range: { from: { amount: '0', currency: 'USD' }, to: { amount: '100000', currency: 'USD' } },
-                steps: [{
-                    id: 'step-1',
-                    order: 0,
-                    groups: [{
-                        id: 'group-1',
-                        requiredApprovals: 1,
-                        approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
-                        approvals: [{ approverId: 'approver-1', createdAt: new Date().toISOString(), comment: null }],
-                    }],
-                }],
-            }],
+            authflows: [
+                {
+                    id: 'authflow-1',
+                    action: 'pay',
+                    range: {
+                        from: { amount: '0', currency: 'USD' },
+                        to: { amount: '100000', currency: 'USD' },
+                    },
+                    steps: [
+                        {
+                            id: 'step-1',
+                            order: 0,
+                            groups: [
+                                {
+                                    id: 'group-1',
+                                    requiredApprovals: 1,
+                                    approvers: [
+                                        {
+                                            id: 'approver-1',
+                                            name: 'Alice',
+                                            email: 'alice@example.com',
+                                        },
+                                    ],
+                                    approvals: [
+                                        {
+                                            approverId: 'approver-1',
+                                            createdAt: new Date().toISOString(),
+                                            comment: null,
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         });
 
         const result = document.canApproverApprove(
@@ -902,41 +1136,68 @@ describe('canApproverApprove', () => {
             referenceId: 'INV-001',
             value: { amount: '10000', currency: 'USD' },
 
-            authflows: [{
-                id: 'authflow-1',
-                action: 'pay',
-                range: { from: { amount: '0', currency: 'USD' }, to: { amount: '100000', currency: 'USD' } },
-                steps: [
-                    {
-                        id: 'step-1',
-                        order: 5,
-                        groups: [{
-                            id: 'group-1',
-                            requiredApprovals: 1,
-                            approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
-                            approvals: [],
-                        }],
+            authflows: [
+                {
+                    id: 'authflow-1',
+                    action: 'pay',
+                    range: {
+                        from: { amount: '0', currency: 'USD' },
+                        to: { amount: '100000', currency: 'USD' },
                     },
-                    {
-                        id: 'step-2',
-                        order: 2,
-                        groups: [{
-                            id: 'group-2',
-                            requiredApprovals: 1,
-                            approvers: [{ id: 'approver-2', name: 'Bob', email: 'bob@example.com' }],
-                            approvals: [],
-                        }],
-                    },
-                ],
-            }],
+                    steps: [
+                        {
+                            id: 'step-1',
+                            order: 5,
+                            groups: [
+                                {
+                                    id: 'group-1',
+                                    requiredApprovals: 1,
+                                    approvers: [
+                                        {
+                                            id: 'approver-1',
+                                            name: 'Alice',
+                                            email: 'alice@example.com',
+                                        },
+                                    ],
+                                    approvals: [],
+                                },
+                            ],
+                        },
+                        {
+                            id: 'step-2',
+                            order: 2,
+                            groups: [
+                                {
+                                    id: 'group-2',
+                                    requiredApprovals: 1,
+                                    approvers: [
+                                        {
+                                            id: 'approver-2',
+                                            name: 'Bob',
+                                            email: 'bob@example.com',
+                                        },
+                                    ],
+                                    approvals: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         });
 
         expect(
-            document.canApproverApprove(Action.fromPlain('pay'), Id.fromPlain('approver-2'))
+            document.canApproverApprove(
+                Action.fromPlain('pay'),
+                Id.fromPlain('approver-2')
+            )
         ).toBe(true);
 
         expect(
-            document.canApproverApprove(Action.fromPlain('pay'), Id.fromPlain('approver-1'))
+            document.canApproverApprove(
+                Action.fromPlain('pay'),
+                Id.fromPlain('approver-1')
+            )
         ).toBe(false);
     });
 

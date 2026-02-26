@@ -1,8 +1,13 @@
 import { Equatable, Mappable, Result } from '../../../../building-blocks';
-import { checkAmountIsInteger, checkAmountIsNonNegative } from './checks/check-amount';
+import {
+    checkAmountIsInteger,
+    checkAmountIsNonNegative,
+} from './checks/check-amount';
 import { checkCurrencyCode } from './checks/check-currency-code';
 
-export class Money implements Equatable<Money>, Mappable<ReturnType<Money['toPlain']>> {
+export class Money
+    implements Equatable<Money>, Mappable<ReturnType<Money['toPlain']>>
+{
     #amount: string;
     #currency: string;
 
@@ -43,7 +48,9 @@ export class Money implements Equatable<Money>, Mappable<ReturnType<Money['toPla
     }
 
     equals(other: Money): boolean {
-        return this.#amount === other.#amount && this.#currency === other.#currency;
+        return (
+            this.#amount === other.#amount && this.#currency === other.#currency
+        );
     }
 
     toPlain() {

@@ -118,7 +118,9 @@ describe('createAuthflowTemplate', () => {
 
         expect(result1.isOk()).toBe(true);
         expect(result2.isOk()).toBe(true);
-        expect(result1.unwrap().id.toPlain()).not.toBe(result2.unwrap().id.toPlain());
+        expect(result1.unwrap().id.toPlain()).not.toBe(
+            result2.unwrap().id.toPlain()
+        );
     });
 
     it('should not have isApproved property', () => {

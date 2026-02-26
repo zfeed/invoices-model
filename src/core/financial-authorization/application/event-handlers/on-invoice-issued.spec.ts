@@ -95,7 +95,9 @@ describe('onInvoiceIssued', () => {
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const result = await unitOfWorkFactory.start(async (uow) => {
-            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+            return uow
+                .collection(FinancialDocument)
+                .findBy('referenceId', 'INV-001');
         });
 
         expect(result).toBeDefined();
@@ -112,7 +114,9 @@ describe('onInvoiceIssued', () => {
         await publishEvent(domainEvents, createInvoiceEvent('INV-001', '500'));
 
         const result = await unitOfWorkFactory.start(async (uow) => {
-            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+            return uow
+                .collection(FinancialDocument)
+                .findBy('referenceId', 'INV-001');
         });
 
         expect(result!.authflows).toHaveLength(1);
@@ -131,7 +135,9 @@ describe('onInvoiceIssued', () => {
         await publishEvent(domainEvents, createInvoiceEvent('INV-001', '5000'));
 
         const result = await unitOfWorkFactory.start(async (uow) => {
-            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+            return uow
+                .collection(FinancialDocument)
+                .findBy('referenceId', 'INV-001');
         });
 
         expect(result!.authflows).toHaveLength(1);
@@ -148,7 +154,9 @@ describe('onInvoiceIssued', () => {
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const result = await unitOfWorkFactory.start(async (uow) => {
-            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+            return uow
+                .collection(FinancialDocument)
+                .findBy('referenceId', 'INV-001');
         });
 
         expect(result!.authflows).toEqual([]);
@@ -167,7 +175,9 @@ describe('onInvoiceIssued', () => {
         );
 
         const result = await unitOfWorkFactory.start(async (uow) => {
-            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+            return uow
+                .collection(FinancialDocument)
+                .findBy('referenceId', 'INV-001');
         });
 
         expect(result!.authflows).toEqual([]);
@@ -184,10 +194,14 @@ describe('onInvoiceIssued', () => {
         await publishEvent(domainEvents, createInvoiceEvent('INV-002'));
 
         const result1 = await unitOfWorkFactory.start(async (uow) => {
-            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+            return uow
+                .collection(FinancialDocument)
+                .findBy('referenceId', 'INV-001');
         });
         const result2 = await unitOfWorkFactory.start(async (uow) => {
-            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-002');
+            return uow
+                .collection(FinancialDocument)
+                .findBy('referenceId', 'INV-002');
         });
 
         expect(result1).toBeDefined();
@@ -209,14 +223,18 @@ describe('onInvoiceIssued', () => {
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const firstResult = await unitOfWorkFactory.start(async (uow) => {
-            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+            return uow
+                .collection(FinancialDocument)
+                .findBy('referenceId', 'INV-001');
         });
         const firstId = firstResult?.id.toPlain();
 
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const secondResult = await unitOfWorkFactory.start(async (uow) => {
-            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+            return uow
+                .collection(FinancialDocument)
+                .findBy('referenceId', 'INV-001');
         });
         const secondId = secondResult?.id.toPlain();
 
@@ -231,7 +249,9 @@ describe('onInvoiceIssued', () => {
         await handler.register();
 
         const result = await unitOfWorkFactory.start(async (uow) => {
-            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+            return uow
+                .collection(FinancialDocument)
+                .findBy('referenceId', 'INV-001');
         });
 
         expect(result).toBeUndefined();
@@ -250,7 +270,9 @@ describe('onInvoiceIssued', () => {
         );
 
         const result = await unitOfWorkFactory.start(async (uow) => {
-            return uow.collection(FinancialDocument).findBy('referenceId', 'my-custom-ref-123');
+            return uow
+                .collection(FinancialDocument)
+                .findBy('referenceId', 'my-custom-ref-123');
         });
 
         expect(result).toBeDefined();
@@ -271,7 +293,9 @@ describe('onInvoiceIssued', () => {
         const ids = await Promise.all(
             ['INV-001', 'INV-002', 'INV-003'].map(async (ref) => {
                 const result = await unitOfWorkFactory.start(async (uow) => {
-                    return uow.collection(FinancialDocument).findBy('referenceId', ref);
+                    return uow
+                        .collection(FinancialDocument)
+                        .findBy('referenceId', ref);
                 });
                 return result?.id.toPlain();
             })
@@ -300,7 +324,9 @@ describe('onInvoiceIssued', () => {
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const result = await unitOfWorkFactory.start(async (uow) => {
-            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+            return uow
+                .collection(FinancialDocument)
+                .findBy('referenceId', 'INV-001');
         });
 
         expect(result!.id.toPlain()).toBe(existing.id.toPlain());
@@ -321,7 +347,9 @@ describe('onInvoiceIssued', () => {
 
         for (let i = 0; i < count; i++) {
             const result = await unitOfWorkFactory.start(async (uow) => {
-                return uow.collection(FinancialDocument).findBy('referenceId', `INV-${i}`);
+                return uow
+                    .collection(FinancialDocument)
+                    .findBy('referenceId', `INV-${i}`);
             });
             expect(result).toBeDefined();
         }
@@ -340,10 +368,14 @@ describe('onInvoiceIssued', () => {
         await publishEvent(domainEvents, createInvoiceEvent('INV-AFTER'));
 
         const before = await unitOfWorkFactory.start(async (uow) => {
-            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-BEFORE');
+            return uow
+                .collection(FinancialDocument)
+                .findBy('referenceId', 'INV-BEFORE');
         });
         const after = await unitOfWorkFactory.start(async (uow) => {
-            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-AFTER');
+            return uow
+                .collection(FinancialDocument)
+                .findBy('referenceId', 'INV-AFTER');
         });
 
         expect(before).toBeUndefined();
@@ -361,10 +393,14 @@ describe('onInvoiceIssued', () => {
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
         const inFactory1 = await unitOfWorkFactory1.start(async (uow) => {
-            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+            return uow
+                .collection(FinancialDocument)
+                .findBy('referenceId', 'INV-001');
         });
         const inFactory2 = await unitOfWorkFactory2.start(async (uow) => {
-            return uow.collection(FinancialDocument).findBy('referenceId', 'INV-001');
+            return uow
+                .collection(FinancialDocument)
+                .findBy('referenceId', 'INV-001');
         });
 
         expect(inFactory1).toBeDefined();

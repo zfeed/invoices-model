@@ -19,7 +19,7 @@ export class Email implements Equatable<Email | string>, Mappable<string> {
             return Result.error(error);
         }
 
-        return Result.ok(new Email(value));
+        return Result.ok(new Email(value.toLowerCase()));
     }
 
     equals(other: Email | string): boolean {

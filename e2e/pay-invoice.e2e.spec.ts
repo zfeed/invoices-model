@@ -1,4 +1,10 @@
-import { setupApp, expectError, resolveByPath, tooLong, expectValidationError } from './helpers';
+import {
+    setupApp,
+    expectError,
+    resolveByPath,
+    tooLong,
+    expectValidationError,
+} from './helpers';
 
 const { postJson, postRaw, createProcessingInvoice } = setupApp();
 

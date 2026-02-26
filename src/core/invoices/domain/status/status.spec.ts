@@ -10,7 +10,10 @@ describe('InvoiceStatus', () => {
             InvoiceStatus.issued(),
             InvoiceStatus.issued(),
         ],
-        createDifferent: () => [InvoiceStatus.issued(), InvoiceStatus.cancelled()],
+        createDifferent: () => [
+            InvoiceStatus.issued(),
+            InvoiceStatus.cancelled(),
+        ],
     });
 
     describe('issued', () => {
@@ -62,7 +65,10 @@ describe('DraftInvoiceStatus', () => {
             DraftInvoiceStatus.draft(),
             DraftInvoiceStatus.draft(),
         ],
-        createDifferent: () => [DraftInvoiceStatus.draft(), DraftInvoiceStatus.completed()],
+        createDifferent: () => [
+            DraftInvoiceStatus.draft(),
+            DraftInvoiceStatus.completed(),
+        ],
     });
 
     describe('draft', () => {

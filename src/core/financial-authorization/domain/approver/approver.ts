@@ -3,7 +3,9 @@ import { Email } from '../email/email';
 import { Id } from '../id/id';
 import { Name } from '../name/name';
 
-export class Approver implements Equatable<Approver>, Mappable<ReturnType<Approver['toPlain']>> {
+export class Approver
+    implements Equatable<Approver>, Mappable<ReturnType<Approver['toPlain']>>
+{
     #id: Id;
     #name: Name;
     #email: Email;
@@ -35,7 +37,7 @@ export class Approver implements Equatable<Approver>, Mappable<ReturnType<Approv
         return new Approver(
             Id.fromPlain(plain.id),
             Name.fromPlain(plain.name),
-            Email.fromPlain(plain.email),
+            Email.fromPlain(plain.email)
         );
     }
 

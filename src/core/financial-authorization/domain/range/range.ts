@@ -3,7 +3,9 @@ import { Money } from '../money/money';
 import { checkCurrenciesEqual } from './checks/check-currencies-equal';
 import { checkFromNotGreaterThanTo } from './checks/check-from-not-greater-than-to';
 
-export class Range implements Equatable<Range>, Mappable<ReturnType<Range['toPlain']>> {
+export class Range
+    implements Equatable<Range>, Mappable<ReturnType<Range['toPlain']>>
+{
     #from: Money;
     #to: Money;
 
@@ -34,8 +36,14 @@ export class Range implements Equatable<Range>, Mappable<ReturnType<Range['toPla
         return Result.ok(new Range(from, to));
     }
 
-    static fromPlain(plain: { from: { amount: string; currency: string }; to: { amount: string; currency: string } }) {
-        return new Range(Money.fromPlain(plain.from), Money.fromPlain(plain.to));
+    static fromPlain(plain: {
+        from: { amount: string; currency: string };
+        to: { amount: string; currency: string };
+    }) {
+        return new Range(
+            Money.fromPlain(plain.from),
+            Money.fromPlain(plain.to)
+        );
     }
 
     equals(other: Range): boolean {

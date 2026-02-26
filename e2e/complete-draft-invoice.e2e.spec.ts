@@ -1,4 +1,9 @@
-import { setupApp, COMPLETE_DRAFT_REQUEST, expectError, INVOICE_SHAPE } from './helpers';
+import {
+    setupApp,
+    COMPLETE_DRAFT_REQUEST,
+    expectError,
+    INVOICE_SHAPE,
+} from './helpers';
 
 const { post, createDraft } = setupApp();
 

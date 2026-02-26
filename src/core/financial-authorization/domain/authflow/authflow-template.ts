@@ -6,7 +6,9 @@ import { StepTemplate } from '../step/step-template';
 import { Authflow } from './authflow';
 import { checkTemplateNoDuplicateStepOrders } from './checks/check-template-no-duplicate-step-orders';
 
-export class AuthflowTemplate implements Mappable<ReturnType<AuthflowTemplate['toPlain']>> {
+export class AuthflowTemplate
+    implements Mappable<ReturnType<AuthflowTemplate['toPlain']>>
+{
     #id: Id;
     #range: Range;
     #steps: StepTemplate[];
@@ -35,12 +37,17 @@ export class AuthflowTemplate implements Mappable<ReturnType<AuthflowTemplate['t
             return Result.error(error);
         }
 
-        return Result.ok(new AuthflowTemplate(Id.create().unwrap(), data.range, data.steps));
+        return Result.ok(
+            new AuthflowTemplate(Id.create().unwrap(), data.range, data.steps)
+        );
     }
 
     static fromPlain(plain: {
         id: string;
-        range: { from: { amount: string; currency: string }; to: { amount: string; currency: string } };
+        range: {
+            from: { amount: string; currency: string };
+            to: { amount: string; currency: string };
+        };
         steps: {
             id: string;
             order: number;
@@ -54,12 +61,14 @@ export class AuthflowTemplate implements Mappable<ReturnType<AuthflowTemplate['t
         return new AuthflowTemplate(
             Id.fromPlain(plain.id),
             Range.fromPlain(plain.range),
-            plain.steps.map((s) => StepTemplate.fromPlain(s)),
+            plain.steps.map((s) => StepTemplate.fromPlain(s))
         );
     }
 
     toAuthflow(action: Action): Result<DomainError, Authflow> {
-        const stepsResult = this.#steps.reduce<Result<DomainError, import('../step/step').Step[]>>(
+        const stepsResult = this.#steps.reduce<
+            Result<DomainError, import('../step/step').Step[]>
+        >(
             (acc, template) =>
                 acc.flatMap((steps) =>
                     template.toStep().map((step) => [...steps, step])

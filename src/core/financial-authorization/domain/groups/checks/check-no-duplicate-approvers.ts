@@ -2,7 +2,9 @@ import { DOMAIN_ERROR_CODE } from '../../../../../building-blocks/errors/domain/
 import { DomainError } from '../../../../../building-blocks/errors/domain/domain.error';
 import { Approver } from '../../approver/approver';
 
-export function checkNoDuplicateApprovers(approvers: Approver[]): DomainError | null {
+export function checkNoDuplicateApprovers(
+    approvers: Approver[]
+): DomainError | null {
     const ids = approvers.map((a) => a.id.toPlain());
     const uniqueIds = new Set(ids);
 

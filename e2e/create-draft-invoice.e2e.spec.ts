@@ -1,4 +1,12 @@
-import { setupApp, expectError, resolveByPath, tooLong, expectValidationError, EMPTY_DRAFT_SHAPE, POPULATED_DRAFT_SHAPE } from './helpers';
+import {
+    setupApp,
+    expectError,
+    resolveByPath,
+    tooLong,
+    expectValidationError,
+    EMPTY_DRAFT_SHAPE,
+    POPULATED_DRAFT_SHAPE,
+} from './helpers';
 
 const { postJson, postRaw } = setupApp();
 
@@ -28,13 +36,18 @@ describe('POST /invoices/drafts', () => {
         expect(json.data.status).toBe('DRAFT');
         expect(json.data.lineItems.items).toHaveLength(1);
         expect(json.data.lineItems.items[0].description).toBe('Service');
-        expect(json.data.lineItems.items[0]).toEqual(expect.objectContaining({
-            description: 'Service',
-            price: { amount: '200', currency: 'USD' },
-            quantity: '1',
-            total: { amount: '200', currency: 'USD' },
-        }));
-        expect(json.data.lineItems.subtotal).toEqual({ amount: '200', currency: 'USD' });
+        expect(json.data.lineItems.items[0]).toEqual(
+            expect.objectContaining({
+                description: 'Service',
+                price: { amount: '200', currency: 'USD' },
+                quantity: '1',
+                total: { amount: '200', currency: 'USD' },
+            })
+        );
+        expect(json.data.lineItems.subtotal).toEqual({
+            amount: '200',
+            currency: 'USD',
+        });
     });
 
     it('returns 400 for invalid JSON', async () => {

@@ -1,5 +1,8 @@
 import { isInt } from 'validator';
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../../building-blocks';
+import {
+    DOMAIN_ERROR_CODE,
+    DomainError,
+} from '../../../../../../building-blocks';
 import { Numeric } from '../../../numeric/numeric';
 
 const ZERO = Numeric.create('0').unwrap();

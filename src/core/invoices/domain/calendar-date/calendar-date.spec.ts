@@ -31,7 +31,9 @@ describe('CalendarDate', () => {
 
     it('should create issue date', () => {
         const issueDate = CalendarDate.create('2023-01-01').unwrap();
-        expect(issueDate.equals(CalendarDate.create('2023-01-01').unwrap())).toBe(true);
+        expect(
+            issueDate.equals(CalendarDate.create('2023-01-01').unwrap())
+        ).toBe(true);
     });
 
     it("should not create issue date if it's not a valid date", () => {

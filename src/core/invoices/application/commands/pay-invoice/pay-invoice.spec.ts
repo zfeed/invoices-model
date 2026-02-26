@@ -158,12 +158,9 @@ describe('PayInvoice', () => {
 
     it('should publish InvoicePaidEvent', async () => {
         const paidEvents: InvoicePaidEvent[] = [];
-        await domainEvents.subscribeToEvent(
-            InvoicePaidEvent,
-            async (e) => {
-                paidEvents.push(e);
-            }
-        );
+        await domainEvents.subscribeToEvent(InvoicePaidEvent, async (e) => {
+            paidEvents.push(e);
+        });
 
         const draft = await createCommand.execute(COMPLETE_DRAFT_REQUEST);
         const invoice = await completeCommand.execute(draft.id);

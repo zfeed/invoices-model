@@ -22,6 +22,10 @@ TypeScript DDD codebase with two bounded contexts: **invoices** (OOP class-based
 - Status types use class hierarchies with static factory methods (e.g., `InvoiceStatus.issued()`), transition guards, `fromPlain` for trusted reconstruction, and `fromString` for validated parsing.
 - Event names are auto-derived from class name: `DraftInvoiceCreatedEvent` → `draft-invoice.created` (dot-separated kebab-case).
 
+## Formatting
+
+- After all changes to files, run `npm run format` to format the code.
+
 ## Code Style
 
 - Prefer functional composition patterns: rambda `when`/`ifElse`, Result/Some/IO monads, flat pipelines.
@@ -61,14 +65,16 @@ e2e/                 # E2E tests (outside src/)
 - **financial-authorization value objects**: every value object (`Name`, `Email`, `Comment`, `Id`, `Order`, `Action`, `ReferenceId`, `Money`) has a factory function (`createName`, `createEmail`, etc.) that returns `Result<DomainError, T>` with validation. Each has a `checks/` folder with standalone check functions using the `ifElse(predicate, createError, Result.ok)` pattern from Ramda.
 - **financial-authorization factory inputs**: factory functions accept raw primitives (`string`, `number`, `string | null`), not domain type aliases. The factory validates and produces the domain type.
 - **financial-authorization composite factories**: composites (`createApproval`, `createApprover`) validate fields via their value-object factories using nested `flatMap`:
-  ```ts
-  export const createApproval = (data: ApprovalInput): Result<DomainError, Approval> =>
-      fromString(data.approverId).flatMap((approverId) =>
-          createComment(data.comment)
-              .map((comment) => ({ approverId, comment }))
-              .map(buildApproval)
-      );
-  ```
+    ```ts
+    export const createApproval = (
+        data: ApprovalInput
+    ): Result<DomainError, Approval> =>
+        fromString(data.approverId).flatMap((approverId) =>
+            createComment(data.comment)
+                .map((comment) => ({ approverId, comment }))
+                .map(buildApproval)
+        );
+    ```
 - **financial-authorization aggregate operations**: functions like `approveGroup`, `approveStep`, `approveAuthflow`, `approveDocument` take positional arguments (not data objects) and use nested `flatMap` chains — no intermediate accumulation types.
 - **financial-authorization build functions**: use `applySpec<Entity>({ field: prop('field'), id: () => createId() })` to construct domain structures from validated input — never manual object literals
 - **financial-authorization aggregate checks**: aggregate-level invariants (e.g., no duplicate approvers, approvers not empty) live in the aggregate's own `checks/` folder and operate on the composite input type

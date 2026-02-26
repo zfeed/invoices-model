@@ -17,7 +17,10 @@ describe('DraftDraftInvoice', () => {
         unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
         domainEvents = new InMemoryDomainEvents();
         createCommand = new CreateDraftInvoice(unitOfWorkFactory, domainEvents);
-        archiveCommand = new ArchiveDraftInvoice(unitOfWorkFactory, domainEvents);
+        archiveCommand = new ArchiveDraftInvoice(
+            unitOfWorkFactory,
+            domainEvents
+        );
         draftCommand = new DraftDraftInvoice(unitOfWorkFactory, domainEvents);
     });
 

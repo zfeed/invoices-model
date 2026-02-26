@@ -3,7 +3,10 @@ import { Mapper } from './mapper';
 
 type FinancialDocumentPlain = ReturnType<FinancialDocument['toPlain']>;
 
-class FinancialDocumentMapper extends Mapper<FinancialDocument, FinancialDocumentPlain> {
+class FinancialDocumentMapper extends Mapper<
+    FinancialDocument,
+    FinancialDocumentPlain
+> {
     entityClass() {
         return FinancialDocument;
     }

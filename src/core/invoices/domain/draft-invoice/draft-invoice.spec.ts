@@ -13,7 +13,9 @@ describe('DraftInvoice', () => {
     it('should create a draft invoice instance with missing data', () => {
         const draftInvoice = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
-        expect(draftInvoice.status.equals(DraftInvoiceStatus.draft())).toBe(true);
+        expect(draftInvoice.status.equals(DraftInvoiceStatus.draft())).toBe(
+            true
+        );
         expect(draftInvoice.total).toBeNull();
         expect(draftInvoice.vatRate).toBeNull();
         expect(draftInvoice.vatAmount).toBeNull();
@@ -315,7 +317,9 @@ describe('DraftInvoice', () => {
 
         const invoice = draftInvoice.toInvoice().unwrap();
 
-        expect(draftInvoice.status.equals(DraftInvoiceStatus.completed())).toBe(true);
+        expect(draftInvoice.status.equals(DraftInvoiceStatus.completed())).toBe(
+            true
+        );
         expect(invoice.dueDate.equals(draftInvoice.dueDate!)).toBe(true);
         expect(invoice.issueDate.equals(draftInvoice.issueDate!)).toBe(true);
         expect(invoice.issuer.equals(draftInvoice.issuer!)).toBe(true);
@@ -389,7 +393,9 @@ describe('DraftInvoice', () => {
 
         draftInvoice.archive().unwrap();
 
-        expect(draftInvoice.status.equals(DraftInvoiceStatus.archived())).toBe(true);
+        expect(draftInvoice.status.equals(DraftInvoiceStatus.archived())).toBe(
+            true
+        );
     });
 
     it('should not archive a completed draft invoice', () => {
@@ -451,7 +457,9 @@ describe('DraftInvoice', () => {
         draftInvoice.archive().unwrap();
         draftInvoice.draft().unwrap();
 
-        expect(draftInvoice.status.equals(DraftInvoiceStatus.draft())).toBe(true);
+        expect(draftInvoice.status.equals(DraftInvoiceStatus.draft())).toBe(
+            true
+        );
     });
 
     it('should not move to draft from DRAFT status', () => {

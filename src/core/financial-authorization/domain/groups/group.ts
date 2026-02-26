@@ -1,4 +1,9 @@
-import { DOMAIN_ERROR_CODE, DomainError, Mappable, Result } from '../../../../building-blocks';
+import {
+    DOMAIN_ERROR_CODE,
+    DomainError,
+    Mappable,
+    Result,
+} from '../../../../building-blocks';
 import { Approval } from '../approval/approval';
 import { Approver } from '../approver/approver';
 import { Id } from '../id/id';
@@ -13,7 +18,12 @@ export class Group implements Mappable<ReturnType<Group['toPlain']>> {
     #approvers: Approver[];
     #approvals: Approval[];
 
-    protected constructor(id: Id, requiredApprovals: number, approvers: Approver[], approvals: Approval[]) {
+    protected constructor(
+        id: Id,
+        requiredApprovals: number,
+        approvers: Approver[],
+        approvals: Approval[]
+    ) {
         this.#id = id;
         this.#requiredApprovals = requiredApprovals;
         this.#approvers = approvers;
@@ -40,41 +50,63 @@ export class Group implements Mappable<ReturnType<Group['toPlain']>> {
         return this.#approvals;
     }
 
-    static create(data: { requiredApprovals: number; approvers: Approver[]; approvals: Approval[] }) {
+    static create(data: {
+        requiredApprovals: number;
+        approvers: Approver[];
+        approvals: Approval[];
+    }) {
         const approversEmptyError = checkApproversNotEmpty(data.approvers);
         if (approversEmptyError) {
             return Result.error(approversEmptyError);
         }
 
-        const duplicateApproversError = checkNoDuplicateApprovers(data.approvers);
+        const duplicateApproversError = checkNoDuplicateApprovers(
+            data.approvers
+        );
         if (duplicateApproversError) {
             return Result.error(duplicateApproversError);
         }
 
-        const approverExistsError = checkApproverExists(data.approvers, data.approvals);
+        const approverExistsError = checkApproverExists(
+            data.approvers,
+            data.approvals
+        );
         if (approverExistsError) {
             return Result.error(approverExistsError);
         }
 
-        const duplicateApprovalsError = checkNoDuplicateApprovals(data.approvals);
+        const duplicateApprovalsError = checkNoDuplicateApprovals(
+            data.approvals
+        );
         if (duplicateApprovalsError) {
             return Result.error(duplicateApprovalsError);
         }
 
-        return Result.ok(new Group(Id.create().unwrap(), data.requiredApprovals, data.approvers, data.approvals));
+        return Result.ok(
+            new Group(
+                Id.create().unwrap(),
+                data.requiredApprovals,
+                data.approvers,
+                data.approvals
+            )
+        );
     }
 
     static fromPlain(plain: {
         id: string;
         requiredApprovals: number;
         approvers: { id: string; name: string; email: string }[];
-        approvals: { approverId: string; createdAt: string; comment: string | null }[];
+        approvals: {
+            approverId: string;
+            createdAt: string;
+            comment: string | null;
+        }[];
     }) {
         return new Group(
             Id.fromPlain(plain.id),
             plain.requiredApprovals,
             plain.approvers.map((a) => Approver.fromPlain(a)),
-            plain.approvals.map((a) => Approval.fromPlain(a)),
+            plain.approvals.map((a) => Approval.fromPlain(a))
         );
     }
 
@@ -104,12 +136,17 @@ export class Group implements Mappable<ReturnType<Group['toPlain']>> {
             return Result.error(approversEmptyError);
         }
 
-        const duplicateApproversError = checkNoDuplicateApprovers(this.#approvers);
+        const duplicateApproversError = checkNoDuplicateApprovers(
+            this.#approvers
+        );
         if (duplicateApproversError) {
             return Result.error(duplicateApproversError);
         }
 
-        const approverExistsError = checkApproverExists(this.#approvers, newApprovals);
+        const approverExistsError = checkApproverExists(
+            this.#approvers,
+            newApprovals
+        );
         if (approverExistsError) {
             return Result.error(approverExistsError);
         }
@@ -119,11 +156,21 @@ export class Group implements Mappable<ReturnType<Group['toPlain']>> {
             return Result.error(duplicateApprovalsError);
         }
 
-        return Result.ok(new Group(this.#id, this.#requiredApprovals, this.#approvers, newApprovals));
+        return Result.ok(
+            new Group(
+                this.#id,
+                this.#requiredApprovals,
+                this.#approvers,
+                newApprovals
+            )
+        );
     }
 
     hasEligibleApprover(approverId: Id): boolean {
-        return !this.isApproved && this.#approvers.some((a) => a.id.equals(approverId));
+        return (
+            !this.isApproved &&
+            this.#approvers.some((a) => a.id.equals(approverId))
+        );
     }
 
     toPlain() {

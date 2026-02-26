@@ -1,4 +1,10 @@
-import { assertNever, DomainError, Equatable, Mappable, Result } from '../../../../building-blocks';
+import {
+    assertNever,
+    DomainError,
+    Equatable,
+    Mappable,
+    Result,
+} from '../../../../building-blocks';
 import { checkRecipientNonEmpty } from './checks/check-recipient-non-empty';
 import { Country } from '../country/country';
 import { Email } from '../email/email';
@@ -10,7 +16,9 @@ export enum RECIPIENT_TYPE {
     COMPANY = 'COMPANY',
 }
 
-export class Recipient implements Equatable<Recipient>, Mappable<ReturnType<Recipient['toPlain']>> {
+export class Recipient
+    implements Equatable<Recipient>, Mappable<ReturnType<Recipient['toPlain']>>
+{
     #type: RECIPIENT_TYPE;
     #name: string;
     #address: string;
@@ -108,7 +116,7 @@ export class Recipient implements Equatable<Recipient>, Mappable<ReturnType<Reci
             plain.taxId,
             Email.fromPlain(plain.email),
             Country.fromPlain(plain.taxResidenceCountry),
-            billing,
+            billing
         );
     }
 

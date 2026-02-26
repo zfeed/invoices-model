@@ -59,10 +59,7 @@ const template = (from: string, to: string) =>
 const seedPolicy = async (unitOfWorkFactory: InMemoryUnitOfWorkFactory) => {
     const policy = AuthflowPolicy.create({
         action: Action.create('pay').unwrap(),
-        templates: [
-            template('0', '999'),
-            template('1000', '9999'),
-        ],
+        templates: [template('0', '999'), template('1000', '9999')],
     }).unwrap();
     await unitOfWorkFactory.start(async (uow) => {
         await uow.collection(AuthflowPolicy).add(policy);
@@ -87,7 +84,10 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
 
     describe('without policy', () => {
         beforeEach(async () => {
-            const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+            const handler = new OnInvoiceIssued(
+                unitOfWorkFactory,
+                domainEvents
+            );
             await handler.register();
         });
 
@@ -96,7 +96,9 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
             const invoice = await completeCommand.execute(draft.id);
 
             const doc = await unitOfWorkFactory.start(async (uow) => {
-                return uow.collection(FinancialDocument).findBy('referenceId', invoice.id);
+                return uow
+                    .collection(FinancialDocument)
+                    .findBy('referenceId', invoice.id);
             });
 
             expect(doc).toBeDefined();
@@ -109,7 +111,9 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
             await completeCommand.execute(draft.id);
 
             const doc = await unitOfWorkFactory.start(async (uow) => {
-                return uow.collection(FinancialDocument).findBy('referenceId', draft.id);
+                return uow
+                    .collection(FinancialDocument)
+                    .findBy('referenceId', draft.id);
             });
 
             expect(doc).toBeUndefined();
@@ -119,7 +123,9 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
             await createCommand.execute(COMPLETE_DRAFT_REQUEST);
 
             const doc = await unitOfWorkFactory.start(async (uow) => {
-                return uow.collection(FinancialDocument).findBy('referenceId', 'any-ref');
+                return uow
+                    .collection(FinancialDocument)
+                    .findBy('referenceId', 'any-ref');
             });
 
             expect(doc).toBeUndefined();
@@ -129,7 +135,9 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
             const draft = await createCommand.execute(COMPLETE_DRAFT_REQUEST);
 
             const doc = await unitOfWorkFactory.start(async (uow) => {
-                return uow.collection(FinancialDocument).findBy('referenceId', draft.id);
+                return uow
+                    .collection(FinancialDocument)
+                    .findBy('referenceId', draft.id);
             });
 
             expect(doc).toBeUndefined();
@@ -139,7 +147,10 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
     describe('with policy', () => {
         beforeEach(async () => {
             await seedPolicy(unitOfWorkFactory);
-            const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+            const handler = new OnInvoiceIssued(
+                unitOfWorkFactory,
+                domainEvents
+            );
             await handler.register();
         });
 
@@ -148,7 +159,9 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
             const invoice = await completeCommand.execute(draft.id);
 
             const doc = await unitOfWorkFactory.start(async (uow) => {
-                return uow.collection(FinancialDocument).findBy('referenceId', invoice.id);
+                return uow
+                    .collection(FinancialDocument)
+                    .findBy('referenceId', invoice.id);
             });
 
             expect(doc).toBeDefined();
@@ -162,7 +175,9 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
             const invoice = await completeCommand.execute(draft.id);
 
             const doc = await unitOfWorkFactory.start(async (uow) => {
-                return uow.collection(FinancialDocument).findBy('referenceId', invoice.id);
+                return uow
+                    .collection(FinancialDocument)
+                    .findBy('referenceId', invoice.id);
             });
 
             // invoice total is 220 (200 + 10% VAT), falls in 0-999
@@ -175,7 +190,9 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
             const invoice = await completeCommand.execute(draft.id);
 
             const doc = await unitOfWorkFactory.start(async (uow) => {
-                return uow.collection(FinancialDocument).findBy('referenceId', invoice.id);
+                return uow
+                    .collection(FinancialDocument)
+                    .findBy('referenceId', invoice.id);
             });
 
             expect(doc!.referenceId.toPlain()).toBe(invoice.id);
@@ -189,10 +206,14 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
             const invoice2 = await completeCommand.execute(draft2.id);
 
             const doc1 = await unitOfWorkFactory.start(async (uow) => {
-                return uow.collection(FinancialDocument).findBy('referenceId', invoice1.id);
+                return uow
+                    .collection(FinancialDocument)
+                    .findBy('referenceId', invoice1.id);
             });
             const doc2 = await unitOfWorkFactory.start(async (uow) => {
-                return uow.collection(FinancialDocument).findBy('referenceId', invoice2.id);
+                return uow
+                    .collection(FinancialDocument)
+                    .findBy('referenceId', invoice2.id);
             });
 
             expect(doc1).toBeDefined();

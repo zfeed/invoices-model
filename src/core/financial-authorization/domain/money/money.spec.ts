@@ -8,7 +8,10 @@ describe('Money', () => {
 
             expect(result.isOk()).toBe(true);
             const money = result.unwrap();
-            expect(money.toPlain()).toEqual({ amount: '10000', currency: 'USD' });
+            expect(money.toPlain()).toEqual({
+                amount: '10000',
+                currency: 'USD',
+            });
         });
 
         it('should create money with zero amount', () => {

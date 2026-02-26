@@ -7,9 +7,7 @@ import { ReferenceId } from '../../domain/reference-id/reference-id';
 export type ApprovalAnswer = 'YES' | 'NO' | 'UNKNOWN';
 
 export class CanApproverApprove {
-    constructor(
-        private readonly unitOfWorkFactory: UnitOfWorkFactory
-    ) {}
+    constructor(private readonly unitOfWorkFactory: UnitOfWorkFactory) {}
 
     public can(approverId: string) {
         return {

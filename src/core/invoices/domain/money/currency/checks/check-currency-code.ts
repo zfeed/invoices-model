@@ -1,5 +1,8 @@
 import { isISO4217 } from 'validator';
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../../building-blocks';
+import {
+    DOMAIN_ERROR_CODE,
+    DomainError,
+} from '../../../../../../building-blocks';
 
 export function checkCurrencyCode(value: string): DomainError | null {
     if (!isISO4217(value)) {

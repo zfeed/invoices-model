@@ -22,22 +22,36 @@ describe('CanApproverApprove', () => {
             id: 'doc-1',
             referenceId: 'ref-1',
             value: { amount: '10000', currency: 'USD' },
-            authflows: [{
-                id: 'authflow-1',
-                action: 'pay',
-                range: { from: { amount: '0', currency: 'USD' }, to: { amount: '100000', currency: 'USD' } },
-                steps: [{
-                    id: 'step-1',
-                    order: 0,
-                    groups: [{
-                        id: 'group-1',
-                        requiredApprovals: 1,
-                        approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
-                        approvals: [],
-                    }],
-                }],
-            }],
-
+            authflows: [
+                {
+                    id: 'authflow-1',
+                    action: 'pay',
+                    range: {
+                        from: { amount: '0', currency: 'USD' },
+                        to: { amount: '100000', currency: 'USD' },
+                    },
+                    steps: [
+                        {
+                            id: 'step-1',
+                            order: 0,
+                            groups: [
+                                {
+                                    id: 'group-1',
+                                    requiredApprovals: 1,
+                                    approvers: [
+                                        {
+                                            id: 'approver-1',
+                                            name: 'Alice',
+                                            email: 'alice@example.com',
+                                        },
+                                    ],
+                                    approvals: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         });
 
         await unitOfWorkFactory.start(async (uow) => {
@@ -61,22 +75,36 @@ describe('CanApproverApprove', () => {
             id: 'doc-1',
             referenceId: 'ref-1',
             value: { amount: '10000', currency: 'USD' },
-            authflows: [{
-                id: 'authflow-1',
-                action: 'pay',
-                range: { from: { amount: '0', currency: 'USD' }, to: { amount: '100000', currency: 'USD' } },
-                steps: [{
-                    id: 'step-1',
-                    order: 0,
-                    groups: [{
-                        id: 'group-1',
-                        requiredApprovals: 1,
-                        approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
-                        approvals: [],
-                    }],
-                }],
-            }],
-
+            authflows: [
+                {
+                    id: 'authflow-1',
+                    action: 'pay',
+                    range: {
+                        from: { amount: '0', currency: 'USD' },
+                        to: { amount: '100000', currency: 'USD' },
+                    },
+                    steps: [
+                        {
+                            id: 'step-1',
+                            order: 0,
+                            groups: [
+                                {
+                                    id: 'group-1',
+                                    requiredApprovals: 1,
+                                    approvers: [
+                                        {
+                                            id: 'approver-1',
+                                            name: 'Alice',
+                                            email: 'alice@example.com',
+                                        },
+                                    ],
+                                    approvals: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         });
 
         await unitOfWorkFactory.start(async (uow) => {
@@ -100,22 +128,42 @@ describe('CanApproverApprove', () => {
             id: 'doc-1',
             referenceId: 'ref-1',
             value: { amount: '10000', currency: 'USD' },
-            authflows: [{
-                id: 'authflow-1',
-                action: 'pay',
-                range: { from: { amount: '0', currency: 'USD' }, to: { amount: '100000', currency: 'USD' } },
-                steps: [{
-                    id: 'step-1',
-                    order: 0,
-                    groups: [{
-                        id: 'group-1',
-                        requiredApprovals: 1,
-                        approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
-                        approvals: [{ approverId: 'approver-1', createdAt: new Date().toISOString(), comment: null }],
-                    }],
-                }],
-            }],
-
+            authflows: [
+                {
+                    id: 'authflow-1',
+                    action: 'pay',
+                    range: {
+                        from: { amount: '0', currency: 'USD' },
+                        to: { amount: '100000', currency: 'USD' },
+                    },
+                    steps: [
+                        {
+                            id: 'step-1',
+                            order: 0,
+                            groups: [
+                                {
+                                    id: 'group-1',
+                                    requiredApprovals: 1,
+                                    approvers: [
+                                        {
+                                            id: 'approver-1',
+                                            name: 'Alice',
+                                            email: 'alice@example.com',
+                                        },
+                                    ],
+                                    approvals: [
+                                        {
+                                            approverId: 'approver-1',
+                                            createdAt: new Date().toISOString(),
+                                            comment: null,
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         });
 
         await unitOfWorkFactory.start(async (uow) => {
@@ -139,22 +187,36 @@ describe('CanApproverApprove', () => {
             id: 'doc-1',
             referenceId: 'ref-1',
             value: { amount: '10000', currency: 'USD' },
-            authflows: [{
-                id: 'authflow-1',
-                action: 'pay',
-                range: { from: { amount: '0', currency: 'USD' }, to: { amount: '100000', currency: 'USD' } },
-                steps: [{
-                    id: 'step-1',
-                    order: 0,
-                    groups: [{
-                        id: 'group-1',
-                        requiredApprovals: 1,
-                        approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
-                        approvals: [],
-                    }],
-                }],
-            }],
-
+            authflows: [
+                {
+                    id: 'authflow-1',
+                    action: 'pay',
+                    range: {
+                        from: { amount: '0', currency: 'USD' },
+                        to: { amount: '100000', currency: 'USD' },
+                    },
+                    steps: [
+                        {
+                            id: 'step-1',
+                            order: 0,
+                            groups: [
+                                {
+                                    id: 'group-1',
+                                    requiredApprovals: 1,
+                                    approvers: [
+                                        {
+                                            id: 'approver-1',
+                                            name: 'Alice',
+                                            email: 'alice@example.com',
+                                        },
+                                    ],
+                                    approvals: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         });
 
         await unitOfWorkFactory.start(async (uow) => {
@@ -178,34 +240,54 @@ describe('CanApproverApprove', () => {
             id: 'doc-1',
             referenceId: 'ref-1',
             value: { amount: '10000', currency: 'USD' },
-            authflows: [{
-                id: 'authflow-1',
-                action: 'pay',
-                range: { from: { amount: '0', currency: 'USD' }, to: { amount: '100000', currency: 'USD' } },
-                steps: [
-                    {
-                        id: 'step-1',
-                        order: 0,
-                        groups: [{
-                            id: 'group-1',
-                            requiredApprovals: 1,
-                            approvers: [{ id: 'approver-1', name: 'Alice', email: 'alice@example.com' }],
-                            approvals: [],
-                        }],
+            authflows: [
+                {
+                    id: 'authflow-1',
+                    action: 'pay',
+                    range: {
+                        from: { amount: '0', currency: 'USD' },
+                        to: { amount: '100000', currency: 'USD' },
                     },
-                    {
-                        id: 'step-2',
-                        order: 1,
-                        groups: [{
-                            id: 'group-2',
-                            requiredApprovals: 1,
-                            approvers: [{ id: 'approver-2', name: 'Bob', email: 'bob@example.com' }],
-                            approvals: [],
-                        }],
-                    },
-                ],
-            }],
-
+                    steps: [
+                        {
+                            id: 'step-1',
+                            order: 0,
+                            groups: [
+                                {
+                                    id: 'group-1',
+                                    requiredApprovals: 1,
+                                    approvers: [
+                                        {
+                                            id: 'approver-1',
+                                            name: 'Alice',
+                                            email: 'alice@example.com',
+                                        },
+                                    ],
+                                    approvals: [],
+                                },
+                            ],
+                        },
+                        {
+                            id: 'step-2',
+                            order: 1,
+                            groups: [
+                                {
+                                    id: 'group-2',
+                                    requiredApprovals: 1,
+                                    approvers: [
+                                        {
+                                            id: 'approver-2',
+                                            name: 'Bob',
+                                            email: 'bob@example.com',
+                                        },
+                                    ],
+                                    approvals: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         });
 
         await unitOfWorkFactory.start(async (uow) => {

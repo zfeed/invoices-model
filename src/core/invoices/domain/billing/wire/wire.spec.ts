@@ -32,7 +32,7 @@ describe('Wire', () => {
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError()).toEqual(
-            expect.objectContaining({ code: '13000' }),
+            expect.objectContaining({ code: '13000' })
         );
     });
 
@@ -41,7 +41,7 @@ describe('Wire', () => {
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError()).toEqual(
-            expect.objectContaining({ code: '13002' }),
+            expect.objectContaining({ code: '13002' })
         );
     });
 
@@ -50,7 +50,7 @@ describe('Wire', () => {
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError()).toEqual(
-            expect.objectContaining({ code: '13002' }),
+            expect.objectContaining({ code: '13002' })
         );
     });
 
@@ -59,7 +59,7 @@ describe('Wire', () => {
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError()).toEqual(
-            expect.objectContaining({ code: '13002' }),
+            expect.objectContaining({ code: '13002' })
         );
     });
 
@@ -68,7 +68,7 @@ describe('Wire', () => {
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError()).toEqual(
-            expect.objectContaining({ code: '13002' }),
+            expect.objectContaining({ code: '13002' })
         );
     });
 
@@ -77,7 +77,7 @@ describe('Wire', () => {
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError()).toEqual(
-            expect.objectContaining({ code: '13001' }),
+            expect.objectContaining({ code: '13001' })
         );
     });
 });

@@ -1,4 +1,7 @@
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../../building-blocks';
+import {
+    DOMAIN_ERROR_CODE,
+    DomainError,
+} from '../../../../../../building-blocks';
 
 export function checkDescriptionNonEmpty(value: string): DomainError | null {
     if (value.trim().length === 0) {

@@ -36,7 +36,10 @@ export class ApproveActionOnDocument {
                 });
             }
 
-            const approval = Approval.create({ approverId: request.approver.id, comment: null }).unwrap();
+            const approval = Approval.create({
+                approverId: request.approver.id,
+                comment: null,
+            }).unwrap();
             document.apply(action, approval).unwrap();
 
             return document;

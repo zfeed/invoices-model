@@ -1,4 +1,9 @@
-import { DOMAIN_ERROR_CODE, DomainError, Equatable, Result } from '../../../../building-blocks';
+import {
+    DOMAIN_ERROR_CODE,
+    DomainError,
+    Equatable,
+    Result,
+} from '../../../../building-blocks';
 
 export enum INVOICE_STATUS {
     ISSUED = 'ISSUED',
