@@ -1,12 +1,8 @@
 import { Equatable, Mappable, Result } from '../../../../../building-blocks';
 import { Email } from '../../email/email';
-import { IBilling } from '../billing.interface';
 
 export class Paypal
-    implements
-        Equatable<Paypal>,
-        IBilling<'PAYPAL', { email: Email }>,
-        Mappable<ReturnType<Paypal['toPlain']>>
+    implements Equatable<Paypal>, Mappable<ReturnType<Paypal['toPlain']>>
 {
     public readonly type = 'PAYPAL' as const;
     public readonly data: { email: Email };
