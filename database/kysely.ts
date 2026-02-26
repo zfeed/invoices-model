@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import { Kysely, PostgresDialect } from 'kysely';
-import { Database } from './types';
+import { DB } from 'kysely-codegen';
 
 export const postgresDialect = new PostgresDialect({
     pool: new Pool({
@@ -12,6 +12,8 @@ export const postgresDialect = new PostgresDialect({
     }),
 });
 
-export const kysely = new Kysely<Database>({
+export const kysely = new Kysely<DB>({
     dialect: postgresDialect,
 });
+
+kysely.selectFrom('draft_invoices').selectAll().execute();

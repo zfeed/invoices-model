@@ -10,7 +10,8 @@
         "test:e2e": "vitest run --config vitest.e2e.config.ts",
         "test:e2e:watch": "vitest --config vitest.e2e.config.ts",
         "format": "prettier --write .",
-        "format:check": "prettier --check ."
+        "format:check": "prettier --check .",
+        "kysely:generate": "kysely-codegen"
     },
     "author": "",
     "license": "ISC",
@@ -20,6 +21,7 @@
         "@types/ramda": "^0.31.1",
         "@types/uuid": "^10.0.0",
         "@types/validator": "^13.15.2",
+        "kysely-codegen": "^0.20.0",
         "kysely-ctl": "^0.20.0",
         "prettier": "^3.6.2",
         "tsx": "^4.21.0",
