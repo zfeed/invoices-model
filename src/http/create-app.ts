@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 import { bootstrap } from '../core/bootstrap';
 import { Session } from '../infrastructure/unit-of-work/session';
+import { Storage } from '../infrastructure/unit-of-work/storage/storage';
 import { InMemoryDomainEvents } from '../infrastructure/domain-events/in-memory-domain-events';
 import {
     draftInvoicesPlugin,
@@ -11,7 +12,7 @@ import { errorHandler } from './error-handler';
 
 export const createApp = async () => {
     const commands = await bootstrap({
-        session: new Session(),
+        session: new Session({ storage: new Storage() }),
         domainEvents: new InMemoryDomainEvents(),
     });
 

@@ -1,4 +1,5 @@
 import { Session } from '../../../../../infrastructure/unit-of-work/session';
+import { Storage } from '../../../../../infrastructure/unit-of-work/storage/storage';
 import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
 import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice';
 import { ArchiveDraftInvoice } from '../archive-draft-invoice/archive-draft-invoice';
@@ -14,7 +15,7 @@ describe('DraftDraftInvoice', () => {
     let draftCommand: DraftDraftInvoice;
 
     beforeEach(() => {
-        session = new Session();
+        session = new Session({ storage: new Storage() });
         domainEvents = new InMemoryDomainEvents();
         createCommand = new CreateDraftInvoice(session, domainEvents);
         archiveCommand = new ArchiveDraftInvoice(session, domainEvents);

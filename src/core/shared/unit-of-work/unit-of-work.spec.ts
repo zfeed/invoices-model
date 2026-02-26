@@ -2,6 +2,7 @@ import { DraftInvoice } from '../../invoices/domain/draft-invoice/draft-invoice'
 import { Id } from '../../invoices/domain/id/id';
 import { LineItem } from '../../invoices/domain/line-item/line-item';
 import { Session } from '../../../infrastructure/unit-of-work/session';
+import { Storage } from '../../../infrastructure/unit-of-work/storage/storage';
 import { OptimisticConcurrencyError } from '../optimistic-concurrency.error';
 import { Invoice } from '../../invoices/domain/invoice/invoice';
 import { CalendarDate } from '../../invoices/domain/calendar-date/calendar-date';
@@ -16,7 +17,7 @@ import { UnitDescription } from '../../invoices/domain/line-item/unit-descriptio
 describe('UnitOfWork contract (InMemory)', () => {
     describe('Collection.get', () => {
         it('should return null for a non-existing entity', async () => {
-            const session = new Session();
+            const session = new Session({ storage: new Storage() });
 
             await session.start(async (uow) => {
                 const collection = uow.collection(DraftInvoice);
@@ -31,7 +32,7 @@ describe('UnitOfWork contract (InMemory)', () => {
 
     describe('Collection.add', () => {
         it('should make entity available via get within the same unit of work', async () => {
-            const session = new Session();
+            const session = new Session({ storage: new Storage() });
 
             await session.start(async (uow) => {
                 const collection = uow.collection(DraftInvoice);
@@ -50,7 +51,7 @@ describe('UnitOfWork contract (InMemory)', () => {
 
     describe('finish', () => {
         it('should persist a newly added entity', async () => {
-            const session = new Session();
+            const session = new Session({ storage: new Storage() });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             await session.start(async (uow) => {
@@ -66,7 +67,7 @@ describe('UnitOfWork contract (InMemory)', () => {
         });
 
         it('should persist modifications made to a tracked entity', async () => {
-            const session = new Session();
+            const session = new Session({ storage: new Storage() });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             await session.start(async (uow) => {
@@ -102,7 +103,7 @@ describe('UnitOfWork contract (InMemory)', () => {
 
     describe('identity map', () => {
         it('should return the same reference when getting the same entity twice', async () => {
-            const session = new Session();
+            const session = new Session({ storage: new Storage() });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             await session.start(async (uow) => {
@@ -120,7 +121,7 @@ describe('UnitOfWork contract (InMemory)', () => {
         });
 
         it('should return the added instance without roundtripping through the store', async () => {
-            const session = new Session();
+            const session = new Session({ storage: new Storage() });
 
             await session.start(async (uow) => {
                 const collection = uow.collection(DraftInvoice);
@@ -136,7 +137,7 @@ describe('UnitOfWork contract (InMemory)', () => {
         });
 
         it('should return distinct instances across different units of work', async () => {
-            const session = new Session();
+            const session = new Session({ storage: new Storage() });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             await session.start(async (uow) => {
@@ -166,7 +167,7 @@ describe('UnitOfWork contract (InMemory)', () => {
 
     describe('isolation', () => {
         it('should not expose uncommitted additions to other units of work', async () => {
-            const session = new Session();
+            const session = new Session({ storage: new Storage() });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             await session.start(async (uow1) => {
@@ -182,7 +183,7 @@ describe('UnitOfWork contract (InMemory)', () => {
         });
 
         it('should not expose uncommitted modifications to other units of work', async () => {
-            const session = new Session();
+            const session = new Session({ storage: new Storage() });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             await session.start(async (uow) => {
@@ -223,7 +224,7 @@ describe('UnitOfWork contract (InMemory)', () => {
 
     describe('rollback', () => {
         it('should not persist changes if the callback throws', async () => {
-            const session = new Session();
+            const session = new Session({ storage: new Storage() });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             await expect(
@@ -240,7 +241,7 @@ describe('UnitOfWork contract (InMemory)', () => {
         });
 
         it('should not persist modifications if the callback throws', async () => {
-            const session = new Session();
+            const session = new Session({ storage: new Storage() });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             await session.start(async (uow) => {
@@ -272,7 +273,7 @@ describe('UnitOfWork contract (InMemory)', () => {
 
     describe('optimistic concurrency', () => {
         it('should throw OptimisticConcurrencyError when two units of work modify the same entity', async () => {
-            const session = new Session();
+            const session = new Session({ storage: new Storage() });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             await session.start(async (uow) => {
@@ -314,7 +315,7 @@ describe('UnitOfWork contract (InMemory)', () => {
 
     describe('Collection edge cases', () => {
         it('should throw OptimisticConcurrencyError when adding an entity with an id that already exists in the store', async () => {
-            const session = new Session();
+            const session = new Session({ storage: new Storage() });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             await session.start(async (uow) => {
@@ -331,7 +332,7 @@ describe('UnitOfWork contract (InMemory)', () => {
 
     describe('dirty tracking', () => {
         it('should cause a concurrency conflict when a read-only load overlaps with a write', async () => {
-            const session = new Session();
+            const session = new Session({ storage: new Storage() });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             await session.start(async (uow) => {
@@ -366,7 +367,7 @@ describe('UnitOfWork contract (InMemory)', () => {
 
     describe('return value', () => {
         it('should return the value produced by the callback', async () => {
-            const session = new Session();
+            const session = new Session({ storage: new Storage() });
 
             const result = await session.start(async () => {
                 return 42;
@@ -376,7 +377,7 @@ describe('UnitOfWork contract (InMemory)', () => {
         });
 
         it('should return undefined when the callback returns nothing', async () => {
-            const session = new Session();
+            const session = new Session({ storage: new Storage() });
 
             const result = await session.start(async () => {});
 
@@ -386,7 +387,7 @@ describe('UnitOfWork contract (InMemory)', () => {
 
     describe('multiple collections', () => {
         it('should persist changes to different entity types independently', async () => {
-            const session = new Session();
+            const session = new Session({ storage: new Storage() });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             const lineItem = LineItem.create({
@@ -441,7 +442,7 @@ describe('UnitOfWork contract (InMemory)', () => {
         });
 
         it('should rollback changes across all collections when the callback throws', async () => {
-            const session = new Session();
+            const session = new Session({ storage: new Storage() });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             const lineItem = LineItem.create({

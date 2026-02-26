@@ -1,5 +1,6 @@
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
 import { Session } from '../../../../infrastructure/unit-of-work/session';
+import { Storage } from '../../../../infrastructure/unit-of-work/storage/storage';
 import { CreateDraftInvoice } from '../../../invoices/application/commands/create-draft-invoice/create-draft-invoice';
 import { CompleteDraftInvoice } from '../../../invoices/application/commands/complete-draft-invoice/complete-draft-invoice';
 import { ISSUER_TYPE } from '../../../invoices/domain/issuer/issuer';
@@ -73,7 +74,7 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
     let completeCommand: CompleteDraftInvoice;
 
     beforeEach(async () => {
-        session = new Session();
+        session = new Session({ storage: new Storage() });
         domainEvents = new InMemoryDomainEvents();
         createCommand = new CreateDraftInvoice(session, domainEvents);
         completeCommand = new CompleteDraftInvoice(session, domainEvents);

@@ -10,7 +10,11 @@ import { UnitOfWork } from './unit-of-work';
 import { Storage } from './storage/storage';
 
 export class Session implements SessionInterface {
-    private readonly storage = new Storage();
+    private readonly storage: Storage;
+
+    constructor(options: { storage: Storage }) {
+        this.storage = options.storage;
+    }
 
     async start<T>(
         callback: (uow: UnitOfWorkInterface) => Promise<T>

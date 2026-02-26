@@ -1,6 +1,7 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
 import { Session } from '../../../../infrastructure/unit-of-work/session';
+import { Storage } from '../../../../infrastructure/unit-of-work/storage/storage';
 import { Approver } from '../../domain/approver/approver';
 import { AuthflowTemplate } from '../../domain/authflow/authflow-template';
 import { FinancialDocument } from '../../domain/document/document';
@@ -89,7 +90,7 @@ describe('approveActionOnDocumentCommand', () => {
     let command: ApproveActionOnDocument;
 
     beforeEach(async () => {
-        session = new Session();
+        session = new Session({ storage: new Storage() });
         domainEvents = new InMemoryDomainEvents();
 
         const createPolicy = new CreateAuthflowPolicy(session, domainEvents);

@@ -1,4 +1,5 @@
 import { Session } from '../../../../../infrastructure/unit-of-work/session';
+import { Storage } from '../../../../../infrastructure/unit-of-work/storage/storage';
 import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
 import { CanApproverApprove } from '../../../../financial-authorization/application/queries/can-approver-approve';
 import { FinancialDocument } from '../../../../financial-authorization/domain/document/document';
@@ -91,7 +92,7 @@ describe('PayInvoice', () => {
     let payCommand: PayInvoice;
 
     beforeEach(() => {
-        session = new Session();
+        session = new Session({ storage: new Storage() });
         domainEvents = new InMemoryDomainEvents();
         const canApproverApprove = new CanApproverApprove(session);
         createCommand = new CreateDraftInvoice(session, domainEvents);

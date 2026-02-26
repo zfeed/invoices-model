@@ -1,6 +1,7 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
 import { Session } from '../../../../infrastructure/unit-of-work/session';
+import { Storage } from '../../../../infrastructure/unit-of-work/storage/storage';
 import { Money } from '../../domain/money/money';
 import { Range } from '../../domain/range/range';
 import { AuthflowTemplate } from '../../domain/authflow/authflow-template';
@@ -22,7 +23,7 @@ const template = (from: string, to: string) =>
 
 describe('createAuthflowPolicyCommand', () => {
     it('should create and save a policy', async () => {
-        const session = new Session();
+        const session = new Session({ storage: new Storage() });
         const domainEvents = new InMemoryDomainEvents();
         const command = new CreateAuthflowPolicy(session, domainEvents);
 
@@ -40,7 +41,7 @@ describe('createAuthflowPolicyCommand', () => {
     });
 
     it('should persist the policy in storage', async () => {
-        const session = new Session();
+        const session = new Session({ storage: new Storage() });
         const domainEvents = new InMemoryDomainEvents();
         const command = new CreateAuthflowPolicy(session, domainEvents);
 
@@ -59,7 +60,7 @@ describe('createAuthflowPolicyCommand', () => {
     });
 
     it('should publish an AuthflowPolicyCreatedEvent', async () => {
-        const session = new Session();
+        const session = new Session({ storage: new Storage() });
         const domainEvents = new InMemoryDomainEvents();
         const command = new CreateAuthflowPolicy(session, domainEvents);
 
@@ -82,7 +83,7 @@ describe('createAuthflowPolicyCommand', () => {
     });
 
     it('should throw when ranges overlap', async () => {
-        const session = new Session();
+        const session = new Session({ storage: new Storage() });
         const domainEvents = new InMemoryDomainEvents();
         const command = new CreateAuthflowPolicy(session, domainEvents);
 
@@ -97,7 +98,7 @@ describe('createAuthflowPolicyCommand', () => {
     });
 
     it('should not persist the policy when validation fails', async () => {
-        const session = new Session();
+        const session = new Session({ storage: new Storage() });
         const domainEvents = new InMemoryDomainEvents();
         const command = new CreateAuthflowPolicy(session, domainEvents);
 
@@ -117,7 +118,7 @@ describe('createAuthflowPolicyCommand', () => {
     });
 
     it('should not publish events when validation fails', async () => {
-        const session = new Session();
+        const session = new Session({ storage: new Storage() });
         const domainEvents = new InMemoryDomainEvents();
         const command = new CreateAuthflowPolicy(session, domainEvents);
 
