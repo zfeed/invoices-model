@@ -1,4 +1,4 @@
-import { UnitOfWorkFactory } from '../../../../../infrastructure/unit-of-work/unit-of-work-factory';
+import { Session } from '../../../../../infrastructure/unit-of-work/session';
 import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
 import { CreateDraftInvoice } from './create-draft-invoice';
 import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
@@ -9,14 +9,14 @@ import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
 import { Id } from '../../../domain/id/id';
 
 describe('CreateDraftInvoice', () => {
-    let unitOfWorkFactory: UnitOfWorkFactory;
+    let session: Session;
     let domainEvents: InMemoryDomainEvents;
     let command: CreateDraftInvoice;
 
     beforeEach(() => {
-        unitOfWorkFactory = new UnitOfWorkFactory();
+        session = new Session();
         domainEvents = new InMemoryDomainEvents();
-        command = new CreateDraftInvoice(unitOfWorkFactory, domainEvents);
+        command = new CreateDraftInvoice(session, domainEvents);
     });
 
     it('should create an empty draft invoice', async () => {
@@ -40,7 +40,7 @@ describe('CreateDraftInvoice', () => {
     it('should persist the draft invoice', async () => {
         const result = await command.execute({});
 
-        await unitOfWorkFactory.start(async (uow) => {
+        await session.start(async (uow) => {
             const loaded = await uow
                 .collection(DraftInvoice)
                 .get(Id.fromString(result.id));

@@ -1,5 +1,5 @@
 import { DomainEvents } from '../../../shared/domain-events/domain-events.interface';
-import { UnitOfWorkFactory } from '../../../shared/unit-of-work/unit-of-work.interface';
+import { Session } from '../../../shared/unit-of-work/unit-of-work.interface';
 import { InvoiceIssuedEvent } from '../../../invoices/domain/invoice/events/invoice-issued.event';
 import { AuthflowPolicy } from '../../domain/authflow/authflow-policy';
 import { FinancialDocument } from '../../domain/document/document';
@@ -8,7 +8,7 @@ import { ReferenceId } from '../../domain/reference-id/reference-id';
 
 export class OnInvoiceIssued {
     constructor(
-        private readonly unitOfWorkFactory: UnitOfWorkFactory,
+        private readonly session: Session,
         private readonly domainEvents: DomainEvents
     ) {}
 
@@ -25,7 +25,7 @@ export class OnInvoiceIssued {
             event.data.total.currency
         ).unwrap();
 
-        const document = await this.unitOfWorkFactory.start(async (uow) => {
+        const document = await this.session.start(async (uow) => {
             const existing = await uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', referenceId.toPlain());

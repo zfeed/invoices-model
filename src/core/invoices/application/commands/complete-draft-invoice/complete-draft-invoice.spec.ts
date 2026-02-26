@@ -1,4 +1,4 @@
-import { UnitOfWorkFactory } from '../../../../../infrastructure/unit-of-work/unit-of-work-factory';
+import { Session } from '../../../../../infrastructure/unit-of-work/session';
 import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
 import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice';
 import { CompleteDraftInvoice } from './complete-draft-invoice';
@@ -44,19 +44,16 @@ const COMPLETE_DRAFT_REQUEST = {
 };
 
 describe('CompleteDraftInvoice', () => {
-    let unitOfWorkFactory: UnitOfWorkFactory;
+    let session: Session;
     let domainEvents: InMemoryDomainEvents;
     let createCommand: CreateDraftInvoice;
     let completeCommand: CompleteDraftInvoice;
 
     beforeEach(() => {
-        unitOfWorkFactory = new UnitOfWorkFactory();
+        session = new Session();
         domainEvents = new InMemoryDomainEvents();
-        createCommand = new CreateDraftInvoice(unitOfWorkFactory, domainEvents);
-        completeCommand = new CompleteDraftInvoice(
-            unitOfWorkFactory,
-            domainEvents
-        );
+        createCommand = new CreateDraftInvoice(session, domainEvents);
+        completeCommand = new CompleteDraftInvoice(session, domainEvents);
     });
 
     it('should throw ITEM_NOT_FOUND when draft invoice does not exist', async () => {
@@ -110,7 +107,7 @@ describe('CompleteDraftInvoice', () => {
 
         const result = await completeCommand.execute(created.id);
 
-        await unitOfWorkFactory.start(async (uow) => {
+        await session.start(async (uow) => {
             const loaded = await uow
                 .collection(Invoice)
                 .get(Id.fromString(result.id));

@@ -4,7 +4,7 @@ export interface UnitOfWork {
     }): Collection<T>;
 }
 
-export interface UnitOfWorkFactory {
+export interface Session {
     start<T>(callback: (uow: UnitOfWork) => Promise<T>): Promise<T>;
 }
 

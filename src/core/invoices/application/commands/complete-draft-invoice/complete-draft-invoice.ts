@@ -4,16 +4,16 @@ import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
 import { Id } from '../../../domain/id/id';
 import { Invoice } from '../../../domain/invoice/invoice';
 import { DomainEvents } from '../../../../shared/domain-events/domain-events.interface';
-import { UnitOfWorkFactory } from '../../../../shared/unit-of-work/unit-of-work.interface';
+import { Session } from '../../../../shared/unit-of-work/unit-of-work.interface';
 
 export class CompleteDraftInvoice {
     constructor(
-        private readonly unitOfWorkFactory: UnitOfWorkFactory,
+        private readonly session: Session,
         private readonly domainEvents: DomainEvents
     ) {}
 
     public async execute(id: string) {
-        const { draftInvoice, invoice } = await this.unitOfWorkFactory.start(
+        const { draftInvoice, invoice } = await this.session.start(
             async (unitOfWork) => {
                 const draftInvoice = await unitOfWork
                     .collection(DraftInvoice)

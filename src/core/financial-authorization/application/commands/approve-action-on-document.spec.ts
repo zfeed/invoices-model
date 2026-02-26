@@ -1,6 +1,6 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
-import { UnitOfWorkFactory } from '../../../../infrastructure/unit-of-work/unit-of-work-factory';
+import { Session } from '../../../../infrastructure/unit-of-work/session';
 import { Approver } from '../../domain/approver/approver';
 import { AuthflowTemplate } from '../../domain/authflow/authflow-template';
 import { FinancialDocument } from '../../domain/document/document';
@@ -84,25 +84,22 @@ const INVOICE_DATA = {
 };
 
 describe('approveActionOnDocumentCommand', () => {
-    let unitOfWorkFactory: UnitOfWorkFactory;
+    let session: Session;
     let domainEvents: InMemoryDomainEvents;
     let command: ApproveActionOnDocument;
 
     beforeEach(async () => {
-        unitOfWorkFactory = new UnitOfWorkFactory();
+        session = new Session();
         domainEvents = new InMemoryDomainEvents();
 
-        const createPolicy = new CreateAuthflowPolicy(
-            unitOfWorkFactory,
-            domainEvents
-        );
+        const createPolicy = new CreateAuthflowPolicy(session, domainEvents);
         await createPolicy.execute({
             action: 'pay',
             templates: [template],
         });
 
         const onInvoiceIssuedHandler = new OnInvoiceIssued(
-            unitOfWorkFactory,
+            session,
             domainEvents
         );
         await onInvoiceIssuedHandler.register();
@@ -110,7 +107,7 @@ describe('approveActionOnDocumentCommand', () => {
             events: [new InvoiceIssuedEvent(INVOICE_DATA)],
         });
 
-        command = new ApproveActionOnDocument(unitOfWorkFactory, domainEvents);
+        command = new ApproveActionOnDocument(session, domainEvents);
     });
 
     it('should throw when document is not found', async () => {
@@ -144,7 +141,7 @@ describe('approveActionOnDocumentCommand', () => {
             approver,
         });
 
-        await unitOfWorkFactory.start(async (uow) => {
+        await session.start(async (uow) => {
             const doc = await uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'invoice-123');

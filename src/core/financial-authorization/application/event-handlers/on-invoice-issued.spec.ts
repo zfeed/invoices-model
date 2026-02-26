@@ -1,4 +1,4 @@
-import { UnitOfWorkFactory } from '../../../../infrastructure/unit-of-work/unit-of-work-factory';
+import { Session } from '../../../../infrastructure/unit-of-work/session';
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
 import { InvoiceIssuedEvent } from '../../../invoices/domain/invoice/events/invoice-issued.event';
 import { Money } from '../../domain/money/money';
@@ -63,7 +63,7 @@ const template = (from: string, to: string) =>
         steps: [],
     }).unwrap();
 
-const seedPolicy = async (unitOfWorkFactory: UnitOfWorkFactory) => {
+const seedPolicy = async (session: Session) => {
     const policy = AuthflowPolicy.create({
         action: Action.create('pay').unwrap(),
         templates: [
@@ -72,7 +72,7 @@ const seedPolicy = async (unitOfWorkFactory: UnitOfWorkFactory) => {
             template('10000', '100000'),
         ],
     }).unwrap();
-    await unitOfWorkFactory.start(async (uow) => {
+    await session.start(async (uow) => {
         await uow.collection(AuthflowPolicy).add(policy);
     });
 };
@@ -86,15 +86,15 @@ const publishEvent = async (
 
 describe('onInvoiceIssued', () => {
     it('should create a new financial document when invoice is created', async () => {
-        const unitOfWorkFactory = new UnitOfWorkFactory();
+        const session = new Session();
         const domainEvents = new InMemoryDomainEvents();
 
-        await seedPolicy(unitOfWorkFactory);
-        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await seedPolicy(session);
+        const handler = new OnInvoiceIssued(session, domainEvents);
         await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
-        const result = await unitOfWorkFactory.start(async (uow) => {
+        const result = await session.start(async (uow) => {
             return uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
@@ -105,15 +105,15 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should create a document with an authflow selected from the policy', async () => {
-        const unitOfWorkFactory = new UnitOfWorkFactory();
+        const session = new Session();
         const domainEvents = new InMemoryDomainEvents();
 
-        await seedPolicy(unitOfWorkFactory);
-        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await seedPolicy(session);
+        const handler = new OnInvoiceIssued(session, domainEvents);
         await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001', '500'));
 
-        const result = await unitOfWorkFactory.start(async (uow) => {
+        const result = await session.start(async (uow) => {
             return uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
@@ -126,15 +126,15 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should select the correct authflow range for the invoice amount', async () => {
-        const unitOfWorkFactory = new UnitOfWorkFactory();
+        const session = new Session();
         const domainEvents = new InMemoryDomainEvents();
 
-        await seedPolicy(unitOfWorkFactory);
-        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await seedPolicy(session);
+        const handler = new OnInvoiceIssued(session, domainEvents);
         await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001', '5000'));
 
-        const result = await unitOfWorkFactory.start(async (uow) => {
+        const result = await session.start(async (uow) => {
             return uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
@@ -146,14 +146,14 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should create a document with empty authflows when no policy exists', async () => {
-        const unitOfWorkFactory = new UnitOfWorkFactory();
+        const session = new Session();
         const domainEvents = new InMemoryDomainEvents();
 
-        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        const handler = new OnInvoiceIssued(session, domainEvents);
         await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
-        const result = await unitOfWorkFactory.start(async (uow) => {
+        const result = await session.start(async (uow) => {
             return uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
@@ -163,18 +163,18 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should create a document with empty authflows when amount is outside policy ranges', async () => {
-        const unitOfWorkFactory = new UnitOfWorkFactory();
+        const session = new Session();
         const domainEvents = new InMemoryDomainEvents();
 
-        await seedPolicy(unitOfWorkFactory);
-        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await seedPolicy(session);
+        const handler = new OnInvoiceIssued(session, domainEvents);
         await handler.register();
         await publishEvent(
             domainEvents,
             createInvoiceEvent('INV-001', '999999')
         );
 
-        const result = await unitOfWorkFactory.start(async (uow) => {
+        const result = await session.start(async (uow) => {
             return uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
@@ -184,21 +184,21 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should create documents with different referenceIds for different invoices', async () => {
-        const unitOfWorkFactory = new UnitOfWorkFactory();
+        const session = new Session();
         const domainEvents = new InMemoryDomainEvents();
 
-        await seedPolicy(unitOfWorkFactory);
-        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await seedPolicy(session);
+        const handler = new OnInvoiceIssued(session, domainEvents);
         await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
         await publishEvent(domainEvents, createInvoiceEvent('INV-002'));
 
-        const result1 = await unitOfWorkFactory.start(async (uow) => {
+        const result1 = await session.start(async (uow) => {
             return uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
         });
-        const result2 = await unitOfWorkFactory.start(async (uow) => {
+        const result2 = await session.start(async (uow) => {
             return uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-002');
@@ -214,15 +214,15 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should not create a duplicate document when invoice with same id is created twice', async () => {
-        const unitOfWorkFactory = new UnitOfWorkFactory();
+        const session = new Session();
         const domainEvents = new InMemoryDomainEvents();
 
-        await seedPolicy(unitOfWorkFactory);
-        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await seedPolicy(session);
+        const handler = new OnInvoiceIssued(session, domainEvents);
         await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
-        const firstResult = await unitOfWorkFactory.start(async (uow) => {
+        const firstResult = await session.start(async (uow) => {
             return uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
@@ -231,7 +231,7 @@ describe('onInvoiceIssued', () => {
 
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
-        const secondResult = await unitOfWorkFactory.start(async (uow) => {
+        const secondResult = await session.start(async (uow) => {
             return uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
@@ -242,13 +242,13 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should not create a document when no event is published', async () => {
-        const unitOfWorkFactory = new UnitOfWorkFactory();
+        const session = new Session();
         const domainEvents = new InMemoryDomainEvents();
 
-        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        const handler = new OnInvoiceIssued(session, domainEvents);
         await handler.register();
 
-        const result = await unitOfWorkFactory.start(async (uow) => {
+        const result = await session.start(async (uow) => {
             return uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
@@ -258,18 +258,18 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should use event data id as the document referenceId', async () => {
-        const unitOfWorkFactory = new UnitOfWorkFactory();
+        const session = new Session();
         const domainEvents = new InMemoryDomainEvents();
 
-        await seedPolicy(unitOfWorkFactory);
-        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await seedPolicy(session);
+        const handler = new OnInvoiceIssued(session, domainEvents);
         await handler.register();
         await publishEvent(
             domainEvents,
             createInvoiceEvent('my-custom-ref-123')
         );
 
-        const result = await unitOfWorkFactory.start(async (uow) => {
+        const result = await session.start(async (uow) => {
             return uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'my-custom-ref-123');
@@ -280,11 +280,11 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should generate a unique document id for each new document', async () => {
-        const unitOfWorkFactory = new UnitOfWorkFactory();
+        const session = new Session();
         const domainEvents = new InMemoryDomainEvents();
 
-        await seedPolicy(unitOfWorkFactory);
-        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await seedPolicy(session);
+        const handler = new OnInvoiceIssued(session, domainEvents);
         await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
         await publishEvent(domainEvents, createInvoiceEvent('INV-002'));
@@ -292,7 +292,7 @@ describe('onInvoiceIssued', () => {
 
         const ids = await Promise.all(
             ['INV-001', 'INV-002', 'INV-003'].map(async (ref) => {
-                const result = await unitOfWorkFactory.start(async (uow) => {
+                const result = await session.start(async (uow) => {
                     return uow
                         .collection(FinancialDocument)
                         .findBy('referenceId', ref);
@@ -306,7 +306,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should not overwrite a pre-existing document in storage', async () => {
-        const unitOfWorkFactory = new UnitOfWorkFactory();
+        const session = new Session();
         const domainEvents = new InMemoryDomainEvents();
 
         const existing = FinancialDocument.create({
@@ -314,16 +314,16 @@ describe('onInvoiceIssued', () => {
             value: Money.create('100', 'USD').unwrap(),
             authflows: [],
         }).unwrap();
-        await unitOfWorkFactory.start(async (uow) => {
+        await session.start(async (uow) => {
             await uow.collection(FinancialDocument).add(existing);
         });
 
-        await seedPolicy(unitOfWorkFactory);
-        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await seedPolicy(session);
+        const handler = new OnInvoiceIssued(session, domainEvents);
         await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
-        const result = await unitOfWorkFactory.start(async (uow) => {
+        const result = await session.start(async (uow) => {
             return uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
@@ -333,11 +333,11 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should handle many events for different invoices', async () => {
-        const unitOfWorkFactory = new UnitOfWorkFactory();
+        const session = new Session();
         const domainEvents = new InMemoryDomainEvents();
 
-        await seedPolicy(unitOfWorkFactory);
-        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await seedPolicy(session);
+        const handler = new OnInvoiceIssued(session, domainEvents);
         await handler.register();
 
         const count = 50;
@@ -346,7 +346,7 @@ describe('onInvoiceIssued', () => {
         }
 
         for (let i = 0; i < count; i++) {
-            const result = await unitOfWorkFactory.start(async (uow) => {
+            const result = await session.start(async (uow) => {
                 return uow
                     .collection(FinancialDocument)
                     .findBy('referenceId', `INV-${i}`);
@@ -356,23 +356,23 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should only react to events published after subscription', async () => {
-        const unitOfWorkFactory = new UnitOfWorkFactory();
+        const session = new Session();
         const domainEvents = new InMemoryDomainEvents();
 
         await publishEvent(domainEvents, createInvoiceEvent('INV-BEFORE'));
 
-        await seedPolicy(unitOfWorkFactory);
-        const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
+        await seedPolicy(session);
+        const handler = new OnInvoiceIssued(session, domainEvents);
         await handler.register();
 
         await publishEvent(domainEvents, createInvoiceEvent('INV-AFTER'));
 
-        const before = await unitOfWorkFactory.start(async (uow) => {
+        const before = await session.start(async (uow) => {
             return uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-BEFORE');
         });
-        const after = await unitOfWorkFactory.start(async (uow) => {
+        const after = await session.start(async (uow) => {
             return uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-AFTER');
@@ -382,28 +382,28 @@ describe('onInvoiceIssued', () => {
         expect(after).toBeDefined();
     });
 
-    it('should isolate documents across separate UoW factory instances', async () => {
-        const unitOfWorkFactory1 = new UnitOfWorkFactory();
-        const unitOfWorkFactory2 = new UnitOfWorkFactory();
+    it('should isolate documents across separate session instances', async () => {
+        const session1 = new Session();
+        const session2 = new Session();
         const domainEvents = new InMemoryDomainEvents();
 
-        await seedPolicy(unitOfWorkFactory1);
-        const handler = new OnInvoiceIssued(unitOfWorkFactory1, domainEvents);
+        await seedPolicy(session1);
+        const handler = new OnInvoiceIssued(session1, domainEvents);
         await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
-        const inFactory1 = await unitOfWorkFactory1.start(async (uow) => {
+        const inSession1 = await session1.start(async (uow) => {
             return uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
         });
-        const inFactory2 = await unitOfWorkFactory2.start(async (uow) => {
+        const inSession2 = await session2.start(async (uow) => {
             return uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
         });
 
-        expect(inFactory1).toBeDefined();
-        expect(inFactory2).toBeUndefined();
+        expect(inSession1).toBeDefined();
+        expect(inSession2).toBeUndefined();
     });
 });

@@ -1,4 +1,4 @@
-import { UnitOfWorkFactory } from '../../../shared/unit-of-work/unit-of-work.interface';
+import { Session } from '../../../shared/unit-of-work/unit-of-work.interface';
 import { Action } from '../../domain/action/action';
 import { FinancialDocument } from '../../domain/document/document';
 import { Id } from '../../domain/id/id';
@@ -7,7 +7,7 @@ import { ReferenceId } from '../../domain/reference-id/reference-id';
 export type ApprovalAnswer = 'YES' | 'NO' | 'UNKNOWN';
 
 export class CanApproverApprove {
-    constructor(private readonly unitOfWorkFactory: UnitOfWorkFactory) {}
+    constructor(private readonly session: Session) {}
 
     public can(approverId: string) {
         return {
@@ -38,7 +38,7 @@ export class CanApproverApprove {
         }
         const validReferenceId = referenceIdResult.unwrap();
 
-        return this.unitOfWorkFactory.start(async (uow) => {
+        return this.session.start(async (uow) => {
             const document = await uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', validReferenceId.toPlain());

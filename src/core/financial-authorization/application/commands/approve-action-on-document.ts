@@ -1,7 +1,7 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
 import { DomainEvents } from '../../../shared/domain-events/domain-events.interface';
-import { UnitOfWorkFactory } from '../../../shared/unit-of-work/unit-of-work.interface';
+import { Session } from '../../../shared/unit-of-work/unit-of-work.interface';
 import { Action } from '../../domain/action/action';
 import { Approval } from '../../domain/approval/approval';
 import { Approver } from '../../domain/approver/approver';
@@ -16,7 +16,7 @@ type ApproveActionRequest = {
 
 export class ApproveActionOnDocument {
     constructor(
-        private readonly unitOfWorkFactory: UnitOfWorkFactory,
+        private readonly session: Session,
         private readonly domainEvents: DomainEvents
     ) {}
 
@@ -24,7 +24,7 @@ export class ApproveActionOnDocument {
         const action = Action.create(request.action).unwrap();
         const referenceId = ReferenceId.create(request.referenceId).unwrap();
 
-        const document = await this.unitOfWorkFactory.start(async (uow) => {
+        const document = await this.session.start(async (uow) => {
             const document = await uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', referenceId.toPlain());

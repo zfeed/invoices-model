@@ -1,5 +1,5 @@
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
-import { UnitOfWorkFactory } from '../../../../infrastructure/unit-of-work/unit-of-work-factory';
+import { Session } from '../../../../infrastructure/unit-of-work/session';
 import { CreateDraftInvoice } from '../../../invoices/application/commands/create-draft-invoice/create-draft-invoice';
 import { CompleteDraftInvoice } from '../../../invoices/application/commands/complete-draft-invoice/complete-draft-invoice';
 import { ISSUER_TYPE } from '../../../invoices/domain/issuer/issuer';
@@ -56,38 +56,32 @@ const template = (from: string, to: string) =>
         steps: [],
     }).unwrap();
 
-const seedPolicy = async (unitOfWorkFactory: UnitOfWorkFactory) => {
+const seedPolicy = async (session: Session) => {
     const policy = AuthflowPolicy.create({
         action: Action.create('pay').unwrap(),
         templates: [template('0', '999'), template('1000', '9999')],
     }).unwrap();
-    await unitOfWorkFactory.start(async (uow) => {
+    await session.start(async (uow) => {
         await uow.collection(AuthflowPolicy).add(policy);
     });
 };
 
 describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
-    let unitOfWorkFactory: UnitOfWorkFactory;
+    let session: Session;
     let domainEvents: InMemoryDomainEvents;
     let createCommand: CreateDraftInvoice;
     let completeCommand: CompleteDraftInvoice;
 
     beforeEach(async () => {
-        unitOfWorkFactory = new UnitOfWorkFactory();
+        session = new Session();
         domainEvents = new InMemoryDomainEvents();
-        createCommand = new CreateDraftInvoice(unitOfWorkFactory, domainEvents);
-        completeCommand = new CompleteDraftInvoice(
-            unitOfWorkFactory,
-            domainEvents
-        );
+        createCommand = new CreateDraftInvoice(session, domainEvents);
+        completeCommand = new CompleteDraftInvoice(session, domainEvents);
     });
 
     describe('without policy', () => {
         beforeEach(async () => {
-            const handler = new OnInvoiceIssued(
-                unitOfWorkFactory,
-                domainEvents
-            );
+            const handler = new OnInvoiceIssued(session, domainEvents);
             await handler.register();
         });
 
@@ -95,7 +89,7 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
             const draft = await createCommand.execute(COMPLETE_DRAFT_REQUEST);
             const invoice = await completeCommand.execute(draft.id);
 
-            const doc = await unitOfWorkFactory.start(async (uow) => {
+            const doc = await session.start(async (uow) => {
                 return uow
                     .collection(FinancialDocument)
                     .findBy('referenceId', invoice.id);
@@ -110,7 +104,7 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
             const draft = await createCommand.execute(COMPLETE_DRAFT_REQUEST);
             await completeCommand.execute(draft.id);
 
-            const doc = await unitOfWorkFactory.start(async (uow) => {
+            const doc = await session.start(async (uow) => {
                 return uow
                     .collection(FinancialDocument)
                     .findBy('referenceId', draft.id);
@@ -122,7 +116,7 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
         it('should not create a financial document when draft creation does not trigger InvoiceIssuedEvent', async () => {
             await createCommand.execute(COMPLETE_DRAFT_REQUEST);
 
-            const doc = await unitOfWorkFactory.start(async (uow) => {
+            const doc = await session.start(async (uow) => {
                 return uow
                     .collection(FinancialDocument)
                     .findBy('referenceId', 'any-ref');
@@ -134,7 +128,7 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
         it('should not create a financial document before the draft is completed', async () => {
             const draft = await createCommand.execute(COMPLETE_DRAFT_REQUEST);
 
-            const doc = await unitOfWorkFactory.start(async (uow) => {
+            const doc = await session.start(async (uow) => {
                 return uow
                     .collection(FinancialDocument)
                     .findBy('referenceId', draft.id);
@@ -146,11 +140,8 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
 
     describe('with policy', () => {
         beforeEach(async () => {
-            await seedPolicy(unitOfWorkFactory);
-            const handler = new OnInvoiceIssued(
-                unitOfWorkFactory,
-                domainEvents
-            );
+            await seedPolicy(session);
+            const handler = new OnInvoiceIssued(session, domainEvents);
             await handler.register();
         });
 
@@ -158,7 +149,7 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
             const draft = await createCommand.execute(COMPLETE_DRAFT_REQUEST);
             const invoice = await completeCommand.execute(draft.id);
 
-            const doc = await unitOfWorkFactory.start(async (uow) => {
+            const doc = await session.start(async (uow) => {
                 return uow
                     .collection(FinancialDocument)
                     .findBy('referenceId', invoice.id);
@@ -174,7 +165,7 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
             const draft = await createCommand.execute(COMPLETE_DRAFT_REQUEST);
             const invoice = await completeCommand.execute(draft.id);
 
-            const doc = await unitOfWorkFactory.start(async (uow) => {
+            const doc = await session.start(async (uow) => {
                 return uow
                     .collection(FinancialDocument)
                     .findBy('referenceId', invoice.id);
@@ -189,7 +180,7 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
             const draft = await createCommand.execute(COMPLETE_DRAFT_REQUEST);
             const invoice = await completeCommand.execute(draft.id);
 
-            const doc = await unitOfWorkFactory.start(async (uow) => {
+            const doc = await session.start(async (uow) => {
                 return uow
                     .collection(FinancialDocument)
                     .findBy('referenceId', invoice.id);
@@ -205,12 +196,12 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
             const invoice1 = await completeCommand.execute(draft1.id);
             const invoice2 = await completeCommand.execute(draft2.id);
 
-            const doc1 = await unitOfWorkFactory.start(async (uow) => {
+            const doc1 = await session.start(async (uow) => {
                 return uow
                     .collection(FinancialDocument)
                     .findBy('referenceId', invoice1.id);
             });
-            const doc2 = await unitOfWorkFactory.start(async (uow) => {
+            const doc2 = await session.start(async (uow) => {
                 return uow
                     .collection(FinancialDocument)
                     .findBy('referenceId', invoice2.id);

@@ -1,5 +1,5 @@
 import { DomainEvents } from './shared/domain-events/domain-events.interface';
-import { UnitOfWorkFactory } from './shared/unit-of-work/unit-of-work.interface';
+import { Session } from './shared/unit-of-work/unit-of-work.interface';
 import { CreateDraftInvoice } from './invoices/application/commands/create-draft-invoice/create-draft-invoice';
 import { UpdateDraftInvoice } from './invoices/application/commands/update-draft-invoice/update-draft-invoice';
 import { CalculateDraftInvoice } from './invoices/application/commands/calculate-draft-invoice/calculate-draft-invoice';
@@ -15,60 +15,54 @@ import { CanApproverApprove } from './financial-authorization/application/querie
 import { OnInvoiceIssued } from './financial-authorization/application/event-handlers/on-invoice-issued';
 
 type Infrastructure = {
-    unitOfWorkFactory: UnitOfWorkFactory;
+    session: Session;
     domainEvents: DomainEvents;
 };
 
 export const bootstrap = async (infra: Infrastructure) => {
     const onInvoiceIssued = new OnInvoiceIssued(
-        infra.unitOfWorkFactory,
+        infra.session,
         infra.domainEvents
     );
     await onInvoiceIssued.register();
 
-    const canApproverApprove = new CanApproverApprove(infra.unitOfWorkFactory);
+    const canApproverApprove = new CanApproverApprove(infra.session);
 
     return {
         createDraftInvoice: new CreateDraftInvoice(
-            infra.unitOfWorkFactory,
+            infra.session,
             infra.domainEvents
         ),
         updateDraftInvoice: new UpdateDraftInvoice(
-            infra.unitOfWorkFactory,
+            infra.session,
             infra.domainEvents
         ),
         calculateDraftInvoice: new CalculateDraftInvoice(),
         completeDraftInvoice: new CompleteDraftInvoice(
-            infra.unitOfWorkFactory,
+            infra.session,
             infra.domainEvents
         ),
         archiveDraftInvoice: new ArchiveDraftInvoice(
-            infra.unitOfWorkFactory,
+            infra.session,
             infra.domainEvents
         ),
         draftDraftInvoice: new DraftDraftInvoice(
-            infra.unitOfWorkFactory,
+            infra.session,
             infra.domainEvents
         ),
-        processInvoice: new ProcessInvoice(
-            infra.unitOfWorkFactory,
-            infra.domainEvents
-        ),
-        cancelInvoice: new CancelInvoice(
-            infra.unitOfWorkFactory,
-            infra.domainEvents
-        ),
+        processInvoice: new ProcessInvoice(infra.session, infra.domainEvents),
+        cancelInvoice: new CancelInvoice(infra.session, infra.domainEvents),
         payInvoice: new PayInvoice(
-            infra.unitOfWorkFactory,
+            infra.session,
             infra.domainEvents,
             canApproverApprove
         ),
         createAuthflowPolicy: new CreateAuthflowPolicy(
-            infra.unitOfWorkFactory,
+            infra.session,
             infra.domainEvents
         ),
         approveActionOnDocument: new ApproveActionOnDocument(
-            infra.unitOfWorkFactory,
+            infra.session,
             infra.domainEvents
         ),
         canApproverApprove,

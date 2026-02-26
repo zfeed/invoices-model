@@ -1,6 +1,6 @@
 import {
     UnitOfWork as UnitOfWorkInterface,
-    UnitOfWorkFactory as UnitOfWorkFactoryInterface,
+    Session as SessionInterface,
 } from '../../core/shared/unit-of-work/unit-of-work.interface';
 import '../mappers/draft-invoice.mapper';
 import '../mappers/invoice.mapper';
@@ -9,7 +9,7 @@ import '../mappers/financial-document.mapper';
 import { UnitOfWork } from './unit-of-work';
 import { Storage } from './storage/storage';
 
-export class UnitOfWorkFactory implements UnitOfWorkFactoryInterface {
+export class Session implements SessionInterface {
     private readonly storage = new Storage();
 
     async start<T>(

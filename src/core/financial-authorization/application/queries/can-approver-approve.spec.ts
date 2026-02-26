@@ -1,11 +1,11 @@
 import { FinancialDocument } from '../../domain/document/document';
-import { UnitOfWorkFactory } from '../../../../infrastructure/unit-of-work/unit-of-work-factory';
+import { Session } from '../../../../infrastructure/unit-of-work/session';
 import { CanApproverApprove } from './can-approver-approve';
 
 describe('CanApproverApprove', () => {
     it('should return UNKNOWN when document does not exist', async () => {
-        const unitOfWorkFactory = new UnitOfWorkFactory();
-        const question = new CanApproverApprove(unitOfWorkFactory);
+        const session = new Session();
+        const question = new CanApproverApprove(session);
 
         const answer = await question
             .can('approver-1')
@@ -17,7 +17,7 @@ describe('CanApproverApprove', () => {
     });
 
     it('should return YES when approver can approve the action', async () => {
-        const unitOfWorkFactory = new UnitOfWorkFactory();
+        const session = new Session();
         const document = FinancialDocument.fromPlain({
             id: 'doc-1',
             referenceId: 'ref-1',
@@ -54,11 +54,11 @@ describe('CanApproverApprove', () => {
             ],
         });
 
-        await unitOfWorkFactory.start(async (uow) => {
+        await session.start(async (uow) => {
             await uow.collection(FinancialDocument).add(document);
         });
 
-        const question = new CanApproverApprove(unitOfWorkFactory);
+        const question = new CanApproverApprove(session);
 
         const answer = await question
             .can('approver-1')
@@ -70,7 +70,7 @@ describe('CanApproverApprove', () => {
     });
 
     it('should return NO when approver is not in any group', async () => {
-        const unitOfWorkFactory = new UnitOfWorkFactory();
+        const session = new Session();
         const document = FinancialDocument.fromPlain({
             id: 'doc-1',
             referenceId: 'ref-1',
@@ -107,11 +107,11 @@ describe('CanApproverApprove', () => {
             ],
         });
 
-        await unitOfWorkFactory.start(async (uow) => {
+        await session.start(async (uow) => {
             await uow.collection(FinancialDocument).add(document);
         });
 
-        const question = new CanApproverApprove(unitOfWorkFactory);
+        const question = new CanApproverApprove(session);
 
         const answer = await question
             .can('approver-2')
@@ -123,7 +123,7 @@ describe('CanApproverApprove', () => {
     });
 
     it('should return NO when authflow is already approved', async () => {
-        const unitOfWorkFactory = new UnitOfWorkFactory();
+        const session = new Session();
         const document = FinancialDocument.fromPlain({
             id: 'doc-1',
             referenceId: 'ref-1',
@@ -166,11 +166,11 @@ describe('CanApproverApprove', () => {
             ],
         });
 
-        await unitOfWorkFactory.start(async (uow) => {
+        await session.start(async (uow) => {
             await uow.collection(FinancialDocument).add(document);
         });
 
-        const question = new CanApproverApprove(unitOfWorkFactory);
+        const question = new CanApproverApprove(session);
 
         const answer = await question
             .can('approver-1')
@@ -182,7 +182,7 @@ describe('CanApproverApprove', () => {
     });
 
     it('should return NO when action does not exist on the document', async () => {
-        const unitOfWorkFactory = new UnitOfWorkFactory();
+        const session = new Session();
         const document = FinancialDocument.fromPlain({
             id: 'doc-1',
             referenceId: 'ref-1',
@@ -219,11 +219,11 @@ describe('CanApproverApprove', () => {
             ],
         });
 
-        await unitOfWorkFactory.start(async (uow) => {
+        await session.start(async (uow) => {
             await uow.collection(FinancialDocument).add(document);
         });
 
-        const question = new CanApproverApprove(unitOfWorkFactory);
+        const question = new CanApproverApprove(session);
 
         const answer = await question
             .can('approver-1')
@@ -235,7 +235,7 @@ describe('CanApproverApprove', () => {
     });
 
     it('should return NO when approver is in a later step', async () => {
-        const unitOfWorkFactory = new UnitOfWorkFactory();
+        const session = new Session();
         const document = FinancialDocument.fromPlain({
             id: 'doc-1',
             referenceId: 'ref-1',
@@ -290,11 +290,11 @@ describe('CanApproverApprove', () => {
             ],
         });
 
-        await unitOfWorkFactory.start(async (uow) => {
+        await session.start(async (uow) => {
             await uow.collection(FinancialDocument).add(document);
         });
 
-        const question = new CanApproverApprove(unitOfWorkFactory);
+        const question = new CanApproverApprove(session);
 
         const answer = await question
             .can('approver-2')

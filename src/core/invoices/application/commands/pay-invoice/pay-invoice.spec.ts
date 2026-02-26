@@ -1,4 +1,4 @@
-import { UnitOfWorkFactory } from '../../../../../infrastructure/unit-of-work/unit-of-work-factory';
+import { Session } from '../../../../../infrastructure/unit-of-work/session';
 import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
 import { CanApproverApprove } from '../../../../financial-authorization/application/queries/can-approver-approve';
 import { FinancialDocument } from '../../../../financial-authorization/domain/document/document';
@@ -83,7 +83,7 @@ const createAuthorizationDocument = (referenceId: string) =>
     }).unwrap();
 
 describe('PayInvoice', () => {
-    let unitOfWorkFactory: UnitOfWorkFactory;
+    let session: Session;
     let domainEvents: InMemoryDomainEvents;
     let createCommand: CreateDraftInvoice;
     let completeCommand: CompleteDraftInvoice;
@@ -91,20 +91,13 @@ describe('PayInvoice', () => {
     let payCommand: PayInvoice;
 
     beforeEach(() => {
-        unitOfWorkFactory = new UnitOfWorkFactory();
+        session = new Session();
         domainEvents = new InMemoryDomainEvents();
-        const canApproverApprove = new CanApproverApprove(unitOfWorkFactory);
-        createCommand = new CreateDraftInvoice(unitOfWorkFactory, domainEvents);
-        completeCommand = new CompleteDraftInvoice(
-            unitOfWorkFactory,
-            domainEvents
-        );
-        processCommand = new ProcessInvoice(unitOfWorkFactory, domainEvents);
-        payCommand = new PayInvoice(
-            unitOfWorkFactory,
-            domainEvents,
-            canApproverApprove
-        );
+        const canApproverApprove = new CanApproverApprove(session);
+        createCommand = new CreateDraftInvoice(session, domainEvents);
+        completeCommand = new CompleteDraftInvoice(session, domainEvents);
+        processCommand = new ProcessInvoice(session, domainEvents);
+        payCommand = new PayInvoice(session, domainEvents, canApproverApprove);
     });
 
     it('should throw PAYMENT_NOT_AUTHORIZED when document does not exist', async () => {
@@ -124,7 +117,7 @@ describe('PayInvoice', () => {
         await processCommand.execute(invoice.id);
 
         const document = createAuthorizationDocument(invoice.id);
-        await unitOfWorkFactory.start(async (uow) => {
+        await session.start(async (uow) => {
             await uow.collection(FinancialDocument).add(document);
         });
 
@@ -144,7 +137,7 @@ describe('PayInvoice', () => {
         await processCommand.execute(invoice.id);
 
         const document = createAuthorizationDocument(invoice.id);
-        await unitOfWorkFactory.start(async (uow) => {
+        await session.start(async (uow) => {
             await uow.collection(FinancialDocument).add(document);
         });
 
@@ -167,7 +160,7 @@ describe('PayInvoice', () => {
         await processCommand.execute(invoice.id);
 
         const document = createAuthorizationDocument(invoice.id);
-        await unitOfWorkFactory.start(async (uow) => {
+        await session.start(async (uow) => {
             await uow.collection(FinancialDocument).add(document);
         });
 

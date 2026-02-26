@@ -3,33 +3,31 @@ import { ApplicationError } from '../../../../../building-blocks/errors/applicat
 import { Id } from '../../../domain/id/id';
 import { Invoice } from '../../../domain/invoice/invoice';
 import { DomainEvents } from '../../../../shared/domain-events/domain-events.interface';
-import { UnitOfWorkFactory } from '../../../../shared/unit-of-work/unit-of-work.interface';
+import { Session } from '../../../../shared/unit-of-work/unit-of-work.interface';
 
 export class CancelInvoice {
     constructor(
-        private readonly unitOfWorkFactory: UnitOfWorkFactory,
+        private readonly session: Session,
         private readonly domainEvents: DomainEvents
     ) {}
 
     public async execute(id: string) {
-        const invoice = await this.unitOfWorkFactory.start(
-            async (unitOfWork) => {
-                const invoice = await unitOfWork
-                    .collection(Invoice)
-                    .get(Id.fromString(id));
+        const invoice = await this.session.start(async (unitOfWork) => {
+            const invoice = await unitOfWork
+                .collection(Invoice)
+                .get(Id.fromString(id));
 
-                if (!invoice) {
-                    throw new ApplicationError({
-                        message: 'Invoice not found',
-                        code: APPLICATION_ERROR_CODE.ITEM_NOT_FOUND,
-                    });
-                }
-
-                invoice.cancel().unwrap();
-
-                return invoice;
+            if (!invoice) {
+                throw new ApplicationError({
+                    message: 'Invoice not found',
+                    code: APPLICATION_ERROR_CODE.ITEM_NOT_FOUND,
+                });
             }
-        );
+
+            invoice.cancel().unwrap();
+
+            return invoice;
+        });
 
         await this.domainEvents.publishEvents(invoice);
 

@@ -1,4 +1,4 @@
-import { UnitOfWorkFactory } from '../../../../../infrastructure/unit-of-work/unit-of-work-factory';
+import { Session } from '../../../../../infrastructure/unit-of-work/session';
 import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
 import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice';
 import { ArchiveDraftInvoice } from '../archive-draft-invoice/archive-draft-invoice';
@@ -7,21 +7,18 @@ import { DraftInvoiceDraftedEvent } from '../../../domain/draft-invoice/events/d
 import { APPLICATION_ERROR_CODE } from '../../../../../building-blocks/errors/application/application-codes';
 
 describe('DraftDraftInvoice', () => {
-    let unitOfWorkFactory: UnitOfWorkFactory;
+    let session: Session;
     let domainEvents: InMemoryDomainEvents;
     let createCommand: CreateDraftInvoice;
     let archiveCommand: ArchiveDraftInvoice;
     let draftCommand: DraftDraftInvoice;
 
     beforeEach(() => {
-        unitOfWorkFactory = new UnitOfWorkFactory();
+        session = new Session();
         domainEvents = new InMemoryDomainEvents();
-        createCommand = new CreateDraftInvoice(unitOfWorkFactory, domainEvents);
-        archiveCommand = new ArchiveDraftInvoice(
-            unitOfWorkFactory,
-            domainEvents
-        );
-        draftCommand = new DraftDraftInvoice(unitOfWorkFactory, domainEvents);
+        createCommand = new CreateDraftInvoice(session, domainEvents);
+        archiveCommand = new ArchiveDraftInvoice(session, domainEvents);
+        draftCommand = new DraftDraftInvoice(session, domainEvents);
     });
 
     it('should throw ITEM_NOT_FOUND when draft invoice does not exist', async () => {
