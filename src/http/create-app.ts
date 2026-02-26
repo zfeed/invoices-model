@@ -1,6 +1,6 @@
 import Fastify from 'fastify';
 import { bootstrap } from '../core/bootstrap';
-import { InMemoryUnitOfWorkFactory } from '../infrastructure/unit-of-work/in-memory.unit-of-work';
+import { InMemoryUnitOfWorkFactory } from '../infrastructure/unit-of-work/in-memory.unit-of-work-factory';
 import { InMemoryDomainEvents } from '../infrastructure/domain-events/in-memory-domain-events';
 import {
     draftInvoicesPlugin,

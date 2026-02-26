@@ -1,5 +1,5 @@
 import { FinancialDocument } from '../../domain/document/document';
-import { InMemoryUnitOfWorkFactory } from '../../../../infrastructure/unit-of-work/in-memory.unit-of-work';
+import { InMemoryUnitOfWorkFactory } from '../../../../infrastructure/unit-of-work/in-memory.unit-of-work-factory';
 import { CanApproverApprove } from './can-approver-approve';
 
 describe('CanApproverApprove', () => {

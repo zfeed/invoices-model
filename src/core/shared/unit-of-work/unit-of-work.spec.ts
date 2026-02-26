@@ -1,7 +1,7 @@
 import { DraftInvoice } from '../../invoices/domain/draft-invoice/draft-invoice';
 import { Id } from '../../invoices/domain/id/id';
 import { LineItem } from '../../invoices/domain/line-item/line-item';
-import { InMemoryUnitOfWorkFactory } from '../../../infrastructure/unit-of-work/in-memory.unit-of-work';
+import { InMemoryUnitOfWorkFactory } from '../../../infrastructure/unit-of-work/in-memory.unit-of-work-factory';
 import { OptimisticConcurrencyError } from '../optimistic-concurrency.error';
 import { Invoice } from '../../invoices/domain/invoice/invoice';
 import { CalendarDate } from '../../invoices/domain/calendar-date/calendar-date';
