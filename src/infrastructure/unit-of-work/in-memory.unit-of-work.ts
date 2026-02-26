@@ -94,8 +94,10 @@ class InMemoryUnitOfWork implements UnitOfWork {
     }
 
     private commit(): void {
-        for (const [entityClass, collection] of this.collections) {
-            this.storage.finish(entityClass, collection.commitEntries());
-        }
+        const entries = [...this.collections.values()].flatMap((collection) =>
+            collection.commitEntries()
+        );
+
+        this.storage.finish(entries);
     }
 }

@@ -9,6 +9,7 @@ export type StorageRecord = {
 export type ModificationType = 'created' | 'updated';
 
 export type CommitEntry = {
+    entityClass: EntityClass;
     id: string;
     data: any;
     modification: ModificationType;
@@ -49,10 +50,10 @@ export class Storage {
         return null;
     }
 
-    finish(entityClass: EntityClass, entries: CommitEntry[]): void {
-        const store = this.getStoreOrThrow(entityClass);
-
+    finish(entries: CommitEntry[]): void {
         for (const entry of entries) {
+            const store = this.getStoreOrThrow(entry.entityClass);
+
             const expectedVersion =
                 entry.modification === 'created' ? null : entry.expectedVersion;
 

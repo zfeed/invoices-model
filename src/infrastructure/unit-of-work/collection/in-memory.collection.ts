@@ -66,6 +66,7 @@ export class InMemoryCollection<T extends { id: { toString(): string } }> {
 
     commitEntries(): CommitEntry[] {
         return [...this.identityMap.entries()].map(([id, entry]) => ({
+            entityClass: this.entityClass,
             id,
             data: this.mapper.toPlain(entry.entity),
             modification: entry.modification,
