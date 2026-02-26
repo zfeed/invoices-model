@@ -1,6 +1,6 @@
 import Fastify from 'fastify';
 import { bootstrap } from '../core/bootstrap';
-import { InMemoryUnitOfWorkFactory } from '../infrastructure/unit-of-work/in-memory.unit-of-work-factory';
+import { UnitOfWorkFactory } from '../infrastructure/unit-of-work/unit-of-work-factory';
 import { InMemoryDomainEvents } from '../infrastructure/domain-events/in-memory-domain-events';
 import {
     draftInvoicesPlugin,
@@ -11,7 +11,7 @@ import { errorHandler } from './error-handler';
 
 export const createApp = async () => {
     const commands = await bootstrap({
-        unitOfWorkFactory: new InMemoryUnitOfWorkFactory(),
+        unitOfWorkFactory: new UnitOfWorkFactory(),
         domainEvents: new InMemoryDomainEvents(),
     });
 

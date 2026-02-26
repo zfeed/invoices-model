@@ -1,10 +1,10 @@
 import { FinancialDocument } from '../../domain/document/document';
-import { InMemoryUnitOfWorkFactory } from '../../../../infrastructure/unit-of-work/in-memory.unit-of-work-factory';
+import { UnitOfWorkFactory } from '../../../../infrastructure/unit-of-work/unit-of-work-factory';
 import { CanApproverApprove } from './can-approver-approve';
 
 describe('CanApproverApprove', () => {
     it('should return UNKNOWN when document does not exist', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const question = new CanApproverApprove(unitOfWorkFactory);
 
         const answer = await question
@@ -17,7 +17,7 @@ describe('CanApproverApprove', () => {
     });
 
     it('should return YES when approver can approve the action', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const document = FinancialDocument.fromPlain({
             id: 'doc-1',
             referenceId: 'ref-1',
@@ -70,7 +70,7 @@ describe('CanApproverApprove', () => {
     });
 
     it('should return NO when approver is not in any group', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const document = FinancialDocument.fromPlain({
             id: 'doc-1',
             referenceId: 'ref-1',
@@ -123,7 +123,7 @@ describe('CanApproverApprove', () => {
     });
 
     it('should return NO when authflow is already approved', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const document = FinancialDocument.fromPlain({
             id: 'doc-1',
             referenceId: 'ref-1',
@@ -182,7 +182,7 @@ describe('CanApproverApprove', () => {
     });
 
     it('should return NO when action does not exist on the document', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const document = FinancialDocument.fromPlain({
             id: 'doc-1',
             referenceId: 'ref-1',
@@ -235,7 +235,7 @@ describe('CanApproverApprove', () => {
     });
 
     it('should return NO when approver is in a later step', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const document = FinancialDocument.fromPlain({
             id: 'doc-1',
             referenceId: 'ref-1',

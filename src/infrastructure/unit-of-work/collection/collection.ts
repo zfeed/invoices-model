@@ -7,7 +7,7 @@ type Mapper = {
     toPlain: (entity: any) => any;
 };
 
-export class InMemoryCollection<T extends { id: { toString(): string } }> {
+export class Collection<T extends { id: { toString(): string } }> {
     private readonly identityMap = new IdentityMap<T>();
 
     constructor(

@@ -1,4 +1,4 @@
-import { InMemoryUnitOfWorkFactory } from '../../../../infrastructure/unit-of-work/in-memory.unit-of-work-factory';
+import { UnitOfWorkFactory } from '../../../../infrastructure/unit-of-work/unit-of-work-factory';
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
 import { InvoiceIssuedEvent } from '../../../invoices/domain/invoice/events/invoice-issued.event';
 import { Money } from '../../domain/money/money';
@@ -63,7 +63,7 @@ const template = (from: string, to: string) =>
         steps: [],
     }).unwrap();
 
-const seedPolicy = async (unitOfWorkFactory: InMemoryUnitOfWorkFactory) => {
+const seedPolicy = async (unitOfWorkFactory: UnitOfWorkFactory) => {
     const policy = AuthflowPolicy.create({
         action: Action.create('pay').unwrap(),
         templates: [
@@ -86,7 +86,7 @@ const publishEvent = async (
 
 describe('onInvoiceIssued', () => {
     it('should create a new financial document when invoice is created', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(unitOfWorkFactory);
@@ -105,7 +105,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should create a document with an authflow selected from the policy', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(unitOfWorkFactory);
@@ -126,7 +126,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should select the correct authflow range for the invoice amount', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(unitOfWorkFactory);
@@ -146,7 +146,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should create a document with empty authflows when no policy exists', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
         const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
@@ -163,7 +163,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should create a document with empty authflows when amount is outside policy ranges', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(unitOfWorkFactory);
@@ -184,7 +184,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should create documents with different referenceIds for different invoices', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(unitOfWorkFactory);
@@ -214,7 +214,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should not create a duplicate document when invoice with same id is created twice', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(unitOfWorkFactory);
@@ -242,7 +242,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should not create a document when no event is published', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
         const handler = new OnInvoiceIssued(unitOfWorkFactory, domainEvents);
@@ -258,7 +258,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should use event data id as the document referenceId', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(unitOfWorkFactory);
@@ -280,7 +280,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should generate a unique document id for each new document', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(unitOfWorkFactory);
@@ -306,7 +306,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should not overwrite a pre-existing document in storage', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
         const existing = FinancialDocument.create({
@@ -333,7 +333,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should handle many events for different invoices', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(unitOfWorkFactory);
@@ -356,7 +356,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should only react to events published after subscription', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
         await publishEvent(domainEvents, createInvoiceEvent('INV-BEFORE'));
@@ -383,8 +383,8 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should isolate documents across separate UoW factory instances', async () => {
-        const unitOfWorkFactory1 = new InMemoryUnitOfWorkFactory();
-        const unitOfWorkFactory2 = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory1 = new UnitOfWorkFactory();
+        const unitOfWorkFactory2 = new UnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(unitOfWorkFactory1);

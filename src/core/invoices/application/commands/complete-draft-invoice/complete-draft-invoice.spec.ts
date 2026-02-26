@@ -1,4 +1,4 @@
-import { InMemoryUnitOfWorkFactory } from '../../../../../infrastructure/unit-of-work/in-memory.unit-of-work-factory';
+import { UnitOfWorkFactory } from '../../../../../infrastructure/unit-of-work/unit-of-work-factory';
 import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
 import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice';
 import { CompleteDraftInvoice } from './complete-draft-invoice';
@@ -44,13 +44,13 @@ const COMPLETE_DRAFT_REQUEST = {
 };
 
 describe('CompleteDraftInvoice', () => {
-    let unitOfWorkFactory: InMemoryUnitOfWorkFactory;
+    let unitOfWorkFactory: UnitOfWorkFactory;
     let domainEvents: InMemoryDomainEvents;
     let createCommand: CreateDraftInvoice;
     let completeCommand: CompleteDraftInvoice;
 
     beforeEach(() => {
-        unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        unitOfWorkFactory = new UnitOfWorkFactory();
         domainEvents = new InMemoryDomainEvents();
         createCommand = new CreateDraftInvoice(unitOfWorkFactory, domainEvents);
         completeCommand = new CompleteDraftInvoice(

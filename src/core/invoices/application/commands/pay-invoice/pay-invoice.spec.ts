@@ -1,4 +1,4 @@
-import { InMemoryUnitOfWorkFactory } from '../../../../../infrastructure/unit-of-work/in-memory.unit-of-work-factory';
+import { UnitOfWorkFactory } from '../../../../../infrastructure/unit-of-work/unit-of-work-factory';
 import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
 import { CanApproverApprove } from '../../../../financial-authorization/application/queries/can-approver-approve';
 import { FinancialDocument } from '../../../../financial-authorization/domain/document/document';
@@ -83,7 +83,7 @@ const createAuthorizationDocument = (referenceId: string) =>
     }).unwrap();
 
 describe('PayInvoice', () => {
-    let unitOfWorkFactory: InMemoryUnitOfWorkFactory;
+    let unitOfWorkFactory: UnitOfWorkFactory;
     let domainEvents: InMemoryDomainEvents;
     let createCommand: CreateDraftInvoice;
     let completeCommand: CompleteDraftInvoice;
@@ -91,7 +91,7 @@ describe('PayInvoice', () => {
     let payCommand: PayInvoice;
 
     beforeEach(() => {
-        unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        unitOfWorkFactory = new UnitOfWorkFactory();
         domainEvents = new InMemoryDomainEvents();
         const canApproverApprove = new CanApproverApprove(unitOfWorkFactory);
         createCommand = new CreateDraftInvoice(unitOfWorkFactory, domainEvents);

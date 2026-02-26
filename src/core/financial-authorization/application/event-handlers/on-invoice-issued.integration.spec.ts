@@ -1,5 +1,5 @@
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
-import { InMemoryUnitOfWorkFactory } from '../../../../infrastructure/unit-of-work/in-memory.unit-of-work-factory';
+import { UnitOfWorkFactory } from '../../../../infrastructure/unit-of-work/unit-of-work-factory';
 import { CreateDraftInvoice } from '../../../invoices/application/commands/create-draft-invoice/create-draft-invoice';
 import { CompleteDraftInvoice } from '../../../invoices/application/commands/complete-draft-invoice/complete-draft-invoice';
 import { ISSUER_TYPE } from '../../../invoices/domain/issuer/issuer';
@@ -56,7 +56,7 @@ const template = (from: string, to: string) =>
         steps: [],
     }).unwrap();
 
-const seedPolicy = async (unitOfWorkFactory: InMemoryUnitOfWorkFactory) => {
+const seedPolicy = async (unitOfWorkFactory: UnitOfWorkFactory) => {
     const policy = AuthflowPolicy.create({
         action: Action.create('pay').unwrap(),
         templates: [template('0', '999'), template('1000', '9999')],
@@ -67,13 +67,13 @@ const seedPolicy = async (unitOfWorkFactory: InMemoryUnitOfWorkFactory) => {
 };
 
 describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
-    let unitOfWorkFactory: InMemoryUnitOfWorkFactory;
+    let unitOfWorkFactory: UnitOfWorkFactory;
     let domainEvents: InMemoryDomainEvents;
     let createCommand: CreateDraftInvoice;
     let completeCommand: CompleteDraftInvoice;
 
     beforeEach(async () => {
-        unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        unitOfWorkFactory = new UnitOfWorkFactory();
         domainEvents = new InMemoryDomainEvents();
         createCommand = new CreateDraftInvoice(unitOfWorkFactory, domainEvents);
         completeCommand = new CompleteDraftInvoice(

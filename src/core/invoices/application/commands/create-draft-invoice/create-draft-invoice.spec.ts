@@ -1,4 +1,4 @@
-import { InMemoryUnitOfWorkFactory } from '../../../../../infrastructure/unit-of-work/in-memory.unit-of-work-factory';
+import { UnitOfWorkFactory } from '../../../../../infrastructure/unit-of-work/unit-of-work-factory';
 import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
 import { CreateDraftInvoice } from './create-draft-invoice';
 import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
@@ -9,12 +9,12 @@ import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
 import { Id } from '../../../domain/id/id';
 
 describe('CreateDraftInvoice', () => {
-    let unitOfWorkFactory: InMemoryUnitOfWorkFactory;
+    let unitOfWorkFactory: UnitOfWorkFactory;
     let domainEvents: InMemoryDomainEvents;
     let command: CreateDraftInvoice;
 
     beforeEach(() => {
-        unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        unitOfWorkFactory = new UnitOfWorkFactory();
         domainEvents = new InMemoryDomainEvents();
         command = new CreateDraftInvoice(unitOfWorkFactory, domainEvents);
     });

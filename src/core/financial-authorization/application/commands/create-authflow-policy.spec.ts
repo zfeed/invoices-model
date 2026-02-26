@@ -1,6 +1,6 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
-import { InMemoryUnitOfWorkFactory } from '../../../../infrastructure/unit-of-work/in-memory.unit-of-work-factory';
+import { UnitOfWorkFactory } from '../../../../infrastructure/unit-of-work/unit-of-work-factory';
 import { Money } from '../../domain/money/money';
 import { Range } from '../../domain/range/range';
 import { AuthflowTemplate } from '../../domain/authflow/authflow-template';
@@ -22,7 +22,7 @@ const template = (from: string, to: string) =>
 
 describe('createAuthflowPolicyCommand', () => {
     it('should create and save a policy', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
         const command = new CreateAuthflowPolicy(
             unitOfWorkFactory,
@@ -43,7 +43,7 @@ describe('createAuthflowPolicyCommand', () => {
     });
 
     it('should persist the policy in storage', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
         const command = new CreateAuthflowPolicy(
             unitOfWorkFactory,
@@ -65,7 +65,7 @@ describe('createAuthflowPolicyCommand', () => {
     });
 
     it('should publish an AuthflowPolicyCreatedEvent', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
         const command = new CreateAuthflowPolicy(
             unitOfWorkFactory,
@@ -91,7 +91,7 @@ describe('createAuthflowPolicyCommand', () => {
     });
 
     it('should throw when ranges overlap', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
         const command = new CreateAuthflowPolicy(
             unitOfWorkFactory,
@@ -109,7 +109,7 @@ describe('createAuthflowPolicyCommand', () => {
     });
 
     it('should not persist the policy when validation fails', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
         const command = new CreateAuthflowPolicy(
             unitOfWorkFactory,
@@ -132,7 +132,7 @@ describe('createAuthflowPolicyCommand', () => {
     });
 
     it('should not publish events when validation fails', async () => {
-        const unitOfWorkFactory = new InMemoryUnitOfWorkFactory();
+        const unitOfWorkFactory = new UnitOfWorkFactory();
         const domainEvents = new InMemoryDomainEvents();
         const command = new CreateAuthflowPolicy(
             unitOfWorkFactory,
