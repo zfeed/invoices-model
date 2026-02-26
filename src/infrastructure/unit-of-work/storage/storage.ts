@@ -50,7 +50,7 @@ export class Storage {
         return null;
     }
 
-    finish(entries: CommitEntry[]): void {
+    async finish(entries: CommitEntry[]): Promise<void> {
         for (const entry of entries) {
             const store = this.getStoreOrThrow(entry.entityClass);
 

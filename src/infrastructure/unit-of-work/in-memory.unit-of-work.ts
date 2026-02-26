@@ -78,7 +78,11 @@ class InMemoryUnitOfWork implements UnitOfWork {
             attempt++
         ) {
             try {
-                this.commit();
+                const entries = [...this.collections.values()].flatMap(
+                    (collection) => collection.commitEntries()
+                );
+
+                await this.storage.finish(entries);
                 return;
             } catch (error) {
                 if (
@@ -91,13 +95,5 @@ class InMemoryUnitOfWork implements UnitOfWork {
                 throw error;
             }
         }
-    }
-
-    private commit(): void {
-        const entries = [...this.collections.values()].flatMap((collection) =>
-            collection.commitEntries()
-        );
-
-        this.storage.finish(entries);
     }
 }
