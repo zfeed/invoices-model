@@ -29,7 +29,10 @@ export class InMemoryUnitOfWorkFactory implements UnitOfWorkFactory {
 class InMemoryUnitOfWork implements UnitOfWork {
     private static readonly MAX_RETRIES = 5;
 
-    private readonly identityMaps = new Map<EntityClass, IdentityMap<any>>();
+    private readonly collections = new Map<
+        EntityClass,
+        InMemoryCollection<any>
+    >();
 
     constructor(
         private readonly storage: Storage,
@@ -42,22 +45,28 @@ class InMemoryUnitOfWork implements UnitOfWork {
     collection<T extends { id: { toString(): string } }>(
         entityClass: EntityClass
     ): Collection<T> {
+        const existing = this.collections.get(entityClass);
+
+        if (existing) {
+            return existing as Collection<T>;
+        }
+
         const mapper = this.mappers.get(entityClass);
 
         if (!mapper) {
             throw new Error(`Mapper for ${entityClass.name} not found`);
         }
 
-        if (!this.identityMaps.has(entityClass)) {
-            this.identityMaps.set(entityClass, new IdentityMap());
-        }
-
-        return new InMemoryCollection<T>(
+        const collection = new InMemoryCollection<T>(
             entityClass,
-            this.identityMaps.get(entityClass)!,
+            new IdentityMap(),
             this.storage,
             mapper
-        ) as Collection<T>;
+        );
+
+        this.collections.set(entityClass, collection);
+
+        return collection as Collection<T>;
     }
 
     async start(): Promise<void> {
@@ -87,17 +96,8 @@ class InMemoryUnitOfWork implements UnitOfWork {
     }
 
     private commit(): void {
-        for (const [entityClass, identityMap] of this.identityMaps) {
-            const mapper = this.mappers.get(entityClass)!;
-
-            const entries = [...identityMap.entries()].map(([id, entry]) => ({
-                id,
-                data: mapper.toPlain(entry.entity),
-                modification: entry.modification,
-                expectedVersion: entry.version,
-            }));
-
-            this.storage.finish(entityClass, entries);
+        for (const [entityClass, collection] of this.collections) {
+            this.storage.finish(entityClass, collection.commitEntries());
         }
     }
 }

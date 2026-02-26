@@ -1,6 +1,6 @@
 import { EntityClass } from '../../registry';
 import { IdentityMap } from '../identity-map/identity-map';
-import { Storage } from '../storage/storage';
+import { CommitEntry, Storage } from '../storage/storage';
 
 type Mapper = {
     toDomain: (plain: any) => any;
@@ -61,5 +61,14 @@ export class InMemoryCollection<T extends { id: { toString(): string } }> {
     async add(object: T): Promise<void> {
         const key = object.id.toString();
         this.identityMap.set(key, object, null, 'created');
+    }
+
+    commitEntries(): CommitEntry[] {
+        return [...this.identityMap.entries()].map(([id, entry]) => ({
+            id,
+            data: this.mapper.toPlain(entry.entity),
+            modification: entry.modification,
+            expectedVersion: entry.version,
+        }));
     }
 }
