@@ -41,14 +41,15 @@ describe('CreateDraftInvoice', () => {
     it('should persist the draft invoice', async () => {
         const result = await command.execute({});
 
-        await session.start(async (uow) => {
+        {
+            await using uow = await session.begin();
             const loaded = await uow
                 .collection(DraftInvoice)
                 .get(Id.fromString(result.id));
 
             expect(loaded).not.toBeNull();
             expect(loaded!.id.toString()).toBe(result.id);
-        });
+        }
     });
 
     it('should create a draft invoice with line items', async () => {

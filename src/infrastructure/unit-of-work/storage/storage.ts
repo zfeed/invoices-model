@@ -21,10 +21,6 @@ export class Storage {
         }
     }
 
-    async start(): Promise<void> {
-        //
-    }
-
     get(entityClass: EntityClass, id: string): any | null {
         const store = this.getStoreOrThrow(entityClass);
         const record = store.get(id);
@@ -66,7 +62,7 @@ export class Storage {
         return null;
     }
 
-    async finish(entries: CommitEntry[]): Promise<void> {
+    async commit(entries: CommitEntry[]): Promise<void> {
         for (const entry of entries) {
             const store = this.getStoreOrThrow(entry.entityClass);
             const mapper = this.getMapper(entry.entityClass);

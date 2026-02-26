@@ -73,9 +73,8 @@ const seedPolicy = async (session: Session) => {
             template('10000', '100000'),
         ],
     }).unwrap();
-    await session.start(async (uow) => {
-        await uow.collection(AuthflowPolicy).add(policy);
-    });
+    await using uow = await session.begin();
+    await uow.collection(AuthflowPolicy).add(policy);
 };
 
 const publishEvent = async (
@@ -95,11 +94,13 @@ describe('onInvoiceIssued', () => {
         await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
-        const result = await session.start(async (uow) => {
-            return uow
+        let result: FinancialDocument | undefined;
+        {
+            await using uow = await session.begin();
+            result = await uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
-        });
+        }
 
         expect(result).toBeDefined();
         expect(result!.referenceId.toPlain()).toBe('INV-001');
@@ -114,11 +115,13 @@ describe('onInvoiceIssued', () => {
         await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001', '500'));
 
-        const result = await session.start(async (uow) => {
-            return uow
+        let result: FinancialDocument | undefined;
+        {
+            await using uow = await session.begin();
+            result = await uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
-        });
+        }
 
         expect(result!.authflows).toHaveLength(1);
         expect(result!.authflows[0].action.toPlain()).toBe('pay');
@@ -135,11 +138,13 @@ describe('onInvoiceIssued', () => {
         await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001', '5000'));
 
-        const result = await session.start(async (uow) => {
-            return uow
+        let result: FinancialDocument | undefined;
+        {
+            await using uow = await session.begin();
+            result = await uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
-        });
+        }
 
         expect(result!.authflows).toHaveLength(1);
         expect(result!.authflows[0].range.from.amount).toBe('1000');
@@ -154,11 +159,13 @@ describe('onInvoiceIssued', () => {
         await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
-        const result = await session.start(async (uow) => {
-            return uow
+        let result: FinancialDocument | undefined;
+        {
+            await using uow = await session.begin();
+            result = await uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
-        });
+        }
 
         expect(result!.authflows).toEqual([]);
     });
@@ -175,11 +182,13 @@ describe('onInvoiceIssued', () => {
             createInvoiceEvent('INV-001', '999999')
         );
 
-        const result = await session.start(async (uow) => {
-            return uow
+        let result: FinancialDocument | undefined;
+        {
+            await using uow = await session.begin();
+            result = await uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
-        });
+        }
 
         expect(result!.authflows).toEqual([]);
     });
@@ -194,16 +203,20 @@ describe('onInvoiceIssued', () => {
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
         await publishEvent(domainEvents, createInvoiceEvent('INV-002'));
 
-        const result1 = await session.start(async (uow) => {
-            return uow
+        let result1: FinancialDocument | undefined;
+        {
+            await using uow = await session.begin();
+            result1 = await uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
-        });
-        const result2 = await session.start(async (uow) => {
-            return uow
+        }
+        let result2: FinancialDocument | undefined;
+        {
+            await using uow = await session.begin();
+            result2 = await uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-002');
-        });
+        }
 
         expect(result1).toBeDefined();
         expect(result2).toBeDefined();
@@ -223,20 +236,24 @@ describe('onInvoiceIssued', () => {
         await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
-        const firstResult = await session.start(async (uow) => {
-            return uow
+        let firstResult: FinancialDocument | undefined;
+        {
+            await using uow = await session.begin();
+            firstResult = await uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
-        });
+        }
         const firstId = firstResult?.id.toPlain();
 
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
-        const secondResult = await session.start(async (uow) => {
-            return uow
+        let secondResult: FinancialDocument | undefined;
+        {
+            await using uow = await session.begin();
+            secondResult = await uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
-        });
+        }
         const secondId = secondResult?.id.toPlain();
 
         expect(firstId).toBe(secondId);
@@ -249,11 +266,13 @@ describe('onInvoiceIssued', () => {
         const handler = new OnInvoiceIssued(session, domainEvents);
         await handler.register();
 
-        const result = await session.start(async (uow) => {
-            return uow
+        let result: FinancialDocument | undefined;
+        {
+            await using uow = await session.begin();
+            result = await uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
-        });
+        }
 
         expect(result).toBeUndefined();
     });
@@ -270,11 +289,13 @@ describe('onInvoiceIssued', () => {
             createInvoiceEvent('my-custom-ref-123')
         );
 
-        const result = await session.start(async (uow) => {
-            return uow
+        let result: FinancialDocument | undefined;
+        {
+            await using uow = await session.begin();
+            result = await uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'my-custom-ref-123');
-        });
+        }
 
         expect(result).toBeDefined();
         expect(result!.referenceId.toPlain()).toBe('my-custom-ref-123');
@@ -293,11 +314,10 @@ describe('onInvoiceIssued', () => {
 
         const ids = await Promise.all(
             ['INV-001', 'INV-002', 'INV-003'].map(async (ref) => {
-                const result = await session.start(async (uow) => {
-                    return uow
-                        .collection(FinancialDocument)
-                        .findBy('referenceId', ref);
-                });
+                await using uow = await session.begin();
+                const result = await uow
+                    .collection(FinancialDocument)
+                    .findBy('referenceId', ref);
                 return result?.id.toPlain();
             })
         );
@@ -315,20 +335,23 @@ describe('onInvoiceIssued', () => {
             value: Money.create('100', 'USD').unwrap(),
             authflows: [],
         }).unwrap();
-        await session.start(async (uow) => {
+        {
+            await using uow = await session.begin();
             await uow.collection(FinancialDocument).add(existing);
-        });
+        }
 
         await seedPolicy(session);
         const handler = new OnInvoiceIssued(session, domainEvents);
         await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
-        const result = await session.start(async (uow) => {
-            return uow
+        let result: FinancialDocument | undefined;
+        {
+            await using uow = await session.begin();
+            result = await uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
-        });
+        }
 
         expect(result!.id.toPlain()).toBe(existing.id.toPlain());
     });
@@ -347,11 +370,13 @@ describe('onInvoiceIssued', () => {
         }
 
         for (let i = 0; i < count; i++) {
-            const result = await session.start(async (uow) => {
-                return uow
+            let result: FinancialDocument | undefined;
+            {
+                await using uow = await session.begin();
+                result = await uow
                     .collection(FinancialDocument)
                     .findBy('referenceId', `INV-${i}`);
-            });
+            }
             expect(result).toBeDefined();
         }
     });
@@ -368,16 +393,20 @@ describe('onInvoiceIssued', () => {
 
         await publishEvent(domainEvents, createInvoiceEvent('INV-AFTER'));
 
-        const before = await session.start(async (uow) => {
-            return uow
+        let before: FinancialDocument | undefined;
+        {
+            await using uow = await session.begin();
+            before = await uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-BEFORE');
-        });
-        const after = await session.start(async (uow) => {
-            return uow
+        }
+        let after: FinancialDocument | undefined;
+        {
+            await using uow = await session.begin();
+            after = await uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-AFTER');
-        });
+        }
 
         expect(before).toBeUndefined();
         expect(after).toBeDefined();
@@ -393,16 +422,20 @@ describe('onInvoiceIssued', () => {
         await handler.register();
         await publishEvent(domainEvents, createInvoiceEvent('INV-001'));
 
-        const inSession1 = await session1.start(async (uow) => {
-            return uow
+        let inSession1: FinancialDocument | undefined;
+        {
+            await using uow = await session1.begin();
+            inSession1 = await uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
-        });
-        const inSession2 = await session2.start(async (uow) => {
-            return uow
+        }
+        let inSession2: FinancialDocument | undefined;
+        {
+            await using uow = await session2.begin();
+            inSession2 = await uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'INV-001');
-        });
+        }
 
         expect(inSession1).toBeDefined();
         expect(inSession2).toBeUndefined();

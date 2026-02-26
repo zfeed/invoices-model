@@ -49,72 +49,66 @@ export class UpdateDraftInvoice {
             };
         }
     ) {
-        const draftInvoice = await this.session.start(async (unitOfWork) => {
-            const draftInvoice = await unitOfWork
-                .collection(DraftInvoice)
-                .get(Id.fromString(id));
+        await using unitOfWork = await this.session.begin();
 
-            if (!draftInvoice) {
-                throw new ApplicationError({
-                    message: 'Draft invoice not found',
-                    code: APPLICATION_ERROR_CODE.ITEM_NOT_FOUND,
-                });
-            }
+        const draftInvoice = await unitOfWork
+            .collection(DraftInvoice)
+            .get(Id.fromString(id));
 
-            if (request.lineItems !== undefined) {
-                draftInvoice.lineItems?.forEach((lineItem) => {
-                    draftInvoice.removeLineItem(lineItem).unwrap();
-                });
+        if (!draftInvoice) {
+            throw new ApplicationError({
+                message: 'Draft invoice not found',
+                code: APPLICATION_ERROR_CODE.ITEM_NOT_FOUND,
+            });
+        }
 
-                request.lineItems
-                    .map((lineItem) => LineItem.create(lineItem).unwrap())
-                    .forEach((lineItem) =>
-                        draftInvoice.addLineItem(lineItem).unwrap()
-                    );
-            }
+        if (request.lineItems !== undefined) {
+            draftInvoice.lineItems?.forEach((lineItem) => {
+                draftInvoice.removeLineItem(lineItem).unwrap();
+            });
 
-            if (request.vatRate) {
-                const vatRate = VatRate.create(request.vatRate).unwrap();
-                draftInvoice.applyVat(vatRate).unwrap();
-            }
+            request.lineItems
+                .map((lineItem) => LineItem.create(lineItem).unwrap())
+                .forEach((lineItem) =>
+                    draftInvoice.addLineItem(lineItem).unwrap()
+                );
+        }
 
-            if (request.issueDate) {
-                const issueDate = CalendarDate.create(
-                    request.issueDate
-                ).unwrap();
-                draftInvoice.addIssueDate(issueDate).unwrap();
-            }
+        if (request.vatRate) {
+            const vatRate = VatRate.create(request.vatRate).unwrap();
+            draftInvoice.applyVat(vatRate).unwrap();
+        }
 
-            if (request.dueDate) {
-                const dueDate = CalendarDate.create(request.dueDate).unwrap();
-                draftInvoice.addDueDate(dueDate).unwrap();
-            }
+        if (request.issueDate) {
+            const issueDate = CalendarDate.create(request.issueDate).unwrap();
+            draftInvoice.addIssueDate(issueDate).unwrap();
+        }
 
-            if (request.issuer) {
-                const issuer = Issuer.create(request.issuer).unwrap();
-                draftInvoice.addIssuer(issuer).unwrap();
-            }
+        if (request.dueDate) {
+            const dueDate = CalendarDate.create(request.dueDate).unwrap();
+            draftInvoice.addDueDate(dueDate).unwrap();
+        }
 
-            if (request.recipient) {
-                const billing = Paypal.create(
-                    request.recipient.billing
-                ).unwrap();
+        if (request.issuer) {
+            const issuer = Issuer.create(request.issuer).unwrap();
+            draftInvoice.addIssuer(issuer).unwrap();
+        }
 
-                const recipient = Recipient.create({
-                    type: request.recipient.type,
-                    name: request.recipient.name,
-                    address: request.recipient.address,
-                    taxId: request.recipient.taxId,
-                    email: request.recipient.email,
-                    taxResidenceCountry: request.recipient.taxResidenceCountry,
-                    billing,
-                }).unwrap();
+        if (request.recipient) {
+            const billing = Paypal.create(request.recipient.billing).unwrap();
 
-                draftInvoice.addRecipient(recipient).unwrap();
-            }
+            const recipient = Recipient.create({
+                type: request.recipient.type,
+                name: request.recipient.name,
+                address: request.recipient.address,
+                taxId: request.recipient.taxId,
+                email: request.recipient.email,
+                taxResidenceCountry: request.recipient.taxResidenceCountry,
+                billing,
+            }).unwrap();
 
-            return draftInvoice;
-        });
+            draftInvoice.addRecipient(recipient).unwrap();
+        }
 
         await this.domainEvents.publishEvents(draftInvoice);
 

@@ -118,9 +118,10 @@ describe('PayInvoice', () => {
         await processCommand.execute(invoice.id);
 
         const document = createAuthorizationDocument(invoice.id);
-        await session.start(async (uow) => {
+        {
+            await using uow = await session.begin();
             await uow.collection(FinancialDocument).add(document);
-        });
+        }
 
         await expect(
             payCommand.execute({
@@ -138,9 +139,10 @@ describe('PayInvoice', () => {
         await processCommand.execute(invoice.id);
 
         const document = createAuthorizationDocument(invoice.id);
-        await session.start(async (uow) => {
+        {
+            await using uow = await session.begin();
             await uow.collection(FinancialDocument).add(document);
-        });
+        }
 
         const result = await payCommand.execute({
             id: invoice.id,
@@ -161,9 +163,10 @@ describe('PayInvoice', () => {
         await processCommand.execute(invoice.id);
 
         const document = createAuthorizationDocument(invoice.id);
-        await session.start(async (uow) => {
+        {
+            await using uow = await session.begin();
             await uow.collection(FinancialDocument).add(document);
-        });
+        }
 
         await payCommand.execute({
             id: invoice.id,

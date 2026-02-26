@@ -25,39 +25,35 @@ export class OnInvoiceIssued {
             event.data.total.currency
         ).unwrap();
 
-        const document = await this.session.start(async (uow) => {
-            const existing = await uow
-                .collection(FinancialDocument)
-                .findBy('referenceId', referenceId.toPlain());
+        await using uow = await this.session.begin();
 
-            if (existing) {
-                return null;
-            }
+        const existing = await uow
+            .collection(FinancialDocument)
+            .findBy('referenceId', referenceId.toPlain());
 
-            const policy = await uow
-                .collection(AuthflowPolicy)
-                .findBy('action', 'pay');
-
-            const authflows = policy
-                ? (() => {
-                      const result = policy.selectAuthflow(value);
-                      return result.isOk() ? [result.unwrap()] : [];
-                  })()
-                : [];
-
-            const doc = FinancialDocument.create({
-                referenceId,
-                value,
-                authflows,
-            }).unwrap();
-
-            await uow.collection(FinancialDocument).add(doc);
-
-            return doc;
-        });
-
-        if (document) {
-            await this.domainEvents.publishEvents(document);
+        if (existing) {
+            return;
         }
+
+        const policy = await uow
+            .collection(AuthflowPolicy)
+            .findBy('action', 'pay');
+
+        const authflows = policy
+            ? (() => {
+                  const result = policy.selectAuthflow(value);
+                  return result.isOk() ? [result.unwrap()] : [];
+              })()
+            : [];
+
+        const document = FinancialDocument.create({
+            referenceId,
+            value,
+            authflows,
+        }).unwrap();
+
+        await uow.collection(FinancialDocument).add(document);
+
+        await this.domainEvents.publishEvents(document);
     }
 }

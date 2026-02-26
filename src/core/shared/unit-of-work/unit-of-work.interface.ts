@@ -1,11 +1,11 @@
-export interface UnitOfWork {
+export interface UnitOfWork extends AsyncDisposable {
     collection<T extends { id: { toString(): string } }>(entityClass: {
         prototype: T;
     }): Collection<T>;
 }
 
 export interface Session {
-    start<T>(callback: (uow: UnitOfWork) => Promise<T>): Promise<T>;
+    begin(): Promise<UnitOfWork>;
 }
 
 export interface Collection<T> {

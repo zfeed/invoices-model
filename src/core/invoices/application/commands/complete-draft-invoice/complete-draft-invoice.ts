@@ -13,26 +13,22 @@ export class CompleteDraftInvoice {
     ) {}
 
     public async execute(id: string) {
-        const { draftInvoice, invoice } = await this.session.start(
-            async (unitOfWork) => {
-                const draftInvoice = await unitOfWork
-                    .collection(DraftInvoice)
-                    .get(Id.fromString(id));
+        await using unitOfWork = await this.session.begin();
 
-                if (!draftInvoice) {
-                    throw new ApplicationError({
-                        message: 'Draft invoice not found',
-                        code: APPLICATION_ERROR_CODE.ITEM_NOT_FOUND,
-                    });
-                }
+        const draftInvoice = await unitOfWork
+            .collection(DraftInvoice)
+            .get(Id.fromString(id));
 
-                const invoice = draftInvoice.toInvoice().unwrap();
+        if (!draftInvoice) {
+            throw new ApplicationError({
+                message: 'Draft invoice not found',
+                code: APPLICATION_ERROR_CODE.ITEM_NOT_FOUND,
+            });
+        }
 
-                await unitOfWork.collection(Invoice).add(invoice);
+        const invoice = draftInvoice.toInvoice().unwrap();
 
-                return { draftInvoice, invoice };
-            }
-        );
+        await unitOfWork.collection(Invoice).add(invoice);
 
         await this.domainEvents.publishEvents(draftInvoice, invoice);
 

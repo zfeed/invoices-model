@@ -142,7 +142,8 @@ describe('approveActionOnDocumentCommand', () => {
             approver,
         });
 
-        await session.start(async (uow) => {
+        {
+            await using uow = await session.begin();
             const doc = await uow
                 .collection(FinancialDocument)
                 .findBy('referenceId', 'invoice-123');
@@ -150,7 +151,7 @@ describe('approveActionOnDocumentCommand', () => {
                 (a) => a.action.toPlain() === 'pay'
             );
             expect(authflow?.isApproved).toBe(true);
-        });
+        }
     });
 
     it('should publish DocumentApprovedEvent', async () => {

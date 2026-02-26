@@ -22,14 +22,13 @@ describe('UnitOfWork contract (InMemory)', () => {
                 maxRetries: 5,
             });
 
-            await session.start(async (uow) => {
-                const collection = uow.collection(DraftInvoice);
-                const id = Id.fromString('non-existing-id');
+            await using uow = await session.begin();
+            const collection = uow.collection(DraftInvoice);
+            const id = Id.fromString('non-existing-id');
 
-                const result = await collection.get(id);
+            const result = await collection.get(id);
 
-                expect(result).toBeNull();
-            });
+            expect(result).toBeNull();
         });
     });
 
@@ -40,22 +39,19 @@ describe('UnitOfWork contract (InMemory)', () => {
                 maxRetries: 5,
             });
 
-            await session.start(async (uow) => {
-                const collection = uow.collection(DraftInvoice);
-                const draft = DraftInvoice.create(
-                    Id.create().unwrap()
-                ).unwrap();
+            await using uow = await session.begin();
+            const collection = uow.collection(DraftInvoice);
+            const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
-                await collection.add(draft);
+            await collection.add(draft);
 
-                const result = await collection.get(draft.id);
+            const result = await collection.get(draft.id);
 
-                expect(result?.id.equals(draft.id)).toBe(true);
-            });
+            expect(result?.id.equals(draft.id)).toBe(true);
         });
     });
 
-    describe('finish', () => {
+    describe('commit', () => {
         it('should persist a newly added entity', async () => {
             const session = new Session({
                 storage: new Storage(),
@@ -63,16 +59,18 @@ describe('UnitOfWork contract (InMemory)', () => {
             });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
-            await session.start(async (uow) => {
+            {
+                await using uow = await session.begin();
                 await uow.collection(DraftInvoice).add(draft);
-            });
+            }
 
-            await session.start(async (uow) => {
+            {
+                await using uow = await session.begin();
                 const result = await uow.collection(DraftInvoice).get(draft.id);
 
                 expect(result).not.toBeNull();
                 expect(result?.id.equals(draft.id)).toBe(true);
-            });
+            }
         });
 
         it('should persist modifications made to a tracked entity', async () => {
@@ -82,11 +80,13 @@ describe('UnitOfWork contract (InMemory)', () => {
             });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
-            await session.start(async (uow) => {
+            {
+                await using uow = await session.begin();
                 await uow.collection(DraftInvoice).add(draft);
-            });
+            }
 
-            await session.start(async (uow) => {
+            {
+                await using uow = await session.begin();
                 const loaded = await uow.collection(DraftInvoice).get(draft.id);
 
                 const lineItem = LineItem.create({
@@ -95,9 +95,10 @@ describe('UnitOfWork contract (InMemory)', () => {
                     quantity: '2',
                 }).unwrap();
                 loaded!.addLineItem(lineItem);
-            });
+            }
 
-            await session.start(async (uow) => {
+            {
+                await using uow = await session.begin();
                 const result = await uow.collection(DraftInvoice).get(draft.id);
 
                 expect(result!.lineItems).not.toBeNull();
@@ -109,7 +110,7 @@ describe('UnitOfWork contract (InMemory)', () => {
                         )
                     )
                 ).toBeDefined();
-            });
+            }
         });
     });
 
@@ -121,18 +122,20 @@ describe('UnitOfWork contract (InMemory)', () => {
             });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
-            await session.start(async (uow) => {
+            {
+                await using uow = await session.begin();
                 await uow.collection(DraftInvoice).add(draft);
-            });
+            }
 
-            await session.start(async (uow) => {
+            {
+                await using uow = await session.begin();
                 const collection = uow.collection(DraftInvoice);
 
                 const first = await collection.get(draft.id);
                 const second = await collection.get(draft.id);
 
                 expect(first).toBe(second);
-            });
+            }
         });
 
         it('should return the added instance without roundtripping through the store', async () => {
@@ -141,17 +144,14 @@ describe('UnitOfWork contract (InMemory)', () => {
                 maxRetries: 5,
             });
 
-            await session.start(async (uow) => {
-                const collection = uow.collection(DraftInvoice);
-                const draft = DraftInvoice.create(
-                    Id.create().unwrap()
-                ).unwrap();
+            await using uow = await session.begin();
+            const collection = uow.collection(DraftInvoice);
+            const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
-                await collection.add(draft);
+            await collection.add(draft);
 
-                const result = await collection.get(draft.id);
-                expect(result).toBe(draft);
-            });
+            const result = await collection.get(draft.id);
+            expect(result).toBe(draft);
         });
 
         it('should return distinct instances across different units of work', async () => {
@@ -161,24 +161,27 @@ describe('UnitOfWork contract (InMemory)', () => {
             });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
-            await session.start(async (uow) => {
+            {
+                await using uow = await session.begin();
                 await uow.collection(DraftInvoice).add(draft);
-            });
+            }
 
             let firstInstance: DraftInvoice | undefined;
             let secondInstance: DraftInvoice | undefined;
 
-            await session.start(async (uow) => {
+            {
+                await using uow = await session.begin();
                 firstInstance = await uow
                     .collection(DraftInvoice)
                     .get(draft.id);
-            });
+            }
 
-            await session.start(async (uow) => {
+            {
+                await using uow = await session.begin();
                 secondInstance = await uow
                     .collection(DraftInvoice)
                     .get(draft.id);
-            });
+            }
 
             expect(firstInstance).toBeDefined();
             expect(secondInstance).toBeDefined();
@@ -194,16 +197,18 @@ describe('UnitOfWork contract (InMemory)', () => {
             });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
-            await session.start(async (uow1) => {
-                await uow1.collection(DraftInvoice).add(draft);
+            const uow1 = await session.begin();
+            await uow1.collection(DraftInvoice).add(draft);
 
-                await session.start(async (uow2) => {
-                    const result = await uow2
-                        .collection(DraftInvoice)
-                        .get(draft.id);
-                    expect(result).toBeNull();
-                });
-            });
+            {
+                await using uow2 = await session.begin();
+                const result = await uow2
+                    .collection(DraftInvoice)
+                    .get(draft.id);
+                expect(result).toBeNull();
+            }
+
+            await uow1[Symbol.asyncDispose]();
         });
 
         it('should not expose uncommitted modifications to other units of work', async () => {
@@ -213,94 +218,38 @@ describe('UnitOfWork contract (InMemory)', () => {
             });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
-            await session.start(async (uow) => {
+            {
+                await using uow = await session.begin();
                 await uow.collection(DraftInvoice).add(draft);
-            });
+            }
 
             let lineItemsInOtherUow: unknown = 'not-checked';
 
-            const uow1Promise = session.start(async (uow1) => {
-                const loaded = await uow1
+            const uow1 = await session.begin();
+            const loaded = await uow1.collection(DraftInvoice).get(draft.id);
+            loaded!.addLineItem(
+                LineItem.create({
+                    description: 'Consulting',
+                    price: { amount: '100', currency: 'USD' },
+                    quantity: '2',
+                }).unwrap()
+            );
+
+            {
+                await using uow2 = await session.begin();
+                const result = await uow2
                     .collection(DraftInvoice)
                     .get(draft.id);
-                loaded!.addLineItem(
-                    LineItem.create({
-                        description: 'Consulting',
-                        price: { amount: '100', currency: 'USD' },
-                        quantity: '2',
-                    }).unwrap()
-                );
-
-                await session.start(async (uow2) => {
-                    const result = await uow2
-                        .collection(DraftInvoice)
-                        .get(draft.id);
-                    lineItemsInOtherUow = result!.lineItems;
-                });
-            });
+                lineItemsInOtherUow = result!.lineItems;
+            }
 
             try {
-                await uow1Promise;
+                await uow1[Symbol.asyncDispose]();
             } catch {
                 // expected: uow1 may fail with OptimisticConcurrencyError
             }
 
             expect(lineItemsInOtherUow).toBeNull();
-        });
-    });
-
-    describe('rollback', () => {
-        it('should not persist changes if the callback throws', async () => {
-            const session = new Session({
-                storage: new Storage(),
-                maxRetries: 5,
-            });
-            const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
-
-            await expect(
-                session.start(async (uow) => {
-                    await uow.collection(DraftInvoice).add(draft);
-                    throw new Error('rollback');
-                })
-            ).rejects.toThrow('rollback');
-
-            await session.start(async (uow) => {
-                const result = await uow.collection(DraftInvoice).get(draft.id);
-                expect(result).toBeNull();
-            });
-        });
-
-        it('should not persist modifications if the callback throws', async () => {
-            const session = new Session({
-                storage: new Storage(),
-                maxRetries: 5,
-            });
-            const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
-
-            await session.start(async (uow) => {
-                await uow.collection(DraftInvoice).add(draft);
-            });
-
-            await expect(
-                session.start(async (uow) => {
-                    const loaded = await uow
-                        .collection(DraftInvoice)
-                        .get(draft.id);
-                    loaded!.addLineItem(
-                        LineItem.create({
-                            description: 'Should not persist',
-                            price: { amount: '100', currency: 'USD' },
-                            quantity: '1',
-                        }).unwrap()
-                    );
-                    throw new Error('rollback');
-                })
-            ).rejects.toThrow('rollback');
-
-            await session.start(async (uow) => {
-                const result = await uow.collection(DraftInvoice).get(draft.id);
-                expect(result!.lineItems).toBeNull();
-            });
         });
     });
 
@@ -312,40 +261,40 @@ describe('UnitOfWork contract (InMemory)', () => {
             });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
-            await session.start(async (uow) => {
+            {
+                await using uow = await session.begin();
                 await uow.collection(DraftInvoice).add(draft);
-            });
+            }
 
-            await expect(
-                session.start(async (uow1) => {
-                    const loaded1 = await uow1
-                        .collection(DraftInvoice)
-                        .get(draft.id);
-                    loaded1!.addLineItem(
-                        LineItem.create({
-                            description: 'From UoW1',
-                            price: { amount: '50', currency: 'USD' },
-                            quantity: '1',
-                        }).unwrap()
-                    );
+            const uow1 = await session.begin();
+            const loaded1 = await uow1.collection(DraftInvoice).get(draft.id);
+            loaded1!.addLineItem(
+                LineItem.create({
+                    description: 'From UoW1',
+                    price: { amount: '50', currency: 'USD' },
+                    quantity: '1',
+                }).unwrap()
+            );
 
-                    // A concurrent UoW commits a change to the same entity first
-                    await session.start(async (uow2) => {
-                        const loaded2 = await uow2
-                            .collection(DraftInvoice)
-                            .get(draft.id);
-                        loaded2!.addLineItem(
-                            LineItem.create({
-                                description: 'From UoW2',
-                                price: { amount: '75', currency: 'USD' },
-                                quantity: '1',
-                            }).unwrap()
-                        );
-                    });
+            // A concurrent UoW commits a change to the same entity first
+            {
+                await using uow2 = await session.begin();
+                const loaded2 = await uow2
+                    .collection(DraftInvoice)
+                    .get(draft.id);
+                loaded2!.addLineItem(
+                    LineItem.create({
+                        description: 'From UoW2',
+                        price: { amount: '75', currency: 'USD' },
+                        quantity: '1',
+                    }).unwrap()
+                );
+            }
 
-                    // uow1 finishes after uow2 already committed — version mismatch
-                })
-            ).rejects.toThrow(OptimisticConcurrencyError);
+            // uow1 disposes after uow2 already committed — version mismatch
+            await expect(uow1[Symbol.asyncDispose]()).rejects.toThrow(
+                OptimisticConcurrencyError
+            );
         });
     });
 
@@ -357,15 +306,18 @@ describe('UnitOfWork contract (InMemory)', () => {
             });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
-            await session.start(async (uow) => {
+            {
+                await using uow = await session.begin();
                 await uow.collection(DraftInvoice).add(draft);
-            });
+            }
 
-            await expect(
-                session.start(async (uow) => {
-                    await uow.collection(DraftInvoice).add(draft);
-                })
-            ).rejects.toThrow(OptimisticConcurrencyError);
+            {
+                const uow = await session.begin();
+                await uow.collection(DraftInvoice).add(draft);
+                await expect(uow[Symbol.asyncDispose]()).rejects.toThrow(
+                    OptimisticConcurrencyError
+                );
+            }
         });
     });
 
@@ -377,59 +329,35 @@ describe('UnitOfWork contract (InMemory)', () => {
             });
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
-            await session.start(async (uow) => {
+            {
+                await using uow = await session.begin();
                 await uow.collection(DraftInvoice).add(draft);
-            });
+            }
 
             // A read-only UoW that just loads the entity still bumps the
             // version on commit, so a concurrent writer will conflict.
-            await expect(
-                session.start(async (uow1) => {
-                    await uow1.collection(DraftInvoice).get(draft.id);
+            const uow1 = await session.begin();
+            await uow1.collection(DraftInvoice).get(draft.id);
 
-                    // A concurrent UoW modifies and commits the same entity
-                    await session.start(async (uow2) => {
-                        const loaded = await uow2
-                            .collection(DraftInvoice)
-                            .get(draft.id);
-                        loaded!.addLineItem(
-                            LineItem.create({
-                                description: 'Concurrent write',
-                                price: { amount: '50', currency: 'USD' },
-                                quantity: '1',
-                            }).unwrap()
-                        );
-                    });
+            // A concurrent UoW modifies and commits the same entity
+            {
+                await using uow2 = await session.begin();
+                const loaded = await uow2
+                    .collection(DraftInvoice)
+                    .get(draft.id);
+                loaded!.addLineItem(
+                    LineItem.create({
+                        description: 'Concurrent write',
+                        price: { amount: '50', currency: 'USD' },
+                        quantity: '1',
+                    }).unwrap()
+                );
+            }
 
-                    // uow1 finishes — version mismatch because uow2 already committed
-                })
-            ).rejects.toThrow(OptimisticConcurrencyError);
-        });
-    });
-
-    describe('return value', () => {
-        it('should return the value produced by the callback', async () => {
-            const session = new Session({
-                storage: new Storage(),
-                maxRetries: 5,
-            });
-
-            const result = await session.start(async () => {
-                return 42;
-            });
-
-            expect(result).toBe(42);
-        });
-
-        it('should return undefined when the callback returns nothing', async () => {
-            const session = new Session({
-                storage: new Storage(),
-                maxRetries: 5,
-            });
-
-            const result = await session.start(async () => {});
-
-            expect(result).toBeUndefined();
+            // uow1 disposes — version mismatch because uow2 already committed
+            await expect(uow1[Symbol.asyncDispose]()).rejects.toThrow(
+                OptimisticConcurrencyError
+            );
         });
     });
 
@@ -474,12 +402,14 @@ describe('UnitOfWork contract (InMemory)', () => {
 
             const invoice = draft.toInvoice().unwrap();
 
-            await session.start(async (uow) => {
+            {
+                await using uow = await session.begin();
                 await uow.collection(DraftInvoice).add(draft);
                 await uow.collection(Invoice).add(invoice);
-            });
+            }
 
-            await session.start(async (uow) => {
+            {
+                await using uow = await session.begin();
                 const loadedDraft = await uow
                     .collection(DraftInvoice)
                     .get(draft.id);
@@ -489,68 +419,7 @@ describe('UnitOfWork contract (InMemory)', () => {
 
                 expect(loadedDraft).not.toBeNull();
                 expect(loadedInvoice).not.toBeNull();
-            });
-        });
-
-        it('should rollback changes across all collections when the callback throws', async () => {
-            const session = new Session({
-                storage: new Storage(),
-                maxRetries: 5,
-            });
-            const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
-
-            const lineItem = LineItem.create({
-                description: 'Service',
-                price: { amount: '200', currency: 'USD' },
-                quantity: '1',
-            }).unwrap();
-            draft.addLineItem(lineItem);
-            draft.addIssueDate(CalendarDate.create('2025-01-01').unwrap());
-            draft.addDueDate(CalendarDate.create('2025-02-01').unwrap());
-            draft.addIssuer(
-                Issuer.create({
-                    type: ISSUER_TYPE.COMPANY,
-                    name: 'Company Inc.',
-                    address: '123 Main St',
-                    taxId: 'TAX123',
-                    email: 'info@company.com',
-                }).unwrap()
-            );
-            draft.addRecipient(
-                Recipient.create({
-                    type: RECIPIENT_TYPE.INDIVIDUAL,
-                    name: 'Jane Smith',
-                    address: '456 Oak Ave',
-                    taxId: 'TAX456',
-                    email: 'jane@example.com',
-                    taxResidenceCountry: 'US',
-                    billing: Paypal.create({
-                        email: 'jane@example.com',
-                    }).unwrap(),
-                }).unwrap()
-            );
-
-            const invoice = draft.toInvoice().unwrap();
-
-            await expect(
-                session.start(async (uow) => {
-                    await uow.collection(DraftInvoice).add(draft);
-                    await uow.collection(Invoice).add(invoice);
-                    throw new Error('rollback');
-                })
-            ).rejects.toThrow('rollback');
-
-            await session.start(async (uow) => {
-                const loadedDraft = await uow
-                    .collection(DraftInvoice)
-                    .get(draft.id);
-                const loadedInvoice = await uow
-                    .collection(Invoice)
-                    .get(invoice.id);
-
-                expect(loadedDraft).toBeNull();
-                expect(loadedInvoice).toBeNull();
-            });
+            }
         });
     });
 });

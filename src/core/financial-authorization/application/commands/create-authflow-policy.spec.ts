@@ -50,13 +50,14 @@ describe('createAuthflowPolicyCommand', () => {
             templates: [template('0', '10000')],
         });
 
-        await session.start(async (uow) => {
+        {
+            await using uow = await session.begin();
             const found = await uow
                 .collection(AuthflowPolicy)
                 .findBy('action', 'approve-invoice');
             expect(found).not.toBeUndefined();
             expect(found!.id.toPlain()).toBe(policy.id);
-        });
+        }
     });
 
     it('should publish an AuthflowPolicyCreatedEvent', async () => {
@@ -109,12 +110,13 @@ describe('createAuthflowPolicyCommand', () => {
             })
             .catch(() => {});
 
-        await session.start(async (uow) => {
+        {
+            await using uow = await session.begin();
             const found = await uow
                 .collection(AuthflowPolicy)
                 .findBy('action', 'approve-invoice');
             expect(found).toBeUndefined();
-        });
+        }
     });
 
     it('should not publish events when validation fails', async () => {

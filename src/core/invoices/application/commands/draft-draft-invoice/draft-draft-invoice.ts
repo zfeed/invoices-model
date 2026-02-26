@@ -12,22 +12,20 @@ export class DraftDraftInvoice {
     ) {}
 
     public async execute(id: string) {
-        const draftInvoice = await this.session.start(async (unitOfWork) => {
-            const draftInvoice = await unitOfWork
-                .collection(DraftInvoice)
-                .get(Id.fromString(id));
+        await using unitOfWork = await this.session.begin();
 
-            if (!draftInvoice) {
-                throw new ApplicationError({
-                    message: 'Draft invoice not found',
-                    code: APPLICATION_ERROR_CODE.ITEM_NOT_FOUND,
-                });
-            }
+        const draftInvoice = await unitOfWork
+            .collection(DraftInvoice)
+            .get(Id.fromString(id));
 
-            draftInvoice.draft().unwrap();
+        if (!draftInvoice) {
+            throw new ApplicationError({
+                message: 'Draft invoice not found',
+                code: APPLICATION_ERROR_CODE.ITEM_NOT_FOUND,
+            });
+        }
 
-            return draftInvoice;
-        });
+        draftInvoice.draft().unwrap();
 
         await this.domainEvents.publishEvents(draftInvoice);
 

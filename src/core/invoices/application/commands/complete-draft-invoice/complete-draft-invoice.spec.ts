@@ -108,14 +108,15 @@ describe('CompleteDraftInvoice', () => {
 
         const result = await completeCommand.execute(created.id);
 
-        await session.start(async (uow) => {
+        {
+            await using uow = await session.begin();
             const loaded = await uow
                 .collection(Invoice)
                 .get(Id.fromString(result.id));
 
             expect(loaded).not.toBeNull();
             expect(loaded!.id.toString()).toBe(result.id);
-        });
+        }
     });
 
     describe('domain events', () => {

@@ -55,9 +55,10 @@ describe('CanApproverApprove', () => {
             ],
         });
 
-        await session.start(async (uow) => {
+        {
+            await using uow = await session.begin();
             await uow.collection(FinancialDocument).add(document);
-        });
+        }
 
         const question = new CanApproverApprove(session);
 
@@ -108,9 +109,10 @@ describe('CanApproverApprove', () => {
             ],
         });
 
-        await session.start(async (uow) => {
+        {
+            await using uow = await session.begin();
             await uow.collection(FinancialDocument).add(document);
-        });
+        }
 
         const question = new CanApproverApprove(session);
 
@@ -167,9 +169,10 @@ describe('CanApproverApprove', () => {
             ],
         });
 
-        await session.start(async (uow) => {
+        {
+            await using uow = await session.begin();
             await uow.collection(FinancialDocument).add(document);
-        });
+        }
 
         const question = new CanApproverApprove(session);
 
@@ -220,9 +223,10 @@ describe('CanApproverApprove', () => {
             ],
         });
 
-        await session.start(async (uow) => {
+        {
+            await using uow = await session.begin();
             await uow.collection(FinancialDocument).add(document);
-        });
+        }
 
         const question = new CanApproverApprove(session);
 
@@ -291,9 +295,10 @@ describe('CanApproverApprove', () => {
             ],
         });
 
-        await session.start(async (uow) => {
+        {
+            await using uow = await session.begin();
             await uow.collection(FinancialDocument).add(document);
-        });
+        }
 
         const question = new CanApproverApprove(session);
 

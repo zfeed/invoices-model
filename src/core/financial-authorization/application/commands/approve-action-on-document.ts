@@ -24,26 +24,24 @@ export class ApproveActionOnDocument {
         const action = Action.create(request.action).unwrap();
         const referenceId = ReferenceId.create(request.referenceId).unwrap();
 
-        const document = await this.session.start(async (uow) => {
-            const document = await uow
-                .collection(FinancialDocument)
-                .findBy('referenceId', referenceId.toPlain());
+        await using uow = await this.session.begin();
 
-            if (!document) {
-                throw new DomainError({
-                    message: `Document with reference ${referenceId.toPlain()} not found`,
-                    code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_DOCUMENT_NOT_FOUND,
-                });
-            }
+        const document = await uow
+            .collection(FinancialDocument)
+            .findBy('referenceId', referenceId.toPlain());
 
-            const approval = Approval.create({
-                approverId: request.approver.id,
-                comment: null,
-            }).unwrap();
-            document.apply(action, approval).unwrap();
+        if (!document) {
+            throw new DomainError({
+                message: `Document with reference ${referenceId.toPlain()} not found`,
+                code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_DOCUMENT_NOT_FOUND,
+            });
+        }
 
-            return document;
-        });
+        const approval = Approval.create({
+            approverId: request.approver.id,
+            comment: null,
+        }).unwrap();
+        document.apply(action, approval).unwrap();
 
         await this.domainEvents.publishEvents(document);
 

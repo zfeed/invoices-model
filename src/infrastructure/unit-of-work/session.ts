@@ -18,16 +18,11 @@ export class Session implements SessionInterface {
         this.maxRetries = options.maxRetries;
     }
 
-    async start<T>(
-        callback: (uow: UnitOfWorkInterface) => Promise<T>
-    ): Promise<T> {
+    async begin(): Promise<UnitOfWorkInterface> {
         const uow = new UnitOfWork(this.storage, {
             maxRetries: this.maxRetries,
         });
 
-        await uow.start();
-        const result = await callback(uow);
-        await uow.finish();
-        return result;
+        return uow;
     }
 }

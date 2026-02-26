@@ -38,18 +38,18 @@ export class CanApproverApprove {
         }
         const validReferenceId = referenceIdResult.unwrap();
 
-        return this.session.start(async (uow) => {
-            const document = await uow
-                .collection(FinancialDocument)
-                .findBy('referenceId', validReferenceId.toPlain());
+        await using uow = await this.session.begin();
 
-            if (!document) {
-                return 'UNKNOWN';
-            }
+        const document = await uow
+            .collection(FinancialDocument)
+            .findBy('referenceId', validReferenceId.toPlain());
 
-            return document.canApproverApprove(validAction, validApproverId)
-                ? 'YES'
-                : 'NO';
-        });
+        if (!document) {
+            return 'UNKNOWN';
+        }
+
+        return document.canApproverApprove(validAction, validApproverId)
+            ? 'YES'
+            : 'NO';
     }
 }

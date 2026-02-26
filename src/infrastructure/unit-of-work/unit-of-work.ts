@@ -35,16 +35,12 @@ export class UnitOfWork implements UnitOfWorkInterface {
         return collection as CollectionInterface<T>;
     }
 
-    async start(): Promise<void> {
-        await this.storage.start();
-    }
-
-    async finish(): Promise<void> {
+    async [Symbol.asyncDispose](): Promise<void> {
         const entries = [...this.collections.values()].flatMap((collection) =>
             collection.commitEntries()
         );
 
-        await retry(() => this.storage.finish(entries))
+        await retry(() => this.storage.commit(entries))
             .while(OptimisticConcurrencyError)
             .times(this.maxRetries);
     }

@@ -23,9 +23,10 @@ export class CreateAuthflowPolicy {
             templates: request.templates,
         }).unwrap();
 
-        await this.session.start(async (uow) => {
+        {
+            await using uow = await this.session.begin();
             await uow.collection(AuthflowPolicy).add(policy);
-        });
+        }
 
         await this.domainEvents.publishEvents(policy);
 

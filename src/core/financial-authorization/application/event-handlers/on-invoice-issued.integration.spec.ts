@@ -62,9 +62,8 @@ const seedPolicy = async (session: Session) => {
         action: Action.create('pay').unwrap(),
         templates: [template('0', '999'), template('1000', '9999')],
     }).unwrap();
-    await session.start(async (uow) => {
-        await uow.collection(AuthflowPolicy).add(policy);
-    });
+    await using uow = await session.begin();
+    await uow.collection(AuthflowPolicy).add(policy);
 };
 
 describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
@@ -90,11 +89,13 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
             const draft = await createCommand.execute(COMPLETE_DRAFT_REQUEST);
             const invoice = await completeCommand.execute(draft.id);
 
-            const doc = await session.start(async (uow) => {
-                return uow
+            let doc: FinancialDocument | undefined;
+            {
+                await using uow = await session.begin();
+                doc = await uow
                     .collection(FinancialDocument)
                     .findBy('referenceId', invoice.id);
-            });
+            }
 
             expect(doc).toBeDefined();
             expect(doc!.referenceId.toPlain()).toBe(invoice.id);
@@ -105,11 +106,13 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
             const draft = await createCommand.execute(COMPLETE_DRAFT_REQUEST);
             await completeCommand.execute(draft.id);
 
-            const doc = await session.start(async (uow) => {
-                return uow
+            let doc: FinancialDocument | undefined;
+            {
+                await using uow = await session.begin();
+                doc = await uow
                     .collection(FinancialDocument)
                     .findBy('referenceId', draft.id);
-            });
+            }
 
             expect(doc).toBeUndefined();
         });
@@ -117,11 +120,13 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
         it('should not create a financial document when draft creation does not trigger InvoiceIssuedEvent', async () => {
             await createCommand.execute(COMPLETE_DRAFT_REQUEST);
 
-            const doc = await session.start(async (uow) => {
-                return uow
+            let doc: FinancialDocument | undefined;
+            {
+                await using uow = await session.begin();
+                doc = await uow
                     .collection(FinancialDocument)
                     .findBy('referenceId', 'any-ref');
-            });
+            }
 
             expect(doc).toBeUndefined();
         });
@@ -129,11 +134,13 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
         it('should not create a financial document before the draft is completed', async () => {
             const draft = await createCommand.execute(COMPLETE_DRAFT_REQUEST);
 
-            const doc = await session.start(async (uow) => {
-                return uow
+            let doc: FinancialDocument | undefined;
+            {
+                await using uow = await session.begin();
+                doc = await uow
                     .collection(FinancialDocument)
                     .findBy('referenceId', draft.id);
-            });
+            }
 
             expect(doc).toBeUndefined();
         });
@@ -150,11 +157,13 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
             const draft = await createCommand.execute(COMPLETE_DRAFT_REQUEST);
             const invoice = await completeCommand.execute(draft.id);
 
-            const doc = await session.start(async (uow) => {
-                return uow
+            let doc: FinancialDocument | undefined;
+            {
+                await using uow = await session.begin();
+                doc = await uow
                     .collection(FinancialDocument)
                     .findBy('referenceId', invoice.id);
-            });
+            }
 
             expect(doc).toBeDefined();
             expect(doc!.referenceId.toPlain()).toBe(invoice.id);
@@ -166,11 +175,13 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
             const draft = await createCommand.execute(COMPLETE_DRAFT_REQUEST);
             const invoice = await completeCommand.execute(draft.id);
 
-            const doc = await session.start(async (uow) => {
-                return uow
+            let doc: FinancialDocument | undefined;
+            {
+                await using uow = await session.begin();
+                doc = await uow
                     .collection(FinancialDocument)
                     .findBy('referenceId', invoice.id);
-            });
+            }
 
             // invoice total is 220 (200 + 10% VAT), falls in 0-999
             expect(doc!.authflows[0].range.from.amount).toBe('0');
@@ -181,11 +192,13 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
             const draft = await createCommand.execute(COMPLETE_DRAFT_REQUEST);
             const invoice = await completeCommand.execute(draft.id);
 
-            const doc = await session.start(async (uow) => {
-                return uow
+            let doc: FinancialDocument | undefined;
+            {
+                await using uow = await session.begin();
+                doc = await uow
                     .collection(FinancialDocument)
                     .findBy('referenceId', invoice.id);
-            });
+            }
 
             expect(doc!.referenceId.toPlain()).toBe(invoice.id);
         });
@@ -197,16 +210,20 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
             const invoice1 = await completeCommand.execute(draft1.id);
             const invoice2 = await completeCommand.execute(draft2.id);
 
-            const doc1 = await session.start(async (uow) => {
-                return uow
+            let doc1: FinancialDocument | undefined;
+            {
+                await using uow = await session.begin();
+                doc1 = await uow
                     .collection(FinancialDocument)
                     .findBy('referenceId', invoice1.id);
-            });
-            const doc2 = await session.start(async (uow) => {
-                return uow
+            }
+            let doc2: FinancialDocument | undefined;
+            {
+                await using uow = await session.begin();
+                doc2 = await uow
                     .collection(FinancialDocument)
                     .findBy('referenceId', invoice2.id);
-            });
+            }
 
             expect(doc1).toBeDefined();
             expect(doc2).toBeDefined();

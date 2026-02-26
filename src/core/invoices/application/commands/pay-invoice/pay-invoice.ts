@@ -27,22 +27,20 @@ export class PayInvoice {
             });
         }
 
-        const invoice = await this.session.start(async (unitOfWork) => {
-            const invoice = await unitOfWork
-                .collection(Invoice)
-                .get(Id.fromString(request.id));
+        await using unitOfWork = await this.session.begin();
 
-            if (!invoice) {
-                throw new ApplicationError({
-                    message: 'Invoice not found',
-                    code: APPLICATION_ERROR_CODE.ITEM_NOT_FOUND,
-                });
-            }
+        const invoice = await unitOfWork
+            .collection(Invoice)
+            .get(Id.fromString(request.id));
 
-            invoice.pay().unwrap();
+        if (!invoice) {
+            throw new ApplicationError({
+                message: 'Invoice not found',
+                code: APPLICATION_ERROR_CODE.ITEM_NOT_FOUND,
+            });
+        }
 
-            return invoice;
-        });
+        invoice.pay().unwrap();
 
         await this.domainEvents.publishEvents(invoice);
 
