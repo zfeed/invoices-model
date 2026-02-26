@@ -18,11 +18,6 @@ export async function up(db: Kysely<any>): Promise<void> {
         .execute();
 
     await db.schema
-        .createType('billing_type')
-        .asEnum(['PAYPAL', 'WIRE'])
-        .execute();
-
-    await db.schema
         .createTable('draft_invoices')
         .addColumn('id', 'uuid', (col) => col.primaryKey())
         .addColumn('status', sql`draft_invoice_status`, (col) => col.notNull())
@@ -44,50 +39,7 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn('recipient_tax_id', 'varchar(20)')
         .addColumn('recipient_email', 'varchar(320)')
         .addColumn('recipient_tax_residence_country', sql`char(2)`)
-        .addColumn('billing_type', sql`billing_type`)
-        .addColumn('billing_data', 'jsonb')
-        .addColumn('created_at', sql`timestamptz`, (col) =>
-            col.notNull().defaultTo(sql`now()`)
-        )
-        .addColumn('updated_at', sql`timestamptz`, (col) =>
-            col.notNull().defaultTo(sql`now()`)
-        )
+        .addColumn('created_at', sql`timestamptz`, (col) => col.notNull())
+        .addColumn('updated_at', sql`timestamptz`, (col) => col.notNull())
         .execute();
-
-    await db.schema
-        .createTable('draft_invoice_line_items')
-        .addColumn('id', 'uuid', (col) =>
-            col.primaryKey().defaultTo(sql`gen_random_uuid()`)
-        )
-        .addColumn('draft_invoice_id', 'uuid', (col) =>
-            col.references('draft_invoices.id').onDelete('cascade').notNull()
-        )
-        .addColumn('description', 'varchar', (col) => col.notNull())
-        .addColumn('price_amount', 'varchar', (col) => col.notNull())
-        .addColumn('price_currency', 'varchar', (col) => col.notNull())
-        .addColumn('quantity', 'varchar', (col) => col.notNull())
-        .addColumn('total_amount', 'varchar', (col) => col.notNull())
-        .addColumn('total_currency', 'varchar', (col) => col.notNull())
-        .addColumn('created_at', sql`timestamptz`, (col) =>
-            col.notNull().defaultTo(sql`now()`)
-        )
-        .addColumn('updated_at', sql`timestamptz`, (col) =>
-            col.notNull().defaultTo(sql`now()`)
-        )
-        .execute();
-
-    await db.schema
-        .createIndex('idx_draft_invoice_line_items_invoice_id')
-        .on('draft_invoice_line_items')
-        .column('draft_invoice_id')
-        .execute();
-}
-
-export async function down(db: Kysely<any>): Promise<void> {
-    await db.schema.dropTable('draft_invoice_line_items').execute();
-    await db.schema.dropTable('draft_invoices').execute();
-    await db.schema.dropType('billing_type').execute();
-    await db.schema.dropType('recipient_type').execute();
-    await db.schema.dropType('issuer_type').execute();
-    await db.schema.dropType('draft_invoice_status').execute();
 }
