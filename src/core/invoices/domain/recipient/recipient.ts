@@ -1,5 +1,4 @@
 import {
-    assertNever,
     DomainError,
     Equatable,
     Mappable,
@@ -9,7 +8,6 @@ import { checkRecipientNonEmpty } from './checks/check-recipient-non-empty';
 import { Country } from '../country/country';
 import { Email } from '../email/email';
 import { Paypal } from '../billing/paypal/paypal';
-import { Wire } from '../billing/wire/wire';
 
 export enum RECIPIENT_TYPE {
     INDIVIDUAL = 'INDIVIDUAL',
@@ -25,7 +23,7 @@ export class Recipient
     #taxId: string;
     #email: Email;
     #taxResidenceCountry: Country;
-    #billing: Paypal | Wire;
+    #billing: Paypal;
 
     protected constructor(
         type: RECIPIENT_TYPE,
@@ -34,7 +32,7 @@ export class Recipient
         taxId: string,
         email: Email,
         taxResidenceCountry: Country,
-        billing: Paypal | Wire
+        billing: Paypal
     ) {
         this.#type = type;
         this.#name = name;
@@ -69,7 +67,7 @@ export class Recipient
         return this.#taxResidenceCountry;
     }
 
-    get billing(): Paypal | Wire {
+    get billing(): Paypal {
         return this.#billing;
     }
 
@@ -99,16 +97,6 @@ export class Recipient
     }
 
     static fromPlain(plain: ReturnType<Recipient['toPlain']>) {
-        let billing: Paypal | Wire;
-
-        if (plain.billing.type === 'PAYPAL') {
-            billing = Paypal.fromPlain(plain.billing);
-        } else if (plain.billing.type === 'WIRE') {
-            billing = Wire.fromPlain(plain.billing);
-        } else {
-            return assertNever(plain.billing);
-        }
-
         return new this(
             plain.type,
             plain.name,
@@ -116,7 +104,7 @@ export class Recipient
             plain.taxId,
             Email.fromPlain(plain.email),
             Country.fromPlain(plain.taxResidenceCountry),
-            billing
+            Paypal.fromPlain(plain.billing)
         );
     }
 
@@ -135,7 +123,7 @@ export class Recipient
         taxId: string;
         email: string;
         taxResidenceCountry: string;
-        billing: Paypal | Wire;
+        billing: Paypal;
     }): Result<DomainError, Recipient> {
         const fieldError =
             checkRecipientNonEmpty('name', name) ??

@@ -237,37 +237,6 @@ describe('POST /invoices/drafts', () => {
         await expectValidationError(res, ['recipient', 'billing', 'email']);
     });
 
-    it('returns 400 when wire billing fields exceed max length', async () => {
-        const res = await postJson('/invoices/drafts', {
-            recipient: {
-                type: 'INDIVIDUAL',
-                name: 'Jane',
-                address: '123 St',
-                taxId: 'TAX1',
-                email: 'jane@example.com',
-                taxResidenceCountry: 'US',
-                billing: {
-                    type: 'WIRE',
-                    swift: tooLong(11),
-                    accountNumber: tooLong(34),
-                    accountHolderName: tooLong(255),
-                    bankName: tooLong(255),
-                    bankAddress: tooLong(500),
-                    bankCountry: tooLong(2),
-                },
-            },
-        });
-        await expectValidationError(
-            res,
-            ['recipient', 'billing', 'swift'],
-            ['recipient', 'billing', 'accountNumber'],
-            ['recipient', 'billing', 'accountHolderName'],
-            ['recipient', 'billing', 'bankName'],
-            ['recipient', 'billing', 'bankAddress'],
-            ['recipient', 'billing', 'bankCountry']
-        );
-    });
-
     it('returns 422 for domain error', async () => {
         const res = await postJson('/invoices/drafts', {
             lineItems: [

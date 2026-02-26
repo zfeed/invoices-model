@@ -4,7 +4,6 @@ import { Id } from '../../../domain/id/id';
 import { Issuer, ISSUER_TYPE } from '../../../domain/issuer/issuer';
 import { LineItem } from '../../../domain/line-item/line-item';
 import { Paypal } from '../../../domain/billing/paypal/paypal';
-import { Wire } from '../../../domain/billing/wire/wire';
 import { Recipient, RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
 import { VatRate } from '../../../domain/vat-rate/vat-rate';
 
@@ -32,20 +31,10 @@ export class CalculateDraftInvoice {
             taxId: string;
             email: string;
             taxResidenceCountry: string;
-            billing:
-                | {
-                      type: 'PAYPAL';
-                      email: string;
-                  }
-                | {
-                      type: 'WIRE';
-                      swift: string;
-                      accountNumber: string;
-                      accountHolderName: string;
-                      bankName: string;
-                      bankAddress: string;
-                      bankCountry: string;
-                  };
+            billing: {
+                type: 'PAYPAL';
+                email: string;
+            };
         };
     }) {
         const draftInvoice = DraftInvoice.create(Id.create().unwrap()).unwrap();
@@ -79,10 +68,7 @@ export class CalculateDraftInvoice {
         }
 
         if (request.recipient) {
-            const billing =
-                request.recipient.billing.type === 'PAYPAL'
-                    ? Paypal.create(request.recipient.billing).unwrap()
-                    : Wire.create(request.recipient.billing).unwrap();
+            const billing = Paypal.create(request.recipient.billing).unwrap();
 
             const recipient = Recipient.create({
                 type: request.recipient.type,

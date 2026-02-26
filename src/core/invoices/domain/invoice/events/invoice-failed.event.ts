@@ -46,22 +46,10 @@ type Data = {
         taxId: string;
         email: string;
         taxResidenceCountry: string;
-        billing:
-            | {
-                  type: 'PAYPAL';
-                  data: { email: string };
-              }
-            | {
-                  type: 'WIRE';
-                  data: {
-                      swift: string;
-                      accountNumber: string;
-                      accountHolderName: string;
-                      bankName: string;
-                      bankAddress: string;
-                      bankCountry: string;
-                  };
-              };
+        billing: {
+            type: 'PAYPAL';
+            data: { email: string };
+        };
     };
 };
 

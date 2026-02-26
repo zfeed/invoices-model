@@ -170,36 +170,6 @@ describe('CreateDraftInvoice', () => {
         );
     });
 
-    it('should create a draft invoice with recipient using wire billing', async () => {
-        const result = await command.execute({
-            recipient: {
-                type: RECIPIENT_TYPE.COMPANY,
-                name: 'Corp Ltd.',
-                address: '789 Elm St',
-                taxId: 'TAX789',
-                email: 'corp@example.com',
-                taxResidenceCountry: 'DE',
-                billing: {
-                    type: 'WIRE',
-                    swift: 'DEUTDEFF',
-                    accountNumber: 'DE89370400440532013000',
-                    accountHolderName: 'Corp Ltd.',
-                    bankName: 'Deutsche Bank',
-                    bankAddress: 'Frankfurt',
-                    bankCountry: 'DE',
-                },
-            },
-        });
-
-        expect(result.recipient).toEqual(
-            expect.objectContaining({
-                type: 'COMPANY',
-                name: 'Corp Ltd.',
-                email: 'corp@example.com',
-            })
-        );
-    });
-
     it('should create a fully populated draft invoice', async () => {
         const result = await command.execute({
             lineItems: [

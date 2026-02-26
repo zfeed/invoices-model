@@ -140,36 +140,6 @@ describe('CalculateDraftInvoice', () => {
         );
     });
 
-    it('should include recipient with wire billing in the result', () => {
-        const result = command.execute({
-            recipient: {
-                type: RECIPIENT_TYPE.COMPANY,
-                name: 'Corp Ltd.',
-                address: '789 Elm St',
-                taxId: 'TAX789',
-                email: 'corp@example.com',
-                taxResidenceCountry: 'DE',
-                billing: {
-                    type: 'WIRE',
-                    swift: 'DEUTDEFF',
-                    accountNumber: 'DE89370400440532013000',
-                    accountHolderName: 'Corp Ltd.',
-                    bankName: 'Deutsche Bank',
-                    bankAddress: 'Frankfurt',
-                    bankCountry: 'DE',
-                },
-            },
-        });
-
-        expect(result.recipient).toEqual(
-            expect.objectContaining({
-                type: 'COMPANY',
-                name: 'Corp Ltd.',
-                email: 'corp@example.com',
-            })
-        );
-    });
-
     it('should calculate a fully populated draft', () => {
         const result = command.execute({
             lineItems: [

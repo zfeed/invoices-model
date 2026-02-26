@@ -35,21 +35,10 @@ export const draftInvoiceSchema = z.object({
             taxId: z.string().max(50),
             email: z.string().max(320),
             taxResidenceCountry: z.string().max(2),
-            billing: z.discriminatedUnion('type', [
-                z.object({
-                    type: z.literal('PAYPAL'),
-                    email: z.string().max(320),
-                }),
-                z.object({
-                    type: z.literal('WIRE'),
-                    swift: z.string().max(11),
-                    accountNumber: z.string().max(34),
-                    accountHolderName: z.string().max(255),
-                    bankName: z.string().max(255),
-                    bankAddress: z.string().max(500),
-                    bankCountry: z.string().max(2),
-                }),
-            ]),
+            billing: z.object({
+                type: z.literal('PAYPAL'),
+                email: z.string().max(320),
+            }),
         })
         .optional(),
 });

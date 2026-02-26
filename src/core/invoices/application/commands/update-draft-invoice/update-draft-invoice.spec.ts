@@ -164,38 +164,6 @@ describe('UpdateDraftInvoice', () => {
         );
     });
 
-    it('should update recipient with wire billing', async () => {
-        const created = await createCommand.execute({});
-
-        const result = await updateCommand.execute(created.id, {
-            recipient: {
-                type: RECIPIENT_TYPE.COMPANY,
-                name: 'Wire Corp',
-                address: '789 Wire St',
-                taxId: 'TAXWIRE',
-                email: 'wire@corp.com',
-                taxResidenceCountry: 'DE',
-                billing: {
-                    type: 'WIRE',
-                    swift: 'DEUTDEFF',
-                    accountNumber: 'DE89370400440532013000',
-                    accountHolderName: 'Wire Corp',
-                    bankName: 'Deutsche Bank',
-                    bankAddress: 'Frankfurt',
-                    bankCountry: 'DE',
-                },
-            },
-        });
-
-        expect(result.recipient).toEqual(
-            expect.objectContaining({
-                type: 'COMPANY',
-                name: 'Wire Corp',
-                email: 'wire@corp.com',
-            })
-        );
-    });
-
     it('should update multiple fields at once', async () => {
         const created = await createCommand.execute({});
 
