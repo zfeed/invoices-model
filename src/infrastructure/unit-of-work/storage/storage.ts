@@ -1,5 +1,5 @@
 import { Store } from '../../store/store';
-import { EntityClass } from '../../registry';
+import { EntityClass, mappers } from '../../registry';
 
 export type StorageRecord = {
     value: any;
@@ -18,8 +18,8 @@ export type CommitEntry = {
 export class Storage {
     private readonly stores = new Map<EntityClass, Store<any>>();
 
-    constructor(entityClasses: Iterable<EntityClass>) {
-        for (const entityClass of entityClasses) {
+    constructor() {
+        for (const entityClass of mappers.keys()) {
             this.stores.set(entityClass, new Store());
         }
     }

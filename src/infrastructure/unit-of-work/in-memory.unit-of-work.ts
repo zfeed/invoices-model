@@ -14,7 +14,7 @@ import { InMemoryCollection } from './collection/in-memory.collection';
 import { Storage } from './storage/storage';
 
 export class InMemoryUnitOfWorkFactory implements UnitOfWorkFactory {
-    private readonly storage = new Storage(mappers.keys());
+    private readonly storage = new Storage();
 
     async start<T>(callback: (uow: UnitOfWork) => Promise<T>): Promise<T> {
         const uow = new InMemoryUnitOfWork(this.storage, mappers);
