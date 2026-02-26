@@ -13,7 +13,7 @@ describe('ArchiveDraftInvoice', () => {
     let archiveCommand: ArchiveDraftInvoice;
 
     beforeEach(() => {
-        session = new Session({ storage: new Storage() });
+        session = new Session({ storage: new Storage(), maxRetries: 5 });
         domainEvents = new InMemoryDomainEvents();
         createCommand = new CreateDraftInvoice(session, domainEvents);
         archiveCommand = new ArchiveDraftInvoice(session, domainEvents);

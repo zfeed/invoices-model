@@ -12,7 +12,7 @@ import { errorHandler } from './error-handler';
 
 export const createApp = async () => {
     const commands = await bootstrap({
-        session: new Session({ storage: new Storage() }),
+        session: new Session({ storage: new Storage(), maxRetries: 5 }),
         domainEvents: new InMemoryDomainEvents(),
     });
 

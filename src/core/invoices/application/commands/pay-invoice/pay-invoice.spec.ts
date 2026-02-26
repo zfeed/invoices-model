@@ -92,7 +92,7 @@ describe('PayInvoice', () => {
     let payCommand: PayInvoice;
 
     beforeEach(() => {
-        session = new Session({ storage: new Storage() });
+        session = new Session({ storage: new Storage(), maxRetries: 5 });
         domainEvents = new InMemoryDomainEvents();
         const canApproverApprove = new CanApproverApprove(session);
         createCommand = new CreateDraftInvoice(session, domainEvents);

@@ -15,7 +15,7 @@ describe('CreateDraftInvoice', () => {
     let command: CreateDraftInvoice;
 
     beforeEach(() => {
-        session = new Session({ storage: new Storage() });
+        session = new Session({ storage: new Storage(), maxRetries: 5 });
         domainEvents = new InMemoryDomainEvents();
         command = new CreateDraftInvoice(session, domainEvents);
     });

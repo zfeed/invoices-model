@@ -11,15 +11,19 @@ import { Storage } from './storage/storage';
 
 export class Session implements SessionInterface {
     private readonly storage: Storage;
+    private readonly maxRetries: number;
 
-    constructor(options: { storage: Storage }) {
+    constructor(options: { storage: Storage; maxRetries: number }) {
         this.storage = options.storage;
+        this.maxRetries = options.maxRetries;
     }
 
     async start<T>(
         callback: (uow: UnitOfWorkInterface) => Promise<T>
     ): Promise<T> {
-        const uow = new UnitOfWork(this.storage);
+        const uow = new UnitOfWork(this.storage, {
+            maxRetries: this.maxRetries,
+        });
 
         await uow.start();
         const result = await callback(uow);

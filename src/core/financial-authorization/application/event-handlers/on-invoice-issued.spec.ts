@@ -87,7 +87,7 @@ const publishEvent = async (
 
 describe('onInvoiceIssued', () => {
     it('should create a new financial document when invoice is created', async () => {
-        const session = new Session({ storage: new Storage() });
+        const session = new Session({ storage: new Storage(), maxRetries: 5 });
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(session);
@@ -106,7 +106,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should create a document with an authflow selected from the policy', async () => {
-        const session = new Session({ storage: new Storage() });
+        const session = new Session({ storage: new Storage(), maxRetries: 5 });
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(session);
@@ -127,7 +127,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should select the correct authflow range for the invoice amount', async () => {
-        const session = new Session({ storage: new Storage() });
+        const session = new Session({ storage: new Storage(), maxRetries: 5 });
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(session);
@@ -147,7 +147,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should create a document with empty authflows when no policy exists', async () => {
-        const session = new Session({ storage: new Storage() });
+        const session = new Session({ storage: new Storage(), maxRetries: 5 });
         const domainEvents = new InMemoryDomainEvents();
 
         const handler = new OnInvoiceIssued(session, domainEvents);
@@ -164,7 +164,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should create a document with empty authflows when amount is outside policy ranges', async () => {
-        const session = new Session({ storage: new Storage() });
+        const session = new Session({ storage: new Storage(), maxRetries: 5 });
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(session);
@@ -185,7 +185,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should create documents with different referenceIds for different invoices', async () => {
-        const session = new Session({ storage: new Storage() });
+        const session = new Session({ storage: new Storage(), maxRetries: 5 });
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(session);
@@ -215,7 +215,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should not create a duplicate document when invoice with same id is created twice', async () => {
-        const session = new Session({ storage: new Storage() });
+        const session = new Session({ storage: new Storage(), maxRetries: 5 });
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(session);
@@ -243,7 +243,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should not create a document when no event is published', async () => {
-        const session = new Session({ storage: new Storage() });
+        const session = new Session({ storage: new Storage(), maxRetries: 5 });
         const domainEvents = new InMemoryDomainEvents();
 
         const handler = new OnInvoiceIssued(session, domainEvents);
@@ -259,7 +259,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should use event data id as the document referenceId', async () => {
-        const session = new Session({ storage: new Storage() });
+        const session = new Session({ storage: new Storage(), maxRetries: 5 });
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(session);
@@ -281,7 +281,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should generate a unique document id for each new document', async () => {
-        const session = new Session({ storage: new Storage() });
+        const session = new Session({ storage: new Storage(), maxRetries: 5 });
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(session);
@@ -307,7 +307,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should not overwrite a pre-existing document in storage', async () => {
-        const session = new Session({ storage: new Storage() });
+        const session = new Session({ storage: new Storage(), maxRetries: 5 });
         const domainEvents = new InMemoryDomainEvents();
 
         const existing = FinancialDocument.create({
@@ -334,7 +334,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should handle many events for different invoices', async () => {
-        const session = new Session({ storage: new Storage() });
+        const session = new Session({ storage: new Storage(), maxRetries: 5 });
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(session);
@@ -357,7 +357,7 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should only react to events published after subscription', async () => {
-        const session = new Session({ storage: new Storage() });
+        const session = new Session({ storage: new Storage(), maxRetries: 5 });
         const domainEvents = new InMemoryDomainEvents();
 
         await publishEvent(domainEvents, createInvoiceEvent('INV-BEFORE'));
@@ -384,8 +384,8 @@ describe('onInvoiceIssued', () => {
     });
 
     it('should isolate documents across separate session instances', async () => {
-        const session1 = new Session({ storage: new Storage() });
-        const session2 = new Session({ storage: new Storage() });
+        const session1 = new Session({ storage: new Storage(), maxRetries: 5 });
+        const session2 = new Session({ storage: new Storage(), maxRetries: 5 });
         const domainEvents = new InMemoryDomainEvents();
 
         await seedPolicy(session1);

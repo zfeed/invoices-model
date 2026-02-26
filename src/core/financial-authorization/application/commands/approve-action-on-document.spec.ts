@@ -90,7 +90,7 @@ describe('approveActionOnDocumentCommand', () => {
     let command: ApproveActionOnDocument;
 
     beforeEach(async () => {
-        session = new Session({ storage: new Storage() });
+        session = new Session({ storage: new Storage(), maxRetries: 5 });
         domainEvents = new InMemoryDomainEvents();
 
         const createPolicy = new CreateAuthflowPolicy(session, domainEvents);
