@@ -9,7 +9,6 @@ import '../mappers/authflow-policy.mapper';
 import '../mappers/financial-document.mapper';
 import { EntityClass, mappers } from '../registry';
 import { OptimisticConcurrencyError } from '../../core/shared/optimistic-concurrency.error';
-import { IdentityMap } from './identity-map/identity-map';
 import { InMemoryCollection } from './collection/in-memory.collection';
 import { Storage } from './storage/storage';
 
@@ -59,7 +58,6 @@ class InMemoryUnitOfWork implements UnitOfWork {
 
         const collection = new InMemoryCollection<T>(
             entityClass,
-            new IdentityMap(),
             this.storage,
             mapper
         );

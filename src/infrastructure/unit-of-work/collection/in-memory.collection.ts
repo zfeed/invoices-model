@@ -8,9 +8,10 @@ type Mapper = {
 };
 
 export class InMemoryCollection<T extends { id: { toString(): string } }> {
+    private readonly identityMap = new IdentityMap<T>();
+
     constructor(
         private readonly entityClass: EntityClass,
-        private readonly identityMap: IdentityMap<T>,
         private readonly storage: Storage,
         private readonly mapper: Mapper
     ) {}
