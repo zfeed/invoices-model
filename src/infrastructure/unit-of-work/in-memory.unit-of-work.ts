@@ -9,6 +9,7 @@ import '../mappers/authflow-policy.mapper';
 import '../mappers/financial-document.mapper';
 import { EntityClass, mappers } from '../registry';
 import { OptimisticConcurrencyError } from '../../core/shared/optimistic-concurrency.error';
+import { retry } from '../../building-blocks/retry/retry';
 import { InMemoryCollection } from './collection/in-memory.collection';
 import { Storage } from './storage/storage';
 
@@ -72,28 +73,12 @@ class InMemoryUnitOfWork implements UnitOfWork {
     }
 
     async finish(): Promise<void> {
-        for (
-            let attempt = 1;
-            attempt <= InMemoryUnitOfWork.MAX_RETRIES;
-            attempt++
-        ) {
-            try {
-                const entries = [...this.collections.values()].flatMap(
-                    (collection) => collection.commitEntries()
-                );
+        const entries = [...this.collections.values()].flatMap((collection) =>
+            collection.commitEntries()
+        );
 
-                await this.storage.finish(entries);
-                return;
-            } catch (error) {
-                if (
-                    error instanceof OptimisticConcurrencyError &&
-                    attempt < InMemoryUnitOfWork.MAX_RETRIES
-                ) {
-                    continue;
-                }
-
-                throw error;
-            }
-        }
+        await retry(() => this.storage.finish(entries))
+            .while(OptimisticConcurrencyError)
+            .times(InMemoryUnitOfWork.MAX_RETRIES);
     }
 }
