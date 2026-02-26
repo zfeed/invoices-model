@@ -6,7 +6,6 @@ import '../mappers/draft-invoice.mapper';
 import '../mappers/invoice.mapper';
 import '../mappers/authflow-policy.mapper';
 import '../mappers/financial-document.mapper';
-import { mappers } from '../registry';
 import { UnitOfWork } from './unit-of-work';
 import { Storage } from './storage/storage';
 
@@ -16,7 +15,7 @@ export class UnitOfWorkFactory implements UnitOfWorkFactoryInterface {
     async start<T>(
         callback: (uow: UnitOfWorkInterface) => Promise<T>
     ): Promise<T> {
-        const uow = new UnitOfWork(this.storage, mappers);
+        const uow = new UnitOfWork(this.storage);
 
         await uow.start();
         const result = await callback(uow);

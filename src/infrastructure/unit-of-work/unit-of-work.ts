@@ -13,13 +13,7 @@ export class UnitOfWork implements UnitOfWorkInterface {
 
     private readonly collections = new Map<EntityClass, Collection<any>>();
 
-    constructor(
-        private readonly storage: Storage,
-        private readonly mappers: Map<
-            EntityClass,
-            { toDomain: (plain: any) => any; toPlain: (entity: any) => any }
-        >
-    ) {}
+    constructor(private readonly storage: Storage) {}
 
     collection<T extends { id: { toString(): string } }>(
         entityClass: EntityClass
@@ -30,13 +24,7 @@ export class UnitOfWork implements UnitOfWorkInterface {
             return existing as CollectionInterface<T>;
         }
 
-        const mapper = this.mappers.get(entityClass);
-
-        if (!mapper) {
-            throw new Error(`Mapper for ${entityClass.name} not found`);
-        }
-
-        const collection = new Collection<T>(entityClass, this.storage, mapper);
+        const collection = new Collection<T>(entityClass, this.storage);
 
         this.collections.set(entityClass, collection);
 
