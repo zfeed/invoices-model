@@ -46,6 +46,12 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn('recipient_tax_residence_country', sql`char(2)`)
         .addColumn('billing_type', sql`billing_type`)
         .addColumn('billing_data', 'jsonb')
+        .addColumn('created_at', sql`timestamptz`, (col) =>
+            col.notNull().defaultTo(sql`now()`)
+        )
+        .addColumn('updated_at', sql`timestamptz`, (col) =>
+            col.notNull().defaultTo(sql`now()`)
+        )
         .execute();
 
     await db.schema
@@ -62,6 +68,12 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn('quantity', 'varchar', (col) => col.notNull())
         .addColumn('total_amount', 'varchar', (col) => col.notNull())
         .addColumn('total_currency', 'varchar', (col) => col.notNull())
+        .addColumn('created_at', sql`timestamptz`, (col) =>
+            col.notNull().defaultTo(sql`now()`)
+        )
+        .addColumn('updated_at', sql`timestamptz`, (col) =>
+            col.notNull().defaultTo(sql`now()`)
+        )
         .execute();
 
     await db.schema

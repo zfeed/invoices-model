@@ -18,7 +18,7 @@ export class Country implements Equatable<Country>, Mappable<string> {
         if (error) {
             return Result.error(error);
         }
-        return Result.ok(new Country(code));
+        return Result.ok(new Country(code.toUpperCase()));
     }
 
     get code(): string {
