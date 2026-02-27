@@ -55,11 +55,9 @@ export class UnitOfWork implements AsyncDisposable {
     }
 
     async [Symbol.asyncDispose](): Promise<void> {
-        const entries = [...this.collections.values()].flatMap((collection) =>
-            collection.commitEntries()
-        );
-
-        await retry(() => this.persistentManager.commit(entries))
+        await retry(() =>
+            this.persistentManager.commit([...this.collections.entries()])
+        )
             .while(OptimisticConcurrencyError)
             .times(this.maxRetries);
     }

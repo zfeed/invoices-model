@@ -7,9 +7,9 @@ import { Store } from '../store/store';
 import { DomainEvents } from '../../core/shared/domain-events/domain-events.interface';
 import {
     EntityClass,
-    CommitEntry,
     PersistentManager as PersistentManagerInterface,
 } from '../../core/shared/unit-of-work/unit-of-work.interface';
+import { Collection } from '../../core/shared/unit-of-work/collection/collection';
 import { mappers } from './registry';
 
 export class PersistentManager implements PersistentManagerInterface {
@@ -64,7 +64,11 @@ export class PersistentManager implements PersistentManagerInterface {
         return null;
     }
 
-    async commit(entries: CommitEntry[]): Promise<void> {
+    async commit(collections: [EntityClass, Collection<any>][]): Promise<void> {
+        const entries = collections.flatMap(([, collection]) =>
+            collection.commitEntries()
+        );
+
         for (const entry of entries) {
             const store = this.getStoreOrThrow(entry.entityClass);
             const mapper = this.getMapper(entry.entityClass);

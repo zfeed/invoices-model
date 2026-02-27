@@ -1,3 +1,5 @@
+import type { Collection } from './collection/collection';
+
 export type EntityClass = Function;
 
 export type ModificationType = 'created' | 'updated';
@@ -17,5 +19,5 @@ export interface PersistentManager {
         value: string,
         tracked?: Iterable<any>
     ): any | null;
-    commit(entries: CommitEntry[]): Promise<void>;
+    commit(collections: [EntityClass, Collection<any>][]): Promise<void>;
 }
