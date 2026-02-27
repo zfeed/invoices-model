@@ -2,7 +2,7 @@ import { APPLICATION_ERROR_CODE } from '../../../../../building-blocks/errors/ap
 import { ApplicationError } from '../../../../../building-blocks/errors/application/application.error';
 import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
 import { Id } from '../../../domain/id/id';
-import { Session } from '../../../../shared/unit-of-work/unit-of-work.interface';
+import { Session } from '../../../../shared/unit-of-work/unit-of-work';
 
 export class ArchiveDraftInvoice {
     constructor(private readonly session: Session) {}

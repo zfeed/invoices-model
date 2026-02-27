@@ -6,7 +6,7 @@ import { LineItem } from '../../../domain/line-item/line-item';
 import { Paypal } from '../../../domain/billing/paypal/paypal';
 import { Recipient, RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
 import { VatRate } from '../../../domain/vat-rate/vat-rate';
-import { Session } from '../../../../shared/unit-of-work/unit-of-work.interface';
+import { Session } from '../../../../shared/unit-of-work/unit-of-work';
 
 export class CreateDraftInvoice {
     constructor(private readonly session: Session) {}

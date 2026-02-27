@@ -3,7 +3,7 @@ import { ApplicationError } from '../../../../../building-blocks/errors/applicat
 import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
 import { Id } from '../../../domain/id/id';
 import { Invoice } from '../../../domain/invoice/invoice';
-import { Session } from '../../../../shared/unit-of-work/unit-of-work.interface';
+import { Session } from '../../../../shared/unit-of-work/unit-of-work';
 
 export class CompleteDraftInvoice {
     constructor(private readonly session: Session) {}

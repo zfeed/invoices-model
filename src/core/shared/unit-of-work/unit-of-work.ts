@@ -1,15 +1,9 @@
-import {
-    Collection as CollectionInterface,
-    UnitOfWork as UnitOfWorkInterface,
-    Session as SessionInterface,
-    EntityClass,
-    Storage,
-} from './unit-of-work.interface';
+import { EntityClass, Storage } from './unit-of-work.interface';
 import { OptimisticConcurrencyError } from '../optimistic-concurrency.error';
 import { retry } from '../../../building-blocks/retry/retry';
 import { Collection } from './collection/collection';
 
-export class Session implements SessionInterface {
+export class Session {
     private readonly storage: Storage;
     private readonly maxRetries: number;
 
@@ -18,7 +12,7 @@ export class Session implements SessionInterface {
         this.maxRetries = options.maxRetries;
     }
 
-    async begin(): Promise<UnitOfWorkInterface> {
+    async begin(): Promise<UnitOfWork> {
         const uow = new UnitOfWork(this.storage, {
             maxRetries: this.maxRetries,
         });
@@ -27,7 +21,7 @@ export class Session implements SessionInterface {
     }
 }
 
-export class UnitOfWork implements UnitOfWorkInterface {
+export class UnitOfWork implements AsyncDisposable {
     private readonly collections = new Map<EntityClass, Collection<any>>();
     private readonly maxRetries: number;
 
@@ -38,20 +32,23 @@ export class UnitOfWork implements UnitOfWorkInterface {
         this.maxRetries = options.maxRetries;
     }
 
-    collection<T extends { id: { toString(): string } }>(
-        entityClass: EntityClass
-    ): CollectionInterface<T> {
-        const existing = this.collections.get(entityClass);
+    collection<T extends { id: { toString(): string } }>(entityClass: {
+        prototype: T;
+    }): Pick<Collection<T>, 'add' | 'get' | 'findBy'> {
+        const existing = this.collections.get(entityClass as EntityClass);
 
         if (existing) {
-            return existing as CollectionInterface<T>;
+            return existing as Collection<T>;
         }
 
-        const collection = new Collection<T>(entityClass, this.storage);
+        const collection = new Collection<T>(
+            entityClass as EntityClass,
+            this.storage
+        );
 
-        this.collections.set(entityClass, collection);
+        this.collections.set(entityClass as EntityClass, collection);
 
-        return collection as CollectionInterface<T>;
+        return collection;
     }
 
     async [Symbol.asyncDispose](): Promise<void> {

@@ -1,4 +1,4 @@
-import { Session } from '../../../shared/unit-of-work/unit-of-work.interface';
+import { Session } from '../../../shared/unit-of-work/unit-of-work';
 import { Action } from '../../domain/action/action';
 import { AuthflowPolicy } from '../../domain/authflow/authflow-policy';
 import { AuthflowTemplate } from '../../domain/authflow/authflow-template';

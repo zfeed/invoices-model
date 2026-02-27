@@ -167,8 +167,8 @@ describe('UnitOfWork contract (InMemory)', () => {
                 await uow.collection(DraftInvoice).add(draft);
             }
 
-            let firstInstance: DraftInvoice | undefined;
-            let secondInstance: DraftInvoice | undefined;
+            let firstInstance: DraftInvoice | null;
+            let secondInstance: DraftInvoice | null;
 
             {
                 await using uow = await session.begin();

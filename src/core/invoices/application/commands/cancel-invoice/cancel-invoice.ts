@@ -2,7 +2,7 @@ import { APPLICATION_ERROR_CODE } from '../../../../../building-blocks/errors/ap
 import { ApplicationError } from '../../../../../building-blocks/errors/application/application.error';
 import { Id } from '../../../domain/id/id';
 import { Invoice } from '../../../domain/invoice/invoice';
-import { Session } from '../../../../shared/unit-of-work/unit-of-work.interface';
+import { Session } from '../../../../shared/unit-of-work/unit-of-work';
 
 export class CancelInvoice {
     constructor(private readonly session: Session) {}

@@ -1,5 +1,5 @@
 import { DomainEvents } from './shared/domain-events/domain-events.interface';
-import { Session } from './shared/unit-of-work/unit-of-work.interface';
+import { Session } from './shared/unit-of-work/unit-of-work';
 import { CreateDraftInvoice } from './invoices/application/commands/create-draft-invoice/create-draft-invoice';
 import { UpdateDraftInvoice } from './invoices/application/commands/update-draft-invoice/update-draft-invoice';
 import { CalculateDraftInvoice } from './invoices/application/commands/calculate-draft-invoice/calculate-draft-invoice';

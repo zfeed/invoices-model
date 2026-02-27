@@ -1,6 +1,6 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
-import { Session } from '../../../shared/unit-of-work/unit-of-work.interface';
+import { Session } from '../../../shared/unit-of-work/unit-of-work';
 import { Action } from '../../domain/action/action';
 import { Approval } from '../../domain/approval/approval';
 import { Approver } from '../../domain/approver/approver';

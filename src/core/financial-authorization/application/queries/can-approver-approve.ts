@@ -1,4 +1,4 @@
-import { Session } from '../../../shared/unit-of-work/unit-of-work.interface';
+import { Session } from '../../../shared/unit-of-work/unit-of-work';
 import { Action } from '../../domain/action/action';
 import { FinancialDocument } from '../../domain/document/document';
 import { Id } from '../../domain/id/id';
