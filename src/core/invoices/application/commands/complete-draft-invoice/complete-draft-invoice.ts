@@ -26,6 +26,8 @@ export class CompleteDraftInvoice {
 
         await unitOfWork.collection(Invoice).add(invoice);
 
+        await unitOfWork.commit();
+
         return invoice.toPlain();
     }
 }

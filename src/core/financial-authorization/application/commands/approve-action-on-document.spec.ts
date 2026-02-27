@@ -91,10 +91,7 @@ describe('approveActionOnDocumentCommand', () => {
 
     beforeEach(async () => {
         domainEvents = new InMemoryDomainEvents();
-        session = new Session({
-            persistentManager: new PersistentManager(domainEvents),
-            maxRetries: 5,
-        });
+        session = new Session(new PersistentManager(domainEvents));
 
         const createPolicy = new CreateAuthflowPolicy(session);
         await createPolicy.execute({

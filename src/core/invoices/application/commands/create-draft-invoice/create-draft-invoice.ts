@@ -90,6 +90,8 @@ export class CreateDraftInvoice {
 
         await unitOfWork.collection(DraftInvoice).add(draftInvoice);
 
+        await unitOfWork.commit();
+
         return draftInvoice.toPlain();
     }
 }

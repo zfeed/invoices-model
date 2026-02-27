@@ -93,10 +93,7 @@ describe('PayInvoice', () => {
 
     beforeEach(() => {
         domainEvents = new InMemoryDomainEvents();
-        session = new Session({
-            persistentManager: new PersistentManager(domainEvents),
-            maxRetries: 5,
-        });
+        session = new Session(new PersistentManager(domainEvents));
         const canApproverApprove = new CanApproverApprove(session);
         createCommand = new CreateDraftInvoice(session);
         completeCommand = new CompleteDraftInvoice(session);
@@ -124,6 +121,7 @@ describe('PayInvoice', () => {
         {
             await using uow = await session.begin();
             await uow.collection(FinancialDocument).add(document);
+            await uow.commit();
         }
 
         await expect(
@@ -145,6 +143,7 @@ describe('PayInvoice', () => {
         {
             await using uow = await session.begin();
             await uow.collection(FinancialDocument).add(document);
+            await uow.commit();
         }
 
         const result = await payCommand.execute({
@@ -169,6 +168,7 @@ describe('PayInvoice', () => {
         {
             await using uow = await session.begin();
             await uow.collection(FinancialDocument).add(document);
+            await uow.commit();
         }
 
         await payCommand.execute({

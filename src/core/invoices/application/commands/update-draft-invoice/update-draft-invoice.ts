@@ -106,6 +106,8 @@ export class UpdateDraftInvoice {
             draftInvoice.addRecipient(recipient).unwrap();
         }
 
+        await unitOfWork.commit();
+
         return draftInvoice.toPlain();
     }
 }

@@ -18,12 +18,9 @@ import { UnitDescription } from '../../invoices/domain/line-item/unit-descriptio
 describe('UnitOfWork contract (InMemory)', () => {
     describe('Collection.get', () => {
         it('should return null for a non-existing entity', async () => {
-            const session = new Session({
-                persistentManager: new PersistentManager(
-                    new InMemoryDomainEvents()
-                ),
-                maxRetries: 5,
-            });
+            const session = new Session(
+                new PersistentManager(new InMemoryDomainEvents())
+            );
 
             await using uow = await session.begin();
             const collection = uow.collection(DraftInvoice);
@@ -37,12 +34,9 @@ describe('UnitOfWork contract (InMemory)', () => {
 
     describe('Collection.add', () => {
         it('should make entity available via get within the same unit of work', async () => {
-            const session = new Session({
-                persistentManager: new PersistentManager(
-                    new InMemoryDomainEvents()
-                ),
-                maxRetries: 5,
-            });
+            const session = new Session(
+                new PersistentManager(new InMemoryDomainEvents())
+            );
 
             await using uow = await session.begin();
             const collection = uow.collection(DraftInvoice);
@@ -58,17 +52,15 @@ describe('UnitOfWork contract (InMemory)', () => {
 
     describe('commit', () => {
         it('should persist a newly added entity', async () => {
-            const session = new Session({
-                persistentManager: new PersistentManager(
-                    new InMemoryDomainEvents()
-                ),
-                maxRetries: 5,
-            });
+            const session = new Session(
+                new PersistentManager(new InMemoryDomainEvents())
+            );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             {
                 await using uow = await session.begin();
                 await uow.collection(DraftInvoice).add(draft);
+                await uow.commit();
             }
 
             {
@@ -81,17 +73,15 @@ describe('UnitOfWork contract (InMemory)', () => {
         });
 
         it('should persist modifications made to a tracked entity', async () => {
-            const session = new Session({
-                persistentManager: new PersistentManager(
-                    new InMemoryDomainEvents()
-                ),
-                maxRetries: 5,
-            });
+            const session = new Session(
+                new PersistentManager(new InMemoryDomainEvents())
+            );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             {
                 await using uow = await session.begin();
                 await uow.collection(DraftInvoice).add(draft);
+                await uow.commit();
             }
 
             {
@@ -104,6 +94,7 @@ describe('UnitOfWork contract (InMemory)', () => {
                     quantity: '2',
                 }).unwrap();
                 loaded!.addLineItem(lineItem);
+                await uow.commit();
             }
 
             {
@@ -125,17 +116,15 @@ describe('UnitOfWork contract (InMemory)', () => {
 
     describe('identity map', () => {
         it('should return the same reference when getting the same entity twice', async () => {
-            const session = new Session({
-                persistentManager: new PersistentManager(
-                    new InMemoryDomainEvents()
-                ),
-                maxRetries: 5,
-            });
+            const session = new Session(
+                new PersistentManager(new InMemoryDomainEvents())
+            );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             {
                 await using uow = await session.begin();
                 await uow.collection(DraftInvoice).add(draft);
+                await uow.commit();
             }
 
             {
@@ -150,12 +139,9 @@ describe('UnitOfWork contract (InMemory)', () => {
         });
 
         it('should return the added instance without roundtripping through the store', async () => {
-            const session = new Session({
-                persistentManager: new PersistentManager(
-                    new InMemoryDomainEvents()
-                ),
-                maxRetries: 5,
-            });
+            const session = new Session(
+                new PersistentManager(new InMemoryDomainEvents())
+            );
 
             await using uow = await session.begin();
             const collection = uow.collection(DraftInvoice);
@@ -168,17 +154,15 @@ describe('UnitOfWork contract (InMemory)', () => {
         });
 
         it('should return distinct instances across different units of work', async () => {
-            const session = new Session({
-                persistentManager: new PersistentManager(
-                    new InMemoryDomainEvents()
-                ),
-                maxRetries: 5,
-            });
+            const session = new Session(
+                new PersistentManager(new InMemoryDomainEvents())
+            );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             {
                 await using uow = await session.begin();
                 await uow.collection(DraftInvoice).add(draft);
+                await uow.commit();
             }
 
             let firstInstance: DraftInvoice | null;
@@ -206,12 +190,9 @@ describe('UnitOfWork contract (InMemory)', () => {
 
     describe('isolation', () => {
         it('should not expose uncommitted additions to other units of work', async () => {
-            const session = new Session({
-                persistentManager: new PersistentManager(
-                    new InMemoryDomainEvents()
-                ),
-                maxRetries: 5,
-            });
+            const session = new Session(
+                new PersistentManager(new InMemoryDomainEvents())
+            );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             const uow1 = await session.begin();
@@ -224,22 +205,18 @@ describe('UnitOfWork contract (InMemory)', () => {
                     .get(draft.id);
                 expect(result).toBeNull();
             }
-
-            await uow1[Symbol.asyncDispose]();
         });
 
         it('should not expose uncommitted modifications to other units of work', async () => {
-            const session = new Session({
-                persistentManager: new PersistentManager(
-                    new InMemoryDomainEvents()
-                ),
-                maxRetries: 5,
-            });
+            const session = new Session(
+                new PersistentManager(new InMemoryDomainEvents())
+            );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             {
                 await using uow = await session.begin();
                 await uow.collection(DraftInvoice).add(draft);
+                await uow.commit();
             }
 
             let lineItemsInOtherUow: unknown = 'not-checked';
@@ -262,29 +239,21 @@ describe('UnitOfWork contract (InMemory)', () => {
                 lineItemsInOtherUow = result!.lineItems;
             }
 
-            try {
-                await uow1[Symbol.asyncDispose]();
-            } catch {
-                // expected: uow1 may fail with OptimisticConcurrencyError
-            }
-
             expect(lineItemsInOtherUow).toBeNull();
         });
     });
 
     describe('optimistic concurrency', () => {
         it('should throw OptimisticConcurrencyError when two units of work modify the same entity', async () => {
-            const session = new Session({
-                persistentManager: new PersistentManager(
-                    new InMemoryDomainEvents()
-                ),
-                maxRetries: 5,
-            });
+            const session = new Session(
+                new PersistentManager(new InMemoryDomainEvents())
+            );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             {
                 await using uow = await session.begin();
                 await uow.collection(DraftInvoice).add(draft);
+                await uow.commit();
             }
 
             const uow1 = await session.begin();
@@ -310,10 +279,11 @@ describe('UnitOfWork contract (InMemory)', () => {
                         quantity: '1',
                     }).unwrap()
                 );
+                await uow2.commit();
             }
 
-            // uow1 disposes after uow2 already committed — version mismatch
-            await expect(uow1[Symbol.asyncDispose]()).rejects.toThrow(
+            // uow1 commits after uow2 already committed — version mismatch
+            await expect(uow1.commit()).rejects.toThrow(
                 OptimisticConcurrencyError
             );
         });
@@ -321,23 +291,21 @@ describe('UnitOfWork contract (InMemory)', () => {
 
     describe('Collection edge cases', () => {
         it('should throw OptimisticConcurrencyError when adding an entity with an id that already exists in the store', async () => {
-            const session = new Session({
-                persistentManager: new PersistentManager(
-                    new InMemoryDomainEvents()
-                ),
-                maxRetries: 5,
-            });
+            const session = new Session(
+                new PersistentManager(new InMemoryDomainEvents())
+            );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             {
                 await using uow = await session.begin();
                 await uow.collection(DraftInvoice).add(draft);
+                await uow.commit();
             }
 
             {
                 const uow = await session.begin();
                 await uow.collection(DraftInvoice).add(draft);
-                await expect(uow[Symbol.asyncDispose]()).rejects.toThrow(
+                await expect(uow.commit()).rejects.toThrow(
                     OptimisticConcurrencyError
                 );
             }
@@ -346,17 +314,15 @@ describe('UnitOfWork contract (InMemory)', () => {
 
     describe('dirty tracking', () => {
         it('should cause a concurrency conflict when a read-only load overlaps with a write', async () => {
-            const session = new Session({
-                persistentManager: new PersistentManager(
-                    new InMemoryDomainEvents()
-                ),
-                maxRetries: 5,
-            });
+            const session = new Session(
+                new PersistentManager(new InMemoryDomainEvents())
+            );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             {
                 await using uow = await session.begin();
                 await uow.collection(DraftInvoice).add(draft);
+                await uow.commit();
             }
 
             // A read-only UoW that just loads the entity still bumps the
@@ -377,10 +343,11 @@ describe('UnitOfWork contract (InMemory)', () => {
                         quantity: '1',
                     }).unwrap()
                 );
+                await uow2.commit();
             }
 
-            // uow1 disposes — version mismatch because uow2 already committed
-            await expect(uow1[Symbol.asyncDispose]()).rejects.toThrow(
+            // uow1 commits — version mismatch because uow2 already committed
+            await expect(uow1.commit()).rejects.toThrow(
                 OptimisticConcurrencyError
             );
         });
@@ -388,12 +355,9 @@ describe('UnitOfWork contract (InMemory)', () => {
 
     describe('multiple collections', () => {
         it('should persist changes to different entity types independently', async () => {
-            const session = new Session({
-                persistentManager: new PersistentManager(
-                    new InMemoryDomainEvents()
-                ),
-                maxRetries: 5,
-            });
+            const session = new Session(
+                new PersistentManager(new InMemoryDomainEvents())
+            );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
 
             const lineItem = LineItem.create({
@@ -433,6 +397,7 @@ describe('UnitOfWork contract (InMemory)', () => {
                 await using uow = await session.begin();
                 await uow.collection(DraftInvoice).add(draft);
                 await uow.collection(Invoice).add(invoice);
+                await uow.commit();
             }
 
             {

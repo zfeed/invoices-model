@@ -40,6 +40,8 @@ export class PayInvoice {
 
         invoice.pay().unwrap();
 
+        await unitOfWork.commit();
+
         return invoice.toPlain();
     }
 }

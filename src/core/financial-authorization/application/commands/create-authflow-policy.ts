@@ -22,6 +22,7 @@ export class CreateAuthflowPolicy {
         {
             await using uow = await this.session.begin();
             await uow.collection(AuthflowPolicy).add(policy);
+            await uow.commit();
         }
 
         return policy.toPlain();

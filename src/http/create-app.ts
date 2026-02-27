@@ -13,10 +13,7 @@ import { errorHandler } from './error-handler';
 export const createApp = async () => {
     const domainEvents = new InMemoryDomainEvents();
     const commands = await bootstrap({
-        session: new Session({
-            persistentManager: new PersistentManager(domainEvents),
-            maxRetries: 5,
-        }),
+        session: new Session(new PersistentManager(domainEvents)),
         domainEvents,
     });
 

@@ -23,6 +23,8 @@ export class ProcessInvoice {
 
         invoice.process().unwrap();
 
+        await unitOfWork.commit();
+
         return invoice.toPlain();
     }
 }

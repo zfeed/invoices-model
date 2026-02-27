@@ -24,10 +24,7 @@ const template = (from: string, to: string) =>
 describe('createAuthflowPolicyCommand', () => {
     it('should create and save a policy', async () => {
         const domainEvents = new InMemoryDomainEvents();
-        const session = new Session({
-            persistentManager: new PersistentManager(domainEvents),
-            maxRetries: 5,
-        });
+        const session = new Session(new PersistentManager(domainEvents));
         const command = new CreateAuthflowPolicy(session);
 
         const policy = await command.execute({
@@ -45,10 +42,7 @@ describe('createAuthflowPolicyCommand', () => {
 
     it('should persist the policy in storage', async () => {
         const domainEvents = new InMemoryDomainEvents();
-        const session = new Session({
-            persistentManager: new PersistentManager(domainEvents),
-            maxRetries: 5,
-        });
+        const session = new Session(new PersistentManager(domainEvents));
         const command = new CreateAuthflowPolicy(session);
 
         const policy = await command.execute({
@@ -68,10 +62,7 @@ describe('createAuthflowPolicyCommand', () => {
 
     it('should publish an AuthflowPolicyCreatedEvent', async () => {
         const domainEvents = new InMemoryDomainEvents();
-        const session = new Session({
-            persistentManager: new PersistentManager(domainEvents),
-            maxRetries: 5,
-        });
+        const session = new Session(new PersistentManager(domainEvents));
         const command = new CreateAuthflowPolicy(session);
 
         const published: AuthflowPolicyCreatedEvent[] = [];
@@ -94,10 +85,7 @@ describe('createAuthflowPolicyCommand', () => {
 
     it('should throw when ranges overlap', async () => {
         const domainEvents = new InMemoryDomainEvents();
-        const session = new Session({
-            persistentManager: new PersistentManager(domainEvents),
-            maxRetries: 5,
-        });
+        const session = new Session(new PersistentManager(domainEvents));
         const command = new CreateAuthflowPolicy(session);
 
         await expect(
@@ -112,10 +100,7 @@ describe('createAuthflowPolicyCommand', () => {
 
     it('should not persist the policy when validation fails', async () => {
         const domainEvents = new InMemoryDomainEvents();
-        const session = new Session({
-            persistentManager: new PersistentManager(domainEvents),
-            maxRetries: 5,
-        });
+        const session = new Session(new PersistentManager(domainEvents));
         const command = new CreateAuthflowPolicy(session);
 
         await command
@@ -136,10 +121,7 @@ describe('createAuthflowPolicyCommand', () => {
 
     it('should not publish events when validation fails', async () => {
         const domainEvents = new InMemoryDomainEvents();
-        const session = new Session({
-            persistentManager: new PersistentManager(domainEvents),
-            maxRetries: 5,
-        });
+        const session = new Session(new PersistentManager(domainEvents));
         const command = new CreateAuthflowPolicy(session);
 
         const published: AuthflowPolicyCreatedEvent[] = [];

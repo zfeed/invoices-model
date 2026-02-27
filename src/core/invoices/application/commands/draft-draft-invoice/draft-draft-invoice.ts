@@ -23,6 +23,8 @@ export class DraftDraftInvoice {
 
         draftInvoice.draft().unwrap();
 
+        await unitOfWork.commit();
+
         return draftInvoice.toPlain();
     }
 }

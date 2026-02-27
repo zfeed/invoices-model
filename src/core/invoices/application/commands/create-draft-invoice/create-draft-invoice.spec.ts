@@ -16,10 +16,7 @@ describe('CreateDraftInvoice', () => {
 
     beforeEach(() => {
         domainEvents = new InMemoryDomainEvents();
-        session = new Session({
-            persistentManager: new PersistentManager(domainEvents),
-            maxRetries: 5,
-        });
+        session = new Session(new PersistentManager(domainEvents));
         command = new CreateDraftInvoice(session);
     });
 

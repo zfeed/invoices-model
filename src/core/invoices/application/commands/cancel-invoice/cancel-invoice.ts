@@ -23,6 +23,8 @@ export class CancelInvoice {
 
         invoice.cancel().unwrap();
 
+        await unitOfWork.commit();
+
         return invoice.toPlain();
     }
 }

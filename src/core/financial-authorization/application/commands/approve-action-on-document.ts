@@ -39,6 +39,8 @@ export class ApproveActionOnDocument {
         }).unwrap();
         document.apply(action, approval).unwrap();
 
+        await uow.commit();
+
         return document.toPlain();
     }
 }

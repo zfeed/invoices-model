@@ -1,39 +1,17 @@
 import { EntityClass, PersistentManager } from './unit-of-work.interface';
-import { OptimisticConcurrencyError } from '../optimistic-concurrency.error';
-import { retry } from '../../../building-blocks/retry/retry';
 import { Collection } from './collection/collection';
 
 export class Session {
-    private readonly persistentManager: PersistentManager;
-    private readonly maxRetries: number;
-
-    constructor(options: {
-        persistentManager: PersistentManager;
-        maxRetries: number;
-    }) {
-        this.persistentManager = options.persistentManager;
-        this.maxRetries = options.maxRetries;
-    }
+    constructor(private readonly persistentManager: PersistentManager) {}
 
     async begin(): Promise<UnitOfWork> {
-        const uow = new UnitOfWork(this.persistentManager, {
-            maxRetries: this.maxRetries,
-        });
-
-        return uow;
+        return new UnitOfWork(this.persistentManager);
     }
 }
 
 export class UnitOfWork implements AsyncDisposable {
     private readonly collections = new Map<EntityClass, Collection<any>>();
-    private readonly maxRetries: number;
-
-    constructor(
-        private readonly persistentManager: PersistentManager,
-        options: { maxRetries: number }
-    ) {
-        this.maxRetries = options.maxRetries;
-    }
+    constructor(private readonly persistentManager: PersistentManager) {}
 
     collection<T extends { id: { toString(): string } }>(entityClass: {
         prototype: T;
@@ -54,11 +32,9 @@ export class UnitOfWork implements AsyncDisposable {
         return collection;
     }
 
-    async [Symbol.asyncDispose](): Promise<void> {
-        await retry(() =>
-            this.persistentManager.commit([...this.collections.entries()])
-        )
-            .while(OptimisticConcurrencyError)
-            .times(this.maxRetries);
+    async commit(): Promise<void> {
+        await this.persistentManager.commit([...this.collections.entries()]);
     }
+
+    async [Symbol.asyncDispose](): Promise<void> {}
 }

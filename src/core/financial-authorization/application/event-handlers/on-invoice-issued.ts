@@ -53,5 +53,7 @@ export class OnInvoiceIssued {
         }).unwrap();
 
         await uow.collection(FinancialDocument).add(document);
+
+        await uow.commit();
     }
 }

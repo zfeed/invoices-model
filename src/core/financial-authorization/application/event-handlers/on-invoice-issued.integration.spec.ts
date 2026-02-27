@@ -64,6 +64,7 @@ const seedPolicy = async (session: Session) => {
     }).unwrap();
     await using uow = await session.begin();
     await uow.collection(AuthflowPolicy).add(policy);
+    await uow.commit();
 };
 
 describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
@@ -74,10 +75,7 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
 
     beforeEach(async () => {
         domainEvents = new InMemoryDomainEvents();
-        session = new Session({
-            persistentManager: new PersistentManager(domainEvents),
-            maxRetries: 5,
-        });
+        session = new Session(new PersistentManager(domainEvents));
         createCommand = new CreateDraftInvoice(session);
         completeCommand = new CompleteDraftInvoice(session);
     });
