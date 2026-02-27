@@ -1,4 +1,4 @@
-import { Session } from '../../../../infrastructure/unit-of-work/session';
+import { Session } from '../../../shared/unit-of-work/unit-of-work';
 import { PersistentManager } from '../../../../infrastructure/unit-of-work/persistent-manager/persistent-manager';
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
 import { InvoiceIssuedEvent } from '../../../invoices/domain/invoice/events/invoice-issued.event';

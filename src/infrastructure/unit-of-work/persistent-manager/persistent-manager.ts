@@ -1,3 +1,8 @@
+import '../../mappers/draft-invoice.mapper';
+import '../../mappers/invoice.mapper';
+import '../../mappers/authflow-policy.mapper';
+import '../../mappers/financial-document.mapper';
+
 import { Store } from '../../store/store';
 import { DomainEvents } from '../../../core/shared/domain-events/domain-events.interface';
 import {

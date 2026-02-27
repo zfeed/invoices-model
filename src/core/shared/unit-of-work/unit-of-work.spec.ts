@@ -1,7 +1,7 @@
 import { DraftInvoice } from '../../invoices/domain/draft-invoice/draft-invoice';
 import { Id } from '../../invoices/domain/id/id';
 import { LineItem } from '../../invoices/domain/line-item/line-item';
-import { Session } from '../../../infrastructure/unit-of-work/session';
+import { Session } from './unit-of-work';
 import { PersistentManager } from '../../../infrastructure/unit-of-work/persistent-manager/persistent-manager';
 import { InMemoryDomainEvents } from '../../../infrastructure/domain-events/in-memory-domain-events';
 import { OptimisticConcurrencyError } from '../optimistic-concurrency.error';

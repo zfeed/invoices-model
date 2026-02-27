@@ -1,6 +1,6 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
-import { Session } from '../../../../infrastructure/unit-of-work/session';
+import { Session } from '../../../shared/unit-of-work/unit-of-work';
 import { PersistentManager } from '../../../../infrastructure/unit-of-work/persistent-manager/persistent-manager';
 import { Approver } from '../../domain/approver/approver';
 import { AuthflowTemplate } from '../../domain/authflow/authflow-template';
