@@ -59,6 +59,10 @@ export class Collection<T extends { id: { toString(): string } }> {
         this.identityMap.set(key, object, 'created');
     }
 
+    values(): T[] {
+        return this.trackedEntities();
+    }
+
     commitEntries(): CommitEntry[] {
         return [...this.identityMap.entries()].map(([id, entry]) => ({
             entityClass: this.entityClass,
