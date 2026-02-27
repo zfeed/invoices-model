@@ -9,7 +9,7 @@ import {
     EntityClass,
     PersistentManager as PersistentManagerInterface,
 } from '../../core/shared/unit-of-work/unit-of-work.interface';
-import { Collection } from '../../core/shared/unit-of-work/collection/collection';
+import type { Collection } from '../../core/shared/unit-of-work/collection/collection';
 import { mappers } from './registry';
 
 export class PersistentManager implements PersistentManagerInterface {
@@ -65,26 +65,23 @@ export class PersistentManager implements PersistentManagerInterface {
     }
 
     async commit(collections: [EntityClass, Collection<any>][]): Promise<void> {
-        const entries = collections.flatMap(([, collection]) =>
-            collection.commitEntries()
-        );
+        const allEntities: any[] = [];
 
-        for (const entry of entries) {
-            const store = this.getStoreOrThrow(entry.entityClass);
-            const mapper = this.getMapper(entry.entityClass);
-            const data = mapper.toPlain(entry.entity);
+        for (const [entityClass, collection] of collections) {
+            const store = this.getStoreOrThrow(entityClass);
+            const mapper = this.getMapper(entityClass);
 
-            const expectedVersion =
-                entry.modification === 'created'
-                    ? null
-                    : this.getTrackedVersion(entry.entityClass, entry.id);
+            for (const entity of collection.values()) {
+                const id = entity.id.toString();
+                const data = mapper.toPlain(entity);
+                const expectedVersion = this.getTrackedVersion(entityClass, id);
 
-            store.setIfVersion(entry.id, data, expectedVersion);
+                store.setIfVersion(id, data, expectedVersion);
+                allEntities.push(entity);
+            }
         }
 
-        const entities = entries.map((entry) => entry.entity);
-
-        await this.domainEvents.publishEvents(...entities);
+        await this.domainEvents.publishEvents(...allEntities);
     }
 
     private trackVersion(

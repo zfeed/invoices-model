@@ -4,13 +4,6 @@ export type EntityClass = Function;
 
 export type ModificationType = 'created' | 'updated';
 
-export type CommitEntry = {
-    entityClass: EntityClass;
-    id: string;
-    entity: any;
-    modification: ModificationType;
-};
-
 export interface PersistentManager {
     get(entityClass: EntityClass, id: string): any | null;
     findBy(

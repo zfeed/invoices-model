@@ -1,8 +1,4 @@
-import {
-    EntityClass,
-    CommitEntry,
-    PersistentManager,
-} from '../unit-of-work.interface';
+import { EntityClass, PersistentManager } from '../unit-of-work.interface';
 import { IdentityMap } from '../identity-map/identity-map';
 
 export class Collection<T extends { id: { toString(): string } }> {
@@ -61,15 +57,6 @@ export class Collection<T extends { id: { toString(): string } }> {
 
     values(): T[] {
         return this.trackedEntities();
-    }
-
-    commitEntries(): CommitEntry[] {
-        return [...this.identityMap.entries()].map(([id, entry]) => ({
-            entityClass: this.entityClass,
-            id,
-            entity: entry.entity,
-            modification: entry.modification,
-        }));
     }
 
     private trackedEntities(): T[] {
