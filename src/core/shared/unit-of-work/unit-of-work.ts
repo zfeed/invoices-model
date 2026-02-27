@@ -5,7 +5,7 @@ export class Session {
     constructor(private readonly persistentManager: PersistentManager) {}
 
     async begin(): Promise<UnitOfWork> {
-        return new UnitOfWork(this.persistentManager);
+        return new UnitOfWork(this.persistentManager.fork());
     }
 }
 

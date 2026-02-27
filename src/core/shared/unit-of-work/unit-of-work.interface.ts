@@ -13,4 +13,5 @@ export interface PersistentManager {
         tracked?: Iterable<any>
     ): any | null;
     commit(collections: [EntityClass, Collection<any>][]): Promise<void>;
+    fork(): PersistentManager;
 }

@@ -13,14 +13,30 @@ import type { Collection } from '../../core/shared/unit-of-work/collection/colle
 import { mappers } from './registry';
 
 export class PersistentManager implements PersistentManagerInterface {
-    private readonly stores = new Map<EntityClass, Store<any>>();
+    private readonly stores: Map<EntityClass, Store<any>>;
     private readonly versions = new Map<EntityClass, Map<string, number>>();
+    private committed = false;
 
-    constructor(private readonly domainEvents: DomainEvents) {
+    constructor(
+        private readonly domainEvents: DomainEvents,
+        stores?: Map<EntityClass, Store<any>>
+    ) {
+        if (stores) {
+            this.stores = stores;
+        } else {
+            this.stores = new Map();
+            for (const entityClass of mappers.keys()) {
+                this.stores.set(entityClass, new Store());
+            }
+        }
+
         for (const entityClass of mappers.keys()) {
-            this.stores.set(entityClass, new Store());
             this.versions.set(entityClass, new Map());
         }
+    }
+
+    fork(): PersistentManagerInterface {
+        return new PersistentManager(this.domainEvents, this.stores);
     }
 
     get(entityClass: EntityClass, id: string): any | null {
@@ -65,6 +81,12 @@ export class PersistentManager implements PersistentManagerInterface {
     }
 
     async commit(collections: [EntityClass, Collection<any>][]): Promise<void> {
+        if (this.committed) {
+            return;
+        }
+
+        this.committed = true;
+
         const allEntities: any[] = [];
 
         for (const [entityClass, collection] of collections) {
