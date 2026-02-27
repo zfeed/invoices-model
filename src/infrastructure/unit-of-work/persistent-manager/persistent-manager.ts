@@ -11,7 +11,7 @@ export type CommitEntry = {
     modification: ModificationType;
 };
 
-export class Storage {
+export class PersistentManager {
     private readonly stores = new Map<EntityClass, Store<any>>();
     private readonly versions = new Map<EntityClass, Map<string, number>>();
 

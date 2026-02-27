@@ -6,14 +6,14 @@ import { EntityClass } from '../registry';
 import { OptimisticConcurrencyError } from '../../core/shared/optimistic-concurrency.error';
 import { retry } from '../../building-blocks/retry/retry';
 import { Collection } from './collection/collection';
-import { Storage } from './storage/storage';
+import { PersistentManager } from './persistent-manager/persistent-manager';
 
 export class UnitOfWork implements UnitOfWorkInterface {
     private readonly collections = new Map<EntityClass, Collection<any>>();
     private readonly maxRetries: number;
 
     constructor(
-        private readonly storage: Storage,
+        private readonly storage: PersistentManager,
         options: { maxRetries: number }
     ) {
         this.maxRetries = options.maxRetries;

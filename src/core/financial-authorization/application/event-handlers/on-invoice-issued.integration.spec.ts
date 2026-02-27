@@ -1,6 +1,6 @@
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
 import { Session } from '../../../../infrastructure/unit-of-work/session';
-import { Storage } from '../../../../infrastructure/unit-of-work/storage/storage';
+import { PersistentManager } from '../../../../infrastructure/unit-of-work/persistent-manager/persistent-manager';
 import { CreateDraftInvoice } from '../../../invoices/application/commands/create-draft-invoice/create-draft-invoice';
 import { CompleteDraftInvoice } from '../../../invoices/application/commands/complete-draft-invoice/complete-draft-invoice';
 import { ISSUER_TYPE } from '../../../invoices/domain/issuer/issuer';
@@ -75,7 +75,7 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
     beforeEach(async () => {
         domainEvents = new InMemoryDomainEvents();
         session = new Session({
-            storage: new Storage(domainEvents),
+            storage: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
         createCommand = new CreateDraftInvoice(session);

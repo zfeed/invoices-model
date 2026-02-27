@@ -1,7 +1,7 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
 import { Session } from '../../../../infrastructure/unit-of-work/session';
-import { Storage } from '../../../../infrastructure/unit-of-work/storage/storage';
+import { PersistentManager } from '../../../../infrastructure/unit-of-work/persistent-manager/persistent-manager';
 import { Approver } from '../../domain/approver/approver';
 import { AuthflowTemplate } from '../../domain/authflow/authflow-template';
 import { FinancialDocument } from '../../domain/document/document';
@@ -92,7 +92,7 @@ describe('approveActionOnDocumentCommand', () => {
     beforeEach(async () => {
         domainEvents = new InMemoryDomainEvents();
         session = new Session({
-            storage: new Storage(domainEvents),
+            storage: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
 

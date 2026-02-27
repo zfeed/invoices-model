@@ -1,4 +1,4 @@
-import { ModificationType } from '../storage/storage';
+import { ModificationType } from '../persistent-manager/persistent-manager';
 
 type TrackedEntry<T> = {
     entity: T;

@@ -1,5 +1,5 @@
 import { Session } from '../../../../../infrastructure/unit-of-work/session';
-import { Storage } from '../../../../../infrastructure/unit-of-work/storage/storage';
+import { PersistentManager } from '../../../../../infrastructure/unit-of-work/persistent-manager/persistent-manager';
 import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
 import { CanApproverApprove } from '../../../../financial-authorization/application/queries/can-approver-approve';
 import { FinancialDocument } from '../../../../financial-authorization/domain/document/document';
@@ -94,7 +94,7 @@ describe('PayInvoice', () => {
     beforeEach(() => {
         domainEvents = new InMemoryDomainEvents();
         session = new Session({
-            storage: new Storage(domainEvents),
+            storage: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
         const canApproverApprove = new CanApproverApprove(session);
