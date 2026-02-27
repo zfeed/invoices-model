@@ -1,19 +1,38 @@
 import {
     Collection as CollectionInterface,
     UnitOfWork as UnitOfWorkInterface,
-} from '../../core/shared/unit-of-work/unit-of-work.interface';
-import { EntityClass } from '../registry';
-import { OptimisticConcurrencyError } from '../../core/shared/optimistic-concurrency.error';
-import { retry } from '../../building-blocks/retry/retry';
+    Session as SessionInterface,
+    EntityClass,
+    Storage,
+} from './unit-of-work.interface';
+import { OptimisticConcurrencyError } from '../optimistic-concurrency.error';
+import { retry } from '../../../building-blocks/retry/retry';
 import { Collection } from './collection/collection';
-import { PersistentManager } from './persistent-manager/persistent-manager';
+
+export class Session implements SessionInterface {
+    private readonly storage: Storage;
+    private readonly maxRetries: number;
+
+    constructor(options: { storage: Storage; maxRetries: number }) {
+        this.storage = options.storage;
+        this.maxRetries = options.maxRetries;
+    }
+
+    async begin(): Promise<UnitOfWorkInterface> {
+        const uow = new UnitOfWork(this.storage, {
+            maxRetries: this.maxRetries,
+        });
+
+        return uow;
+    }
+}
 
 export class UnitOfWork implements UnitOfWorkInterface {
     private readonly collections = new Map<EntityClass, Collection<any>>();
     private readonly maxRetries: number;
 
     constructor(
-        private readonly storage: PersistentManager,
+        private readonly storage: Storage,
         options: { maxRetries: number }
     ) {
         this.maxRetries = options.maxRetries;

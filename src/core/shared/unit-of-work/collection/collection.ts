@@ -1,16 +1,12 @@
-import { EntityClass } from '../../registry';
+import { EntityClass, CommitEntry, Storage } from '../unit-of-work.interface';
 import { IdentityMap } from '../identity-map/identity-map';
-import {
-    CommitEntry,
-    PersistentManager,
-} from '../persistent-manager/persistent-manager';
 
 export class Collection<T extends { id: { toString(): string } }> {
     private readonly identityMap = new IdentityMap<T>();
 
     constructor(
         private readonly entityClass: EntityClass,
-        private readonly storage: PersistentManager
+        private readonly storage: Storage
     ) {}
 
     async get(id: { toString(): string }): Promise<T | null> {

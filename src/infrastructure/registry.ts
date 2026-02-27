@@ -1,4 +1,6 @@
-export type EntityClass = Function;
+import { EntityClass } from '../core/shared/unit-of-work/unit-of-work.interface';
+
+export type { EntityClass };
 type Mapper = { toDomain: (plain: any) => any; toPlain: (entity: any) => any };
 
 export const mappers = new Map<EntityClass, Mapper>();

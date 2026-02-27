@@ -1,17 +1,13 @@
 import { Store } from '../../store/store';
 import { DomainEvents } from '../../../core/shared/domain-events/domain-events.interface';
-import { EntityClass, mappers } from '../../registry';
+import {
+    EntityClass,
+    CommitEntry,
+    Storage,
+} from '../../../core/shared/unit-of-work/unit-of-work.interface';
+import { mappers } from '../../registry';
 
-export type ModificationType = 'created' | 'updated';
-
-export type CommitEntry = {
-    entityClass: EntityClass;
-    id: string;
-    entity: any;
-    modification: ModificationType;
-};
-
-export class PersistentManager {
+export class PersistentManager implements Storage {
     private readonly stores = new Map<EntityClass, Store<any>>();
     private readonly versions = new Map<EntityClass, Map<string, number>>();
 

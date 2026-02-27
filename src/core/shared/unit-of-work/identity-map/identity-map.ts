@@ -1,4 +1,4 @@
-import { ModificationType } from '../persistent-manager/persistent-manager';
+import { ModificationType } from '../unit-of-work.interface';
 
 type TrackedEntry<T> = {
     entity: T;
