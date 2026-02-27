@@ -9,7 +9,7 @@ export type CommitEntry = {
     modification: ModificationType;
 };
 
-export interface Storage {
+export interface PersistentManager {
     get(entityClass: EntityClass, id: string): any | null;
     findBy(
         entityClass: EntityClass,

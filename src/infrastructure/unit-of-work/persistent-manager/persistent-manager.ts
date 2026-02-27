@@ -3,11 +3,11 @@ import { DomainEvents } from '../../../core/shared/domain-events/domain-events.i
 import {
     EntityClass,
     CommitEntry,
-    Storage,
+    PersistentManager as PersistentManagerInterface,
 } from '../../../core/shared/unit-of-work/unit-of-work.interface';
 import { mappers } from '../../registry';
 
-export class PersistentManager implements Storage {
+export class PersistentManager implements PersistentManagerInterface {
     private readonly stores = new Map<EntityClass, Store<any>>();
     private readonly versions = new Map<EntityClass, Map<string, number>>();
 

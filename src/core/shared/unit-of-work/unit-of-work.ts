@@ -1,13 +1,13 @@
-import { EntityClass, Storage } from './unit-of-work.interface';
+import { EntityClass, PersistentManager } from './unit-of-work.interface';
 import { OptimisticConcurrencyError } from '../optimistic-concurrency.error';
 import { retry } from '../../../building-blocks/retry/retry';
 import { Collection } from './collection/collection';
 
 export class Session {
-    private readonly storage: Storage;
+    private readonly storage: PersistentManager;
     private readonly maxRetries: number;
 
-    constructor(options: { storage: Storage; maxRetries: number }) {
+    constructor(options: { storage: PersistentManager; maxRetries: number }) {
         this.storage = options.storage;
         this.maxRetries = options.maxRetries;
     }
@@ -26,7 +26,7 @@ export class UnitOfWork implements AsyncDisposable {
     private readonly maxRetries: number;
 
     constructor(
-        private readonly storage: Storage,
+        private readonly storage: PersistentManager,
         options: { maxRetries: number }
     ) {
         this.maxRetries = options.maxRetries;
