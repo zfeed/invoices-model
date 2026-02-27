@@ -51,10 +51,13 @@ describe('CompleteDraftInvoice', () => {
     let completeCommand: CompleteDraftInvoice;
 
     beforeEach(() => {
-        session = new Session({ storage: new Storage(), maxRetries: 5 });
         domainEvents = new InMemoryDomainEvents();
-        createCommand = new CreateDraftInvoice(session, domainEvents);
-        completeCommand = new CompleteDraftInvoice(session, domainEvents);
+        session = new Session({
+            storage: new Storage(domainEvents),
+            maxRetries: 5,
+        });
+        createCommand = new CreateDraftInvoice(session);
+        completeCommand = new CompleteDraftInvoice(session);
     });
 
     it('should throw ITEM_NOT_FOUND when draft invoice does not exist', async () => {

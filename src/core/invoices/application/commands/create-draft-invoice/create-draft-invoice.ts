@@ -6,14 +6,10 @@ import { LineItem } from '../../../domain/line-item/line-item';
 import { Paypal } from '../../../domain/billing/paypal/paypal';
 import { Recipient, RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
 import { VatRate } from '../../../domain/vat-rate/vat-rate';
-import { DomainEvents } from '../../../../shared/domain-events/domain-events.interface';
 import { Session } from '../../../../shared/unit-of-work/unit-of-work.interface';
 
 export class CreateDraftInvoice {
-    constructor(
-        private readonly session: Session,
-        private readonly domainEvents: DomainEvents
-    ) {}
+    constructor(private readonly session: Session) {}
 
     public async execute(request: {
         lineItems?: {
@@ -93,8 +89,6 @@ export class CreateDraftInvoice {
         }
 
         await unitOfWork.collection(DraftInvoice).add(draftInvoice);
-
-        await this.domainEvents.publishEvents(draftInvoice);
 
         return draftInvoice.toPlain();
     }

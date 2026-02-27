@@ -90,10 +90,13 @@ describe('approveActionOnDocumentCommand', () => {
     let command: ApproveActionOnDocument;
 
     beforeEach(async () => {
-        session = new Session({ storage: new Storage(), maxRetries: 5 });
         domainEvents = new InMemoryDomainEvents();
+        session = new Session({
+            storage: new Storage(domainEvents),
+            maxRetries: 5,
+        });
 
-        const createPolicy = new CreateAuthflowPolicy(session, domainEvents);
+        const createPolicy = new CreateAuthflowPolicy(session);
         await createPolicy.execute({
             action: 'pay',
             templates: [template],
@@ -108,7 +111,7 @@ describe('approveActionOnDocumentCommand', () => {
             events: [new InvoiceIssuedEvent(INVOICE_DATA)],
         });
 
-        command = new ApproveActionOnDocument(session, domainEvents);
+        command = new ApproveActionOnDocument(session);
     });
 
     it('should throw when document is not found', async () => {

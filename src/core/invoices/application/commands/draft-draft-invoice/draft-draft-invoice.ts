@@ -2,14 +2,10 @@ import { APPLICATION_ERROR_CODE } from '../../../../../building-blocks/errors/ap
 import { ApplicationError } from '../../../../../building-blocks/errors/application/application.error';
 import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
 import { Id } from '../../../domain/id/id';
-import { DomainEvents } from '../../../../shared/domain-events/domain-events.interface';
 import { Session } from '../../../../shared/unit-of-work/unit-of-work.interface';
 
 export class DraftDraftInvoice {
-    constructor(
-        private readonly session: Session,
-        private readonly domainEvents: DomainEvents
-    ) {}
+    constructor(private readonly session: Session) {}
 
     public async execute(id: string) {
         await using unitOfWork = await this.session.begin();
@@ -26,8 +22,6 @@ export class DraftDraftInvoice {
         }
 
         draftInvoice.draft().unwrap();
-
-        await this.domainEvents.publishEvents(draftInvoice);
 
         return draftInvoice.toPlain();
     }

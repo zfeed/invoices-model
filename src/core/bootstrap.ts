@@ -29,42 +29,17 @@ export const bootstrap = async (infra: Infrastructure) => {
     const canApproverApprove = new CanApproverApprove(infra.session);
 
     return {
-        createDraftInvoice: new CreateDraftInvoice(
-            infra.session,
-            infra.domainEvents
-        ),
-        updateDraftInvoice: new UpdateDraftInvoice(
-            infra.session,
-            infra.domainEvents
-        ),
+        createDraftInvoice: new CreateDraftInvoice(infra.session),
+        updateDraftInvoice: new UpdateDraftInvoice(infra.session),
         calculateDraftInvoice: new CalculateDraftInvoice(),
-        completeDraftInvoice: new CompleteDraftInvoice(
-            infra.session,
-            infra.domainEvents
-        ),
-        archiveDraftInvoice: new ArchiveDraftInvoice(
-            infra.session,
-            infra.domainEvents
-        ),
-        draftDraftInvoice: new DraftDraftInvoice(
-            infra.session,
-            infra.domainEvents
-        ),
-        processInvoice: new ProcessInvoice(infra.session, infra.domainEvents),
-        cancelInvoice: new CancelInvoice(infra.session, infra.domainEvents),
-        payInvoice: new PayInvoice(
-            infra.session,
-            infra.domainEvents,
-            canApproverApprove
-        ),
-        createAuthflowPolicy: new CreateAuthflowPolicy(
-            infra.session,
-            infra.domainEvents
-        ),
-        approveActionOnDocument: new ApproveActionOnDocument(
-            infra.session,
-            infra.domainEvents
-        ),
+        completeDraftInvoice: new CompleteDraftInvoice(infra.session),
+        archiveDraftInvoice: new ArchiveDraftInvoice(infra.session),
+        draftDraftInvoice: new DraftDraftInvoice(infra.session),
+        processInvoice: new ProcessInvoice(infra.session),
+        cancelInvoice: new CancelInvoice(infra.session),
+        payInvoice: new PayInvoice(infra.session, canApproverApprove),
+        createAuthflowPolicy: new CreateAuthflowPolicy(infra.session),
+        approveActionOnDocument: new ApproveActionOnDocument(infra.session),
         canApproverApprove,
     };
 };

@@ -3,13 +3,11 @@ import { ApplicationError } from '../../../../../building-blocks/errors/applicat
 import { CanApproverApprove } from '../../../../financial-authorization/application/queries/can-approver-approve';
 import { Id } from '../../../domain/id/id';
 import { Invoice } from '../../../domain/invoice/invoice';
-import { DomainEvents } from '../../../../shared/domain-events/domain-events.interface';
 import { Session } from '../../../../shared/unit-of-work/unit-of-work.interface';
 
 export class PayInvoice {
     constructor(
         private readonly session: Session,
-        private readonly domainEvents: DomainEvents,
         private readonly canApproverApprove: CanApproverApprove
     ) {}
 
@@ -41,8 +39,6 @@ export class PayInvoice {
         }
 
         invoice.pay().unwrap();
-
-        await this.domainEvents.publishEvents(invoice);
 
         return invoice.toPlain();
     }

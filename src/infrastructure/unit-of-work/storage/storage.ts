@@ -1,4 +1,5 @@
 import { Store } from '../../store/store';
+import { DomainEvents } from '../../../core/shared/domain-events/domain-events.interface';
 import { EntityClass, mappers } from '../../registry';
 
 export type ModificationType = 'created' | 'updated';
@@ -14,7 +15,7 @@ export class Storage {
     private readonly stores = new Map<EntityClass, Store<any>>();
     private readonly versions = new Map<EntityClass, Map<string, number>>();
 
-    constructor() {
+    constructor(private readonly domainEvents: DomainEvents) {
         for (const entityClass of mappers.keys()) {
             this.stores.set(entityClass, new Store());
             this.versions.set(entityClass, new Map());
@@ -75,6 +76,10 @@ export class Storage {
 
             store.setIfVersion(entry.id, data, expectedVersion);
         }
+
+        const entities = entries.map((entry) => entry.entity);
+
+        await this.domainEvents.publishEvents(...entities);
     }
 
     private trackVersion(

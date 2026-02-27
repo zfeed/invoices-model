@@ -1,4 +1,3 @@
-import { DomainEvents } from '../../../shared/domain-events/domain-events.interface';
 import { Session } from '../../../shared/unit-of-work/unit-of-work.interface';
 import { Action } from '../../domain/action/action';
 import { AuthflowPolicy } from '../../domain/authflow/authflow-policy';
@@ -10,10 +9,7 @@ type CreateAuthflowPolicyRequest = {
 };
 
 export class CreateAuthflowPolicy {
-    constructor(
-        private readonly session: Session,
-        private readonly domainEvents: DomainEvents
-    ) {}
+    constructor(private readonly session: Session) {}
 
     public async execute(request: CreateAuthflowPolicyRequest) {
         const action = Action.create(request.action).unwrap();
@@ -27,8 +23,6 @@ export class CreateAuthflowPolicy {
             await using uow = await this.session.begin();
             await uow.collection(AuthflowPolicy).add(policy);
         }
-
-        await this.domainEvents.publishEvents(policy);
 
         return policy.toPlain();
     }

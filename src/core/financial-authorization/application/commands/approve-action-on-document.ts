@@ -1,6 +1,5 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { DomainError } from '../../../../building-blocks/errors/domain/domain.error';
-import { DomainEvents } from '../../../shared/domain-events/domain-events.interface';
 import { Session } from '../../../shared/unit-of-work/unit-of-work.interface';
 import { Action } from '../../domain/action/action';
 import { Approval } from '../../domain/approval/approval';
@@ -15,10 +14,7 @@ type ApproveActionRequest = {
 };
 
 export class ApproveActionOnDocument {
-    constructor(
-        private readonly session: Session,
-        private readonly domainEvents: DomainEvents
-    ) {}
+    constructor(private readonly session: Session) {}
 
     public async execute(request: ApproveActionRequest) {
         const action = Action.create(request.action).unwrap();
@@ -42,8 +38,6 @@ export class ApproveActionOnDocument {
             comment: null,
         }).unwrap();
         document.apply(action, approval).unwrap();
-
-        await this.domainEvents.publishEvents(document);
 
         return document.toPlain();
     }

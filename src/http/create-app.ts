@@ -11,9 +11,13 @@ import {
 import { errorHandler } from './error-handler';
 
 export const createApp = async () => {
+    const domainEvents = new InMemoryDomainEvents();
     const commands = await bootstrap({
-        session: new Session({ storage: new Storage(), maxRetries: 5 }),
-        domainEvents: new InMemoryDomainEvents(),
+        session: new Session({
+            storage: new Storage(domainEvents),
+            maxRetries: 5,
+        }),
+        domainEvents,
     });
 
     const app = Fastify();

@@ -92,13 +92,16 @@ describe('PayInvoice', () => {
     let payCommand: PayInvoice;
 
     beforeEach(() => {
-        session = new Session({ storage: new Storage(), maxRetries: 5 });
         domainEvents = new InMemoryDomainEvents();
+        session = new Session({
+            storage: new Storage(domainEvents),
+            maxRetries: 5,
+        });
         const canApproverApprove = new CanApproverApprove(session);
-        createCommand = new CreateDraftInvoice(session, domainEvents);
-        completeCommand = new CompleteDraftInvoice(session, domainEvents);
-        processCommand = new ProcessInvoice(session, domainEvents);
-        payCommand = new PayInvoice(session, domainEvents, canApproverApprove);
+        createCommand = new CreateDraftInvoice(session);
+        completeCommand = new CompleteDraftInvoice(session);
+        processCommand = new ProcessInvoice(session);
+        payCommand = new PayInvoice(session, canApproverApprove);
     });
 
     it('should throw PAYMENT_NOT_AUTHORIZED when document does not exist', async () => {
