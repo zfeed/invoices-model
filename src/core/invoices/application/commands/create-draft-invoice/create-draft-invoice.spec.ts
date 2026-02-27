@@ -1,5 +1,5 @@
 import { Session } from '../../../../shared/unit-of-work/unit-of-work';
-import { PersistentManager } from '../../../../../infrastructure/unit-of-work/persistent-manager/persistent-manager';
+import { PersistentManager } from '../../../../../infrastructure/persistent-manager/persistent-manager';
 import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
 import { CreateDraftInvoice } from './create-draft-invoice';
 import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';

@@ -1,4 +1,4 @@
-import { FinancialDocument } from '../../core/financial-authorization/domain/document/document';
+import { FinancialDocument } from '../../../core/financial-authorization/domain/document/document';
 import { Mapper } from './mapper';
 
 type FinancialDocumentPlain = ReturnType<FinancialDocument['toPlain']>;

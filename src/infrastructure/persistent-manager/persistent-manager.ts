@@ -1,16 +1,16 @@
-import '../../mappers/draft-invoice.mapper';
-import '../../mappers/invoice.mapper';
-import '../../mappers/authflow-policy.mapper';
-import '../../mappers/financial-document.mapper';
+import './mappers/draft-invoice.mapper';
+import './mappers/invoice.mapper';
+import './mappers/authflow-policy.mapper';
+import './mappers/financial-document.mapper';
 
-import { Store } from '../../store/store';
-import { DomainEvents } from '../../../core/shared/domain-events/domain-events.interface';
+import { Store } from '../store/store';
+import { DomainEvents } from '../../core/shared/domain-events/domain-events.interface';
 import {
     EntityClass,
     CommitEntry,
     PersistentManager as PersistentManagerInterface,
-} from '../../../core/shared/unit-of-work/unit-of-work.interface';
-import { mappers } from '../../registry';
+} from '../../core/shared/unit-of-work/unit-of-work.interface';
+import { mappers } from './registry';
 
 export class PersistentManager implements PersistentManagerInterface {
     private readonly stores = new Map<EntityClass, Store<any>>();

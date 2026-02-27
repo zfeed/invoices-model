@@ -1,4 +1,4 @@
-import { AuthflowPolicy } from '../../core/financial-authorization/domain/authflow/authflow-policy';
+import { AuthflowPolicy } from '../../../core/financial-authorization/domain/authflow/authflow-policy';
 import { Mapper } from './mapper';
 
 type AuthflowPolicyPlain = ReturnType<AuthflowPolicy['toPlain']>;

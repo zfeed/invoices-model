@@ -1,6 +1,6 @@
 import { FinancialDocument } from '../../domain/document/document';
 import { Session } from '../../../shared/unit-of-work/unit-of-work';
-import { PersistentManager } from '../../../../infrastructure/unit-of-work/persistent-manager/persistent-manager';
+import { PersistentManager } from '../../../../infrastructure/persistent-manager/persistent-manager';
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
 import { CanApproverApprove } from './can-approver-approve';
 

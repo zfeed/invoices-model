@@ -1,4 +1,4 @@
-import { Invoice } from '../../core/invoices/domain/invoice/invoice';
+import { Invoice } from '../../../core/invoices/domain/invoice/invoice';
 import { Mapper } from './mapper';
 
 type InvoicePlain = ReturnType<Invoice['toPlain']>;

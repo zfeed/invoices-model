@@ -1,7 +1,7 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
 import { Session } from '../../../shared/unit-of-work/unit-of-work';
-import { PersistentManager } from '../../../../infrastructure/unit-of-work/persistent-manager/persistent-manager';
+import { PersistentManager } from '../../../../infrastructure/persistent-manager/persistent-manager';
 import { Money } from '../../domain/money/money';
 import { Range } from '../../domain/range/range';
 import { AuthflowTemplate } from '../../domain/authflow/authflow-template';
