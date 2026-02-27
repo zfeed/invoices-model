@@ -88,7 +88,7 @@ describe('onInvoiceIssued', () => {
     it('should create a new financial document when invoice is created', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session = new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
 
@@ -112,7 +112,7 @@ describe('onInvoiceIssued', () => {
     it('should create a document with an authflow selected from the policy', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session = new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
 
@@ -138,7 +138,7 @@ describe('onInvoiceIssued', () => {
     it('should select the correct authflow range for the invoice amount', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session = new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
 
@@ -163,7 +163,7 @@ describe('onInvoiceIssued', () => {
     it('should create a document with empty authflows when no policy exists', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session = new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
 
@@ -185,7 +185,7 @@ describe('onInvoiceIssued', () => {
     it('should create a document with empty authflows when amount is outside policy ranges', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session = new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
 
@@ -211,7 +211,7 @@ describe('onInvoiceIssued', () => {
     it('should create documents with different referenceIds for different invoices', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session = new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
 
@@ -248,7 +248,7 @@ describe('onInvoiceIssued', () => {
     it('should not create a duplicate document when invoice with same id is created twice', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session = new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
 
@@ -283,7 +283,7 @@ describe('onInvoiceIssued', () => {
     it('should not create a document when no event is published', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session = new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
 
@@ -304,7 +304,7 @@ describe('onInvoiceIssued', () => {
     it('should use event data id as the document referenceId', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session = new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
 
@@ -331,7 +331,7 @@ describe('onInvoiceIssued', () => {
     it('should generate a unique document id for each new document', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session = new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
 
@@ -359,7 +359,7 @@ describe('onInvoiceIssued', () => {
     it('should not overwrite a pre-existing document in storage', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session = new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
 
@@ -392,7 +392,7 @@ describe('onInvoiceIssued', () => {
     it('should handle many events for different invoices', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session = new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
 
@@ -420,7 +420,7 @@ describe('onInvoiceIssued', () => {
     it('should only react to events published after subscription', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session = new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
 
@@ -454,11 +454,11 @@ describe('onInvoiceIssued', () => {
     it('should isolate documents across separate session instances', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session1 = new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
         const session2 = new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
 

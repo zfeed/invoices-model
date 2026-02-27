@@ -14,7 +14,7 @@ export const createApp = async () => {
     const domainEvents = new InMemoryDomainEvents();
     const commands = await bootstrap({
         session: new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         }),
         domainEvents,

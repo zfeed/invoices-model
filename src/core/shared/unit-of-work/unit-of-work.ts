@@ -4,16 +4,19 @@ import { retry } from '../../../building-blocks/retry/retry';
 import { Collection } from './collection/collection';
 
 export class Session {
-    private readonly storage: PersistentManager;
+    private readonly persistentManager: PersistentManager;
     private readonly maxRetries: number;
 
-    constructor(options: { storage: PersistentManager; maxRetries: number }) {
-        this.storage = options.storage;
+    constructor(options: {
+        persistentManager: PersistentManager;
+        maxRetries: number;
+    }) {
+        this.persistentManager = options.persistentManager;
         this.maxRetries = options.maxRetries;
     }
 
     async begin(): Promise<UnitOfWork> {
-        const uow = new UnitOfWork(this.storage, {
+        const uow = new UnitOfWork(this.persistentManager, {
             maxRetries: this.maxRetries,
         });
 
@@ -26,7 +29,7 @@ export class UnitOfWork implements AsyncDisposable {
     private readonly maxRetries: number;
 
     constructor(
-        private readonly storage: PersistentManager,
+        private readonly persistentManager: PersistentManager,
         options: { maxRetries: number }
     ) {
         this.maxRetries = options.maxRetries;
@@ -43,7 +46,7 @@ export class UnitOfWork implements AsyncDisposable {
 
         const collection = new Collection<T>(
             entityClass as EntityClass,
-            this.storage
+            this.persistentManager
         );
 
         this.collections.set(entityClass as EntityClass, collection);
@@ -56,7 +59,7 @@ export class UnitOfWork implements AsyncDisposable {
             collection.commitEntries()
         );
 
-        await retry(() => this.storage.commit(entries))
+        await retry(() => this.persistentManager.commit(entries))
             .while(OptimisticConcurrencyError)
             .times(this.maxRetries);
     }

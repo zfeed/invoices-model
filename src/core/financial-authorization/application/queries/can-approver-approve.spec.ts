@@ -7,7 +7,9 @@ import { CanApproverApprove } from './can-approver-approve';
 describe('CanApproverApprove', () => {
     it('should return UNKNOWN when document does not exist', async () => {
         const session = new Session({
-            storage: new PersistentManager(new InMemoryDomainEvents()),
+            persistentManager: new PersistentManager(
+                new InMemoryDomainEvents()
+            ),
             maxRetries: 5,
         });
         const question = new CanApproverApprove(session);
@@ -23,7 +25,9 @@ describe('CanApproverApprove', () => {
 
     it('should return YES when approver can approve the action', async () => {
         const session = new Session({
-            storage: new PersistentManager(new InMemoryDomainEvents()),
+            persistentManager: new PersistentManager(
+                new InMemoryDomainEvents()
+            ),
             maxRetries: 5,
         });
         const document = FinancialDocument.fromPlain({
@@ -80,7 +84,9 @@ describe('CanApproverApprove', () => {
 
     it('should return NO when approver is not in any group', async () => {
         const session = new Session({
-            storage: new PersistentManager(new InMemoryDomainEvents()),
+            persistentManager: new PersistentManager(
+                new InMemoryDomainEvents()
+            ),
             maxRetries: 5,
         });
         const document = FinancialDocument.fromPlain({
@@ -137,7 +143,9 @@ describe('CanApproverApprove', () => {
 
     it('should return NO when authflow is already approved', async () => {
         const session = new Session({
-            storage: new PersistentManager(new InMemoryDomainEvents()),
+            persistentManager: new PersistentManager(
+                new InMemoryDomainEvents()
+            ),
             maxRetries: 5,
         });
         const document = FinancialDocument.fromPlain({
@@ -200,7 +208,9 @@ describe('CanApproverApprove', () => {
 
     it('should return NO when action does not exist on the document', async () => {
         const session = new Session({
-            storage: new PersistentManager(new InMemoryDomainEvents()),
+            persistentManager: new PersistentManager(
+                new InMemoryDomainEvents()
+            ),
             maxRetries: 5,
         });
         const document = FinancialDocument.fromPlain({
@@ -257,7 +267,9 @@ describe('CanApproverApprove', () => {
 
     it('should return NO when approver is in a later step', async () => {
         const session = new Session({
-            storage: new PersistentManager(new InMemoryDomainEvents()),
+            persistentManager: new PersistentManager(
+                new InMemoryDomainEvents()
+            ),
             maxRetries: 5,
         });
         const document = FinancialDocument.fromPlain({

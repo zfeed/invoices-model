@@ -25,7 +25,7 @@ describe('createAuthflowPolicyCommand', () => {
     it('should create and save a policy', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session = new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
         const command = new CreateAuthflowPolicy(session);
@@ -46,7 +46,7 @@ describe('createAuthflowPolicyCommand', () => {
     it('should persist the policy in storage', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session = new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
         const command = new CreateAuthflowPolicy(session);
@@ -69,7 +69,7 @@ describe('createAuthflowPolicyCommand', () => {
     it('should publish an AuthflowPolicyCreatedEvent', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session = new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
         const command = new CreateAuthflowPolicy(session);
@@ -95,7 +95,7 @@ describe('createAuthflowPolicyCommand', () => {
     it('should throw when ranges overlap', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session = new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
         const command = new CreateAuthflowPolicy(session);
@@ -113,7 +113,7 @@ describe('createAuthflowPolicyCommand', () => {
     it('should not persist the policy when validation fails', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session = new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
         const command = new CreateAuthflowPolicy(session);
@@ -137,7 +137,7 @@ describe('createAuthflowPolicyCommand', () => {
     it('should not publish events when validation fails', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session = new Session({
-            storage: new PersistentManager(domainEvents),
+            persistentManager: new PersistentManager(domainEvents),
             maxRetries: 5,
         });
         const command = new CreateAuthflowPolicy(session);
