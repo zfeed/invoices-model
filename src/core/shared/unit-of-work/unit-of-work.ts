@@ -36,5 +36,7 @@ export class UnitOfWork implements AsyncDisposable {
         await this.persistentManager.commit([...this.collections.entries()]);
     }
 
-    async [Symbol.asyncDispose](): Promise<void> {}
+    async [Symbol.asyncDispose](): Promise<void> {
+        await this.persistentManager.rollback();
+    }
 }

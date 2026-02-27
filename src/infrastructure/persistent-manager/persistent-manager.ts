@@ -16,6 +16,7 @@ export class PersistentManager implements PersistentManagerInterface {
     private readonly stores: Map<EntityClass, Store<any>>;
     private readonly versions = new Map<EntityClass, Map<string, number>>();
     private committed = false;
+    private rolledBack = false;
 
     constructor(
         private readonly domainEvents: DomainEvents,
@@ -80,8 +81,12 @@ export class PersistentManager implements PersistentManagerInterface {
         return null;
     }
 
+    async rollback(): Promise<void> {
+        this.rolledBack = true;
+    }
+
     async commit(collections: [EntityClass, Collection<any>][]): Promise<void> {
-        if (this.committed) {
+        if (this.committed || this.rolledBack) {
             return;
         }
 
