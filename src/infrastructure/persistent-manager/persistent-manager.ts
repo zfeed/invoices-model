@@ -3,6 +3,7 @@ import './mappers/invoice.mapper';
 import './mappers/authflow-policy.mapper';
 import './mappers/financial-document.mapper';
 
+import { Invoice } from '../../core/invoices/domain/invoice/invoice';
 import { Store } from '../store/store';
 import { DomainEvents } from '../../core/shared/domain-events/domain-events.interface';
 import {
@@ -12,7 +13,9 @@ import {
 import type { Collection } from '../../core/shared/unit-of-work/collection/collection';
 import { mappers } from './registry';
 
-export class PersistentManager implements PersistentManagerInterface {
+export class PersistentManager<T extends Invoice>
+    implements PersistentManagerInterface<T>
+{
     private readonly stores: Map<EntityClass, Store<any>>;
     private readonly versions = new Map<EntityClass, Map<string, number>>();
     private committed = false;
@@ -36,8 +39,8 @@ export class PersistentManager implements PersistentManagerInterface {
         }
     }
 
-    fork(): PersistentManagerInterface {
-        return new PersistentManager(this.domainEvents, this.stores);
+    fork<T extends Invoice>(): PersistentManagerInterface<T> {
+        return new PersistentManager<T>(this.domainEvents, this.stores);
     }
 
     async get(entityClass: EntityClass, id: string) {
@@ -85,7 +88,7 @@ export class PersistentManager implements PersistentManagerInterface {
         this.rolledBack = true;
     }
 
-    async commit(collections: [EntityClass, Collection<any>][]): Promise<void> {
+    async commit(collections: [EntityClass, Collection<T>][]): Promise<void> {
         if (this.committed || this.rolledBack) {
             return;
         }
