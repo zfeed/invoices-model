@@ -6,7 +6,7 @@ export class Collection<T extends { id: { toString(): string } }> {
 
     constructor(
         private readonly entityClass: EntityClass,
-        private readonly storage: PersistentManager
+        private readonly persistentManager: PersistentManager
     ) {}
 
     async get(id: { toString(): string }): Promise<T | null> {
@@ -18,7 +18,7 @@ export class Collection<T extends { id: { toString(): string } }> {
             return item;
         }
 
-        const entity = (await this.storage.get(
+        const entity = (await this.persistentManager.get(
             this.entityClass,
             key
         )) as T | null;
@@ -31,7 +31,7 @@ export class Collection<T extends { id: { toString(): string } }> {
     }
 
     async findBy(key: string, value: string): Promise<T | undefined> {
-        const entity = (await this.storage.findBy(
+        const entity = (await this.persistentManager.findBy(
             this.entityClass,
             key,
             value,
