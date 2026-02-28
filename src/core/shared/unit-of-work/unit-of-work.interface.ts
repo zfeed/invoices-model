@@ -2,8 +2,6 @@ import type { Collection } from './collection/collection';
 
 export type EntityClass = Function;
 
-export type ModificationType = 'created' | 'updated';
-
 export interface PersistentManager {
     get(entityClass: EntityClass, id: string): Promise<any | null>;
     findBy(

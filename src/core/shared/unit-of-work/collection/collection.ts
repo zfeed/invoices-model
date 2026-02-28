@@ -27,7 +27,7 @@ export class Collection<T extends { id: { toString(): string } }> {
             return null;
         }
 
-        return this.identityMap.setIfAbsent(key, entity, 'updated');
+        return this.identityMap.setIfAbsent(key, entity);
     }
 
     async findBy(key: string, value: string): Promise<T | undefined> {
@@ -44,12 +44,12 @@ export class Collection<T extends { id: { toString(): string } }> {
 
         const entityKey = entity.id.toString();
 
-        return this.identityMap.setIfAbsent(entityKey, entity, 'updated');
+        return this.identityMap.setIfAbsent(entityKey, entity);
     }
 
     async add(object: T): Promise<void> {
         const key = object.id.toString();
-        this.identityMap.setIfAbsent(key, object, 'created');
+        this.identityMap.setIfAbsent(key, object);
     }
 
     values(): T[] {

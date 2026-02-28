@@ -1,8 +1,5 @@
-import { ModificationType } from '../unit-of-work.interface';
-
 type TrackedEntry<T> = {
     entity: T;
-    modification: ModificationType;
 };
 
 export class IdentityMap<T> {
@@ -12,18 +9,18 @@ export class IdentityMap<T> {
         return this.tracked.get(key)?.entity;
     }
 
-    set(key: string, entity: T, modification: ModificationType): void {
-        this.tracked.set(key, { entity, modification });
+    set(key: string, entity: T): void {
+        this.tracked.set(key, { entity });
     }
 
-    setIfAbsent(key: string, entity: T, modification: ModificationType): T {
+    setIfAbsent(key: string, entity: T): T {
         const existing = this.tracked.get(key);
 
         if (existing) {
             return existing.entity;
         }
 
-        this.tracked.set(key, { entity, modification });
+        this.tracked.set(key, { entity });
         return entity;
     }
 
