@@ -3,7 +3,10 @@ import './mappers/invoice.mapper';
 import './mappers/authflow-policy.mapper';
 import './mappers/financial-document.mapper';
 
+import { DraftInvoice } from '../../core/invoices/domain/draft-invoice/draft-invoice';
 import { Invoice } from '../../core/invoices/domain/invoice/invoice';
+import { AuthflowPolicy } from '../../core/financial-authorization/domain/authflow/authflow-policy';
+import { FinancialDocument } from '../../core/financial-authorization/domain/document/document';
 import { Store } from '../store/store';
 import { DomainEvents } from '../../core/shared/domain-events/domain-events.interface';
 import {
@@ -13,9 +16,9 @@ import {
 import type { Collection } from '../../core/shared/unit-of-work/collection/collection';
 import { mappers } from './registry';
 
-export class PersistentManager<T extends Invoice>
-    implements PersistentManagerInterface<T>
-{
+type Entity = DraftInvoice | Invoice | AuthflowPolicy | FinancialDocument;
+
+export class PersistentManager implements PersistentManagerInterface<Entity> {
     private readonly stores: Map<EntityClass, Store<any>>;
     private readonly versions = new Map<EntityClass, Map<string, number>>();
     private committed = false;
@@ -39,8 +42,8 @@ export class PersistentManager<T extends Invoice>
         }
     }
 
-    fork<T extends Invoice>(): PersistentManagerInterface<T> {
-        return new PersistentManager<T>(this.domainEvents, this.stores);
+    fork(): PersistentManagerInterface<Entity> {
+        return new PersistentManager(this.domainEvents, this.stores);
     }
 
     async get(entityClass: EntityClass, id: string) {
@@ -60,7 +63,7 @@ export class PersistentManager<T extends Invoice>
         entityClass: EntityClass,
         key: string,
         value: string,
-        tracked: Iterable<any> = []
+        tracked: Iterable<Entity> = []
     ) {
         const mapper = this.getMapper(entityClass);
 
@@ -88,14 +91,16 @@ export class PersistentManager<T extends Invoice>
         this.rolledBack = true;
     }
 
-    async commit(collections: [EntityClass, Collection<T>][]): Promise<void> {
+    async commit(
+        collections: [EntityClass, Collection<Entity>][]
+    ): Promise<void> {
         if (this.committed || this.rolledBack) {
             return;
         }
 
         this.committed = true;
 
-        const allEntities: any[] = [];
+        const allEntities: Entity[] = [];
 
         for (const [entityClass, collection] of collections) {
             const store = this.getStoreOrThrow(entityClass);
