@@ -16,6 +16,17 @@ export class IdentityMap<T> {
         this.tracked.set(key, { entity, modification });
     }
 
+    setIfAbsent(key: string, entity: T, modification: ModificationType): T {
+        const existing = this.tracked.get(key);
+
+        if (existing) {
+            return existing.entity;
+        }
+
+        this.tracked.set(key, { entity, modification });
+        return entity;
+    }
+
     has(key: string): boolean {
         return this.tracked.has(key);
     }

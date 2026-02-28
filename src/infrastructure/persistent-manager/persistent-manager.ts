@@ -40,7 +40,7 @@ export class PersistentManager implements PersistentManagerInterface {
         return new PersistentManager(this.domainEvents, this.stores);
     }
 
-    get(entityClass: EntityClass, id: string): any | null {
+    async get(entityClass: EntityClass, id: string) {
         const store = this.getStoreOrThrow(entityClass);
         const record = store.get(id);
 
@@ -53,12 +53,12 @@ export class PersistentManager implements PersistentManagerInterface {
         return this.getMapper(entityClass).toDomain(record.value);
     }
 
-    findBy(
+    async findBy(
         entityClass: EntityClass,
         key: string,
         value: string,
         tracked: Iterable<any> = []
-    ): any | null {
+    ) {
         const mapper = this.getMapper(entityClass);
 
         for (const entity of tracked) {

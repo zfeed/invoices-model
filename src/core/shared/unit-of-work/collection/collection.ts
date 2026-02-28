@@ -18,24 +18,25 @@ export class Collection<T extends { id: { toString(): string } }> {
             return item;
         }
 
-        const entity = this.storage.get(this.entityClass, key) as T | null;
+        const entity = (await this.storage.get(
+            this.entityClass,
+            key
+        )) as T | null;
 
         if (!entity) {
             return null;
         }
 
-        this.identityMap.set(key, entity, 'updated');
-
-        return entity;
+        return this.identityMap.setIfAbsent(key, entity, 'updated');
     }
 
     async findBy(key: string, value: string): Promise<T | undefined> {
-        const entity = this.storage.findBy(
+        const entity = (await this.storage.findBy(
             this.entityClass,
             key,
             value,
             this.trackedEntities()
-        ) as T | null;
+        )) as T | null;
 
         if (!entity) {
             return undefined;
@@ -43,11 +44,7 @@ export class Collection<T extends { id: { toString(): string } }> {
 
         const entityKey = entity.id.toString();
 
-        if (!this.identityMap.has(entityKey)) {
-            this.identityMap.set(entityKey, entity, 'updated');
-        }
-
-        return entity;
+        return this.identityMap.setIfAbsent(entityKey, entity, 'updated');
     }
 
     async add(object: T): Promise<void> {
