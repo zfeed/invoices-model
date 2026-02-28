@@ -1,8 +1,3 @@
-import './mappers/draft-invoice.mapper';
-import './mappers/invoice.mapper';
-import './mappers/authflow-policy.mapper';
-import './mappers/financial-document.mapper';
-
 import { DraftInvoice } from '../../core/invoices/domain/draft-invoice/draft-invoice';
 import { Invoice } from '../../core/invoices/domain/invoice/invoice';
 import { AuthflowPolicy } from '../../core/financial-authorization/domain/authflow/authflow-policy';
@@ -14,30 +9,33 @@ import {
     PersistentManager as PersistentManagerInterface,
 } from '../../core/shared/unit-of-work/unit-of-work.interface';
 import type { Collection } from '../../core/shared/unit-of-work/collection/collection';
-import { mappers } from './registry';
 
 type Entity = DraftInvoice | Invoice | AuthflowPolicy | FinancialDocument;
 
+type MappableEntityClass = EntityClass & {
+    fromPlain(plain: Record<string, unknown>): Entity;
+};
+
+const entityClasses: MappableEntityClass[] = [
+    DraftInvoice,
+    Invoice,
+    AuthflowPolicy,
+    FinancialDocument,
+];
+
 export class PersistentManager implements PersistentManagerInterface<Entity> {
-    private readonly stores: Map<EntityClass, Store<any>>;
     private readonly versions = new Map<EntityClass, Map<string, number>>();
     private committed = false;
     private rolledBack = false;
 
     constructor(
         private readonly domainEvents: DomainEvents,
-        stores?: Map<EntityClass, Store<any>>
+        private readonly stores: Map<
+            EntityClass,
+            Store<Record<string, unknown>>
+        > = new Map(entityClasses.map((ec) => [ec, new Store()]))
     ) {
-        if (stores) {
-            this.stores = stores;
-        } else {
-            this.stores = new Map();
-            for (const entityClass of mappers.keys()) {
-                this.stores.set(entityClass, new Store());
-            }
-        }
-
-        for (const entityClass of mappers.keys()) {
+        for (const entityClass of entityClasses) {
             this.versions.set(entityClass, new Map());
         }
     }
@@ -56,7 +54,7 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
 
         this.trackVersion(entityClass, id, record.version);
 
-        return this.getMapper(entityClass).toDomain(record.value);
+        return this.getMappable(entityClass).fromPlain(record.value);
     }
 
     async findBy(
@@ -65,10 +63,10 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         value: string,
         tracked: Iterable<Entity> = []
     ) {
-        const mapper = this.getMapper(entityClass);
-
         for (const entity of tracked) {
-            if (mapper.toPlain(entity)[key] === value) {
+            const plain: Record<string, unknown> = entity.toPlain();
+
+            if (plain[key] === value) {
                 return entity;
             }
         }
@@ -77,7 +75,9 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
 
         for (const record of store.values()) {
             if (record.value[key] === value) {
-                const entity = mapper.toDomain(record.value);
+                const entity = this.getMappable(entityClass).fromPlain(
+                    record.value
+                );
                 const id = entity.id.toString();
                 this.trackVersion(entityClass, id, record.version);
                 return entity;
@@ -104,11 +104,10 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
 
         for (const [entityClass, collection] of collections) {
             const store = this.getStoreOrThrow(entityClass);
-            const mapper = this.getMapper(entityClass);
 
             for (const entity of collection.values()) {
                 const id = entity.id.toString();
-                const data = mapper.toPlain(entity);
+                const data = entity.toPlain();
                 const expectedVersion = this.getTrackedVersion(entityClass, id);
 
                 store.setIfVersion(id, data, expectedVersion);
@@ -134,17 +133,19 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         return this.versions.get(entityClass)?.get(id) ?? null;
     }
 
-    private getMapper(entityClass: EntityClass) {
-        const mapper = mappers.get(entityClass);
+    private getMappable(entityClass: EntityClass): MappableEntityClass {
+        const mappable = entityClasses.find((ec) => ec === entityClass);
 
-        if (!mapper) {
-            throw new Error(`Mapper for ${entityClass.name} not found`);
+        if (!mappable) {
+            throw new Error(`Entity class ${entityClass.name} not found`);
         }
 
-        return mapper;
+        return mappable;
     }
 
-    private getStoreOrThrow(entityClass: EntityClass): Store<any> {
+    private getStoreOrThrow(
+        entityClass: EntityClass
+    ): Store<Record<string, unknown>> {
         const store = this.stores.get(entityClass);
 
         if (!store) {

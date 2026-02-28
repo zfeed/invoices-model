@@ -28,6 +28,7 @@ TypeScript DDD codebase with two bounded contexts: **invoices** (OOP class-based
 
 ## Code Style
 
+- Avoid `any` and `as` type assertions. Use `unknown`, `Record<string, unknown>`, or specific types instead. Prefer structural typing, narrowing, and lookup patterns over casts.
 - Prefer functional composition patterns: rambda `when`/`ifElse`, Result/Some/IO monads, flat pipelines.
 - Avoid class-based implementations when a functional approach is asked for. Avoid manual object reconstruction, wrapper functions, and explicit type aliases unless asked.
 - When asked for functional style, use the existing monadic types in `building-blocks/` — do not introduce new wrapper constructs.
