@@ -40,7 +40,7 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         }
     }
 
-    fork(): PersistentManagerInterface<Entity> {
+    async fork(): Promise<PersistentManagerInterface<Entity>> {
         return new PersistentManager(this.domainEvents, this.stores);
     }
 

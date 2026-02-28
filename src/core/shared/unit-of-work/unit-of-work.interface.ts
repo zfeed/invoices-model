@@ -14,5 +14,5 @@ export interface PersistentManager<
     ): Promise<T | null>;
     commit(collections: [EntityClass, Collection<T>][]): Promise<void>;
     rollback(): Promise<void>;
-    fork(): PersistentManager<T>;
+    fork(): Promise<PersistentManager<T>>;
 }
