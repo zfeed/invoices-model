@@ -49,7 +49,7 @@ export class Collection<T extends { id: { toString(): string } }> {
 
     async add(object: T): Promise<void> {
         const key = object.id.toString();
-        this.identityMap.set(key, object, 'created');
+        this.identityMap.setIfAbsent(key, object, 'created');
     }
 
     values(): T[] {
