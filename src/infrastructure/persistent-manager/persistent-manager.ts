@@ -9,14 +9,26 @@ import {
     PersistentManager as PersistentManagerInterface,
 } from '../../core/shared/unit-of-work/unit-of-work.interface';
 import type { Collection } from '../../core/shared/unit-of-work/collection/collection';
+import {
+    DraftInvoiceDataMapper,
+    DraftInvoiceRecord,
+} from './mappers/invoices/draft-invoice.data-mapper';
+import {
+    InvoiceDataMapper,
+    InvoiceRecord,
+} from './mappers/invoices/invoice.data-mapper';
+import {
+    AuthflowPolicyDataMapper,
+    AuthflowPolicyRecord,
+} from './mappers/financial-authorization/authflow-policy.data-mapper';
+import {
+    FinancialDocumentDataMapper,
+    FinancialDocumentRecord,
+} from './mappers/financial-authorization/financial-document.data-mapper';
 
 type Entity = DraftInvoice | Invoice | AuthflowPolicy | FinancialDocument;
 
-type MappableEntityClass = EntityClass & {
-    fromPlain(plain: Record<string, unknown>): Entity;
-};
-
-const entityClasses: MappableEntityClass[] = [
+const entityClasses: EntityClass[] = [
     DraftInvoice,
     Invoice,
     AuthflowPolicy,
@@ -54,7 +66,7 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
 
         this.trackVersion(entityClass, id, record.version);
 
-        return this.getMappable(entityClass).fromPlain(record.value);
+        return this.fromRecord(entityClass, record.value);
     }
 
     async findBy(
@@ -64,9 +76,9 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         tracked: Iterable<Entity> = []
     ) {
         for (const entity of tracked) {
-            const plain: Record<string, unknown> = entity.toPlain();
+            const record = this.toRecord(entity);
 
-            if (plain[key] === value) {
+            if (this.resolveRecordValue(record[key]) === value) {
                 return entity;
             }
         }
@@ -74,10 +86,8 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         const store = this.getStoreOrThrow(entityClass);
 
         for (const record of store.values()) {
-            if (record.value[key] === value) {
-                const entity = this.getMappable(entityClass).fromPlain(
-                    record.value
-                );
+            if (this.resolveRecordValue(record.value[key]) === value) {
+                const entity = this.fromRecord(entityClass, record.value);
                 const id = entity.id.toString();
                 this.trackVersion(entityClass, id, record.version);
                 return entity;
@@ -107,7 +117,7 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
 
             for (const entity of collection.values()) {
                 const id = entity.id.toString();
-                const data = entity.toPlain();
+                const data = this.toRecord(entity);
                 const expectedVersion = this.getTrackedVersion(entityClass, id);
 
                 store.setIfVersion(id, data, expectedVersion);
@@ -116,6 +126,63 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         }
 
         await this.domainEvents.publishEvents(...allEntities);
+    }
+
+    private fromRecord(
+        entityClass: EntityClass,
+        record: Record<string, unknown>
+    ): Entity {
+        if (entityClass === DraftInvoice) {
+            return DraftInvoiceDataMapper.fromRecord(
+                record as DraftInvoiceRecord
+            );
+        }
+
+        if (entityClass === Invoice) {
+            return InvoiceDataMapper.fromRecord(record as InvoiceRecord);
+        }
+
+        if (entityClass === AuthflowPolicy) {
+            return AuthflowPolicyDataMapper.fromRecord(
+                record as AuthflowPolicyRecord
+            );
+        }
+
+        if (entityClass === FinancialDocument) {
+            return FinancialDocumentDataMapper.fromRecord(
+                record as FinancialDocumentRecord
+            );
+        }
+
+        throw new Error(`No mapper for ${entityClass.name}`);
+    }
+
+    private toRecord(entity: Entity): Record<string, unknown> {
+        if (entity instanceof DraftInvoice) {
+            return DraftInvoiceDataMapper.from(entity).toRecord();
+        }
+
+        if (entity instanceof Invoice) {
+            return InvoiceDataMapper.from(entity).toRecord();
+        }
+
+        if (entity instanceof AuthflowPolicy) {
+            return AuthflowPolicyDataMapper.from(entity).toRecord();
+        }
+
+        if (entity instanceof FinancialDocument) {
+            return FinancialDocumentDataMapper.from(entity).toRecord();
+        }
+
+        throw new Error('No mapper for entity');
+    }
+
+    private resolveRecordValue(value: unknown): unknown {
+        if (value !== null && typeof value === 'object' && 'value' in value) {
+            return (value as Record<string, unknown>).value;
+        }
+
+        return value;
     }
 
     private trackVersion(
@@ -131,16 +198,6 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         id: string
     ): number | null {
         return this.versions.get(entityClass)?.get(id) ?? null;
-    }
-
-    private getMappable(entityClass: EntityClass): MappableEntityClass {
-        const mappable = entityClasses.find((ec) => ec === entityClass);
-
-        if (!mappable) {
-            throw new Error(`Entity class ${entityClass.name} not found`);
-        }
-
-        return mappable;
     }
 
     private getStoreOrThrow(
