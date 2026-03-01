@@ -14,6 +14,10 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn('vat_rate', sql`numeric(5, 2)`)
         .addColumn('vat_amount', sql`numeric(78, 0)`)
         .addColumn('vat_currency', sql`char(3)`)
+        .addColumn('subtotal_amount', sql`numeric(78, 0)`, (col) =>
+            col.notNull()
+        )
+        .addColumn('subtotal_currency', sql`char(3)`, (col) => col.notNull())
         .addColumn('total_amount', sql`numeric(78, 0)`, (col) => col.notNull())
         .addColumn('total_currency', sql`char(3)`, (col) => col.notNull())
         .addColumn('issue_date', 'date', (col) => col.notNull())

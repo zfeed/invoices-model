@@ -4,6 +4,7 @@
     "description": "",
     "scripts": {
         "start": "tsc --noEmit && tsx src/http/app.ts",
+        "try": "tsc --noEmit && tsx index.ts",
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
@@ -29,9 +30,12 @@
         "vitest": "^4.0.18"
     },
     "dependencies": {
+        "@types/lodash": "^4.17.24",
         "decimal.js": "^10.6.0",
+        "dotenv": "^17.3.1",
         "fastify": "^5.7.4",
         "kysely": "^0.28.11",
+        "lodash": "^4.17.23",
         "pg": "^8.19.0",
         "ramda": "^0.32.0",
         "uuid": "^13.0.0",

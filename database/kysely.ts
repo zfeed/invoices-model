@@ -1,14 +1,16 @@
 import { Pool } from 'pg';
 import { Kysely, PostgresDialect } from 'kysely';
+import type {
+    Transaction as BaseTransaction,
+    ControlledTransaction as BaseControlledTransaction,
+} from 'kysely';
 import { DB } from 'kysely-codegen';
+
+console.log(process.env.POSTGRES_HOST);
 
 export const postgresDialect = new PostgresDialect({
     pool: new Pool({
-        host: process.env.POSTGRES_HOST,
-        port: Number(process.env.POSTGRES_PORT),
-        user: process.env.POSTGRES_USER,
-        password: process.env.POSTGRES_PASSWORD,
-        database: process.env.POSTGRES_DB,
+        connectionString: process.env.DATABASE_URL,
     }),
 });
 
@@ -16,4 +18,5 @@ export const kysely = new Kysely<DB>({
     dialect: postgresDialect,
 });
 
-kysely.selectFrom('draft_invoices').selectAll().execute();
+export type Transaction = BaseTransaction<DB>;
+export type ControlledTransaction = BaseControlledTransaction<DB>;
