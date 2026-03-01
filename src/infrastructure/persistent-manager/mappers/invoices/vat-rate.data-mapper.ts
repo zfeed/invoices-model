@@ -1,4 +1,4 @@
-import { VatRate } from '../../../core/invoices/domain/vat-rate/vat-rate';
+import { VatRate } from '../../../../core/invoices/domain/vat-rate/vat-rate';
 import { NumericDataMapper, NumericRecord } from './numeric.data-mapper';
 
 export type VatRateRecord = {

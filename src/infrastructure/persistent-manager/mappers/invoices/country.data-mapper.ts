@@ -1,4 +1,4 @@
-import { Country } from '../../../core/invoices/domain/country/country';
+import { Country } from '../../../../core/invoices/domain/country/country';
 
 export type CountryRecord = {
     code: string;

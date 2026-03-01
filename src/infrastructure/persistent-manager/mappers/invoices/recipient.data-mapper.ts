@@ -1,7 +1,7 @@
 import {
     Recipient,
     RECIPIENT_TYPE,
-} from '../../../core/invoices/domain/recipient/recipient';
+} from '../../../../core/invoices/domain/recipient/recipient';
 import { CountryDataMapper, CountryRecord } from './country.data-mapper';
 import { EmailDataMapper, EmailRecord } from './email.data-mapper';
 import { PaypalDataMapper, PaypalRecord } from './paypal.data-mapper';

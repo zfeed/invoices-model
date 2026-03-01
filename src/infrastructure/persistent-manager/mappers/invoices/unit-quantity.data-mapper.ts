@@ -1,4 +1,4 @@
-import { UnitQuantity } from '../../../core/invoices/domain/line-item/unit-quantity/unit-quantity';
+import { UnitQuantity } from '../../../../core/invoices/domain/line-item/unit-quantity/unit-quantity';
 import { NumericDataMapper, NumericRecord } from './numeric.data-mapper';
 
 export type UnitQuantityRecord = {

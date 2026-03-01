@@ -1,7 +1,7 @@
 import {
     Issuer,
     ISSUER_TYPE,
-} from '../../../core/invoices/domain/issuer/issuer';
+} from '../../../../core/invoices/domain/issuer/issuer';
 import { EmailDataMapper, EmailRecord } from './email.data-mapper';
 
 export type IssuerRecord = {

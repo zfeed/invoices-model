@@ -1,4 +1,4 @@
-import { Invoice } from '../../../core/invoices/domain/invoice/invoice';
+import { Invoice } from '../../../../core/invoices/domain/invoice/invoice';
 import {
     CalendarDateDataMapper,
     CalendarDateRecord,

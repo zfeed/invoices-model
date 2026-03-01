@@ -1,4 +1,4 @@
-import { UnitDescription } from '../../../core/invoices/domain/line-item/unit-description/unit-description';
+import { UnitDescription } from '../../../../core/invoices/domain/line-item/unit-description/unit-description';
 
 export type UnitDescriptionRecord = {
     value: string;

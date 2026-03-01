@@ -1,4 +1,4 @@
-import { Email } from '../../../core/invoices/domain/email/email';
+import { Email } from '../../../../core/invoices/domain/email/email';
 
 export type EmailRecord = {
     value: string;

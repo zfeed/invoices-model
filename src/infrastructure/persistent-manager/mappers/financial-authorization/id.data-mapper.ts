@@ -1,4 +1,4 @@
-import { Id } from '../../../core/invoices/domain/id/id';
+import { Id } from '../../../../core/financial-authorization/domain/id/id';
 
 export type IdRecord = {
     value: string;

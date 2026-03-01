@@ -1,4 +1,4 @@
-import { Numeric } from '../../../core/invoices/domain/numeric/numeric';
+import { Numeric } from '../../../../core/invoices/domain/numeric/numeric';
 
 export type NumericRecord = {
     value: string;

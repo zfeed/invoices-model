@@ -1,4 +1,4 @@
-import { Money } from '../../../core/invoices/domain/money/money/money';
+import { Money } from '../../../../core/invoices/domain/money/money/money';
 import { CurrencyDataMapper, CurrencyRecord } from './currency.data-mapper';
 import { NumericDataMapper, NumericRecord } from './numeric.data-mapper';
 

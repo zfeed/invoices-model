@@ -1,4 +1,4 @@
-import { CalendarDate } from '../../../core/invoices/domain/calendar-date/calendar-date';
+import { CalendarDate } from '../../../../core/invoices/domain/calendar-date/calendar-date';
 
 export type CalendarDateRecord = {
     value: string;

@@ -1,4 +1,4 @@
-import { Currency } from '../../../core/invoices/domain/money/currency/currency';
+import { Currency } from '../../../../core/invoices/domain/money/currency/currency';
 
 export type CurrencyRecord = {
     code: string;

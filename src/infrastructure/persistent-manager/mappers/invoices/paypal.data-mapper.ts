@@ -1,4 +1,4 @@
-import { Paypal } from '../../../core/invoices/domain/billing/paypal/paypal';
+import { Paypal } from '../../../../core/invoices/domain/billing/paypal/paypal';
 import { EmailDataMapper, EmailRecord } from './email.data-mapper';
 
 export type PaypalRecord = {

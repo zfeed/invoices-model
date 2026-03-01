@@ -1,4 +1,4 @@
-import { LineItems } from '../../../core/invoices/domain/line-items/line-items';
+import { LineItems } from '../../../../core/invoices/domain/line-items/line-items';
 import { LineItemDataMapper, LineItemRecord } from './line-item.data-mapper';
 import { MoneyDataMapper, MoneyRecord } from './money.data-mapper';
 
