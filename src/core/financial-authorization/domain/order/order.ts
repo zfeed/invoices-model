@@ -2,10 +2,10 @@ import { Equatable, Mappable, Result } from '../../../../building-blocks';
 import { checkOrderNonNegative } from './checks/check-order-non-negative';
 
 export class Order implements Equatable<Order>, Mappable<number> {
-    #value: number;
+    protected _value: number;
 
     protected constructor(value: number) {
-        this.#value = value;
+        this._value = value;
     }
 
     static create(value: number) {
@@ -23,14 +23,14 @@ export class Order implements Equatable<Order>, Mappable<number> {
     }
 
     equals(other: Order): boolean {
-        return this.#value === other.#value;
+        return this._value === other._value;
     }
 
     toPlain(): number {
-        return this.#value;
+        return this._value;
     }
 
     toString(): string {
-        return String(this.#value);
+        return String(this._value);
     }
 }

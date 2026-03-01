@@ -4,10 +4,10 @@ import { checkDescriptionNonEmpty } from './checks/check-description-non-empty';
 export class UnitDescription
     implements Equatable<UnitDescription>, Mappable<string>
 {
-    #value: string;
+    protected _value: string;
 
     protected constructor(value: string) {
-        this.#value = value;
+        this._value = value;
     }
 
     static create(value: string) {
@@ -25,14 +25,14 @@ export class UnitDescription
     }
 
     equals(other: UnitDescription) {
-        return this.#value === other.#value;
+        return this._value === other._value;
     }
 
     toPlain(): string {
-        return this.#value;
+        return this._value;
     }
 
     toString(): string {
-        return this.#value;
+        return this._value;
     }
 }

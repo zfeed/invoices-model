@@ -32,73 +32,23 @@ export class Invoice
             | InvoiceFailedEvent
         >
 {
-    #id: Id;
-    #status: InvoiceStatus;
-    #vatRate: VatRate | null;
-    #vatAmount: Money | null;
-    #total: Money;
-    #lineItems: LineItems;
-    #issueDate: CalendarDate;
-    #dueDate: CalendarDate;
-    #issuer: Issuer;
-    #recipient: Recipient;
-    #events: (
+    protected _id: Id;
+    protected _status: InvoiceStatus;
+    protected _vatRate: VatRate | null;
+    protected _vatAmount: Money | null;
+    protected _total: Money;
+    protected _lineItems: LineItems;
+    protected _issueDate: CalendarDate;
+    protected _dueDate: CalendarDate;
+    protected _issuer: Issuer;
+    protected _recipient: Recipient;
+    protected _events: (
         | InvoiceIssuedEvent
         | InvoiceProcessingEvent
         | InvoiceCancelledEvent
         | InvoicePaidEvent
         | InvoiceFailedEvent
     )[] = [];
-
-    public get id(): Id {
-        return this.#id;
-    }
-
-    public get status(): InvoiceStatus {
-        return this.#status;
-    }
-
-    public get events(): ReadonlyArray<
-        | InvoiceIssuedEvent
-        | InvoiceProcessingEvent
-        | InvoiceCancelledEvent
-        | InvoicePaidEvent
-        | InvoiceFailedEvent
-    > {
-        return this.#events;
-    }
-
-    public get total(): Money {
-        return this.#total;
-    }
-
-    public get vatRate(): VatRate | null {
-        return this.#vatRate;
-    }
-
-    public get vatAmount(): Money | null {
-        return this.#vatAmount;
-    }
-
-    public get lineItems(): ReadOnlyLineItems {
-        return this.#lineItems;
-    }
-
-    public get issueDate(): CalendarDate {
-        return this.#issueDate;
-    }
-
-    public get dueDate(): CalendarDate {
-        return this.#dueDate;
-    }
-
-    public get issuer(): Issuer {
-        return this.#issuer;
-    }
-
-    public get recipient(): Recipient {
-        return this.#recipient;
-    }
 
     protected constructor(
         id: Id,
@@ -112,16 +62,56 @@ export class Invoice
         issuer: Issuer,
         recipient: Recipient
     ) {
-        this.#id = id;
-        this.#status = status;
-        this.#lineItems = lineItems;
-        this.#total = total;
-        this.#vatRate = vatRate;
-        this.#vatAmount = vatAmount;
-        this.#issueDate = issueDate;
-        this.#dueDate = dueDate;
-        this.#recipient = recipient;
-        this.#issuer = issuer;
+        this._id = id;
+        this._status = status;
+        this._lineItems = lineItems;
+        this._total = total;
+        this._vatRate = vatRate;
+        this._vatAmount = vatAmount;
+        this._issueDate = issueDate;
+        this._dueDate = dueDate;
+        this._recipient = recipient;
+        this._issuer = issuer;
+    }
+
+    public get id(): Id {
+        return this._id;
+    }
+    public get status(): InvoiceStatus {
+        return this._status;
+    }
+    public get events(): ReadonlyArray<
+        | InvoiceIssuedEvent
+        | InvoiceProcessingEvent
+        | InvoiceCancelledEvent
+        | InvoicePaidEvent
+        | InvoiceFailedEvent
+    > {
+        return this._events;
+    }
+    public get total(): Money {
+        return this._total;
+    }
+    public get vatRate(): VatRate | null {
+        return this._vatRate;
+    }
+    public get vatAmount(): Money | null {
+        return this._vatAmount;
+    }
+    public get lineItems(): ReadOnlyLineItems {
+        return this._lineItems;
+    }
+    public get issueDate(): CalendarDate {
+        return this._issueDate;
+    }
+    public get dueDate(): CalendarDate {
+        return this._dueDate;
+    }
+    public get issuer(): Issuer {
+        return this._issuer;
+    }
+    public get recipient(): Recipient {
+        return this._recipient;
     }
 
     static fromPlain(plain: ReturnType<Invoice['toPlain']>) {
@@ -206,92 +196,92 @@ export class Invoice
 
         if (!options.status) {
             const event = new InvoiceIssuedEvent(invoice.toPlain());
-            invoice.#events.push(event);
+            invoice._events.push(event);
         }
 
         return Result.ok(invoice);
     }
 
     process() {
-        if (!this.#status.equals(InvoiceStatus.issued())) {
+        if (!this._status.equals(InvoiceStatus.issued())) {
             return Result.error(
                 new DomainError({
-                    message: `Cannot process invoice in status ${this.#status.toString()}`,
+                    message: `Cannot process invoice in status ${this._status.toString()}`,
                     code: DOMAIN_ERROR_CODE.INVOICE_INVALID_STATUS_TRANSITION,
                 })
             );
         }
 
-        this.#status = InvoiceStatus.processing();
+        this._status = InvoiceStatus.processing();
 
-        this.#events.push(new InvoiceProcessingEvent(this.toPlain()));
+        this._events.push(new InvoiceProcessingEvent(this.toPlain()));
 
         return Result.ok(undefined);
     }
 
     pay() {
-        if (!this.#status.equals(InvoiceStatus.processing())) {
+        if (!this._status.equals(InvoiceStatus.processing())) {
             return Result.error(
                 new DomainError({
-                    message: `Cannot pay invoice in status ${this.#status.toString()}`,
+                    message: `Cannot pay invoice in status ${this._status.toString()}`,
                     code: DOMAIN_ERROR_CODE.INVOICE_INVALID_STATUS_TRANSITION,
                 })
             );
         }
 
-        this.#status = InvoiceStatus.paid();
+        this._status = InvoiceStatus.paid();
 
-        this.#events.push(new InvoicePaidEvent(this.toPlain()));
+        this._events.push(new InvoicePaidEvent(this.toPlain()));
 
         return Result.ok(undefined);
     }
 
     fail() {
-        if (!this.#status.equals(InvoiceStatus.processing())) {
+        if (!this._status.equals(InvoiceStatus.processing())) {
             return Result.error(
                 new DomainError({
-                    message: `Cannot fail invoice in status ${this.#status.toString()}`,
+                    message: `Cannot fail invoice in status ${this._status.toString()}`,
                     code: DOMAIN_ERROR_CODE.INVOICE_INVALID_STATUS_TRANSITION,
                 })
             );
         }
 
-        this.#status = InvoiceStatus.failed();
+        this._status = InvoiceStatus.failed();
 
-        this.#events.push(new InvoiceFailedEvent(this.toPlain()));
+        this._events.push(new InvoiceFailedEvent(this.toPlain()));
 
         return Result.ok(undefined);
     }
 
     cancel() {
-        if (!this.#status.equals(InvoiceStatus.issued())) {
+        if (!this._status.equals(InvoiceStatus.issued())) {
             return Result.error(
                 new DomainError({
-                    message: `Cannot cancel invoice in status ${this.#status.toString()}`,
+                    message: `Cannot cancel invoice in status ${this._status.toString()}`,
                     code: DOMAIN_ERROR_CODE.INVOICE_INVALID_STATUS_TRANSITION,
                 })
             );
         }
 
-        this.#status = InvoiceStatus.cancelled();
+        this._status = InvoiceStatus.cancelled();
 
-        this.#events.push(new InvoiceCancelledEvent(this.toPlain()));
+        this._events.push(new InvoiceCancelledEvent(this.toPlain()));
 
         return Result.ok(undefined);
     }
 
     toPlain() {
         return {
-            id: this.#id.toPlain(),
-            status: this.#status.toString(),
-            lineItems: this.#lineItems.toPlain(),
-            total: this.#total.toPlain(),
-            vatRate: this.#vatRate ? this.#vatRate.toPlain() : null,
-            vatAmount: this.#vatAmount ? this.#vatAmount.toPlain() : null,
-            issueDate: this.#issueDate.toString(),
-            dueDate: this.#dueDate.toString(),
-            issuer: this.#issuer.toPlain(),
-            recipient: this.#recipient.toPlain(),
+            id: this._id.toPlain(),
+            status: this._status.toString(),
+            lineItems: this._lineItems.toPlain(),
+            total: this._total.toPlain(),
+            vatRate: this._vatRate ? this._vatRate.toPlain() : null,
+            vatAmount: this._vatAmount ? this._vatAmount.toPlain() : null,
+            issueDate: this._issueDate.toString(),
+            dueDate: this._dueDate.toString(),
+            issuer: this._issuer.toPlain(),
+            recipient: this._recipient.toPlain(),
         };
     }
 }

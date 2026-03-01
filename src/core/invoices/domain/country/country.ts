@@ -2,10 +2,14 @@ import { Equatable, Mappable, Result } from '../../../../building-blocks';
 import { checkCountryCode } from './checks/check-country-code';
 
 export class Country implements Equatable<Country>, Mappable<string> {
-    #code: string;
+    protected _code: string;
 
     protected constructor(code: string) {
-        this.#code = code;
+        this._code = code;
+    }
+
+    get code(): string {
+        return this._code;
     }
 
     static fromPlain(code: string) {
@@ -21,19 +25,15 @@ export class Country implements Equatable<Country>, Mappable<string> {
         return Result.ok(new Country(code.toUpperCase()));
     }
 
-    get code(): string {
-        return this.#code;
-    }
-
     toPlain(): string {
-        return this.#code;
+        return this._code;
     }
 
     toString(): string {
-        return this.#code;
+        return this._code;
     }
 
     equals(other: Country): boolean {
-        return this.#code === other.#code;
+        return this._code === other._code;
     }
 }

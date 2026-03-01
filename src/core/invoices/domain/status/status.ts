@@ -20,10 +20,10 @@ export enum DRAFT_INVOICE_STATUS {
 }
 
 export class Status<T extends string> implements Equatable<Status<T>> {
-    #value: T;
+    protected _value: T;
 
     protected constructor(value: T) {
-        this.#value = value;
+        this._value = value;
     }
 
     protected static parseEnum<E extends Record<string, string>>(
@@ -46,10 +46,10 @@ export class Status<T extends string> implements Equatable<Status<T>> {
     }
 
     toString(): string {
-        return this.#value;
+        return this._value;
     }
 
     equals(other: Status<T>): boolean {
-        return this.#value === other.#value;
+        return this._value === other._value;
     }
 }

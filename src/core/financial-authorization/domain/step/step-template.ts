@@ -7,26 +7,26 @@ import { Step } from './step';
 export class StepTemplate
     implements Mappable<ReturnType<StepTemplate['toPlain']>>
 {
-    #id: Id;
-    #order: Order;
-    #groups: GroupTemplate[];
+    protected _id: Id;
+    protected _order: Order;
+    protected _groups: GroupTemplate[];
 
     protected constructor(id: Id, order: Order, groups: GroupTemplate[]) {
-        this.#id = id;
-        this.#order = order;
-        this.#groups = groups;
+        this._id = id;
+        this._order = order;
+        this._groups = groups;
     }
 
     public get id(): Id {
-        return this.#id;
+        return this._id;
     }
 
     public get order(): Order {
-        return this.#order;
+        return this._order;
     }
 
-    public get groups(): readonly GroupTemplate[] {
-        return this.#groups;
+    public get groups(): GroupTemplate[] {
+        return this._groups;
     }
 
     static create(data: { order: Order; groups: GroupTemplate[] }) {
@@ -52,7 +52,7 @@ export class StepTemplate
     }
 
     toStep(): Result<DomainError, Step> {
-        const groupResults = this.#groups.reduce<
+        const groupResults = this._groups.reduce<
             Result<DomainError, import('../groups/group').Group[]>
         >(
             (acc, template) =>
@@ -63,15 +63,15 @@ export class StepTemplate
         );
 
         return groupResults.flatMap((groups) =>
-            Step.create({ order: this.#order, groups })
+            Step.create({ order: this._order, groups })
         );
     }
 
     toPlain() {
         return {
-            id: this.#id.toPlain(),
-            order: this.#order.toPlain(),
-            groups: this.#groups.map((g) => g.toPlain()),
+            id: this._id.toPlain(),
+            order: this._order.toPlain(),
+            groups: this._groups.map((g) => g.toPlain()),
         };
     }
 }

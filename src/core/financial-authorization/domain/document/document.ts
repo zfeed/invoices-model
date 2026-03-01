@@ -21,11 +21,11 @@ export class FinancialDocument
         Mappable<ReturnType<FinancialDocument['toPlain']>>,
         PublishableEvents<DomainEvent<any>>
 {
-    #id: Id;
-    #referenceId: ReferenceId;
-    #value: Money;
-    #authflows: Authflow[];
-    #events: DomainEvent<any>[] = [];
+    protected _id: Id;
+    protected _referenceId: ReferenceId;
+    protected _value: Money;
+    protected _authflows: Authflow[];
+    protected _events: DomainEvent<any>[] = [];
 
     protected constructor(
         id: Id,
@@ -33,30 +33,30 @@ export class FinancialDocument
         value: Money,
         authflows: Authflow[]
     ) {
-        this.#id = id;
-        this.#referenceId = referenceId;
-        this.#value = value;
-        this.#authflows = authflows;
+        this._id = id;
+        this._referenceId = referenceId;
+        this._value = value;
+        this._authflows = authflows;
     }
 
     public get id(): Id {
-        return this.#id;
+        return this._id;
     }
 
     public get referenceId(): ReferenceId {
-        return this.#referenceId;
+        return this._referenceId;
     }
 
     public get value(): Money {
-        return this.#value;
+        return this._value;
     }
 
-    public get authflows(): readonly Authflow[] {
-        return this.#authflows;
+    public get authflows(): Authflow[] {
+        return this._authflows;
     }
 
-    public get events(): ReadonlyArray<DomainEvent<any>> {
-        return this.#events;
+    public get events(): DomainEvent<any>[] {
+        return this._events;
     }
 
     static create(data: {
@@ -76,7 +76,7 @@ export class FinancialDocument
             data.authflows
         );
 
-        doc.#events.push(new DocumentCreatedEvent(doc.toPlain()));
+        doc._events.push(new DocumentCreatedEvent(doc.toPlain()));
 
         return Result.ok(doc);
     }
@@ -117,7 +117,7 @@ export class FinancialDocument
     }
 
     apply(action: Action, approval: Approval): Result<DomainError, undefined> {
-        const authflow = this.#authflows.find((a) => a.action.equals(action));
+        const authflow = this._authflows.find((a) => a.action.equals(action));
 
         if (!authflow) {
             return Result.error(
@@ -134,27 +134,27 @@ export class FinancialDocument
             return Result.error(authflowResult.unwrapError());
         }
 
-        this.#authflows = this.#authflows.map((a) =>
+        this._authflows = this._authflows.map((a) =>
             a.action.equals(action) ? authflowResult.unwrap() : a
         );
 
-        const dupError = checkNoDuplicateAuthflowActions(this.#authflows);
+        const dupError = checkNoDuplicateAuthflowActions(this._authflows);
         if (dupError) {
             return Result.error(dupError);
         }
 
-        this.#events.push(new DocumentApprovedEvent(this.toPlain()));
+        this._events.push(new DocumentApprovedEvent(this.toPlain()));
 
         return Result.ok(undefined);
     }
 
     isActionApproved(action: Action): boolean {
-        const authflow = this.#authflows.find((a) => a.action.equals(action));
+        const authflow = this._authflows.find((a) => a.action.equals(action));
         return authflow ? authflow.isApproved : false;
     }
 
     canApproverApprove(action: Action, approverId: Id): boolean {
-        const authflow = this.#authflows.find((a) => a.action.equals(action));
+        const authflow = this._authflows.find((a) => a.action.equals(action));
 
         if (!authflow) {
             return false;
@@ -165,10 +165,10 @@ export class FinancialDocument
 
     toPlain() {
         return {
-            id: this.#id.toPlain(),
-            referenceId: this.#referenceId.toPlain(),
-            value: this.#value.toPlain(),
-            authflows: this.#authflows.map((a) => a.toPlain()),
+            id: this._id.toPlain(),
+            referenceId: this._referenceId.toPlain(),
+            value: this._value.toPlain(),
+            authflows: this._authflows.map((a) => a.toPlain()),
         };
     }
 }

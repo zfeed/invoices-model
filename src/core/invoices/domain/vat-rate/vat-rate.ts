@@ -5,18 +5,18 @@ import { checkPercents } from './checks/check-percents';
 export class VatRate
     implements Equatable<VatRate>, Mappable<ReturnType<VatRate['toPlain']>>
 {
-    #value: Numeric;
+    protected _value: Numeric;
 
     public get rate(): Numeric {
-        return this.#value;
+        return this._value;
     }
 
     protected constructor(value: Numeric) {
-        this.#value = value;
+        this._value = value;
     }
 
     equals(other: VatRate): boolean {
-        return this.#value.equals(other.rate);
+        return this._value.equals(other.rate);
     }
 
     static fromPlain(value: string) {
@@ -45,6 +45,6 @@ export class VatRate
     }
 
     toPlain() {
-        return this.#value.toString();
+        return this._value.toString();
     }
 }

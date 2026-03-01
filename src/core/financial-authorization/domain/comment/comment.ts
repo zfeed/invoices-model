@@ -2,10 +2,10 @@ import { Equatable, Mappable, Result } from '../../../../building-blocks';
 import { checkCommentNotBlank } from './checks/check-comment-not-blank';
 
 export class Comment implements Equatable<Comment>, Mappable<string | null> {
-    #value: string | null;
+    protected _value: string | null;
 
     protected constructor(value: string | null) {
-        this.#value = value;
+        this._value = value;
     }
 
     static create(value: string | null) {
@@ -27,14 +27,14 @@ export class Comment implements Equatable<Comment>, Mappable<string | null> {
     }
 
     equals(other: Comment): boolean {
-        return this.#value === other.#value;
+        return this._value === other._value;
     }
 
     toPlain(): string | null {
-        return this.#value;
+        return this._value;
     }
 
     toString(): string {
-        return this.#value ?? '';
+        return this._value ?? '';
     }
 }

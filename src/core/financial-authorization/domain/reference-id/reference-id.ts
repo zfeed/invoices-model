@@ -2,10 +2,10 @@ import { Equatable, Mappable, Result } from '../../../../building-blocks';
 import { checkReferenceIdNotBlank } from './checks/check-reference-id-not-blank';
 
 export class ReferenceId implements Equatable<ReferenceId>, Mappable<string> {
-    #value: string;
+    protected _value: string;
 
     protected constructor(value: string) {
-        this.#value = value;
+        this._value = value;
     }
 
     static create(value: string) {
@@ -23,14 +23,14 @@ export class ReferenceId implements Equatable<ReferenceId>, Mappable<string> {
     }
 
     equals(other: ReferenceId): boolean {
-        return this.#value === other.#value;
+        return this._value === other._value;
     }
 
     toPlain(): string {
-        return this.#value;
+        return this._value;
     }
 
     toString(): string {
-        return this.#value;
+        return this._value;
     }
 }

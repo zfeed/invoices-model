@@ -2,10 +2,10 @@ import { Equatable, Result } from '../../../../../building-blocks';
 import { checkCurrencyCode } from './checks/check-currency-code';
 
 export class Currency implements Equatable<Currency> {
-    #code: string;
+    protected _code: string;
 
     protected constructor(code: string) {
-        this.#code = code;
+        this._code = code;
     }
 
     static fromPlain(code: string) {
@@ -22,10 +22,10 @@ export class Currency implements Equatable<Currency> {
     }
 
     equals(other: Currency): boolean {
-        return this.#code === other.#code;
+        return this._code === other._code;
     }
 
     toString(): string {
-        return this.#code;
+        return this._code;
     }
 }

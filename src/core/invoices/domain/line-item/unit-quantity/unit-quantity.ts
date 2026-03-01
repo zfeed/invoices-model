@@ -3,10 +3,14 @@ import { Numeric } from '../../numeric/numeric';
 import { checkUnitQuantity } from './checks/check-unit-quantity';
 
 export class UnitQuantity implements Equatable<UnitQuantity>, Mappable<string> {
-    #value: Numeric;
+    protected _value: Numeric;
 
     protected constructor(value: Numeric) {
-        this.#value = value;
+        this._value = value;
+    }
+
+    get value(): Numeric {
+        return this._value;
     }
 
     static fromPlain(value: string) {
@@ -23,15 +27,11 @@ export class UnitQuantity implements Equatable<UnitQuantity>, Mappable<string> {
         return Result.ok(new UnitQuantity(Numeric.create(value).unwrap()));
     }
 
-    get value(): Numeric {
-        return this.#value;
-    }
-
     equals(other: UnitQuantity) {
-        return this.#value.equals(other.#value);
+        return this._value.equals(other._value);
     }
 
     toPlain() {
-        return this.#value.toString();
+        return this._value.toString();
     }
 }

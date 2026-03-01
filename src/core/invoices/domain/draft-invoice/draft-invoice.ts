@@ -35,73 +35,23 @@ export class DraftInvoice
             | DraftInvoiceDraftedEvent
         >
 {
-    #id: Id;
-    #status: DraftInvoiceStatus;
-    #vatRate: VatRate | null;
-    #vatAmount: Money | null;
-    #total: Money | null;
-    #lineItems: LineItems | null;
-    #issueDate: CalendarDate | null;
-    #dueDate: CalendarDate | null;
-    #issuer: Issuer | null;
-    #recipient: Recipient | null;
-    #events: (
+    protected _id: Id;
+    protected _status: DraftInvoiceStatus;
+    protected _vatRate: VatRate | null;
+    protected _vatAmount: Money | null;
+    protected _total: Money | null;
+    protected _lineItems: LineItems | null;
+    protected _issueDate: CalendarDate | null;
+    protected _dueDate: CalendarDate | null;
+    protected _issuer: Issuer | null;
+    protected _recipient: Recipient | null;
+    protected _events: (
         | DraftInvoiceCreatedEvent
         | DraftInvoiceUpdatedEvent
         | DraftInvoiceFinishedEvent
         | DraftInvoiceArchivedEvent
         | DraftInvoiceDraftedEvent
     )[] = [];
-
-    public get events(): ReadonlyArray<
-        | DraftInvoiceCreatedEvent
-        | DraftInvoiceUpdatedEvent
-        | DraftInvoiceFinishedEvent
-        | DraftInvoiceArchivedEvent
-        | DraftInvoiceDraftedEvent
-    > {
-        return this.#events;
-    }
-
-    public get id(): Id {
-        return this.#id;
-    }
-
-    public get status(): DraftInvoiceStatus {
-        return this.#status;
-    }
-
-    public get total(): Money | null {
-        return this.#total;
-    }
-
-    public get vatRate(): VatRate | null {
-        return this.#vatRate;
-    }
-
-    public get vatAmount(): Money | null {
-        return this.#vatAmount;
-    }
-
-    public get lineItems(): ReadOnlyLineItems | null {
-        return this.#lineItems;
-    }
-
-    public get issueDate(): CalendarDate | null {
-        return this.#issueDate;
-    }
-
-    public get dueDate(): CalendarDate | null {
-        return this.#dueDate;
-    }
-
-    public get issuer(): Issuer | null {
-        return this.#issuer;
-    }
-
-    public get recipient(): Recipient | null {
-        return this.#recipient;
-    }
 
     protected constructor(
         id: Id,
@@ -115,22 +65,62 @@ export class DraftInvoice
         issuer: Issuer | null = null,
         recipient: Recipient | null = null
     ) {
-        this.#id = id;
-        this.#status = status;
-        this.#lineItems = lineItems;
-        this.#total = total;
-        this.#vatRate = vatRate;
-        this.#vatAmount = vatAmount;
-        this.#issueDate = issueDate;
-        this.#dueDate = dueDate;
-        this.#recipient = recipient;
-        this.#issuer = issuer;
+        this._id = id;
+        this._status = status;
+        this._lineItems = lineItems;
+        this._total = total;
+        this._vatRate = vatRate;
+        this._vatAmount = vatAmount;
+        this._issueDate = issueDate;
+        this._dueDate = dueDate;
+        this._recipient = recipient;
+        this._issuer = issuer;
     }
 
-    #guardDraftStatus(): DomainError | null {
-        if (!this.#status.equals(DraftInvoiceStatus.draft())) {
+    public get events(): ReadonlyArray<
+        | DraftInvoiceCreatedEvent
+        | DraftInvoiceUpdatedEvent
+        | DraftInvoiceFinishedEvent
+        | DraftInvoiceArchivedEvent
+        | DraftInvoiceDraftedEvent
+    > {
+        return this._events;
+    }
+    public get id(): Id {
+        return this._id;
+    }
+    public get status(): DraftInvoiceStatus {
+        return this._status;
+    }
+    public get total(): Money | null {
+        return this._total;
+    }
+    public get vatRate(): VatRate | null {
+        return this._vatRate;
+    }
+    public get vatAmount(): Money | null {
+        return this._vatAmount;
+    }
+    public get lineItems(): ReadOnlyLineItems | null {
+        return this._lineItems;
+    }
+    public get issueDate(): CalendarDate | null {
+        return this._issueDate;
+    }
+    public get dueDate(): CalendarDate | null {
+        return this._dueDate;
+    }
+    public get issuer(): Issuer | null {
+        return this._issuer;
+    }
+    public get recipient(): Recipient | null {
+        return this._recipient;
+    }
+
+    protected _guardDraftStatus(): DomainError | null {
+        if (!this._status.equals(DraftInvoiceStatus.draft())) {
             return new DomainError({
-                message: `Cannot modify draft invoice in status ${this.#status.toString()}`,
+                message: `Cannot modify draft invoice in status ${this._status.toString()}`,
                 code: DOMAIN_ERROR_CODE.DRAFT_INVOICE_INVALID_STATUS_TRANSITION,
             });
         }
@@ -138,20 +128,20 @@ export class DraftInvoice
     }
 
     public toInvoice(): Result<DomainError, Invoice> {
-        const guardError = this.#guardDraftStatus();
+        const guardError = this._guardDraftStatus();
         if (guardError) {
             return Result.error(guardError);
         }
 
         const error = checkDraftInvoiceComplete({
-            total: this.#total,
-            vatRate: this.#vatRate,
-            vatAmount: this.#vatAmount,
-            issueDate: this.#issueDate,
-            dueDate: this.#dueDate,
-            recipient: this.#recipient,
-            issuer: this.#issuer,
-            lineItems: this.#lineItems,
+            total: this._total,
+            vatRate: this._vatRate,
+            vatAmount: this._vatAmount,
+            issueDate: this._issueDate,
+            dueDate: this._dueDate,
+            recipient: this._recipient,
+            issuer: this._issuer,
+            lineItems: this._lineItems,
         });
 
         if (error) {
@@ -160,89 +150,89 @@ export class DraftInvoice
 
         const result = Invoice.create({
             id: Id.create().unwrap(),
-            lineItems: this.#lineItems!,
-            issueDate: this.#issueDate!,
-            vatRate: this.#vatRate!,
-            dueDate: this.#dueDate!,
-            issuer: this.#issuer!,
-            recipient: this.#recipient!,
+            lineItems: this._lineItems!,
+            issueDate: this._issueDate!,
+            vatRate: this._vatRate!,
+            dueDate: this._dueDate!,
+            issuer: this._issuer!,
+            recipient: this._recipient!,
         });
 
-        this.#status = DraftInvoiceStatus.completed();
+        this._status = DraftInvoiceStatus.completed();
 
-        this.#events.push(new DraftInvoiceFinishedEvent(this.toPlain()));
+        this._events.push(new DraftInvoiceFinishedEvent(this.toPlain()));
 
         return result;
     }
 
     public archive(): Result<DomainError, void> {
-        if (!this.#status.equals(DraftInvoiceStatus.draft())) {
+        if (!this._status.equals(DraftInvoiceStatus.draft())) {
             return Result.error(
                 new DomainError({
-                    message: `Cannot archive draft invoice in status ${this.#status.toString()}`,
+                    message: `Cannot archive draft invoice in status ${this._status.toString()}`,
                     code: DOMAIN_ERROR_CODE.DRAFT_INVOICE_INVALID_STATUS_TRANSITION,
                 })
             );
         }
 
-        this.#status = DraftInvoiceStatus.archived();
+        this._status = DraftInvoiceStatus.archived();
 
-        this.#events.push(new DraftInvoiceArchivedEvent(this.toPlain()));
+        this._events.push(new DraftInvoiceArchivedEvent(this.toPlain()));
 
         return Result.ok(undefined);
     }
 
     public draft(): Result<DomainError, void> {
-        if (!this.#status.equals(DraftInvoiceStatus.archived())) {
+        if (!this._status.equals(DraftInvoiceStatus.archived())) {
             return Result.error(
                 new DomainError({
-                    message: `Cannot move to draft from status ${this.#status.toString()}`,
+                    message: `Cannot move to draft from status ${this._status.toString()}`,
                     code: DOMAIN_ERROR_CODE.DRAFT_INVOICE_INVALID_STATUS_TRANSITION,
                 })
             );
         }
 
-        this.#status = DraftInvoiceStatus.draft();
+        this._status = DraftInvoiceStatus.draft();
 
-        this.#events.push(new DraftInvoiceDraftedEvent(this.toPlain()));
+        this._events.push(new DraftInvoiceDraftedEvent(this.toPlain()));
 
         return Result.ok(undefined);
     }
 
     public addLineItem(lineItem: LineItem) {
-        const guardError = this.#guardDraftStatus();
+        const guardError = this._guardDraftStatus();
         if (guardError) {
             return Result.error(guardError);
         }
 
         let lineItemsResult;
 
-        if (this.#lineItems === null) {
+        if (this._lineItems === null) {
             lineItemsResult = LineItems.create({ items: [lineItem] });
         } else {
-            lineItemsResult = this.#lineItems.add(lineItem);
+            lineItemsResult = this._lineItems.add(lineItem);
         }
 
         if (lineItemsResult.isError()) {
             return lineItemsResult.error();
         }
 
-        this.#lineItems = lineItemsResult.unwrap();
+        this._lineItems = lineItemsResult.unwrap();
 
-        this.#calculateTotal();
+        this._calculateTotal();
 
-        this.#events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
+        this._events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
 
         return Result.ok(undefined);
     }
 
     public removeLineItem(lineItem: LineItem) {
-        const guardError = this.#guardDraftStatus();
+        const guardError = this._guardDraftStatus();
         if (guardError) {
             return Result.error(guardError);
         }
 
-        const lineItemsResult = this.#lineItems!.remove(lineItem);
+        const lineItemsResult = this._lineItems!.remove(lineItem);
 
         if (lineItemsResult.isError()) {
             return lineItemsResult.error();
@@ -250,66 +240,66 @@ export class DraftInvoice
 
         let lineItems = lineItemsResult.unwrap();
 
-        this.#lineItems = lineItems.length === 0 ? null : lineItems;
+        this._lineItems = lineItems.length === 0 ? null : lineItems;
 
-        this.#calculateTotal();
+        this._calculateTotal();
 
-        this.#events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
+        this._events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
 
         return Result.ok(undefined);
     }
 
     public applyVat(vatRate: VatRate): Result<DomainError, void> {
-        const guardError = this.#guardDraftStatus();
+        const guardError = this._guardDraftStatus();
         if (guardError) {
             return Result.error(guardError);
         }
 
-        const error = checkLineItemsNotEmpty(this.#lineItems);
+        const error = checkLineItemsNotEmpty(this._lineItems);
 
         if (error) {
             return Result.error(error);
         }
 
-        this.#vatRate = vatRate;
-        this.#calculateTotal();
+        this._vatRate = vatRate;
+        this._calculateTotal();
 
         return Result.ok(undefined);
     }
 
     public addIssuer(issuer: Issuer): Result<DomainError, void> {
-        const guardError = this.#guardDraftStatus();
+        const guardError = this._guardDraftStatus();
         if (guardError) {
             return Result.error(guardError);
         }
 
-        this.#issuer = issuer;
-        this.#events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
+        this._issuer = issuer;
+        this._events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
 
         return Result.ok(undefined);
     }
 
     public addRecipient(recipient: Recipient): Result<DomainError, void> {
-        const guardError = this.#guardDraftStatus();
+        const guardError = this._guardDraftStatus();
         if (guardError) {
             return Result.error(guardError);
         }
 
-        this.#recipient = recipient;
-        this.#events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
+        this._recipient = recipient;
+        this._events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
 
         return Result.ok(undefined);
     }
 
     public addDueDate(dueDate: CalendarDate): Result<DomainError, void> {
-        const guardError = this.#guardDraftStatus();
+        const guardError = this._guardDraftStatus();
         if (guardError) {
             return Result.error(guardError);
         }
 
-        if (this.#issueDate !== null) {
+        if (this._issueDate !== null) {
             const dateError = checkDates({
-                issueDate: this.#issueDate,
+                issueDate: this._issueDate,
                 dueDate,
             });
             if (dateError) {
@@ -317,46 +307,46 @@ export class DraftInvoice
             }
         }
 
-        this.#dueDate = dueDate;
+        this._dueDate = dueDate;
 
-        this.#events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
+        this._events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
 
         return Result.ok(undefined);
     }
 
     public addIssueDate(issueDate: CalendarDate): Result<DomainError, void> {
-        const guardError = this.#guardDraftStatus();
+        const guardError = this._guardDraftStatus();
         if (guardError) {
             return Result.error(guardError);
         }
 
-        if (this.#dueDate !== null) {
+        if (this._dueDate !== null) {
             const dateError = checkDates({
                 issueDate,
-                dueDate: this.#dueDate,
+                dueDate: this._dueDate,
             });
             if (dateError) {
                 return Result.error(dateError);
             }
         }
 
-        this.#issueDate = issueDate;
+        this._issueDate = issueDate;
 
-        this.#events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
+        this._events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
 
         return Result.ok(undefined);
     }
 
     public isValid(): boolean {
         const error = checkDraftInvoiceComplete({
-            total: this.#total,
-            vatRate: this.#vatRate,
-            vatAmount: this.#vatAmount,
-            issueDate: this.#issueDate,
-            dueDate: this.#dueDate,
-            recipient: this.#recipient,
-            issuer: this.#issuer,
-            lineItems: this.#lineItems,
+            total: this._total,
+            vatRate: this._vatRate,
+            vatAmount: this._vatAmount,
+            issueDate: this._issueDate,
+            dueDate: this._dueDate,
+            recipient: this._recipient,
+            issuer: this._issuer,
+            lineItems: this._lineItems,
         });
 
         if (error) {
@@ -366,29 +356,29 @@ export class DraftInvoice
         return true;
     }
 
-    #calculateTotal(): void {
-        if (this.#lineItems === null) {
-            this.#total = null;
+    protected _calculateTotal(): void {
+        if (this._lineItems === null) {
+            this._total = null;
             return;
         }
 
-        const subtotal = this.#lineItems.subtotal;
+        const subtotal = this._lineItems.subtotal;
 
-        const total = this.#vatRate
-            ? this.#vatRate.addTo(subtotal).unwrap()
+        const total = this._vatRate
+            ? this._vatRate.addTo(subtotal).unwrap()
             : subtotal;
-        const vatAmount = this.#vatRate
+        const vatAmount = this._vatRate
             ? total.subtract(subtotal).unwrap()
             : null;
 
-        this.#total = total;
-        this.#vatAmount = vatAmount;
+        this._total = total;
+        this._vatAmount = vatAmount;
     }
 
     static create(id: Id) {
         const draftInvoice = new DraftInvoice(id, DraftInvoiceStatus.draft());
 
-        draftInvoice.#events.push(
+        draftInvoice._events.push(
             new DraftInvoiceCreatedEvent(draftInvoice.toPlain())
         );
 
@@ -433,16 +423,16 @@ export class DraftInvoice
 
     toPlain() {
         return {
-            id: this.#id.toPlain(),
-            status: this.#status.toString(),
-            lineItems: this.#lineItems?.toPlain() ?? null,
-            total: this.#total?.toPlain() ?? null,
-            vatRate: this.#vatRate?.toPlain() ?? null,
-            vatAmount: this.#vatAmount?.toPlain() ?? null,
-            issueDate: this.#issueDate?.toPlain() ?? null,
-            dueDate: this.#dueDate?.toPlain() ?? null,
-            issuer: this.#issuer?.toPlain() ?? null,
-            recipient: this.#recipient?.toPlain() ?? null,
+            id: this._id.toPlain(),
+            status: this._status.toString(),
+            lineItems: this._lineItems?.toPlain() ?? null,
+            total: this._total?.toPlain() ?? null,
+            vatRate: this._vatRate?.toPlain() ?? null,
+            vatAmount: this._vatAmount?.toPlain() ?? null,
+            issueDate: this._issueDate?.toPlain() ?? null,
+            dueDate: this._dueDate?.toPlain() ?? null,
+            issuer: this._issuer?.toPlain() ?? null,
+            recipient: this._recipient?.toPlain() ?? null,
         };
     }
 }

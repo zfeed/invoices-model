@@ -6,26 +6,26 @@ import { Name } from '../name/name';
 export class Approver
     implements Equatable<Approver>, Mappable<ReturnType<Approver['toPlain']>>
 {
-    #id: Id;
-    #name: Name;
-    #email: Email;
+    protected _id: Id;
+    protected _name: Name;
+    protected _email: Email;
 
     protected constructor(id: Id, name: Name, email: Email) {
-        this.#id = id;
-        this.#name = name;
-        this.#email = email;
+        this._id = id;
+        this._name = name;
+        this._email = email;
     }
 
     public get id(): Id {
-        return this.#id;
+        return this._id;
     }
 
     public get name(): Name {
-        return this.#name;
+        return this._name;
     }
 
     public get email(): Email {
-        return this.#email;
+        return this._email;
     }
 
     static create(data: { name: Name; email: Email }) {
@@ -42,18 +42,18 @@ export class Approver
     }
 
     equals(other: Approver): boolean {
-        return this.#id.equals(other.#id);
+        return this._id.equals(other._id);
     }
 
     toPlain() {
         return {
-            id: this.#id.toPlain(),
-            name: this.#name.toPlain(),
-            email: this.#email.toPlain(),
+            id: this._id.toPlain(),
+            name: this._name.toPlain(),
+            email: this._email.toPlain(),
         };
     }
 
     toString(): string {
-        return `${this.#name.toString()} <${this.#email.toString()}>`;
+        return `${this._name.toString()} <${this._email.toString()}>`;
     }
 }

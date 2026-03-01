@@ -10,10 +10,10 @@ import { Id } from '../id/id';
 import { Order } from '../order/order';
 
 export class Step implements Mappable<ReturnType<Step['toPlain']>> {
-    #id: Id;
-    #order: Order;
-    #isApproved: boolean;
-    #groups: Group[];
+    protected _id: Id;
+    protected _order: Order;
+    protected _isApproved: boolean;
+    protected _groups: Group[];
 
     protected constructor(
         id: Id,
@@ -21,26 +21,26 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
         isApproved: boolean,
         groups: Group[]
     ) {
-        this.#id = id;
-        this.#order = order;
-        this.#isApproved = isApproved;
-        this.#groups = groups;
+        this._id = id;
+        this._order = order;
+        this._isApproved = isApproved;
+        this._groups = groups;
     }
 
     public get id(): Id {
-        return this.#id;
+        return this._id;
     }
 
     public get order(): Order {
-        return this.#order;
+        return this._order;
     }
 
     public get isApproved(): boolean {
-        return this.#isApproved;
+        return this._isApproved;
     }
 
-    public get groups(): readonly Group[] {
-        return this.#groups;
+    public get groups(): Group[] {
+        return this._groups;
     }
 
     static create(data: { order: Order; groups: Group[] }) {
@@ -78,7 +78,7 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
     }
 
     apply(approval: Approval): Result<DomainError, Step> {
-        if (this.isApproved) {
+        if (this._isApproved) {
             return Result.error(
                 new DomainError({
                     code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NO_PENDING_STEPS,
@@ -87,7 +87,7 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
             );
         }
 
-        const groupIndex = this.#groups.findIndex((g) =>
+        const groupIndex = this._groups.findIndex((g) =>
             g.hasEligibleApprover(approval.approverId)
         );
 
@@ -100,20 +100,20 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
             );
         }
 
-        const groupResult = this.#groups[groupIndex].apply(approval);
+        const groupResult = this._groups[groupIndex].apply(approval);
 
         if (groupResult.isError()) {
             return Result.error(groupResult.unwrapError());
         }
 
-        const updatedGroups = this.#groups.map((g, i) =>
+        const updatedGroups = this._groups.map((g, i) =>
             i === groupIndex ? groupResult.unwrap() : g
         );
 
         return Result.ok(
             new Step(
-                this.#id,
-                this.#order,
+                this._id,
+                this._order,
                 updatedGroups.every((g) => g.isApproved),
                 updatedGroups
             )
@@ -122,17 +122,17 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
 
     hasEligibleApprover(approverId: Id): boolean {
         return (
-            !this.#isApproved &&
-            this.#groups.some((g) => g.hasEligibleApprover(approverId))
+            !this._isApproved &&
+            this._groups.some((g) => g.hasEligibleApprover(approverId))
         );
     }
 
     toPlain() {
         return {
-            id: this.#id.toPlain(),
-            order: this.#order.toPlain(),
-            isApproved: this.isApproved,
-            groups: this.#groups.map((g) => g.toPlain()),
+            id: this._id.toPlain(),
+            order: this._order.toPlain(),
+            isApproved: this._isApproved,
+            groups: this._groups.map((g) => g.toPlain()),
         };
     }
 }

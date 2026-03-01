@@ -12,10 +12,10 @@ export class CalendarDate
         Comparable<CalendarDate>,
         Mappable<string>
 {
-    #value: string;
+    protected _value: string;
 
     protected constructor(value: string) {
-        this.#value = value;
+        this._value = value;
     }
 
     static fromPlain(value: string) {
@@ -33,30 +33,30 @@ export class CalendarDate
     }
 
     equals(other: CalendarDate): boolean {
-        return this.#value === other.#value;
+        return this._value === other._value;
     }
 
     lessThan(other: CalendarDate): boolean {
-        return this.#value < other.#value;
+        return this._value < other._value;
     }
 
     lessThanEqual(other: CalendarDate): boolean {
-        return this.#value <= other.#value;
+        return this._value <= other._value;
     }
 
     greaterThan(other: CalendarDate): boolean {
-        return this.#value > other.#value;
+        return this._value > other._value;
     }
 
     greaterThanEqual(other: CalendarDate): boolean {
-        return this.#value >= other.#value;
+        return this._value >= other._value;
     }
 
     toPlain(): string {
-        return this.#value;
+        return this._value;
     }
 
     toString(): string {
-        return this.#value;
+        return this._value;
     }
 }

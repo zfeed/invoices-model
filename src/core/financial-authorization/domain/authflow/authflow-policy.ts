@@ -15,35 +15,35 @@ export class AuthflowPolicy
         Mappable<ReturnType<AuthflowPolicy['toPlain']>>,
         PublishableEvents<DomainEvent<any>>
 {
-    #id: Id;
-    #action: Action;
-    #templates: AuthflowTemplate[];
-    #events: DomainEvent<any>[] = [];
+    protected _id: Id;
+    protected _action: Action;
+    protected _templates: AuthflowTemplate[];
+    protected _events: DomainEvent<any>[] = [];
 
     protected constructor(
         id: Id,
         action: Action,
         templates: AuthflowTemplate[]
     ) {
-        this.#id = id;
-        this.#action = action;
-        this.#templates = templates;
+        this._id = id;
+        this._action = action;
+        this._templates = templates;
     }
 
     public get id(): Id {
-        return this.#id;
+        return this._id;
     }
 
     public get action(): Action {
-        return this.#action;
+        return this._action;
     }
 
-    public get templates(): readonly AuthflowTemplate[] {
-        return this.#templates;
+    public get templates(): AuthflowTemplate[] {
+        return this._templates;
     }
 
-    public get events(): ReadonlyArray<DomainEvent<any>> {
-        return this.#events;
+    public get events(): DomainEvent<any>[] {
+        return this._events;
     }
 
     static create(data: { action: Action; templates: AuthflowTemplate[] }) {
@@ -58,7 +58,7 @@ export class AuthflowPolicy
             data.templates
         );
 
-        policy.#events.push(new AuthflowPolicyCreatedEvent(policy.toPlain()));
+        policy._events.push(new AuthflowPolicyCreatedEvent(policy.toPlain()));
 
         return Result.ok(policy);
     }
@@ -91,25 +91,25 @@ export class AuthflowPolicy
     }
 
     selectAuthflow(amount: Money): Result<DomainError, Authflow> {
-        const rangeError = checkTemplateInRange(this.#templates, amount);
+        const rangeError = checkTemplateInRange(this._templates, amount);
         if (rangeError) {
             return Result.error(rangeError);
         }
 
-        const matched = this.#templates.find(
+        const matched = this._templates.find(
             (t) =>
                 Number(amount.amount) >= Number(t.range.from.amount) &&
                 Number(amount.amount) <= Number(t.range.to.amount)
         )!;
 
-        return matched.toAuthflow(this.#action);
+        return matched.toAuthflow(this._action);
     }
 
     toPlain() {
         return {
-            id: this.#id.toPlain(),
-            action: this.#action.toPlain(),
-            templates: this.#templates.map((t) => t.toPlain()),
+            id: this._id.toPlain(),
+            action: this._action.toPlain(),
+            templates: this._templates.map((t) => t.toPlain()),
         };
     }
 }

@@ -6,10 +6,10 @@ import { UnitQuantity } from './unit-quantity/unit-quantity';
 export class LineItem
     implements Equatable<LineItem>, Mappable<ReturnType<LineItem['toPlain']>>
 {
-    #price: Money;
-    #description: UnitDescription;
-    #quantity: UnitQuantity;
-    #total: Money;
+    protected _price: Money;
+    protected _description: UnitDescription;
+    protected _quantity: UnitQuantity;
+    protected _total: Money;
 
     protected constructor(
         description: UnitDescription,
@@ -17,42 +17,42 @@ export class LineItem
         quantity: UnitQuantity,
         total: Money
     ) {
-        this.#description = description;
-        this.#price = price;
-        this.#quantity = quantity;
-        this.#total = total;
+        this._description = description;
+        this._price = price;
+        this._quantity = quantity;
+        this._total = total;
     }
 
     get price(): Money {
-        return this.#price;
+        return this._price;
     }
 
     get description(): UnitDescription {
-        return this.#description;
+        return this._description;
     }
 
     get quantity(): UnitQuantity {
-        return this.#quantity;
+        return this._quantity;
     }
 
     get total(): Money {
-        return this.#total;
+        return this._total;
     }
 
     equals(other: LineItem): boolean {
         return (
-            this.#description.equals(other.#description) &&
-            this.#price.equals(other.#price) &&
-            this.#quantity.equals(other.#quantity)
+            this._description.equals(other._description) &&
+            this._price.equals(other._price) &&
+            this._quantity.equals(other._quantity)
         );
     }
 
     toPlain() {
         return {
-            description: this.#description.toPlain(),
-            price: this.#price.toPlain(),
-            quantity: this.#quantity.toPlain(),
-            total: this.#total.toPlain(),
+            description: this._description.toPlain(),
+            price: this._price.toPlain(),
+            quantity: this._quantity.toPlain(),
+            total: this._total.toPlain(),
         };
     }
 

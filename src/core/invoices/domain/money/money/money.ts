@@ -8,58 +8,58 @@ import { checkMinorUnits } from './checks/check-minor-units';
 export class Money
     implements Equatable<Money>, Mappable<ReturnType<Money['toPlain']>>
 {
-    #amount: Numeric;
-    #currency: Currency;
+    protected _amount: Numeric;
+    protected _currency: Currency;
 
     protected constructor(amount: Numeric, currency: Currency) {
-        this.#amount = amount;
-        this.#currency = currency;
+        this._amount = amount;
+        this._currency = currency;
     }
 
-    public get amount(): Numeric {
-        return this.#amount;
+    get amount(): Numeric {
+        return this._amount;
     }
 
-    public get currency(): Currency {
-        return this.#currency;
+    get currency(): Currency {
+        return this._currency;
     }
 
     equals(other: Money): boolean {
-        const isSameCurrency = this.#currency.equals(other.currency);
-        const isSameAmount = this.#amount.equals(other.amount);
+        const isSameCurrency = this._currency.equals(other._currency);
+        const isSameAmount = this._amount.equals(other._amount);
 
         return isSameCurrency && isSameAmount;
     }
 
     add(other: Money) {
-        const error = checkEqualCurrencies(this.#currency, other.currency);
+        const error = checkEqualCurrencies(this._currency, other._currency);
 
         if (error) {
             return Result.error(error);
         }
 
-        const value = this.#amount.add(other.amount);
+        const value = this._amount.add(other._amount);
 
-        return Result.ok(new Money(value, this.#currency));
+        return Result.ok(new Money(value, this._currency));
     }
 
     subtract(other: Money) {
-        const error = checkEqualCurrencies(this.#currency, other.currency);
+        const error = checkEqualCurrencies(this._currency, other._currency);
 
         if (error) {
             return Result.error(error);
         }
 
-        const value = this.#amount.subtract(other.amount);
+        const value = this._amount.subtract(other._amount);
 
-        return Result.ok(new Money(value, this.#currency));
+        return Result.ok(new Money(value, this._currency));
     }
 
     multiplyBy(factor: Numeric, rounding: ROUNDING = ROUNDING.UP): Money {
-        const value = this.#amount
+        const value = this._amount
             .multiplyBy(factor)
             .toDecimalPlaces(0, rounding);
-        return new Money(value, this.#currency);
+        return new Money(value, this._currency);
     }
 
     static fromPlain(plain: { amount: string; currency: string }) {
@@ -88,13 +88,13 @@ export class Money
     }
 
     toString(): string {
-        return `${this.#amount.toString()} ${this.#currency.toString()}`;
+        return `${this._amount.toString()} ${this._currency.toString()}`;
     }
 
     toPlain() {
         return {
-            amount: this.#amount.toString(),
-            currency: this.#currency.toString(),
+            amount: this._amount.toString(),
+            currency: this._currency.toString(),
         };
     }
 }

@@ -6,20 +6,20 @@ import { checkFromNotGreaterThanTo } from './checks/check-from-not-greater-than-
 export class Range
     implements Equatable<Range>, Mappable<ReturnType<Range['toPlain']>>
 {
-    #from: Money;
-    #to: Money;
+    protected _from: Money;
+    protected _to: Money;
 
     protected constructor(from: Money, to: Money) {
-        this.#from = from;
-        this.#to = to;
+        this._from = from;
+        this._to = to;
     }
 
     public get from(): Money {
-        return this.#from;
+        return this._from;
     }
 
     public get to(): Money {
-        return this.#to;
+        return this._to;
     }
 
     static create(from: Money, to: Money) {
@@ -47,17 +47,17 @@ export class Range
     }
 
     equals(other: Range): boolean {
-        return this.#from.equals(other.#from) && this.#to.equals(other.#to);
+        return this._from.equals(other._from) && this._to.equals(other._to);
     }
 
     toPlain() {
         return {
-            from: this.#from.toPlain(),
-            to: this.#to.toPlain(),
+            from: this._from.toPlain(),
+            to: this._to.toPlain(),
         };
     }
 
     toString(): string {
-        return `${this.#from.toString()} - ${this.#to.toString()}`;
+        return `${this._from.toString()} - ${this._to.toString()}`;
     }
 }

@@ -9,26 +9,26 @@ import { checkTemplateNoDuplicateStepOrders } from './checks/check-template-no-d
 export class AuthflowTemplate
     implements Mappable<ReturnType<AuthflowTemplate['toPlain']>>
 {
-    #id: Id;
-    #range: Range;
-    #steps: StepTemplate[];
+    protected _id: Id;
+    protected _range: Range;
+    protected _steps: StepTemplate[];
 
     protected constructor(id: Id, range: Range, steps: StepTemplate[]) {
-        this.#id = id;
-        this.#range = range;
-        this.#steps = steps;
+        this._id = id;
+        this._range = range;
+        this._steps = steps;
     }
 
     public get id(): Id {
-        return this.#id;
+        return this._id;
     }
 
     public get range(): Range {
-        return this.#range;
+        return this._range;
     }
 
-    public get steps(): readonly StepTemplate[] {
-        return this.#steps;
+    public get steps(): StepTemplate[] {
+        return this._steps;
     }
 
     static create(data: { range: Range; steps: StepTemplate[] }) {
@@ -66,7 +66,7 @@ export class AuthflowTemplate
     }
 
     toAuthflow(action: Action): Result<DomainError, Authflow> {
-        const stepsResult = this.#steps.reduce<
+        const stepsResult = this._steps.reduce<
             Result<DomainError, import('../step/step').Step[]>
         >(
             (acc, template) =>
@@ -77,15 +77,15 @@ export class AuthflowTemplate
         );
 
         return stepsResult.flatMap((steps) =>
-            Authflow.create({ action, range: this.#range, steps })
+            Authflow.create({ action, range: this._range, steps })
         );
     }
 
     toPlain() {
         return {
-            id: this.#id.toPlain(),
-            range: this.#range.toPlain(),
-            steps: this.#steps.map((s) => s.toPlain()),
+            id: this._id.toPlain(),
+            range: this._range.toPlain(),
+            steps: this._steps.map((s) => s.toPlain()),
         };
     }
 }

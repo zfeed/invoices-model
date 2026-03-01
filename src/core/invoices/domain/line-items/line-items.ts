@@ -10,16 +10,20 @@ export class LineItems
         Equatable<ReadOnlyLineItems>,
         Mappable<ReturnType<LineItems['toPlain']>>
 {
-    #items: LineItem[];
-    #subtotal: Money;
+    protected _items: LineItem[];
+    protected _subtotal: Money;
 
     protected constructor(items: LineItem[], subtotal: Money) {
-        this.#items = items;
-        this.#subtotal = subtotal;
+        this._items = items;
+        this._subtotal = subtotal;
     }
 
     get length(): number {
-        return this.#items.length;
+        return this._items.length;
+    }
+
+    get subtotal(): Money {
+        return this._subtotal;
     }
 
     private static calculateSubtotal(items: LineItem[]): Money {
@@ -36,30 +40,26 @@ export class LineItems
         return total;
     }
 
-    get subtotal(): Money {
-        return this.#subtotal;
-    }
-
     forEach(callback: (item: LineItem) => void) {
-        this.#items.forEach(callback);
+        this._items.forEach(callback);
     }
 
     contains(lineItem: LineItem): boolean {
-        return this.#items.some((item) => item.equals(lineItem));
+        return this._items.some((item) => item.equals(lineItem));
     }
 
     add(lineItem: LineItem) {
-        return LineItems.create({ items: [...this.#items, lineItem] });
+        return LineItems.create({ items: [...this._items, lineItem] });
     }
 
     remove(lineItem: LineItem) {
-        const lineItems = this.#items.filter((item) => !item.equals(lineItem));
+        const lineItems = this._items.filter((item) => !item.equals(lineItem));
 
         return LineItems.create({ items: lineItems });
     }
 
     find(predicate: (item: LineItem) => boolean): LineItem | undefined {
-        return this.#items.find(predicate);
+        return this._items.find(predicate);
     }
 
     equals(other: ReadOnlyLineItems): boolean {
@@ -67,8 +67,8 @@ export class LineItems
             throw new Error('Invalid argument type');
         }
 
-        return this.#items.every((item, index) =>
-            item.equals(other.#items[index])
+        return this._items.every((item, index) =>
+            item.equals(other._items[index])
         );
     }
 
@@ -105,8 +105,8 @@ export class LineItems
 
     toPlain() {
         return {
-            items: this.#items.map((item) => item.toPlain()),
-            subtotal: this.#subtotal.toPlain(),
+            items: this._items.map((item) => item.toPlain()),
+            subtotal: this._subtotal.toPlain(),
         };
     }
 }

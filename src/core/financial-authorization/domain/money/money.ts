@@ -8,20 +8,20 @@ import { checkCurrencyCode } from './checks/check-currency-code';
 export class Money
     implements Equatable<Money>, Mappable<ReturnType<Money['toPlain']>>
 {
-    #amount: string;
-    #currency: string;
+    protected _amount: string;
+    protected _currency: string;
 
     protected constructor(amount: string, currency: string) {
-        this.#amount = amount;
-        this.#currency = currency;
+        this._amount = amount;
+        this._currency = currency;
     }
 
     public get amount(): string {
-        return this.#amount;
+        return this._amount;
     }
 
     public get currency(): string {
-        return this.#currency;
+        return this._currency;
     }
 
     static create(amount: string, currency: string) {
@@ -49,18 +49,18 @@ export class Money
 
     equals(other: Money): boolean {
         return (
-            this.#amount === other.#amount && this.#currency === other.#currency
+            this._amount === other._amount && this._currency === other._currency
         );
     }
 
     toPlain() {
         return {
-            amount: this.#amount,
-            currency: this.#currency,
+            amount: this._amount,
+            currency: this._currency,
         };
     }
 
     toString(): string {
-        return `${this.#amount} ${this.#currency}`;
+        return `${this._amount} ${this._currency}`;
     }
 }

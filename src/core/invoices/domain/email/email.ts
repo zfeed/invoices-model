@@ -2,10 +2,10 @@ import { Equatable, Mappable, Result } from '../../../../building-blocks';
 import { checkEmailFormat } from './checks/check-email-format';
 
 export class Email implements Equatable<Email | string>, Mappable<string> {
-    #value: string;
+    protected _value: string;
 
     protected constructor(value: string) {
-        this.#value = value;
+        this._value = value;
     }
 
     static fromPlain(value: string) {
@@ -24,16 +24,16 @@ export class Email implements Equatable<Email | string>, Mappable<string> {
 
     equals(other: Email | string): boolean {
         if (typeof other === 'string') {
-            return this.#value === other;
+            return this._value === other;
         }
-        return this.#value === other.#value;
+        return this._value === other._value;
     }
 
     toPlain(): string {
-        return this.#value;
+        return this._value;
     }
 
     toString(): string {
-        return this.#value;
+        return this._value;
     }
 }

@@ -13,10 +13,10 @@ import { checkApproverExists } from './checks/check-approver-exists';
 import { checkNoDuplicateApprovals } from './checks/check-no-duplicate-approvals';
 
 export class Group implements Mappable<ReturnType<Group['toPlain']>> {
-    #id: Id;
-    #requiredApprovals: number;
-    #approvers: Approver[];
-    #approvals: Approval[];
+    protected _id: Id;
+    protected _requiredApprovals: number;
+    protected _approvers: Approver[];
+    protected _approvals: Approval[];
 
     protected constructor(
         id: Id,
@@ -24,30 +24,30 @@ export class Group implements Mappable<ReturnType<Group['toPlain']>> {
         approvers: Approver[],
         approvals: Approval[]
     ) {
-        this.#id = id;
-        this.#requiredApprovals = requiredApprovals;
-        this.#approvers = approvers;
-        this.#approvals = approvals;
+        this._id = id;
+        this._requiredApprovals = requiredApprovals;
+        this._approvers = approvers;
+        this._approvals = approvals;
     }
 
     public get id(): Id {
-        return this.#id;
+        return this._id;
     }
 
     public get requiredApprovals(): number {
-        return this.#requiredApprovals;
+        return this._requiredApprovals;
+    }
+
+    public get approvers(): Approver[] {
+        return this._approvers;
+    }
+
+    public get approvals(): Approval[] {
+        return this._approvals;
     }
 
     public get isApproved(): boolean {
-        return this.#approvals.length >= this.#requiredApprovals;
-    }
-
-    public get approvers(): readonly Approver[] {
-        return this.#approvers;
-    }
-
-    public get approvals(): readonly Approval[] {
-        return this.#approvals;
+        return this._approvals.length >= this._requiredApprovals;
     }
 
     static create(data: {
@@ -120,7 +120,7 @@ export class Group implements Mappable<ReturnType<Group['toPlain']>> {
             );
         }
 
-        if (!this.#approvers.some((a) => a.id.equals(approval.approverId))) {
+        if (!this._approvers.some((a) => a.id.equals(approval.approverId))) {
             return Result.error(
                 new DomainError({
                     code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND,
@@ -129,22 +129,22 @@ export class Group implements Mappable<ReturnType<Group['toPlain']>> {
             );
         }
 
-        const newApprovals = [...this.#approvals, approval];
+        const newApprovals = [...this._approvals, approval];
 
-        const approversEmptyError = checkApproversNotEmpty(this.#approvers);
+        const approversEmptyError = checkApproversNotEmpty(this._approvers);
         if (approversEmptyError) {
             return Result.error(approversEmptyError);
         }
 
         const duplicateApproversError = checkNoDuplicateApprovers(
-            this.#approvers
+            this._approvers
         );
         if (duplicateApproversError) {
             return Result.error(duplicateApproversError);
         }
 
         const approverExistsError = checkApproverExists(
-            this.#approvers,
+            this._approvers,
             newApprovals
         );
         if (approverExistsError) {
@@ -158,9 +158,9 @@ export class Group implements Mappable<ReturnType<Group['toPlain']>> {
 
         return Result.ok(
             new Group(
-                this.#id,
-                this.#requiredApprovals,
-                this.#approvers,
+                this._id,
+                this._requiredApprovals,
+                this._approvers,
                 newApprovals
             )
         );
@@ -169,17 +169,17 @@ export class Group implements Mappable<ReturnType<Group['toPlain']>> {
     hasEligibleApprover(approverId: Id): boolean {
         return (
             !this.isApproved &&
-            this.#approvers.some((a) => a.id.equals(approverId))
+            this._approvers.some((a) => a.id.equals(approverId))
         );
     }
 
     toPlain() {
         return {
-            id: this.#id.toPlain(),
-            requiredApprovals: this.#requiredApprovals,
+            id: this._id.toPlain(),
+            requiredApprovals: this._requiredApprovals,
             isApproved: this.isApproved,
-            approvers: this.#approvers.map((a) => a.toPlain()),
-            approvals: this.#approvals.map((a) => a.toPlain()),
+            approvers: this._approvers.map((a) => a.toPlain()),
+            approvals: this._approvals.map((a) => a.toPlain()),
         };
     }
 }

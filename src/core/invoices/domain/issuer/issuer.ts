@@ -10,11 +10,11 @@ export enum ISSUER_TYPE {
 export class Issuer
     implements Equatable<Issuer>, Mappable<ReturnType<Issuer['toPlain']>>
 {
-    #type: ISSUER_TYPE;
-    #name: string;
-    #address: string;
-    #taxId: string;
-    #email: Email;
+    protected _type: ISSUER_TYPE;
+    protected _name: string;
+    protected _address: string;
+    protected _taxId: string;
+    protected _email: Email;
 
     protected constructor(
         type: ISSUER_TYPE,
@@ -23,50 +23,50 @@ export class Issuer
         taxId: string,
         email: Email
     ) {
-        this.#type = type;
-        this.#name = name;
-        this.#address = address;
-        this.#taxId = taxId;
-        this.#email = email;
+        this._type = type;
+        this._name = name;
+        this._address = address;
+        this._taxId = taxId;
+        this._email = email;
     }
 
     get type(): ISSUER_TYPE {
-        return this.#type;
+        return this._type;
     }
 
     get name(): string {
-        return this.#name;
+        return this._name;
     }
 
     get address(): string {
-        return this.#address;
+        return this._address;
     }
 
     get taxId(): string {
-        return this.#taxId;
+        return this._taxId;
     }
 
     get email(): Email {
-        return this.#email;
+        return this._email;
     }
 
     equals(other: Issuer): boolean {
         return (
-            this.#type === other.#type &&
-            this.#name === other.#name &&
-            this.#address === other.#address &&
-            this.#taxId === other.#taxId &&
-            this.#email.equals(other.#email)
+            this._type === other._type &&
+            this._name === other._name &&
+            this._address === other._address &&
+            this._taxId === other._taxId &&
+            this._email.equals(other._email)
         );
     }
 
     toPlain() {
         return {
-            type: this.#type,
-            name: this.#name,
-            address: this.#address,
-            taxId: this.#taxId,
-            email: this.#email.toPlain(),
+            type: this._type,
+            name: this._name,
+            address: this._address,
+            taxId: this._taxId,
+            email: this._email.toPlain(),
         };
     }
 

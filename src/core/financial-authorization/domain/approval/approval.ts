@@ -4,30 +4,30 @@ import { Id } from '../id/id';
 import { Timestamp } from '../timestamp/timestamp';
 
 export class Approval implements Mappable<ReturnType<Approval['toPlain']>> {
-    #approverId: Id;
-    #createdAt: Timestamp;
-    #comment: Comment;
+    protected _approverId: Id;
+    protected _createdAt: Timestamp;
+    protected _comment: Comment;
 
     protected constructor(
         approverId: Id,
         createdAt: Timestamp,
         comment: Comment
     ) {
-        this.#approverId = approverId;
-        this.#createdAt = createdAt;
-        this.#comment = comment;
+        this._approverId = approverId;
+        this._createdAt = createdAt;
+        this._comment = comment;
     }
 
     public get approverId(): Id {
-        return this.#approverId;
+        return this._approverId;
     }
 
     public get createdAt(): Timestamp {
-        return this.#createdAt;
+        return this._createdAt;
     }
 
     public get comment(): Comment {
-        return this.#comment;
+        return this._comment;
     }
 
     static create(data: { approverId: Id; comment: string | null }) {
@@ -60,9 +60,9 @@ export class Approval implements Mappable<ReturnType<Approval['toPlain']>> {
 
     toPlain() {
         return {
-            approverId: this.#approverId.toPlain(),
-            createdAt: this.#createdAt.toPlain(),
-            comment: this.#comment.toPlain(),
+            approverId: this._approverId.toPlain(),
+            createdAt: this._createdAt.toPlain(),
+            comment: this._comment.toPlain(),
         };
     }
 }

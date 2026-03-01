@@ -12,40 +12,40 @@ import { Step } from '../step/step';
 import { checkNoDuplicateStepOrders } from './checks/check-no-duplicate-step-orders';
 
 export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
-    #id: Id;
-    #action: Action;
-    #range: Range;
-    #steps: Step[];
-    #currentStep: Step | undefined;
+    protected _id: Id;
+    protected _action: Action;
+    protected _range: Range;
+    protected _steps: Step[];
+    protected _currentStep: Step | undefined;
 
     protected constructor(id: Id, action: Action, range: Range, steps: Step[]) {
-        this.#id = id;
-        this.#action = action;
-        this.#range = range;
-        this.#steps = [...steps].sort(
+        this._id = id;
+        this._action = action;
+        this._range = range;
+        this._steps = [...steps].sort(
             (a, b) => a.order.toPlain() - b.order.toPlain()
         );
-        this.#currentStep = this.#steps.find((s) => !s.isApproved);
+        this._currentStep = this._steps.find((s) => !s.isApproved);
     }
 
     public get id(): Id {
-        return this.#id;
+        return this._id;
     }
 
     public get action(): Action {
-        return this.#action;
+        return this._action;
     }
 
     public get range(): Range {
-        return this.#range;
+        return this._range;
+    }
+
+    public get steps(): Step[] {
+        return this._steps;
     }
 
     public get isApproved(): boolean {
-        return this.#currentStep === undefined;
-    }
-
-    public get steps(): readonly Step[] {
-        return this.#steps;
+        return this._currentStep === undefined;
     }
 
     static create(data: { action: Action; range: Range; steps: Step[] }) {
@@ -95,7 +95,7 @@ export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
     }
 
     apply(approval: Approval): Result<DomainError, Authflow> {
-        if (!this.#currentStep) {
+        if (!this._currentStep) {
             return Result.error(
                 new DomainError({
                     code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NO_PENDING_STEPS,
@@ -104,14 +104,14 @@ export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
             );
         }
 
-        const stepResult = this.#currentStep.apply(approval);
+        const stepResult = this._currentStep.apply(approval);
 
         if (stepResult.isError()) {
             return Result.error(stepResult.unwrapError());
         }
 
-        const updatedSteps = this.#steps.map((s) =>
-            s.order.equals(this.#currentStep!.order) ? stepResult.unwrap() : s
+        const updatedSteps = this._steps.map((s) =>
+            s.order.equals(this._currentStep!.order) ? stepResult.unwrap() : s
         );
 
         const error = checkNoDuplicateStepOrders(updatedSteps);
@@ -120,16 +120,16 @@ export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
         }
 
         return Result.ok(
-            new Authflow(this.#id, this.#action, this.#range, updatedSteps)
+            new Authflow(this._id, this._action, this._range, updatedSteps)
         );
     }
 
     hasEligibleApprover(approverId: Id): boolean {
-        if (!this.#currentStep) {
+        if (!this._currentStep) {
             return false;
         }
 
-        return this.#currentStep.hasEligibleApprover(approverId);
+        return this._currentStep.hasEligibleApprover(approverId);
     }
 
     canApproverApprove(approverId: Id): boolean {
@@ -142,11 +142,11 @@ export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
 
     toPlain() {
         return {
-            id: this.#id.toPlain(),
-            action: this.#action.toPlain(),
-            range: this.#range.toPlain(),
+            id: this._id.toPlain(),
+            action: this._action.toPlain(),
+            range: this._range.toPlain(),
             isApproved: this.isApproved,
-            steps: this.#steps.map((s) => s.toPlain()),
+            steps: this._steps.map((s) => s.toPlain()),
         };
     }
 }

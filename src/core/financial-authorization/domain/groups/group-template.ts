@@ -8,30 +8,30 @@ import { checkTemplateNoDuplicateApprovers } from './checks/check-template-no-du
 export class GroupTemplate
     implements Mappable<ReturnType<GroupTemplate['toPlain']>>
 {
-    #id: Id;
-    #requiredApprovals: number;
-    #approvers: Approver[];
+    protected _id: Id;
+    protected _requiredApprovals: number;
+    protected _approvers: Approver[];
 
     protected constructor(
         id: Id,
         requiredApprovals: number,
         approvers: Approver[]
     ) {
-        this.#id = id;
-        this.#requiredApprovals = requiredApprovals;
-        this.#approvers = approvers;
+        this._id = id;
+        this._requiredApprovals = requiredApprovals;
+        this._approvers = approvers;
     }
 
     public get id(): Id {
-        return this.#id;
+        return this._id;
     }
 
     public get requiredApprovals(): number {
-        return this.#requiredApprovals;
+        return this._requiredApprovals;
     }
 
-    public get approvers(): readonly Approver[] {
-        return this.#approvers;
+    public get approvers(): Approver[] {
+        return this._approvers;
     }
 
     static create(data: { requiredApprovals: number; approvers: Approver[] }) {
@@ -70,17 +70,17 @@ export class GroupTemplate
 
     toGroup(): Result<DomainError, Group> {
         return Group.create({
-            requiredApprovals: this.#requiredApprovals,
-            approvers: this.#approvers,
+            requiredApprovals: this._requiredApprovals,
+            approvers: this._approvers,
             approvals: [],
         });
     }
 
     toPlain() {
         return {
-            id: this.#id.toPlain(),
-            requiredApprovals: this.#requiredApprovals,
-            approvers: this.#approvers.map((a) => a.toPlain()),
+            id: this._id.toPlain(),
+            requiredApprovals: this._requiredApprovals,
+            approvers: this._approvers.map((a) => a.toPlain()),
         };
     }
 }

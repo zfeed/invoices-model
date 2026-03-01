@@ -17,13 +17,13 @@ export enum RECIPIENT_TYPE {
 export class Recipient
     implements Equatable<Recipient>, Mappable<ReturnType<Recipient['toPlain']>>
 {
-    #type: RECIPIENT_TYPE;
-    #name: string;
-    #address: string;
-    #taxId: string;
-    #email: Email;
-    #taxResidenceCountry: Country;
-    #billing: Paypal;
+    protected _type: RECIPIENT_TYPE;
+    protected _name: string;
+    protected _address: string;
+    protected _taxId: string;
+    protected _email: Email;
+    protected _taxResidenceCountry: Country;
+    protected _billing: Paypal;
 
     protected constructor(
         type: RECIPIENT_TYPE,
@@ -34,65 +34,65 @@ export class Recipient
         taxResidenceCountry: Country,
         billing: Paypal
     ) {
-        this.#type = type;
-        this.#name = name;
-        this.#address = address;
-        this.#taxId = taxId;
-        this.#email = email;
-        this.#taxResidenceCountry = taxResidenceCountry;
-        this.#billing = billing;
+        this._type = type;
+        this._name = name;
+        this._address = address;
+        this._taxId = taxId;
+        this._email = email;
+        this._taxResidenceCountry = taxResidenceCountry;
+        this._billing = billing;
     }
 
     get type(): RECIPIENT_TYPE {
-        return this.#type;
+        return this._type;
     }
 
     get name(): string {
-        return this.#name;
+        return this._name;
     }
 
     get address(): string {
-        return this.#address;
+        return this._address;
     }
 
     get taxId(): string {
-        return this.#taxId;
+        return this._taxId;
     }
 
     get email(): Email {
-        return this.#email;
+        return this._email;
     }
 
     get taxResidenceCountry(): Country {
-        return this.#taxResidenceCountry;
+        return this._taxResidenceCountry;
     }
 
     get billing(): Paypal {
-        return this.#billing;
+        return this._billing;
     }
 
     equals(other: Recipient): boolean {
         return (
-            this.#type === other.#type &&
-            this.#name === other.#name &&
-            this.#address === other.#address &&
-            this.#taxId === other.#taxId &&
-            this.#email.equals(other.#email) &&
-            this.#taxResidenceCountry.equals(other.#taxResidenceCountry) &&
-            this.#billing.type === other.#billing.type &&
-            this.#billing.equals(other.#billing as any)
+            this._type === other._type &&
+            this._name === other._name &&
+            this._address === other._address &&
+            this._taxId === other._taxId &&
+            this._email.equals(other._email) &&
+            this._taxResidenceCountry.equals(other._taxResidenceCountry) &&
+            this._billing.type === other._billing.type &&
+            this._billing.equals(other._billing as any)
         );
     }
 
     toPlain() {
         return {
-            type: this.#type,
-            name: this.#name,
-            address: this.#address,
-            taxId: this.#taxId,
-            email: this.#email.toString(),
-            taxResidenceCountry: this.#taxResidenceCountry.toString(),
-            billing: this.#billing.toPlain(),
+            type: this._type,
+            name: this._name,
+            address: this._address,
+            taxId: this._taxId,
+            email: this._email.toString(),
+            taxResidenceCountry: this._taxResidenceCountry.toString(),
+            billing: this._billing.toPlain(),
         };
     }
 
