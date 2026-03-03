@@ -22,20 +22,13 @@ import {
     FinancialDocumentDataMapper,
     FinancialDocumentRecord,
 } from './mappers/financial-authorization/financial-document.data-mapper';
+import dayjs from 'dayjs';
 import { ISSUER_TYPE } from '../../core/invoices/domain/issuer/issuer';
 import { RECIPIENT_TYPE } from '../../core/invoices/domain/recipient/recipient';
-import {
-    DRAFT_INVOICE_STATUS,
-    INVOICE_STATUS,
-} from '../../core/invoices/domain/status/status';
-import type { DraftInvoiceRecord } from './mappers/invoices/draft-invoice.data-mapper';
+import { INVOICE_STATUS } from '../../core/invoices/domain/status/status';
 import type { InvoiceRecord } from './mappers/invoices/invoice.data-mapper';
 
 type Entity = DraftInvoice | Invoice | AuthflowPolicy | FinancialDocument;
-
-type DraftInvoiceRow = Awaited<
-    ReturnType<DraftInvoiceStorage['select']>
->[number];
 
 type InvoiceRow = Awaited<ReturnType<InvoiceStorage['select']>>[number];
 
@@ -46,115 +39,6 @@ const inMemoryEntityClasses: EntityClass[] = [
     AuthflowPolicy,
     FinancialDocument,
 ];
-
-function toDateString(date: Date): string {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-}
-
-function toDraftInvoiceRecord(rows: DraftInvoiceRow[]): DraftInvoiceRecord {
-    const row = rows[0];
-    const lineItemRows = rows.filter(
-        (r) => r.draft_invoice_line_item_id !== null
-    );
-
-    return {
-        id: { value: row.id },
-        status: { value: row.status as DRAFT_INVOICE_STATUS },
-        lineItems:
-            lineItemRows.length > 0
-                ? {
-                      items: lineItemRows.map((r) => ({
-                          description: {
-                              value: r.draft_invoice_line_item_description!,
-                          },
-                          price: {
-                              amount: {
-                                  value: r.draft_invoice_line_item_price_amount!,
-                              },
-                              currency: {
-                                  code: r.draft_invoice_line_item_price_currency!,
-                              },
-                          },
-                          quantity: {
-                              value: {
-                                  value: r.draft_invoice_line_item_quantity!,
-                              },
-                          },
-                          total: {
-                              amount: {
-                                  value: r.draft_invoice_line_item_total_amount!,
-                              },
-                              currency: {
-                                  code: r.draft_invoice_line_item_total_currency!,
-                              },
-                          },
-                      })),
-                      subtotal: {
-                          amount: { value: row.subtotal_amount! },
-                          currency: { code: row.subtotal_currency! },
-                      },
-                  }
-                : null,
-        total:
-            row.total_amount !== null
-                ? {
-                      amount: { value: row.total_amount },
-                      currency: { code: row.total_currency! },
-                  }
-                : null,
-        vatRate:
-            row.vat_rate !== null ? { value: { value: row.vat_rate } } : null,
-        vatAmount:
-            row.vat_amount !== null
-                ? {
-                      amount: { value: row.vat_amount },
-                      currency: { code: row.vat_currency! },
-                  }
-                : null,
-        issueDate:
-            row.issue_date !== null
-                ? { value: toDateString(row.issue_date) }
-                : null,
-        dueDate:
-            row.due_date !== null
-                ? { value: toDateString(row.due_date) }
-                : null,
-        issuer:
-            row.issuer_type !== null
-                ? {
-                      type: row.issuer_type as ISSUER_TYPE,
-                      name: row.issuer_name!,
-                      address: row.issuer_address!,
-                      taxId: row.issuer_tax_id!,
-                      email: { value: row.issuer_email! },
-                  }
-                : null,
-        recipient:
-            row.recipient_type !== null
-                ? {
-                      type: row.recipient_type as RECIPIENT_TYPE,
-                      name: row.recipient_name!,
-                      address: row.recipient_address!,
-                      taxId: row.recipient_tax_id!,
-                      email: { value: row.recipient_email! },
-                      taxResidenceCountry: {
-                          code: row.recipient_tax_residence_country!,
-                      },
-                      billing: {
-                          type: 'PAYPAL' as const,
-                          data: {
-                              email: {
-                                  value: row.draft_invoice_paypal_billing_email!,
-                              },
-                          },
-                      },
-                  }
-                : null,
-    };
-}
 
 function toInvoiceRecord(rows: InvoiceRow[]): InvoiceRecord {
     const row = rows[0];
@@ -208,8 +92,8 @@ function toInvoiceRecord(rows: InvoiceRow[]): InvoiceRecord {
                       currency: { code: row.vat_currency! },
                   }
                 : null,
-        issueDate: { value: toDateString(row.issue_date) },
-        dueDate: { value: toDateString(row.due_date) },
+        issueDate: { value: dayjs(row.issue_date).format('YYYY-MM-DD') },
+        dueDate: { value: dayjs(row.due_date).format('YYYY-MM-DD') },
         issuer: {
             type: row.issuer_type as ISSUER_TYPE,
             name: row.issuer_name,
@@ -288,9 +172,7 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
                 return null;
             }
 
-            return DraftInvoiceDataMapper.fromRecord(
-                toDraftInvoiceRecord(rows)
-            );
+            return DraftInvoiceDataMapper.fromRows(rows);
         }
 
         if (entityClass === Invoice) {
