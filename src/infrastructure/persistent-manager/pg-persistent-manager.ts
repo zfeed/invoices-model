@@ -36,6 +36,8 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
     private committed = false;
     private rolledBack = false;
     private transaction: ControlledTransaction | null = null;
+    private draftInvoiceStorage: DraftInvoiceStorage | null = null;
+    private invoiceStorage: InvoiceStorage | null = null;
     private readonly versions = new Map<EntityClass, Map<string, number>>();
 
     constructor(
@@ -72,11 +74,8 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
             return null;
         }
 
-        const tx = this.getTransaction();
-
         if (entityClass === DraftInvoice) {
-            const storage = new DraftInvoiceStorage(tx);
-            const rows = await storage.select(id);
+            const rows = await this.getDraftInvoiceStorage().select(id);
 
             if (rows.length === 0) {
                 return null;
@@ -86,8 +85,7 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         }
 
         if (entityClass === Invoice) {
-            const storage = new InvoiceStorage(tx);
-            const rows = await storage.select(id);
+            const rows = await this.getInvoiceStorage().select(id);
 
             if (rows.length === 0) {
                 return null;
@@ -152,20 +150,17 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
 
         this.committed = true;
 
-        const tx = this.getTransaction();
         const allEntities: Entity[] = [];
 
         for (const [entityClass, collection] of collections) {
             for (const entity of collection.values()) {
                 if (entity instanceof DraftInvoice) {
-                    const storage = new DraftInvoiceStorage(tx);
                     const record =
                         DraftInvoiceDataMapper.from(entity).toRecord();
-                    await storage.merge(record);
+                    await this.getDraftInvoiceStorage().merge(record);
                 } else if (entity instanceof Invoice) {
-                    const storage = new InvoiceStorage(tx);
                     const record = InvoiceDataMapper.from(entity).toRecord();
-                    await storage.merge(record);
+                    await this.getInvoiceStorage().merge(record);
                 } else {
                     const store = this.stores.get(entityClass);
 
@@ -184,7 +179,7 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
             }
         }
 
-        await tx.commit().execute();
+        await this.getTransaction().commit().execute();
         await this.domainEvents.publishEvents(...allEntities);
     }
 
@@ -270,6 +265,8 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
 
     private async initTransaction(): Promise<void> {
         this.transaction = await kysely.startTransaction().execute();
+        this.draftInvoiceStorage = new DraftInvoiceStorage(this.transaction);
+        this.invoiceStorage = new InvoiceStorage(this.transaction);
     }
 
     private getTransaction(): ControlledTransaction {
@@ -278,5 +275,21 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         }
 
         return this.transaction;
+    }
+
+    private getDraftInvoiceStorage(): DraftInvoiceStorage {
+        if (!this.draftInvoiceStorage) {
+            throw new Error('Transaction not initialized');
+        }
+
+        return this.draftInvoiceStorage;
+    }
+
+    private getInvoiceStorage(): InvoiceStorage {
+        if (!this.invoiceStorage) {
+            throw new Error('Transaction not initialized');
+        }
+
+        return this.invoiceStorage;
     }
 }
