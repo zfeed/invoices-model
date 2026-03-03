@@ -7,5 +7,6 @@ export default defineConfig({
         include: ['src/**/*.{test,spec}.ts'],
         exclude: ['node_modules/**'],
         setupFiles: ['dotenv/config'],
+        fileParallelism: false,
     },
 });

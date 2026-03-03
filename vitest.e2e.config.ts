@@ -6,5 +6,6 @@ export default defineConfig({
         environment: 'node',
         include: ['e2e/**/*.e2e.spec.ts'],
         setupFiles: ['dotenv/config'],
+        fileParallelism: false,
     },
 });

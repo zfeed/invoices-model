@@ -1,13 +1,14 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
 import { Session } from '../../../shared/unit-of-work/unit-of-work';
-import { PersistentManager } from '../../../../infrastructure/persistent-manager/persistent-manager';
+import { PersistentManager } from '../../../../infrastructure/persistent-manager/pg-persistent-manager';
 import { Money } from '../../domain/money/money';
 import { Range } from '../../domain/range/range';
 import { AuthflowTemplate } from '../../domain/authflow/authflow-template';
 import { AuthflowPolicy } from '../../domain/authflow/authflow-policy';
 import { AuthflowPolicyCreatedEvent } from '../../domain/authflow/events/authflow-policy-created.event';
 import { CreateAuthflowPolicy } from './create-authflow-policy';
+import { cleanDatabase } from '../../../../infrastructure/persistent-manager/clean-database';
 
 const range = (from: string, to: string) =>
     Range.create(
@@ -22,6 +23,7 @@ const template = (from: string, to: string) =>
     }).unwrap();
 
 describe('createAuthflowPolicyCommand', () => {
+    beforeEach(cleanDatabase);
     it('should create and save a policy', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session = new Session(new PersistentManager(domainEvents));

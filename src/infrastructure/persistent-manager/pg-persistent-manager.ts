@@ -1,3 +1,5 @@
+import { AuthflowPolicy } from '../../core/financial-authorization/domain/authflow/authflow-policy';
+import { FinancialDocument } from '../../core/financial-authorization/domain/document/document';
 import { DraftInvoice } from '../../core/invoices/domain/draft-invoice/draft-invoice';
 import { Invoice } from '../../core/invoices/domain/invoice/invoice';
 import { DomainEvents } from '../../core/shared/domain-events/domain-events.interface';
@@ -7,12 +9,16 @@ import {
 } from '../../core/shared/unit-of-work/unit-of-work.interface';
 import type { Collection } from '../../core/shared/unit-of-work/collection/collection';
 import { kysely, ControlledTransaction } from '../../../database/kysely';
+import { AuthflowPolicyStorage } from './authflow-policy-storage';
 import { DraftInvoiceStorage } from './draft-invoice-storage';
+import { FinancialDocumentStorage } from './financial-document-storage';
 import { InvoiceStorage } from './invoice-storage';
+import { AuthflowPolicyDataMapper } from './mappers/financial-authorization/authflow-policy.data-mapper';
+import { FinancialDocumentDataMapper } from './mappers/financial-authorization/financial-document.data-mapper';
 import { DraftInvoiceDataMapper } from './mappers/invoices/draft-invoice.data-mapper';
 import { InvoiceDataMapper } from './mappers/invoices/invoice.data-mapper';
 
-type Entity = DraftInvoice | Invoice;
+type Entity = DraftInvoice | Invoice | AuthflowPolicy | FinancialDocument;
 
 const UUID_RE =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -23,6 +29,8 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
     private transaction: ControlledTransaction | null = null;
     private draftInvoiceStorage: DraftInvoiceStorage | null = null;
     private invoiceStorage: InvoiceStorage | null = null;
+    private financialDocumentStorage: FinancialDocumentStorage | null = null;
+    private authflowPolicyStorage: AuthflowPolicyStorage | null = null;
 
     constructor(private readonly domainEvents: DomainEvents) {}
 
@@ -58,10 +66,58 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
             return InvoiceDataMapper.fromRows(rows);
         }
 
+        if (entityClass === FinancialDocument) {
+            const rows = await this.getFinancialDocumentStorage().select(id);
+
+            if (!rows) {
+                return null;
+            }
+
+            return FinancialDocumentDataMapper.fromRows(rows);
+        }
+
+        if (entityClass === AuthflowPolicy) {
+            const rows = await this.getAuthflowPolicyStorage().select(id);
+
+            if (!rows) {
+                return null;
+            }
+
+            return AuthflowPolicyDataMapper.fromRows(rows);
+        }
+
         throw new Error(`Unknown entity class: ${entityClass.name}`);
     }
 
-    async findBy(): Promise<Entity | null> {
+    async findBy(
+        entityClass: EntityClass,
+        key: string,
+        value: string
+    ): Promise<Entity | null> {
+        if (entityClass === FinancialDocument && key === 'referenceId') {
+            const rows =
+                await this.getFinancialDocumentStorage().selectByReferenceId(
+                    value
+                );
+
+            if (!rows) {
+                return null;
+            }
+
+            return FinancialDocumentDataMapper.fromRows(rows);
+        }
+
+        if (entityClass === AuthflowPolicy && key === 'action') {
+            const rows =
+                await this.getAuthflowPolicyStorage().selectByAction(value);
+
+            if (!rows) {
+                return null;
+            }
+
+            return AuthflowPolicyDataMapper.fromRows(rows);
+        }
+
         throw new Error('Not implemented');
     }
 
@@ -97,6 +153,14 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
                 } else if (entity instanceof Invoice) {
                     const record = InvoiceDataMapper.from(entity).toRecord();
                     await this.getInvoiceStorage().merge(record);
+                } else if (entity instanceof FinancialDocument) {
+                    const record =
+                        FinancialDocumentDataMapper.from(entity).toRecord();
+                    await this.getFinancialDocumentStorage().merge(record);
+                } else if (entity instanceof AuthflowPolicy) {
+                    const record =
+                        AuthflowPolicyDataMapper.from(entity).toRecord();
+                    await this.getAuthflowPolicyStorage().merge(record);
                 }
 
                 allEntities.push(entity);
@@ -111,6 +175,12 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         this.transaction = await kysely.startTransaction().execute();
         this.draftInvoiceStorage = new DraftInvoiceStorage(this.transaction);
         this.invoiceStorage = new InvoiceStorage(this.transaction);
+        this.financialDocumentStorage = new FinancialDocumentStorage(
+            this.transaction
+        );
+        this.authflowPolicyStorage = new AuthflowPolicyStorage(
+            this.transaction
+        );
     }
 
     private getTransaction(): ControlledTransaction {
@@ -135,5 +205,21 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         }
 
         return this.invoiceStorage;
+    }
+
+    private getFinancialDocumentStorage(): FinancialDocumentStorage {
+        if (!this.financialDocumentStorage) {
+            throw new Error('Transaction not initialized');
+        }
+
+        return this.financialDocumentStorage;
+    }
+
+    private getAuthflowPolicyStorage(): AuthflowPolicyStorage {
+        if (!this.authflowPolicyStorage) {
+            throw new Error('Transaction not initialized');
+        }
+
+        return this.authflowPolicyStorage;
     }
 }

@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { createApp } from '../src/http/create-app';
+import { cleanDatabase } from '../src/infrastructure/persistent-manager/clean-database';
 
 export const COMPLETE_DRAFT_REQUEST = {
     lineItems: [
@@ -50,6 +51,7 @@ export const setupApp = () => {
     let app: FastifyInstance;
 
     beforeEach(async () => {
+        await cleanDatabase();
         app = await createApp();
         await app.ready();
     });

@@ -1,5 +1,5 @@
 import { Session } from '../../../../shared/unit-of-work/unit-of-work';
-import { PersistentManager } from '../../../../../infrastructure/persistent-manager/persistent-manager';
+import { PersistentManager } from '../../../../../infrastructure/persistent-manager/pg-persistent-manager';
 import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
 import { CanApproverApprove } from '../../../../financial-authorization/application/queries/can-approver-approve';
 import { FinancialDocument } from '../../../../financial-authorization/domain/document/document';
@@ -14,6 +14,9 @@ import { InvoicePaidEvent } from '../../../domain/invoice/events/invoice-paid.ev
 import { APPLICATION_ERROR_CODE } from '../../../../../building-blocks/errors/application/application-codes';
 import { ISSUER_TYPE } from '../../../domain/issuer/issuer';
 import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
+import { cleanDatabase } from '../../../../../infrastructure/persistent-manager/clean-database';
+
+const uuid = () => crypto.randomUUID();
 
 const COMPLETE_DRAFT_REQUEST = {
     lineItems: [
@@ -47,13 +50,15 @@ const COMPLETE_DRAFT_REQUEST = {
     },
 };
 
+const APPROVER_ID = uuid();
+
 const createAuthorizationDocument = (referenceId: string) =>
     FinancialDocument.create({
         referenceId: ReferenceId.fromPlain(referenceId),
         value: Money.fromPlain({ amount: '220', currency: 'USD' }),
         authflows: [
             Authflow.fromPlain({
-                id: 'authflow-1',
+                id: uuid(),
                 action: 'pay',
                 range: {
                     from: { amount: '0', currency: 'USD' },
@@ -61,15 +66,15 @@ const createAuthorizationDocument = (referenceId: string) =>
                 },
                 steps: [
                     {
-                        id: 'step-1',
+                        id: uuid(),
                         order: 0,
                         groups: [
                             {
-                                id: 'group-1',
+                                id: uuid(),
                                 requiredApprovals: 1,
                                 approvers: [
                                     {
-                                        id: 'approver-1',
+                                        id: APPROVER_ID,
                                         name: 'Alice',
                                         email: 'alice@example.com',
                                     },
@@ -91,7 +96,8 @@ describe('PayInvoice', () => {
     let processCommand: ProcessInvoice;
     let payCommand: PayInvoice;
 
-    beforeEach(() => {
+    beforeEach(async () => {
+        await cleanDatabase();
         domainEvents = new InMemoryDomainEvents();
         session = new Session(new PersistentManager(domainEvents));
         const canApproverApprove = new CanApproverApprove(session);
@@ -105,7 +111,7 @@ describe('PayInvoice', () => {
         await expect(
             payCommand.execute({
                 id: 'non-existing-id',
-                approverId: 'approver-1',
+                approverId: APPROVER_ID,
             })
         ).rejects.toMatchObject({
             code: APPLICATION_ERROR_CODE.PAYMENT_NOT_AUTHORIZED,
@@ -127,7 +133,7 @@ describe('PayInvoice', () => {
         await expect(
             payCommand.execute({
                 id: invoice.id,
-                approverId: 'unauthorized-approver',
+                approverId: uuid(),
             })
         ).rejects.toMatchObject({
             code: APPLICATION_ERROR_CODE.PAYMENT_NOT_AUTHORIZED,
@@ -148,7 +154,7 @@ describe('PayInvoice', () => {
 
         const result = await payCommand.execute({
             id: invoice.id,
-            approverId: 'approver-1',
+            approverId: APPROVER_ID,
         });
 
         expect(result.status).toBe('PAID');
@@ -173,7 +179,7 @@ describe('PayInvoice', () => {
 
         await payCommand.execute({
             id: invoice.id,
-            approverId: 'approver-1',
+            approverId: APPROVER_ID,
         });
 
         expect(paidEvents).toEqual([

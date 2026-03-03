@@ -1,5 +1,5 @@
 import { Session } from '../../../shared/unit-of-work/unit-of-work';
-import { PersistentManager } from '../../../../infrastructure/persistent-manager/persistent-manager';
+import { PersistentManager } from '../../../../infrastructure/persistent-manager/pg-persistent-manager';
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
 import { InvoiceIssuedEvent } from '../../../invoices/domain/invoice/events/invoice-issued.event';
 import { Money } from '../../domain/money/money';
@@ -10,6 +10,7 @@ import { Action } from '../../domain/action/action';
 import { FinancialDocument } from '../../domain/document/document';
 import { ReferenceId } from '../../domain/reference-id/reference-id';
 import { OnInvoiceIssued } from './on-invoice-issued';
+import { cleanDatabase } from '../../../../infrastructure/persistent-manager/clean-database';
 
 const createInvoiceEvent = (id: string, amount = '100', currency = 'USD') =>
     new InvoiceIssuedEvent({
@@ -86,6 +87,8 @@ const publishEvent = async (
 };
 
 describe('onInvoiceIssued', () => {
+    beforeEach(cleanDatabase);
+
     it('should create a new financial document when invoice is created', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session = new Session(new PersistentManager(domainEvents));
@@ -414,7 +417,7 @@ describe('onInvoiceIssued', () => {
         expect(after).toBeDefined();
     });
 
-    it('should isolate documents across separate session instances', async () => {
+    it('should see committed documents across separate session instances', async () => {
         const domainEvents = new InMemoryDomainEvents();
         const session1 = new Session(new PersistentManager(domainEvents));
         const session2 = new Session(new PersistentManager(domainEvents));
@@ -440,6 +443,6 @@ describe('onInvoiceIssued', () => {
         }
 
         expect(inSession1).toBeDefined();
-        expect(inSession2).toBeUndefined();
+        expect(inSession2).toBeDefined();
     });
 });

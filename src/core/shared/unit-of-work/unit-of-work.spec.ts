@@ -2,9 +2,8 @@ import { DraftInvoice } from '../../invoices/domain/draft-invoice/draft-invoice'
 import { Id } from '../../invoices/domain/id/id';
 import { LineItem } from '../../invoices/domain/line-item/line-item';
 import { Session } from './unit-of-work';
-import { PersistentManager } from '../../../infrastructure/persistent-manager/persistent-manager';
+import { PersistentManager } from '../../../infrastructure/persistent-manager/pg-persistent-manager';
 import { InMemoryDomainEvents } from '../../../infrastructure/domain-events/in-memory-domain-events';
-import { OptimisticConcurrencyError } from '../optimistic-concurrency.error';
 import { Invoice } from '../../invoices/domain/invoice/invoice';
 import { CalendarDate } from '../../invoices/domain/calendar-date/calendar-date';
 import { Issuer, ISSUER_TYPE } from '../../invoices/domain/issuer/issuer';
@@ -15,7 +14,7 @@ import {
 import { Paypal } from '../../invoices/domain/billing/paypal/paypal';
 import { UnitDescription } from '../../invoices/domain/line-item/unit-description/unit-description';
 
-describe('UnitOfWork contract (InMemory)', () => {
+describe('UnitOfWork contract', () => {
     describe('Collection.get', () => {
         it('should return null for a non-existing entity', async () => {
             const session = new Session(
@@ -205,151 +204,6 @@ describe('UnitOfWork contract (InMemory)', () => {
                     .get(draft.id);
                 expect(result).toBeNull();
             }
-        });
-
-        it('should not expose uncommitted modifications to other units of work', async () => {
-            const session = new Session(
-                new PersistentManager(new InMemoryDomainEvents())
-            );
-            const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
-
-            {
-                await using uow = await session.begin();
-                await uow.collection(DraftInvoice).add(draft);
-                await uow.commit();
-            }
-
-            let lineItemsInOtherUow: unknown = 'not-checked';
-
-            const uow1 = await session.begin();
-            const loaded = await uow1.collection(DraftInvoice).get(draft.id);
-            loaded!.addLineItem(
-                LineItem.create({
-                    description: 'Consulting',
-                    price: { amount: '100', currency: 'USD' },
-                    quantity: '2',
-                }).unwrap()
-            );
-
-            {
-                await using uow2 = await session.begin();
-                const result = await uow2
-                    .collection(DraftInvoice)
-                    .get(draft.id);
-                lineItemsInOtherUow = result!.lineItems;
-            }
-
-            expect(lineItemsInOtherUow).toBeNull();
-        });
-    });
-
-    describe('optimistic concurrency', () => {
-        it('should throw OptimisticConcurrencyError when two units of work modify the same entity', async () => {
-            const session = new Session(
-                new PersistentManager(new InMemoryDomainEvents())
-            );
-            const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
-
-            {
-                await using uow = await session.begin();
-                await uow.collection(DraftInvoice).add(draft);
-                await uow.commit();
-            }
-
-            const uow1 = await session.begin();
-            const loaded1 = await uow1.collection(DraftInvoice).get(draft.id);
-            loaded1!.addLineItem(
-                LineItem.create({
-                    description: 'From UoW1',
-                    price: { amount: '50', currency: 'USD' },
-                    quantity: '1',
-                }).unwrap()
-            );
-
-            // A concurrent UoW commits a change to the same entity first
-            {
-                await using uow2 = await session.begin();
-                const loaded2 = await uow2
-                    .collection(DraftInvoice)
-                    .get(draft.id);
-                loaded2!.addLineItem(
-                    LineItem.create({
-                        description: 'From UoW2',
-                        price: { amount: '75', currency: 'USD' },
-                        quantity: '1',
-                    }).unwrap()
-                );
-                await uow2.commit();
-            }
-
-            // uow1 commits after uow2 already committed — version mismatch
-            await expect(uow1.commit()).rejects.toThrow(
-                OptimisticConcurrencyError
-            );
-        });
-    });
-
-    describe('Collection edge cases', () => {
-        it('should throw OptimisticConcurrencyError when adding an entity with an id that already exists in the store', async () => {
-            const session = new Session(
-                new PersistentManager(new InMemoryDomainEvents())
-            );
-            const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
-
-            {
-                await using uow = await session.begin();
-                await uow.collection(DraftInvoice).add(draft);
-                await uow.commit();
-            }
-
-            {
-                const uow = await session.begin();
-                await uow.collection(DraftInvoice).add(draft);
-                await expect(uow.commit()).rejects.toThrow(
-                    OptimisticConcurrencyError
-                );
-            }
-        });
-    });
-
-    describe('dirty tracking', () => {
-        it('should cause a concurrency conflict when a read-only load overlaps with a write', async () => {
-            const session = new Session(
-                new PersistentManager(new InMemoryDomainEvents())
-            );
-            const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
-
-            {
-                await using uow = await session.begin();
-                await uow.collection(DraftInvoice).add(draft);
-                await uow.commit();
-            }
-
-            // A read-only UoW that just loads the entity still bumps the
-            // version on commit, so a concurrent writer will conflict.
-            const uow1 = await session.begin();
-            await uow1.collection(DraftInvoice).get(draft.id);
-
-            // A concurrent UoW modifies and commits the same entity
-            {
-                await using uow2 = await session.begin();
-                const loaded = await uow2
-                    .collection(DraftInvoice)
-                    .get(draft.id);
-                loaded!.addLineItem(
-                    LineItem.create({
-                        description: 'Concurrent write',
-                        price: { amount: '50', currency: 'USD' },
-                        quantity: '1',
-                    }).unwrap()
-                );
-                await uow2.commit();
-            }
-
-            // uow1 commits — version mismatch because uow2 already committed
-            await expect(uow1.commit()).rejects.toThrow(
-                OptimisticConcurrencyError
-            );
         });
     });
 

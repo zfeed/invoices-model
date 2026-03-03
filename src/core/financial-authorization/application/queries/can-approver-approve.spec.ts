@@ -1,10 +1,60 @@
 import { FinancialDocument } from '../../domain/document/document';
 import { Session } from '../../../shared/unit-of-work/unit-of-work';
-import { PersistentManager } from '../../../../infrastructure/persistent-manager/persistent-manager';
+import { PersistentManager } from '../../../../infrastructure/persistent-manager/pg-persistent-manager';
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
 import { CanApproverApprove } from './can-approver-approve';
+import { cleanDatabase } from '../../../../infrastructure/persistent-manager/clean-database';
+
+const uuid = () => crypto.randomUUID();
+
+const createDocumentFixture = (overrides: {
+    approverId: string;
+    referenceId?: string;
+}) => {
+    const ref = overrides.referenceId ?? uuid();
+    return {
+        document: FinancialDocument.fromPlain({
+            id: uuid(),
+            referenceId: ref,
+            value: { amount: '10000', currency: 'USD' },
+            authflows: [
+                {
+                    id: uuid(),
+                    action: 'pay',
+                    range: {
+                        from: { amount: '0', currency: 'USD' },
+                        to: { amount: '100000', currency: 'USD' },
+                    },
+                    steps: [
+                        {
+                            id: uuid(),
+                            order: 0,
+                            groups: [
+                                {
+                                    id: uuid(),
+                                    requiredApprovals: 1,
+                                    approvers: [
+                                        {
+                                            id: overrides.approverId,
+                                            name: 'Alice',
+                                            email: 'alice@example.com',
+                                        },
+                                    ],
+                                    approvals: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        }),
+        referenceId: ref,
+    };
+};
 
 describe('CanApproverApprove', () => {
+    beforeEach(cleanDatabase);
+
     it('should return UNKNOWN when document does not exist', async () => {
         const session = new Session(
             new PersistentManager(new InMemoryDomainEvents())
@@ -12,7 +62,7 @@ describe('CanApproverApprove', () => {
         const question = new CanApproverApprove(session);
 
         const answer = await question
-            .can('approver-1')
+            .can(uuid())
             .perform('pay')
             .on('non-existent-ref')
             .ask();
@@ -24,40 +74,9 @@ describe('CanApproverApprove', () => {
         const session = new Session(
             new PersistentManager(new InMemoryDomainEvents())
         );
-        const document = FinancialDocument.fromPlain({
-            id: 'doc-1',
-            referenceId: 'ref-1',
-            value: { amount: '10000', currency: 'USD' },
-            authflows: [
-                {
-                    id: 'authflow-1',
-                    action: 'pay',
-                    range: {
-                        from: { amount: '0', currency: 'USD' },
-                        to: { amount: '100000', currency: 'USD' },
-                    },
-                    steps: [
-                        {
-                            id: 'step-1',
-                            order: 0,
-                            groups: [
-                                {
-                                    id: 'group-1',
-                                    requiredApprovals: 1,
-                                    approvers: [
-                                        {
-                                            id: 'approver-1',
-                                            name: 'Alice',
-                                            email: 'alice@example.com',
-                                        },
-                                    ],
-                                    approvals: [],
-                                },
-                            ],
-                        },
-                    ],
-                },
-            ],
+        const approverId = uuid();
+        const { document, referenceId } = createDocumentFixture({
+            approverId,
         });
 
         {
@@ -69,9 +88,9 @@ describe('CanApproverApprove', () => {
         const question = new CanApproverApprove(session);
 
         const answer = await question
-            .can('approver-1')
+            .can(approverId)
             .perform('pay')
-            .on('ref-1')
+            .on(referenceId)
             .ask();
 
         expect(answer).toBe('YES');
@@ -81,40 +100,9 @@ describe('CanApproverApprove', () => {
         const session = new Session(
             new PersistentManager(new InMemoryDomainEvents())
         );
-        const document = FinancialDocument.fromPlain({
-            id: 'doc-1',
-            referenceId: 'ref-1',
-            value: { amount: '10000', currency: 'USD' },
-            authflows: [
-                {
-                    id: 'authflow-1',
-                    action: 'pay',
-                    range: {
-                        from: { amount: '0', currency: 'USD' },
-                        to: { amount: '100000', currency: 'USD' },
-                    },
-                    steps: [
-                        {
-                            id: 'step-1',
-                            order: 0,
-                            groups: [
-                                {
-                                    id: 'group-1',
-                                    requiredApprovals: 1,
-                                    approvers: [
-                                        {
-                                            id: 'approver-1',
-                                            name: 'Alice',
-                                            email: 'alice@example.com',
-                                        },
-                                    ],
-                                    approvals: [],
-                                },
-                            ],
-                        },
-                    ],
-                },
-            ],
+        const approverId = uuid();
+        const { document, referenceId } = createDocumentFixture({
+            approverId,
         });
 
         {
@@ -126,9 +114,9 @@ describe('CanApproverApprove', () => {
         const question = new CanApproverApprove(session);
 
         const answer = await question
-            .can('approver-2')
+            .can(uuid())
             .perform('pay')
-            .on('ref-1')
+            .on(referenceId)
             .ask();
 
         expect(answer).toBe('NO');
@@ -138,13 +126,15 @@ describe('CanApproverApprove', () => {
         const session = new Session(
             new PersistentManager(new InMemoryDomainEvents())
         );
+        const approverId = uuid();
+        const ref = uuid();
         const document = FinancialDocument.fromPlain({
-            id: 'doc-1',
-            referenceId: 'ref-1',
+            id: uuid(),
+            referenceId: ref,
             value: { amount: '10000', currency: 'USD' },
             authflows: [
                 {
-                    id: 'authflow-1',
+                    id: uuid(),
                     action: 'pay',
                     range: {
                         from: { amount: '0', currency: 'USD' },
@@ -152,22 +142,22 @@ describe('CanApproverApprove', () => {
                     },
                     steps: [
                         {
-                            id: 'step-1',
+                            id: uuid(),
                             order: 0,
                             groups: [
                                 {
-                                    id: 'group-1',
+                                    id: uuid(),
                                     requiredApprovals: 1,
                                     approvers: [
                                         {
-                                            id: 'approver-1',
+                                            id: approverId,
                                             name: 'Alice',
                                             email: 'alice@example.com',
                                         },
                                     ],
                                     approvals: [
                                         {
-                                            approverId: 'approver-1',
+                                            approverId,
                                             createdAt: new Date().toISOString(),
                                             comment: null,
                                         },
@@ -189,9 +179,9 @@ describe('CanApproverApprove', () => {
         const question = new CanApproverApprove(session);
 
         const answer = await question
-            .can('approver-1')
+            .can(approverId)
             .perform('pay')
-            .on('ref-1')
+            .on(ref)
             .ask();
 
         expect(answer).toBe('NO');
@@ -201,40 +191,9 @@ describe('CanApproverApprove', () => {
         const session = new Session(
             new PersistentManager(new InMemoryDomainEvents())
         );
-        const document = FinancialDocument.fromPlain({
-            id: 'doc-1',
-            referenceId: 'ref-1',
-            value: { amount: '10000', currency: 'USD' },
-            authflows: [
-                {
-                    id: 'authflow-1',
-                    action: 'pay',
-                    range: {
-                        from: { amount: '0', currency: 'USD' },
-                        to: { amount: '100000', currency: 'USD' },
-                    },
-                    steps: [
-                        {
-                            id: 'step-1',
-                            order: 0,
-                            groups: [
-                                {
-                                    id: 'group-1',
-                                    requiredApprovals: 1,
-                                    approvers: [
-                                        {
-                                            id: 'approver-1',
-                                            name: 'Alice',
-                                            email: 'alice@example.com',
-                                        },
-                                    ],
-                                    approvals: [],
-                                },
-                            ],
-                        },
-                    ],
-                },
-            ],
+        const approverId = uuid();
+        const { document, referenceId } = createDocumentFixture({
+            approverId,
         });
 
         {
@@ -246,9 +205,9 @@ describe('CanApproverApprove', () => {
         const question = new CanApproverApprove(session);
 
         const answer = await question
-            .can('approver-1')
+            .can(approverId)
             .perform('non-existent')
-            .on('ref-1')
+            .on(referenceId)
             .ask();
 
         expect(answer).toBe('NO');
@@ -258,13 +217,17 @@ describe('CanApproverApprove', () => {
         const session = new Session(
             new PersistentManager(new InMemoryDomainEvents())
         );
+        const approverId1 = uuid();
+        const approverId2 = uuid();
+        const ref = uuid();
+
         const document = FinancialDocument.fromPlain({
-            id: 'doc-1',
-            referenceId: 'ref-1',
+            id: uuid(),
+            referenceId: ref,
             value: { amount: '10000', currency: 'USD' },
             authflows: [
                 {
-                    id: 'authflow-1',
+                    id: uuid(),
                     action: 'pay',
                     range: {
                         from: { amount: '0', currency: 'USD' },
@@ -272,15 +235,15 @@ describe('CanApproverApprove', () => {
                     },
                     steps: [
                         {
-                            id: 'step-1',
+                            id: uuid(),
                             order: 0,
                             groups: [
                                 {
-                                    id: 'group-1',
+                                    id: uuid(),
                                     requiredApprovals: 1,
                                     approvers: [
                                         {
-                                            id: 'approver-1',
+                                            id: approverId1,
                                             name: 'Alice',
                                             email: 'alice@example.com',
                                         },
@@ -290,15 +253,15 @@ describe('CanApproverApprove', () => {
                             ],
                         },
                         {
-                            id: 'step-2',
+                            id: uuid(),
                             order: 1,
                             groups: [
                                 {
-                                    id: 'group-2',
+                                    id: uuid(),
                                     requiredApprovals: 1,
                                     approvers: [
                                         {
-                                            id: 'approver-2',
+                                            id: approverId2,
                                             name: 'Bob',
                                             email: 'bob@example.com',
                                         },
@@ -321,9 +284,9 @@ describe('CanApproverApprove', () => {
         const question = new CanApproverApprove(session);
 
         const answer = await question
-            .can('approver-2')
+            .can(approverId2)
             .perform('pay')
-            .on('ref-1')
+            .on(ref)
             .ask();
 
         expect(answer).toBe('NO');

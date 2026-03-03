@@ -1,7 +1,7 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
 import { Session } from '../../../shared/unit-of-work/unit-of-work';
-import { PersistentManager } from '../../../../infrastructure/persistent-manager/persistent-manager';
+import { PersistentManager } from '../../../../infrastructure/persistent-manager/pg-persistent-manager';
 import { Approver } from '../../domain/approver/approver';
 import { AuthflowTemplate } from '../../domain/authflow/authflow-template';
 import { FinancialDocument } from '../../domain/document/document';
@@ -17,11 +17,7 @@ import { InvoiceIssuedEvent } from '../../../invoices/domain/invoice/events/invo
 import { CreateAuthflowPolicy } from './create-authflow-policy';
 import { OnInvoiceIssued } from '../event-handlers/on-invoice-issued';
 import { ApproveActionOnDocument } from './approve-action-on-document';
-
-const approver = Approver.create({
-    name: Name.create('John Doe').unwrap(),
-    email: Email.create('john@example.com').unwrap(),
-}).unwrap();
+import { cleanDatabase } from '../../../../infrastructure/persistent-manager/clean-database';
 
 const range = (from: string, to: string) =>
     Range.create(
@@ -29,20 +25,29 @@ const range = (from: string, to: string) =>
         Money.create(to, 'USD').unwrap()
     ).unwrap();
 
-const groupTemplate = GroupTemplate.create({
-    requiredApprovals: 1,
-    approvers: [approver],
-}).unwrap();
+const createTemplate = () => {
+    const approver = Approver.create({
+        name: Name.create('John Doe').unwrap(),
+        email: Email.create('john@example.com').unwrap(),
+    }).unwrap();
 
-const stepTemplate = StepTemplate.create({
-    order: Order.create(0).unwrap(),
-    groups: [groupTemplate],
-}).unwrap();
+    const groupTemplate = GroupTemplate.create({
+        requiredApprovals: 1,
+        approvers: [approver],
+    }).unwrap();
 
-const template = AuthflowTemplate.create({
-    range: range('0', '10000'),
-    steps: [stepTemplate],
-}).unwrap();
+    const stepTemplate = StepTemplate.create({
+        order: Order.create(0).unwrap(),
+        groups: [groupTemplate],
+    }).unwrap();
+
+    const template = AuthflowTemplate.create({
+        range: range('0', '10000'),
+        steps: [stepTemplate],
+    }).unwrap();
+
+    return { approver, template };
+};
 
 const INVOICE_DATA = {
     id: 'invoice-123',
@@ -88,15 +93,21 @@ describe('approveActionOnDocumentCommand', () => {
     let session: Session;
     let domainEvents: InMemoryDomainEvents;
     let command: ApproveActionOnDocument;
+    let approver: ReturnType<typeof createTemplate>['approver'];
 
     beforeEach(async () => {
+        await cleanDatabase();
+
+        const fixtures = createTemplate();
+        approver = fixtures.approver;
+
         domainEvents = new InMemoryDomainEvents();
         session = new Session(new PersistentManager(domainEvents));
 
         const createPolicy = new CreateAuthflowPolicy(session);
         await createPolicy.execute({
             action: 'pay',
-            templates: [template],
+            templates: [fixtures.template],
         });
 
         const onInvoiceIssuedHandler = new OnInvoiceIssued(

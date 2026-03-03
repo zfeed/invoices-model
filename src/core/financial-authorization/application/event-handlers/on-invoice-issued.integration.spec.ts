@@ -1,6 +1,6 @@
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
 import { Session } from '../../../shared/unit-of-work/unit-of-work';
-import { PersistentManager } from '../../../../infrastructure/persistent-manager/persistent-manager';
+import { PersistentManager } from '../../../../infrastructure/persistent-manager/pg-persistent-manager';
 import { CreateDraftInvoice } from '../../../invoices/application/commands/create-draft-invoice/create-draft-invoice';
 import { CompleteDraftInvoice } from '../../../invoices/application/commands/complete-draft-invoice/complete-draft-invoice';
 import { ISSUER_TYPE } from '../../../invoices/domain/issuer/issuer';
@@ -12,6 +12,7 @@ import { AuthflowPolicy } from '../../domain/authflow/authflow-policy';
 import { Action } from '../../domain/action/action';
 import { FinancialDocument } from '../../domain/document/document';
 import { OnInvoiceIssued } from './on-invoice-issued';
+import { cleanDatabase } from '../../../../infrastructure/persistent-manager/clean-database';
 
 const COMPLETE_DRAFT_REQUEST = {
     lineItems: [
@@ -74,6 +75,7 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
     let completeCommand: CompleteDraftInvoice;
 
     beforeEach(async () => {
+        await cleanDatabase();
         domainEvents = new InMemoryDomainEvents();
         session = new Session(new PersistentManager(domainEvents));
         createCommand = new CreateDraftInvoice(session);
