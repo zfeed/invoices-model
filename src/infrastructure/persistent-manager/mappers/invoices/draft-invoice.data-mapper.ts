@@ -3,7 +3,11 @@ import { DraftInvoice } from '../../../../core/invoices/domain/draft-invoice/dra
 import { DRAFT_INVOICE_STATUS } from '../../../../core/invoices/domain/status/status';
 import { ISSUER_TYPE } from '../../../../core/invoices/domain/issuer/issuer';
 import { RECIPIENT_TYPE } from '../../../../core/invoices/domain/recipient/recipient';
-import type { DraftInvoiceRow } from '../../draft-invoice-storage';
+import type { DraftInvoiceStorage } from '../../draft-invoice-storage';
+
+export type DraftInvoiceRow = Awaited<
+    ReturnType<DraftInvoiceStorage['select']>
+>[number];
 import {
     CalendarDateDataMapper,
     CalendarDateRecord,

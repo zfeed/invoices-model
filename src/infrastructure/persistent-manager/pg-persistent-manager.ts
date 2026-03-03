@@ -22,15 +22,7 @@ import {
     FinancialDocumentDataMapper,
     FinancialDocumentRecord,
 } from './mappers/financial-authorization/financial-document.data-mapper';
-import dayjs from 'dayjs';
-import { ISSUER_TYPE } from '../../core/invoices/domain/issuer/issuer';
-import { RECIPIENT_TYPE } from '../../core/invoices/domain/recipient/recipient';
-import { INVOICE_STATUS } from '../../core/invoices/domain/status/status';
-import type { InvoiceRecord } from './mappers/invoices/invoice.data-mapper';
-
 type Entity = DraftInvoice | Invoice | AuthflowPolicy | FinancialDocument;
-
-type InvoiceRow = Awaited<ReturnType<InvoiceStorage['select']>>[number];
 
 const UUID_RE =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -39,88 +31,6 @@ const inMemoryEntityClasses: EntityClass[] = [
     AuthflowPolicy,
     FinancialDocument,
 ];
-
-function toInvoiceRecord(rows: InvoiceRow[]): InvoiceRecord {
-    const row = rows[0];
-    const lineItemRows = rows.filter((r) => r.invoice_line_item_id !== null);
-
-    return {
-        id: { value: row.id },
-        status: { value: row.status as INVOICE_STATUS },
-        lineItems: {
-            items: lineItemRows.map((r) => ({
-                description: {
-                    value: r.invoice_line_item_description!,
-                },
-                price: {
-                    amount: {
-                        value: r.invoice_line_item_price_amount!,
-                    },
-                    currency: {
-                        code: r.invoice_line_item_price_currency!,
-                    },
-                },
-                quantity: {
-                    value: {
-                        value: r.invoice_line_item_quantity!,
-                    },
-                },
-                total: {
-                    amount: {
-                        value: r.invoice_line_item_total_amount!,
-                    },
-                    currency: {
-                        code: r.invoice_line_item_total_currency!,
-                    },
-                },
-            })),
-            subtotal: {
-                amount: { value: row.subtotal_amount },
-                currency: { code: row.subtotal_currency },
-            },
-        },
-        total: {
-            amount: { value: row.total_amount },
-            currency: { code: row.total_currency },
-        },
-        vatRate:
-            row.vat_rate !== null ? { value: { value: row.vat_rate } } : null,
-        vatAmount:
-            row.vat_amount !== null
-                ? {
-                      amount: { value: row.vat_amount },
-                      currency: { code: row.vat_currency! },
-                  }
-                : null,
-        issueDate: { value: dayjs(row.issue_date).format('YYYY-MM-DD') },
-        dueDate: { value: dayjs(row.due_date).format('YYYY-MM-DD') },
-        issuer: {
-            type: row.issuer_type as ISSUER_TYPE,
-            name: row.issuer_name,
-            address: row.issuer_address,
-            taxId: row.issuer_tax_id,
-            email: { value: row.issuer_email },
-        },
-        recipient: {
-            type: row.recipient_type as RECIPIENT_TYPE,
-            name: row.recipient_name,
-            address: row.recipient_address,
-            taxId: row.recipient_tax_id,
-            email: { value: row.recipient_email },
-            taxResidenceCountry: {
-                code: row.recipient_tax_residence_country,
-            },
-            billing: {
-                type: 'PAYPAL' as const,
-                data: {
-                    email: {
-                        value: row.invoice_paypal_billing_email!,
-                    },
-                },
-            },
-        },
-    };
-}
 
 export class PersistentManager implements PersistentManagerInterface<Entity> {
     private committed = false;
@@ -183,7 +93,7 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
                 return null;
             }
 
-            return InvoiceDataMapper.fromRecord(toInvoiceRecord(rows));
+            return InvoiceDataMapper.fromRows(rows);
         }
 
         throw new Error(`Unknown entity class: ${entityClass.name}`);

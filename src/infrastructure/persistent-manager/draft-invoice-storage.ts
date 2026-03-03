@@ -2,10 +2,6 @@ import { sql } from 'kysely';
 import { ControlledTransaction } from '../../../database/kysely';
 import { DraftInvoiceRecord } from './mappers/invoices/draft-invoice.data-mapper';
 
-export type DraftInvoiceRow = Awaited<
-    ReturnType<DraftInvoiceStorage['select']>
->[number];
-
 export class DraftInvoiceStorage {
     constructor(private tx: ControlledTransaction) {}
 
