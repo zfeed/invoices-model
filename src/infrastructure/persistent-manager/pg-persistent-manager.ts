@@ -1,7 +1,5 @@
 import { DraftInvoice } from '../../core/invoices/domain/draft-invoice/draft-invoice';
 import { Invoice } from '../../core/invoices/domain/invoice/invoice';
-import { AuthflowPolicy } from '../../core/financial-authorization/domain/authflow/authflow-policy';
-import { FinancialDocument } from '../../core/financial-authorization/domain/document/document';
 import { DomainEvents } from '../../core/shared/domain-events/domain-events.interface';
 import {
     EntityClass,
@@ -9,28 +7,15 @@ import {
 } from '../../core/shared/unit-of-work/unit-of-work.interface';
 import type { Collection } from '../../core/shared/unit-of-work/collection/collection';
 import { kysely, ControlledTransaction } from '../../../database/kysely';
-import { Store } from '../store/store';
 import { DraftInvoiceStorage } from './draft-invoice-storage';
 import { InvoiceStorage } from './invoice-storage';
 import { DraftInvoiceDataMapper } from './mappers/invoices/draft-invoice.data-mapper';
 import { InvoiceDataMapper } from './mappers/invoices/invoice.data-mapper';
-import {
-    AuthflowPolicyDataMapper,
-    AuthflowPolicyRecord,
-} from './mappers/financial-authorization/authflow-policy.data-mapper';
-import {
-    FinancialDocumentDataMapper,
-    FinancialDocumentRecord,
-} from './mappers/financial-authorization/financial-document.data-mapper';
-type Entity = DraftInvoice | Invoice | AuthflowPolicy | FinancialDocument;
+
+type Entity = DraftInvoice | Invoice;
 
 const UUID_RE =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-const inMemoryEntityClasses: EntityClass[] = [
-    AuthflowPolicy,
-    FinancialDocument,
-];
 
 export class PersistentManager implements PersistentManagerInterface<Entity> {
     private committed = false;
@@ -38,38 +23,17 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
     private transaction: ControlledTransaction | null = null;
     private draftInvoiceStorage: DraftInvoiceStorage | null = null;
     private invoiceStorage: InvoiceStorage | null = null;
-    private readonly versions = new Map<EntityClass, Map<string, number>>();
 
-    constructor(
-        private readonly domainEvents: DomainEvents,
-        private readonly stores: Map<
-            EntityClass,
-            Store<Record<string, unknown>>
-        > = new Map(inMemoryEntityClasses.map((ec) => [ec, new Store()]))
-    ) {
-        for (const entityClass of inMemoryEntityClasses) {
-            this.versions.set(entityClass, new Map());
-        }
-    }
+    constructor(private readonly domainEvents: DomainEvents) {}
 
     async fork(): Promise<PersistentManagerInterface<Entity>> {
-        const newManager = new PersistentManager(
-            this.domainEvents,
-            this.stores
-        );
+        const newManager = new PersistentManager(this.domainEvents);
         await newManager.initTransaction();
 
         return newManager;
     }
 
     async get(entityClass: EntityClass, id: string): Promise<Entity | null> {
-        if (
-            entityClass === AuthflowPolicy ||
-            entityClass === FinancialDocument
-        ) {
-            return this.getFromStore(entityClass, id);
-        }
-
         if (!UUID_RE.test(id)) {
             return null;
         }
@@ -97,36 +61,8 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         throw new Error(`Unknown entity class: ${entityClass.name}`);
     }
 
-    async findBy(
-        entityClass: EntityClass,
-        key: string,
-        value: string,
-        tracked: Iterable<Entity> = []
-    ): Promise<Entity | null> {
-        for (const entity of tracked) {
-            const record = this.toRecord(entity);
-
-            if (this.resolveRecordValue(record[key]) === value) {
-                return entity;
-            }
-        }
-
-        const store = this.stores.get(entityClass);
-
-        if (!store) {
-            return null;
-        }
-
-        for (const record of store.values()) {
-            if (this.resolveRecordValue(record.value[key]) === value) {
-                const entity = this.fromRecord(entityClass, record.value);
-                const id = entity.id.toString();
-                this.trackVersion(entityClass, id, record.version);
-                return entity;
-            }
-        }
-
-        return null;
+    async findBy(): Promise<Entity | null> {
+        throw new Error('Not implemented');
     }
 
     async rollback(): Promise<void> {
@@ -152,7 +88,7 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
 
         const allEntities: Entity[] = [];
 
-        for (const [entityClass, collection] of collections) {
+        for (const [, collection] of collections) {
             for (const entity of collection.values()) {
                 if (entity instanceof DraftInvoice) {
                     const record =
@@ -161,18 +97,6 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
                 } else if (entity instanceof Invoice) {
                     const record = InvoiceDataMapper.from(entity).toRecord();
                     await this.getInvoiceStorage().merge(record);
-                } else {
-                    const store = this.stores.get(entityClass);
-
-                    if (store) {
-                        const id = entity.id.toString();
-                        const data = this.toRecord(entity);
-                        const expectedVersion = this.getTrackedVersion(
-                            entityClass,
-                            id
-                        );
-                        store.setIfVersion(id, data, expectedVersion);
-                    }
                 }
 
                 allEntities.push(entity);
@@ -181,86 +105,6 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
 
         await this.getTransaction().commit().execute();
         await this.domainEvents.publishEvents(...allEntities);
-    }
-
-    private getFromStore(entityClass: EntityClass, id: string): Entity | null {
-        const store = this.stores.get(entityClass);
-
-        if (!store) {
-            return null;
-        }
-
-        const record = store.get(id);
-
-        if (!record) {
-            return null;
-        }
-
-        this.trackVersion(entityClass, id, record.version);
-
-        return this.fromRecord(entityClass, record.value);
-    }
-
-    private fromRecord(
-        entityClass: EntityClass,
-        record: Record<string, unknown>
-    ): Entity {
-        if (entityClass === AuthflowPolicy) {
-            return AuthflowPolicyDataMapper.fromRecord(
-                record as AuthflowPolicyRecord
-            );
-        }
-
-        if (entityClass === FinancialDocument) {
-            return FinancialDocumentDataMapper.fromRecord(
-                record as FinancialDocumentRecord
-            );
-        }
-
-        throw new Error(`No mapper for ${entityClass.name}`);
-    }
-
-    private toRecord(entity: Entity): Record<string, unknown> {
-        if (entity instanceof DraftInvoice) {
-            return DraftInvoiceDataMapper.from(entity).toRecord();
-        }
-
-        if (entity instanceof Invoice) {
-            return InvoiceDataMapper.from(entity).toRecord();
-        }
-
-        if (entity instanceof AuthflowPolicy) {
-            return AuthflowPolicyDataMapper.from(entity).toRecord();
-        }
-
-        if (entity instanceof FinancialDocument) {
-            return FinancialDocumentDataMapper.from(entity).toRecord();
-        }
-
-        throw new Error('No mapper for entity');
-    }
-
-    private resolveRecordValue(value: unknown): unknown {
-        if (value !== null && typeof value === 'object' && 'value' in value) {
-            return (value as Record<string, unknown>).value;
-        }
-
-        return value;
-    }
-
-    private trackVersion(
-        entityClass: EntityClass,
-        id: string,
-        version: number
-    ): void {
-        this.versions.get(entityClass)?.set(id, version);
-    }
-
-    private getTrackedVersion(
-        entityClass: EntityClass,
-        id: string
-    ): number | null {
-        return this.versions.get(entityClass)?.get(id) ?? null;
     }
 
     private async initTransaction(): Promise<void> {
