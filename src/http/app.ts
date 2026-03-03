@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { createApp } from './create-app';
 
 const main = async () => {

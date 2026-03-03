@@ -1,6 +1,6 @@
 services:
     postgres:
-        env_file: .env.docker
+        env_file: .env
         image: postgres:18.2
         ports:
             - '${POSTGRES_PORT}:5432'

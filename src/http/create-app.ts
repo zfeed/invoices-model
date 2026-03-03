@@ -1,7 +1,7 @@
 import Fastify from 'fastify';
 import { bootstrap } from '../core/bootstrap';
 import { Session } from '../core/shared/unit-of-work/unit-of-work';
-import { PersistentManager } from '../infrastructure/persistent-manager/persistent-manager';
+import { PersistentManager } from '../infrastructure/persistent-manager/pg-persistent-manager';
 import { InMemoryDomainEvents } from '../infrastructure/domain-events/in-memory-domain-events';
 import {
     draftInvoicesPlugin,

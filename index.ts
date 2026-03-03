@@ -1,57 +1,22 @@
-import 'dotenv/config';
-import { kysely } from './database/kysely';
-import { v7 } from 'uuid';
-import { unflatten } from './src/building-blocks';
-import { DraftInvoice } from './src/core/invoices/domain/draft-invoice/draft-invoice';
-import { selectDraftInvoice } from './draft-invoice';
-const id = '019ca53e-c501-7008-99a2-74e4a58f9c5a';
+import { Numeric } from './src/core/invoices/domain/numeric/numeric';
+import { NumericDataMapper } from './src/infrastructure/persistent-manager/mappers/invoices/numeric.data-mapper';
 
-async function main() {
-    const entity = await selectDraftInvoice(id);
+// Client creates a domain Numeric — knows nothing about persistence
+const numeric = Numeric.fromPlain('123.45');
 
-    console.log(1111);
-    console.log(entity);
-}
+// Infrastructure layer converts to a DB record
+const mapped = NumericDataMapper.from(numeric);
+const record = mapped.toRecord();
+// { value: '123.45' }
+console.log(record);
 
-async function insert() {
-    // await kysely
-    //     .insertInto('draft_invoices')
-    //     .values({
-    //         id,
-    //         status: 'DRAFT',
-    //         created_at: new Date(),
-    //         updated_at: new Date(),
-    //     })
-    //     .executeTakeFirst();
-    //
+const record2 = NumericDataMapper.from(
+    NumericDataMapper.from(mapped)
+).toRecord();
 
-    // await kysely
-    //     .insertInto('draft_invoice_line_items')
-    //     .values({
-    //         id: v7(),
-    //         description: 'Hey2',
-    //         draft_invoice_id: id,
-    //         price_amount: 200,
-    //         total_amount: 200,
-    //         total_currency: 'USD',
-    //         quantity: 1,
-    //         price_currency: 'USD',
-    //         created_at: new Date(),
-    //         updated_at: new Date(),
-    //     })
-    //     .executeTakeFirst();
-    //
-    //
-    await kysely
-        .insertInto('draft_invoice_paypal_billings')
-        .values({
-            id: v7(),
-            email: 'exaple.com',
-            draft_invoice_id: id,
-            created_at: new Date(),
-            updated_at: new Date(),
-        })
-        .executeTakeFirst();
-}
+console.log(record2, 'record2');
 
-main();
+// And back from a DB record to a domain object
+const hydrated = NumericDataMapper.fromRecord(record);
+
+console.log(hydrated.add(Numeric.fromPlain('100')).toString());

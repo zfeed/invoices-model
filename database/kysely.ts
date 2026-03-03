@@ -6,8 +6,6 @@ import type {
 } from 'kysely';
 import { DB } from 'kysely-codegen';
 
-console.log(process.env.POSTGRES_HOST);
-
 export const postgresDialect = new PostgresDialect({
     pool: new Pool({
         connectionString: process.env.DATABASE_URL,
