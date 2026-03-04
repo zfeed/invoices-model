@@ -46,18 +46,6 @@ export class Approval implements Mappable<ReturnType<Approval['toPlain']>> {
         );
     }
 
-    static fromPlain(plain: {
-        approverId: string;
-        createdAt: string;
-        comment: string | null;
-    }) {
-        return new Approval(
-            Id.fromPlain(plain.approverId),
-            Timestamp.fromPlain(plain.createdAt),
-            Comment.fromPlain(plain.comment)
-        );
-    }
-
     toPlain() {
         return {
             approverId: this._approverId.toPlain(),

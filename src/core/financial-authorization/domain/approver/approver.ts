@@ -28,17 +28,9 @@ export class Approver
         return this._email;
     }
 
-    static create(data: { name: Name; email: Email }) {
-        const id = Id.create().unwrap();
+    static create(data: { id?: Id; name: Name; email: Email }) {
+        const id = data.id ?? Id.create().unwrap();
         return Result.ok(new Approver(id, data.name, data.email));
-    }
-
-    static fromPlain(plain: { id: string; name: string; email: string }) {
-        return new Approver(
-            Id.fromPlain(plain.id),
-            Name.fromPlain(plain.name),
-            Email.fromPlain(plain.email)
-        );
     }
 
     equals(other: Approver): boolean {

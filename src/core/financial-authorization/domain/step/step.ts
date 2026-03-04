@@ -54,29 +54,6 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
         );
     }
 
-    static fromPlain(plain: {
-        id: string;
-        order: number;
-        groups: {
-            id: string;
-            requiredApprovals: number;
-            approvers: { id: string; name: string; email: string }[];
-            approvals: {
-                approverId: string;
-                createdAt: string;
-                comment: string | null;
-            }[];
-        }[];
-    }) {
-        const groups = plain.groups.map((g) => Group.fromPlain(g));
-        return new Step(
-            Id.fromPlain(plain.id),
-            Order.fromPlain(plain.order),
-            groups.every((g) => g.isApproved),
-            groups
-        );
-    }
-
     apply(approval: Approval): Result<DomainError, Step> {
         if (this._isApproved) {
             return Result.error(

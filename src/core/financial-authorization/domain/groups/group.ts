@@ -92,24 +92,6 @@ export class Group implements Mappable<ReturnType<Group['toPlain']>> {
         );
     }
 
-    static fromPlain(plain: {
-        id: string;
-        requiredApprovals: number;
-        approvers: { id: string; name: string; email: string }[];
-        approvals: {
-            approverId: string;
-            createdAt: string;
-            comment: string | null;
-        }[];
-    }) {
-        return new Group(
-            Id.fromPlain(plain.id),
-            plain.requiredApprovals,
-            plain.approvers.map((a) => Approver.fromPlain(a)),
-            plain.approvals.map((a) => Approval.fromPlain(a))
-        );
-    }
-
     apply(approval: Approval): Result<DomainError, Group> {
         if (this.isApproved) {
             return Result.error(

@@ -4,7 +4,7 @@ import { Approval } from './approval';
 
 describe('Approval.create', () => {
     it('should create an approval with a comment', () => {
-        const approverId = Id.fromPlain('123');
+        const approverId = Id.fromString('123');
 
         const result = Approval.create({
             approverId,
@@ -19,7 +19,7 @@ describe('Approval.create', () => {
     });
 
     it('should create an approval with null comment', () => {
-        const approverId = Id.fromPlain('456');
+        const approverId = Id.fromString('456');
 
         const result = Approval.create({
             approverId,
@@ -35,7 +35,7 @@ describe('Approval.create', () => {
 
     it('should set createdAt to current date', () => {
         const beforeCreation = new Date();
-        const approverId = Id.fromPlain('789');
+        const approverId = Id.fromString('789');
 
         const result = Approval.create({
             approverId,
@@ -51,7 +51,7 @@ describe('Approval.create', () => {
     });
 
     it('should reject empty string comment', () => {
-        const approverId = Id.fromPlain('user-001');
+        const approverId = Id.fromString('user-001');
 
         const result = Approval.create({
             approverId,
@@ -65,7 +65,7 @@ describe('Approval.create', () => {
     });
 
     it('should reject whitespace-only comment', () => {
-        const approverId = Id.fromPlain('user-001');
+        const approverId = Id.fromString('user-001');
 
         const result = Approval.create({
             approverId,

@@ -35,22 +35,6 @@ export class StepTemplate
         );
     }
 
-    static fromPlain(plain: {
-        id: string;
-        order: number;
-        groups: {
-            id: string;
-            requiredApprovals: number;
-            approvers: { id: string; name: string; email: string }[];
-        }[];
-    }) {
-        return new StepTemplate(
-            Id.fromPlain(plain.id),
-            Order.fromPlain(plain.order),
-            plain.groups.map((g) => GroupTemplate.fromPlain(g))
-        );
-    }
-
     toStep(): Result<DomainError, Step> {
         const groupResults = this._groups.reduce<
             Result<DomainError, import('../groups/group').Group[]>

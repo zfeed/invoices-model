@@ -75,15 +75,10 @@ const approveActionOnDocument =
             async (request) => {
                 const referenceId = request.params.referenceId;
                 const data = parse(approveActionSchema, request.body);
-                const approver = Approver.fromPlain({
-                    id: data.approver.id,
-                    name: data.approver.name,
-                    email: data.approver.email,
-                });
                 const result = await commands.approveActionOnDocument.execute({
                     referenceId,
                     action: data.action,
-                    approver,
+                    approverId: data.approverId,
                 });
                 return { data: result };
             }

@@ -18,10 +18,6 @@ export class CalendarDate
         this._value = value;
     }
 
-    static fromPlain(value: string) {
-        return new CalendarDate(value);
-    }
-
     static create(date: string) {
         const error = checkIsISO8601Date(date);
 

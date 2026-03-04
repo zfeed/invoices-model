@@ -56,13 +56,4 @@ describe('UnitQuantity', () => {
             );
         }
     );
-
-    describe('toPlain / fromPlain', () => {
-        it('round-trips through toPlain and fromPlain', () => {
-            const quantity = UnitQuantity.create('5').unwrap();
-            const restored = UnitQuantity.fromPlain(quantity.toPlain());
-
-            expect(restored.equals(quantity)).toBe(true);
-        });
-    });
 });

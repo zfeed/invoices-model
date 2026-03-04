@@ -2,11 +2,7 @@ import { z } from 'zod';
 
 export const approveActionSchema = z.object({
     action: z.string().max(10),
-    approver: z.object({
-        id: z.string().max(36),
-        name: z.string().max(255),
-        email: z.string().max(320),
-    }),
+    approverId: z.string().max(36),
 });
 
 export const approverSchema = z.object({

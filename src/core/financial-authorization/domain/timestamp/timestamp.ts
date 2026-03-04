@@ -11,10 +11,6 @@ export class Timestamp implements Equatable<Timestamp>, Mappable<string> {
         return new Timestamp(new Date());
     }
 
-    static fromPlain(value: string) {
-        return new Timestamp(new Date(value));
-    }
-
     equals(other: Timestamp): boolean {
         return this._value.getTime() === other._value.getTime();
     }

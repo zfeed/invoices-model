@@ -72,13 +72,6 @@ export class LineItems
         );
     }
 
-    static fromPlain(plain: ReturnType<LineItems['toPlain']>) {
-        return new LineItems(
-            plain.items.map((item) => LineItem.fromPlain(item)),
-            Money.fromPlain(plain.subtotal)
-        );
-    }
-
     static create({ items }: { items: LineItem[] }) {
         const duplicateError = checkNoDuplicate(items);
 

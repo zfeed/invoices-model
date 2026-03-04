@@ -62,13 +62,6 @@ export class Money
         return new Money(value, this._currency);
     }
 
-    static fromPlain(plain: { amount: string; currency: string }) {
-        return new Money(
-            Numeric.create(plain.amount).unwrap(),
-            Currency.fromPlain(plain.currency)
-        );
-    }
-
     static create(amount: string, currency: string) {
         const error = checkMinorUnits(amount);
 

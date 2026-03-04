@@ -18,10 +18,6 @@ export class Order implements Equatable<Order>, Mappable<number> {
         return Result.ok(new Order(value));
     }
 
-    static fromPlain(value: number) {
-        return new Order(value);
-    }
-
     equals(other: Order): boolean {
         return this._value === other._value;
     }

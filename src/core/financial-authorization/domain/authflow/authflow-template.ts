@@ -42,29 +42,6 @@ export class AuthflowTemplate
         );
     }
 
-    static fromPlain(plain: {
-        id: string;
-        range: {
-            from: { amount: string; currency: string };
-            to: { amount: string; currency: string };
-        };
-        steps: {
-            id: string;
-            order: number;
-            groups: {
-                id: string;
-                requiredApprovals: number;
-                approvers: { id: string; name: string; email: string }[];
-            }[];
-        }[];
-    }) {
-        return new AuthflowTemplate(
-            Id.fromPlain(plain.id),
-            Range.fromPlain(plain.range),
-            plain.steps.map((s) => StepTemplate.fromPlain(s))
-        );
-    }
-
     toAuthflow(action: Action): Result<DomainError, Authflow> {
         const stepsResult = this._steps.reduce<
             Result<DomainError, import('../step/step').Step[]>

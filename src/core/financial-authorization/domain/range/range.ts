@@ -36,16 +36,6 @@ export class Range
         return Result.ok(new Range(from, to));
     }
 
-    static fromPlain(plain: {
-        from: { amount: string; currency: string };
-        to: { amount: string; currency: string };
-    }) {
-        return new Range(
-            Money.fromPlain(plain.from),
-            Money.fromPlain(plain.to)
-        );
-    }
-
     equals(other: Range): boolean {
         return this._from.equals(other._from) && this._to.equals(other._to);
     }

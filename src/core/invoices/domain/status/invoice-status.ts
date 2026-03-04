@@ -26,10 +26,6 @@ export class InvoiceStatus extends Status<INVOICE_STATUS> {
         return new InvoiceStatus(INVOICE_STATUS.FAILED);
     }
 
-    static fromPlain(value: string): InvoiceStatus {
-        return new InvoiceStatus(value as INVOICE_STATUS);
-    }
-
     static fromString(value: string): Result<DomainError, InvoiceStatus> {
         return Status.parseEnum(
             INVOICE_STATUS,

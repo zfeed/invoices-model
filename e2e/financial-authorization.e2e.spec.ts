@@ -223,11 +223,7 @@ describe('POST /documents/:referenceId/approve', () => {
         const { invoice, approverId } = await createPolicyAndIssueInvoice();
         const res = await postJson(`/documents/${invoice.id}/approve`, {
             action: 'pay',
-            approver: {
-                id: approverId,
-                name: 'Alice',
-                email: 'alice@example.com',
-            },
+            approverId,
         });
         expect(res.status).toBe(200);
         const json = await res.json();
@@ -275,51 +271,30 @@ describe('POST /documents/:referenceId/approve', () => {
     it('returns 400 when action exceeds max length', async () => {
         const res = await postJson('/documents/some-ref/approve', {
             action: tooLong(10),
-            approver: {
-                id: 'some-id',
-                name: 'Alice',
-                email: 'alice@example.com',
-            },
+            approverId: 'some-id',
         });
         await expectValidationError(res, ['action']);
     });
 
-    it('returns 400 when approver fields exceed max length', async () => {
+    it('returns 400 when approverId exceeds max length', async () => {
         const res = await postJson('/documents/some-ref/approve', {
             action: 'pay',
-            approver: {
-                id: tooLong(36),
-                name: tooLong(255),
-                email: tooLong(320),
-            },
+            approverId: tooLong(36),
         });
-        await expectValidationError(
-            res,
-            ['approver', 'id'],
-            ['approver', 'name'],
-            ['approver', 'email']
-        );
+        await expectValidationError(res, ['approverId']);
     });
 
     it('returns 422 for non-existent document', async () => {
         const res = await postJson('/documents/non-existent/approve', {
             action: 'pay',
-            approver: {
-                id: 'some-id',
-                name: 'Alice',
-                email: 'alice@example.com',
-            },
+            approverId: 'some-id',
         });
         await expectError(res, 422);
     });
 
     it('returns 400 for missing action', async () => {
         const res = await postJson('/documents/some-ref/approve', {
-            approver: {
-                id: 'some-id',
-                name: 'Alice',
-                email: 'alice@example.com',
-            },
+            approverId: 'some-id',
         });
         expect(res.status).toBe(400);
         const json = await res.json();
@@ -343,11 +318,7 @@ describe('POST /documents/:referenceId/approve', () => {
 
     it('returns issue paths that resolve to the input object', async () => {
         const body = {
-            approver: {
-                id: 'some-id',
-                name: 'Alice',
-                email: 'alice@example.com',
-            },
+            approverId: 'some-id',
         };
         const res = await postJson('/documents/some-ref/approve', body);
         const json = await res.json();
@@ -362,19 +333,11 @@ describe('POST /documents/:referenceId/approve', () => {
         const { invoice, approverId } = await createPolicyAndIssueInvoice();
         await postJson(`/documents/${invoice.id}/approve`, {
             action: 'pay',
-            approver: {
-                id: approverId,
-                name: 'Alice',
-                email: 'alice@example.com',
-            },
+            approverId,
         });
         const res = await postJson(`/documents/${invoice.id}/approve`, {
             action: 'pay',
-            approver: {
-                id: approverId,
-                name: 'Alice',
-                email: 'alice@example.com',
-            },
+            approverId,
         });
         await expectError(res, 422);
     });

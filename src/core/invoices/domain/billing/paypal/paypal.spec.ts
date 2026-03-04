@@ -35,7 +35,7 @@ describe('Paypal', () => {
     it('should serialize to plain and back', () => {
         const paypal = Paypal.create({ email: 'billing@company.com' }).unwrap();
         const plain = paypal.toPlain();
-        const restored = Paypal.fromPlain(plain);
+        const restored = Paypal.create({ email: plain.data.email }).unwrap();
 
         expect(restored.equals(paypal)).toBe(true);
     });

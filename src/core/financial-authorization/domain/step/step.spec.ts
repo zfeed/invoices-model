@@ -1,40 +1,50 @@
+import { Approval } from '../approval/approval';
+import { Approver } from '../approver/approver';
+import { Email } from '../email/email';
 import { Group } from '../groups/group';
+import { Id } from '../id/id';
+import { Name } from '../name/name';
 import { Order } from '../order/order';
 import { Step } from './step';
+
+const makeApprover = (id: string, name: string, email: string) =>
+    Approver.create({
+        id: Id.fromString(id),
+        name: Name.create(name).unwrap(),
+        email: Email.create(email).unwrap(),
+    }).unwrap();
+
+const makeApproval = (approverId: string, comment: string | null) =>
+    Approval.create({
+        approverId: Id.fromString(approverId),
+        comment,
+    }).unwrap();
+
+const makeGroup = (
+    approvers: { id: string; name: string; email: string }[],
+    approvals: { approverId: string; comment: string | null }[] = []
+) =>
+    Group.create({
+        requiredApprovals: 1,
+        approvers: approvers.map((a) => makeApprover(a.id, a.name, a.email)),
+        approvals: approvals.map((a) => makeApproval(a.approverId, a.comment)),
+    }).unwrap();
 
 describe('Step.create', () => {
     it('should create a step successfully with all groups approved', () => {
         const groups = [
-            Group.fromPlain({
-                id: 'group-1',
-                requiredApprovals: 1,
-                approvers: [
-                    { id: '1', name: 'Alice', email: 'alice@example.com' },
-                ],
-                approvals: [
-                    {
-                        approverId: '1',
-                        createdAt: new Date().toISOString(),
-                        comment: 'Approved',
-                    },
-                ],
-            }),
-            Group.fromPlain({
-                id: 'group-2',
-                requiredApprovals: 1,
-                approvers: [{ id: '2', name: 'Bob', email: 'bob@example.com' }],
-                approvals: [
-                    {
-                        approverId: '2',
-                        createdAt: new Date().toISOString(),
-                        comment: 'Approved',
-                    },
-                ],
-            }),
+            makeGroup(
+                [{ id: '1', name: 'Alice', email: 'alice@example.com' }],
+                [{ approverId: '1', comment: 'Approved' }]
+            ),
+            makeGroup(
+                [{ id: '2', name: 'Bob', email: 'bob@example.com' }],
+                [{ approverId: '2', comment: 'Approved' }]
+            ),
         ];
 
         const result = Step.create({
-            order: Order.fromPlain(1),
+            order: Order.create(1).unwrap(),
             groups,
         });
 
@@ -48,30 +58,15 @@ describe('Step.create', () => {
 
     it('should create a step with isApproved false when some groups are not approved', () => {
         const groups = [
-            Group.fromPlain({
-                id: 'group-1',
-                requiredApprovals: 1,
-                approvers: [
-                    { id: '1', name: 'Alice', email: 'alice@example.com' },
-                ],
-                approvals: [
-                    {
-                        approverId: '1',
-                        createdAt: new Date().toISOString(),
-                        comment: 'Approved',
-                    },
-                ],
-            }),
-            Group.fromPlain({
-                id: 'group-2',
-                requiredApprovals: 1,
-                approvers: [{ id: '2', name: 'Bob', email: 'bob@example.com' }],
-                approvals: [],
-            }),
+            makeGroup(
+                [{ id: '1', name: 'Alice', email: 'alice@example.com' }],
+                [{ approverId: '1', comment: 'Approved' }]
+            ),
+            makeGroup([{ id: '2', name: 'Bob', email: 'bob@example.com' }], []),
         ];
 
         const result = Step.create({
-            order: Order.fromPlain(0),
+            order: Order.create(0).unwrap(),
             groups,
         });
 
@@ -84,24 +79,15 @@ describe('Step.create', () => {
 
     it('should create a step with isApproved false when all groups are not approved', () => {
         const groups = [
-            Group.fromPlain({
-                id: 'group-1',
-                requiredApprovals: 1,
-                approvers: [
-                    { id: '1', name: 'Alice', email: 'alice@example.com' },
-                ],
-                approvals: [],
-            }),
-            Group.fromPlain({
-                id: 'group-2',
-                requiredApprovals: 1,
-                approvers: [{ id: '2', name: 'Bob', email: 'bob@example.com' }],
-                approvals: [],
-            }),
+            makeGroup(
+                [{ id: '1', name: 'Alice', email: 'alice@example.com' }],
+                []
+            ),
+            makeGroup([{ id: '2', name: 'Bob', email: 'bob@example.com' }], []),
         ];
 
         const result = Step.create({
-            order: Order.fromPlain(2),
+            order: Order.create(2).unwrap(),
             groups,
         });
 
@@ -116,7 +102,7 @@ describe('Step.create', () => {
         const groups: Group[] = [];
 
         const result = Step.create({
-            order: Order.fromPlain(0),
+            order: Order.create(0).unwrap(),
             groups,
         });
 
@@ -129,24 +115,14 @@ describe('Step.create', () => {
 
     it('should create a step successfully with order 0', () => {
         const groups = [
-            Group.fromPlain({
-                id: 'group-1',
-                requiredApprovals: 1,
-                approvers: [
-                    { id: '1', name: 'Alice', email: 'alice@example.com' },
-                ],
-                approvals: [
-                    {
-                        approverId: '1',
-                        createdAt: new Date().toISOString(),
-                        comment: 'Approved',
-                    },
-                ],
-            }),
+            makeGroup(
+                [{ id: '1', name: 'Alice', email: 'alice@example.com' }],
+                [{ approverId: '1', comment: 'Approved' }]
+            ),
         ];
 
         const result = Step.create({
-            order: Order.fromPlain(0),
+            order: Order.create(0).unwrap(),
             groups,
         });
 
@@ -158,18 +134,14 @@ describe('Step.create', () => {
 
     it('should create a step successfully with large order number', () => {
         const groups = [
-            Group.fromPlain({
-                id: 'group-1',
-                requiredApprovals: 1,
-                approvers: [
-                    { id: '1', name: 'Alice', email: 'alice@example.com' },
-                ],
-                approvals: [],
-            }),
+            makeGroup(
+                [{ id: '1', name: 'Alice', email: 'alice@example.com' }],
+                []
+            ),
         ];
 
         const result = Step.create({
-            order: Order.fromPlain(9999),
+            order: Order.create(9999).unwrap(),
             groups,
         });
 
@@ -181,24 +153,14 @@ describe('Step.create', () => {
 
     it('should create a step with single approved group', () => {
         const groups = [
-            Group.fromPlain({
-                id: 'group-1',
-                requiredApprovals: 1,
-                approvers: [
-                    { id: '1', name: 'Alice', email: 'alice@example.com' },
-                ],
-                approvals: [
-                    {
-                        approverId: '1',
-                        createdAt: new Date().toISOString(),
-                        comment: 'Approved',
-                    },
-                ],
-            }),
+            makeGroup(
+                [{ id: '1', name: 'Alice', email: 'alice@example.com' }],
+                [{ approverId: '1', comment: 'Approved' }]
+            ),
         ];
 
         const result = Step.create({
-            order: Order.fromPlain(5),
+            order: Order.create(5).unwrap(),
             groups,
         });
 
@@ -211,19 +173,17 @@ describe('Step.create', () => {
 
     it('should create a step with single non-approved group', () => {
         const groups = [
-            Group.fromPlain({
-                id: 'group-1',
-                requiredApprovals: 1,
-                approvers: [
+            makeGroup(
+                [
                     { id: '1', name: 'Alice', email: 'alice@example.com' },
                     { id: '2', name: 'Bob', email: 'bob@example.com' },
                 ],
-                approvals: [],
-            }),
+                []
+            ),
         ];
 
         const result = Step.create({
-            order: Order.fromPlain(3),
+            order: Order.create(3).unwrap(),
             groups,
         });
 
@@ -236,44 +196,22 @@ describe('Step.create', () => {
 
     it('should create a step with multiple groups where only the last is not approved', () => {
         const groups = [
-            Group.fromPlain({
-                id: 'group-1',
-                requiredApprovals: 1,
-                approvers: [
-                    { id: '1', name: 'Alice', email: 'alice@example.com' },
-                ],
-                approvals: [
-                    {
-                        approverId: '1',
-                        createdAt: new Date().toISOString(),
-                        comment: 'Approved',
-                    },
-                ],
-            }),
-            Group.fromPlain({
-                id: 'group-2',
-                requiredApprovals: 1,
-                approvers: [{ id: '2', name: 'Bob', email: 'bob@example.com' }],
-                approvals: [
-                    {
-                        approverId: '2',
-                        createdAt: new Date().toISOString(),
-                        comment: 'Approved',
-                    },
-                ],
-            }),
-            Group.fromPlain({
-                id: 'group-3',
-                requiredApprovals: 1,
-                approvers: [
-                    { id: '3', name: 'Charlie', email: 'charlie@example.com' },
-                ],
-                approvals: [],
-            }),
+            makeGroup(
+                [{ id: '1', name: 'Alice', email: 'alice@example.com' }],
+                [{ approverId: '1', comment: 'Approved' }]
+            ),
+            makeGroup(
+                [{ id: '2', name: 'Bob', email: 'bob@example.com' }],
+                [{ approverId: '2', comment: 'Approved' }]
+            ),
+            makeGroup(
+                [{ id: '3', name: 'Charlie', email: 'charlie@example.com' }],
+                []
+            ),
         ];
 
         const result = Step.create({
-            order: Order.fromPlain(1),
+            order: Order.create(1).unwrap(),
             groups,
         });
 
@@ -286,29 +224,19 @@ describe('Step.create', () => {
 
     it('should generate a unique ID for each step', () => {
         const groups = [
-            Group.fromPlain({
-                id: 'group-1',
-                requiredApprovals: 1,
-                approvers: [
-                    { id: '1', name: 'Alice', email: 'alice@example.com' },
-                ],
-                approvals: [
-                    {
-                        approverId: '1',
-                        createdAt: new Date().toISOString(),
-                        comment: 'Approved',
-                    },
-                ],
-            }),
+            makeGroup(
+                [{ id: '1', name: 'Alice', email: 'alice@example.com' }],
+                [{ approverId: '1', comment: 'Approved' }]
+            ),
         ];
 
         const result1 = Step.create({
-            order: Order.fromPlain(0),
+            order: Order.create(0).unwrap(),
             groups,
         });
 
         const result2 = Step.create({
-            order: Order.fromPlain(1),
+            order: Order.create(1).unwrap(),
             groups,
         });
 

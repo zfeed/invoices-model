@@ -56,18 +56,6 @@ export class GroupTemplate
         );
     }
 
-    static fromPlain(plain: {
-        id: string;
-        requiredApprovals: number;
-        approvers: { id: string; name: string; email: string }[];
-    }) {
-        return new GroupTemplate(
-            Id.fromPlain(plain.id),
-            plain.requiredApprovals,
-            plain.approvers.map((a) => Approver.fromPlain(a))
-        );
-    }
-
     toGroup(): Result<DomainError, Group> {
         return Group.create({
             requiredApprovals: this._requiredApprovals,

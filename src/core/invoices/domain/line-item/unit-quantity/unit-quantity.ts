@@ -13,10 +13,6 @@ export class UnitQuantity implements Equatable<UnitQuantity>, Mappable<string> {
         return this._value;
     }
 
-    static fromPlain(value: string) {
-        return new UnitQuantity(Numeric.create(value).unwrap());
-    }
-
     static create(value: string) {
         const error = checkUnitQuantity(value);
 

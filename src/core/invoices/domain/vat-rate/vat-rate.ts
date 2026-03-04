@@ -19,10 +19,6 @@ export class VatRate
         return this._value.equals(other.rate);
     }
 
-    static fromPlain(value: string) {
-        return new VatRate(Numeric.fromPlain(value));
-    }
-
     static create(value: string) {
         const error = checkPercents(value);
 

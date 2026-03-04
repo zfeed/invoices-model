@@ -2,7 +2,7 @@ import { Numeric } from './src/core/invoices/domain/numeric/numeric';
 import { NumericDataMapper } from './src/infrastructure/persistent-manager/mappers/invoices/numeric.data-mapper';
 
 // Client creates a domain Numeric — knows nothing about persistence
-const numeric = Numeric.fromPlain('123.45');
+const numeric = Numeric.create('123.45').unwrap();
 
 // Infrastructure layer converts to a DB record
 const mapped = NumericDataMapper.from(numeric);
@@ -19,4 +19,4 @@ console.log(record2, 'record2');
 // And back from a DB record to a domain object
 const hydrated = NumericDataMapper.fromRecord(record);
 
-console.log(hydrated.add(Numeric.fromPlain('100')).toString());
+console.log(hydrated.add(Numeric.create('100').unwrap()).toString());

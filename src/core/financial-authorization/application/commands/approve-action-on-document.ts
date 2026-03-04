@@ -3,14 +3,14 @@ import { DomainError } from '../../../../building-blocks/errors/domain/domain.er
 import { Session } from '../../../shared/unit-of-work/unit-of-work';
 import { Action } from '../../domain/action/action';
 import { Approval } from '../../domain/approval/approval';
-import { Approver } from '../../domain/approver/approver';
 import { FinancialDocument } from '../../domain/document/document';
+import { Id } from '../../domain/id/id';
 import { ReferenceId } from '../../domain/reference-id/reference-id';
 
 type ApproveActionRequest = {
     referenceId: string;
     action: string;
-    approver: Approver;
+    approverId: string;
 };
 
 export class ApproveActionOnDocument {
@@ -34,7 +34,7 @@ export class ApproveActionOnDocument {
         }
 
         const approval = Approval.create({
-            approverId: request.approver.id,
+            approverId: Id.fromString(request.approverId),
             comment: null,
         }).unwrap();
         document.apply(action, approval).unwrap();

@@ -10,6 +10,7 @@ import { GroupTemplate } from '../../domain/groups/group-template';
 import { Money } from '../../domain/money/money';
 import { Name } from '../../domain/name/name';
 import { Email } from '../../domain/email/email';
+import { Id } from '../../domain/id/id';
 import { Order } from '../../domain/order/order';
 import { Range } from '../../domain/range/range';
 import { StepTemplate } from '../../domain/step/step-template';
@@ -93,13 +94,13 @@ describe('approveActionOnDocumentCommand', () => {
     let session: Session;
     let domainEvents: InMemoryDomainEvents;
     let command: ApproveActionOnDocument;
-    let approver: ReturnType<typeof createTemplate>['approver'];
+    let approverId: string;
 
     beforeEach(async () => {
         await cleanDatabase();
 
         const fixtures = createTemplate();
-        approver = fixtures.approver;
+        approverId = fixtures.approver.id.toPlain();
 
         domainEvents = new InMemoryDomainEvents();
         session = new Session(new PersistentManager(domainEvents));
@@ -127,7 +128,7 @@ describe('approveActionOnDocumentCommand', () => {
             command.execute({
                 referenceId: 'non-existing',
                 action: 'pay',
-                approver,
+                approverId,
             })
         ).rejects.toMatchObject({
             code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_DOCUMENT_NOT_FOUND,
@@ -138,7 +139,7 @@ describe('approveActionOnDocumentCommand', () => {
         const document = await command.execute({
             referenceId: 'invoice-123',
             action: 'pay',
-            approver,
+            approverId,
         });
 
         const authflow = document.authflows.find((a) => a.action === 'pay');
@@ -150,7 +151,7 @@ describe('approveActionOnDocumentCommand', () => {
         await command.execute({
             referenceId: 'invoice-123',
             action: 'pay',
-            approver,
+            approverId,
         });
 
         {
@@ -177,7 +178,7 @@ describe('approveActionOnDocumentCommand', () => {
         await command.execute({
             referenceId: 'invoice-123',
             action: 'pay',
-            approver,
+            approverId,
         });
 
         expect(approvedEvents).toHaveLength(1);
@@ -190,7 +191,7 @@ describe('approveActionOnDocumentCommand', () => {
             command.execute({
                 referenceId: 'invoice-123',
                 action: 'unknown-action',
-                approver,
+                approverId,
             })
         ).rejects.toMatchObject({
             code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_NOT_FOUND,
@@ -201,14 +202,14 @@ describe('approveActionOnDocumentCommand', () => {
         await command.execute({
             referenceId: 'invoice-123',
             action: 'pay',
-            approver,
+            approverId,
         });
 
         await expect(
             command.execute({
                 referenceId: 'invoice-123',
                 action: 'pay',
-                approver,
+                approverId,
             })
         ).rejects.toThrow();
     });

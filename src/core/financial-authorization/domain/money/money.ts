@@ -43,10 +43,6 @@ export class Money
         return Result.ok(new Money(amount, currency));
     }
 
-    static fromPlain(plain: { amount: string; currency: string }) {
-        return new Money(plain.amount, plain.currency);
-    }
-
     equals(other: Money): boolean {
         return (
             this._amount === other._amount && this._currency === other._currency

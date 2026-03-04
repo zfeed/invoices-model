@@ -15,10 +15,6 @@ export class Numeric implements Equatable<Numeric>, Comparable<Numeric> {
         this._value = new Decimal(value);
     }
 
-    static fromPlain(value: string): Numeric {
-        return new Numeric(value);
-    }
-
     static create(value: string): Result<DomainError, Numeric> {
         const error = checkNumericValue(value);
 

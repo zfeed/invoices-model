@@ -20,10 +20,6 @@ export class UnitDescription
         return Result.ok(new UnitDescription(value));
     }
 
-    static fromPlain(value: string) {
-        return new UnitDescription(value);
-    }
-
     equals(other: UnitDescription) {
         return this._value === other._value;
     }

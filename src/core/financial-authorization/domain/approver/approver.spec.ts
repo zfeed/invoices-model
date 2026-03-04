@@ -4,8 +4,8 @@ import { Approver } from './approver';
 
 describe('Approver.create', () => {
     it('should create an approver with valid data', () => {
-        const name = Name.fromPlain('John Doe');
-        const email = Email.fromPlain('john.doe@example.com');
+        const name = Name.create('John Doe').unwrap();
+        const email = Email.create('john.doe@example.com').unwrap();
 
         const result = Approver.create({ name, email });
 
@@ -19,8 +19,8 @@ describe('Approver.create', () => {
     });
 
     it('should generate a unique ID for each approver', () => {
-        const name = Name.fromPlain('Jane Smith');
-        const email = Email.fromPlain('jane.smith@example.com');
+        const name = Name.create('Jane Smith').unwrap();
+        const email = Email.create('jane.smith@example.com').unwrap();
 
         const result1 = Approver.create({ name, email });
         const result2 = Approver.create({ name, email });
@@ -35,8 +35,8 @@ describe('Approver.create', () => {
     });
 
     it('should generate valid UUID format for id', () => {
-        const name = Name.fromPlain('UUID Test');
-        const email = Email.fromPlain('uuid@example.com');
+        const name = Name.create('UUID Test').unwrap();
+        const email = Email.create('uuid@example.com').unwrap();
 
         const result = Approver.create({ name, email });
 

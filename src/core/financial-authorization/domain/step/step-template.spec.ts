@@ -1,26 +1,33 @@
+import { Approver } from '../approver/approver';
+import { Email } from '../email/email';
 import { GroupTemplate } from '../groups/group-template';
+import { Id } from '../id/id';
+import { Name } from '../name/name';
 import { Order } from '../order/order';
 import { StepTemplate } from './step-template';
+
+const makeApprover = (id: string, name: string, email: string) =>
+    Approver.create({
+        id: Id.fromString(id),
+        name: Name.create(name).unwrap(),
+        email: Email.create(email).unwrap(),
+    }).unwrap();
 
 describe('StepTemplate.create', () => {
     it('should create a step template successfully', () => {
         const groups = [
-            GroupTemplate.fromPlain({
-                id: 'group-1',
+            GroupTemplate.create({
                 requiredApprovals: 1,
-                approvers: [
-                    { id: '1', name: 'Alice', email: 'alice@example.com' },
-                ],
-            }),
-            GroupTemplate.fromPlain({
-                id: 'group-2',
+                approvers: [makeApprover('1', 'Alice', 'alice@example.com')],
+            }).unwrap(),
+            GroupTemplate.create({
                 requiredApprovals: 1,
-                approvers: [{ id: '2', name: 'Bob', email: 'bob@example.com' }],
-            }),
+                approvers: [makeApprover('2', 'Bob', 'bob@example.com')],
+            }).unwrap(),
         ];
 
         const result = StepTemplate.create({
-            order: Order.fromPlain(0),
+            order: Order.create(0).unwrap(),
             groups,
         });
 
@@ -33,7 +40,7 @@ describe('StepTemplate.create', () => {
 
     it('should create a step template with empty groups array', () => {
         const result = StepTemplate.create({
-            order: Order.fromPlain(0),
+            order: Order.create(0).unwrap(),
             groups: [],
         });
 
@@ -45,7 +52,7 @@ describe('StepTemplate.create', () => {
 
     it('should create a step template with large order number', () => {
         const result = StepTemplate.create({
-            order: Order.fromPlain(9999),
+            order: Order.create(9999).unwrap(),
             groups: [],
         });
 
@@ -55,11 +62,11 @@ describe('StepTemplate.create', () => {
 
     it('should generate a unique ID for each step template', () => {
         const result1 = StepTemplate.create({
-            order: Order.fromPlain(0),
+            order: Order.create(0).unwrap(),
             groups: [],
         });
         const result2 = StepTemplate.create({
-            order: Order.fromPlain(1),
+            order: Order.create(1).unwrap(),
             groups: [],
         });
 
@@ -72,7 +79,7 @@ describe('StepTemplate.create', () => {
 
     it('should not have isApproved property', () => {
         const result = StepTemplate.create({
-            order: Order.fromPlain(0),
+            order: Order.create(0).unwrap(),
             groups: [],
         });
 

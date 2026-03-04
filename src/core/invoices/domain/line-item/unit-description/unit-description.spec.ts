@@ -39,13 +39,4 @@ describe('UnitDescription', () => {
             })
         );
     });
-
-    describe('toPlain / fromPlain', () => {
-        it('round-trips through toPlain and fromPlain', () => {
-            const description = UnitDescription.create('Product A').unwrap();
-            const restored = UnitDescription.fromPlain(description.toPlain());
-
-            expect(restored.equals(description)).toBe(true);
-        });
-    });
 });

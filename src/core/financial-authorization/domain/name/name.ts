@@ -18,10 +18,6 @@ export class Name implements Equatable<Name>, Mappable<string> {
         return Result.ok(new Name(value));
     }
 
-    static fromPlain(value: string) {
-        return new Name(value);
-    }
-
     equals(other: Name): boolean {
         return this._value === other._value;
     }

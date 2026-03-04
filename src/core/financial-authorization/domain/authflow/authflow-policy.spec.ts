@@ -1,5 +1,11 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
+import { Approver } from '../approver/approver';
+import { Email } from '../email/email';
+import { GroupTemplate } from '../groups/group-template';
+import { Id } from '../id/id';
 import { Money } from '../money/money';
+import { Name } from '../name/name';
+import { Order } from '../order/order';
 import { Range } from '../range/range';
 import { AuthflowTemplate } from './authflow-template';
 import { AuthflowPolicy } from './authflow-policy';
@@ -17,6 +23,13 @@ const template = (from: string, to: string) =>
     AuthflowTemplate.create({
         range: range(from, to),
         steps: [],
+    }).unwrap();
+
+const makeApprover = (id: string, name: string, email: string) =>
+    Approver.create({
+        id: Id.fromString(id),
+        name: Name.create(name).unwrap(),
+        email: Email.create(email).unwrap(),
     }).unwrap();
 
 describe('createAuthflowPolicy', () => {
@@ -163,19 +176,17 @@ describe('createAuthflowPolicy', () => {
 
 describe('selectAuthflow', () => {
     const steps: StepTemplate[] = [
-        StepTemplate.fromPlain({
-            id: 'step-1',
-            order: 0,
+        StepTemplate.create({
+            order: Order.create(0).unwrap(),
             groups: [
-                {
-                    id: 'group-1',
+                GroupTemplate.create({
                     requiredApprovals: 1,
                     approvers: [
-                        { id: '1', name: 'Alice', email: 'alice@example.com' },
+                        makeApprover('1', 'Alice', 'alice@example.com'),
                     ],
-                },
+                }).unwrap(),
             ],
-        }),
+        }).unwrap(),
     ];
 
     const templateWithSteps = (from: string, to: string) =>

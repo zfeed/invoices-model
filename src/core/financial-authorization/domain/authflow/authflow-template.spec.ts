@@ -1,5 +1,11 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
+import { Approver } from '../approver/approver';
+import { Email } from '../email/email';
+import { GroupTemplate } from '../groups/group-template';
+import { Id } from '../id/id';
 import { Money } from '../money/money';
+import { Name } from '../name/name';
+import { Order } from '../order/order';
 import { Range } from '../range/range';
 import { StepTemplate } from '../step/step-template';
 import { AuthflowTemplate } from './authflow-template';
@@ -9,43 +15,38 @@ const testRange = Range.create(
     Money.create('100000', 'USD').unwrap()
 ).unwrap();
 
+const makeApprover = (id: string, name: string, email: string) =>
+    Approver.create({
+        id: Id.fromString(id),
+        name: Name.create(name).unwrap(),
+        email: Email.create(email).unwrap(),
+    }).unwrap();
+
 describe('createAuthflowTemplate', () => {
     it('should create an authflow template successfully', () => {
         const steps: StepTemplate[] = [
-            StepTemplate.fromPlain({
-                id: 'step-1',
-                order: 0,
+            StepTemplate.create({
+                order: Order.create(0).unwrap(),
                 groups: [
-                    {
-                        id: 'group-1',
+                    GroupTemplate.create({
                         requiredApprovals: 1,
                         approvers: [
-                            {
-                                id: '1',
-                                name: 'Alice',
-                                email: 'alice@example.com',
-                            },
+                            makeApprover('1', 'Alice', 'alice@example.com'),
                         ],
-                    },
+                    }).unwrap(),
                 ],
-            }),
-            StepTemplate.fromPlain({
-                id: 'step-2',
-                order: 1,
+            }).unwrap(),
+            StepTemplate.create({
+                order: Order.create(1).unwrap(),
                 groups: [
-                    {
-                        id: 'group-2',
+                    GroupTemplate.create({
                         requiredApprovals: 1,
                         approvers: [
-                            {
-                                id: '2',
-                                name: 'Bob',
-                                email: 'bob@example.com',
-                            },
+                            makeApprover('2', 'Bob', 'bob@example.com'),
                         ],
-                    },
+                    }).unwrap(),
                 ],
-            }),
+            }).unwrap(),
         ];
 
         const result = AuthflowTemplate.create({
@@ -72,8 +73,14 @@ describe('createAuthflowTemplate', () => {
 
     it('should fail with duplicate step orders', () => {
         const steps: StepTemplate[] = [
-            StepTemplate.fromPlain({ id: 'step-1', order: 0, groups: [] }),
-            StepTemplate.fromPlain({ id: 'step-2', order: 0, groups: [] }),
+            StepTemplate.create({
+                order: Order.create(0).unwrap(),
+                groups: [],
+            }).unwrap(),
+            StepTemplate.create({
+                order: Order.create(0).unwrap(),
+                groups: [],
+            }).unwrap(),
         ];
 
         const result = AuthflowTemplate.create({
@@ -91,9 +98,18 @@ describe('createAuthflowTemplate', () => {
 
     it('should create an authflow template with non-sequential but unique orders', () => {
         const steps: StepTemplate[] = [
-            StepTemplate.fromPlain({ id: 'step-1', order: 5, groups: [] }),
-            StepTemplate.fromPlain({ id: 'step-2', order: 10, groups: [] }),
-            StepTemplate.fromPlain({ id: 'step-3', order: 15, groups: [] }),
+            StepTemplate.create({
+                order: Order.create(5).unwrap(),
+                groups: [],
+            }).unwrap(),
+            StepTemplate.create({
+                order: Order.create(10).unwrap(),
+                groups: [],
+            }).unwrap(),
+            StepTemplate.create({
+                order: Order.create(15).unwrap(),
+                groups: [],
+            }).unwrap(),
         ];
 
         const result = AuthflowTemplate.create({

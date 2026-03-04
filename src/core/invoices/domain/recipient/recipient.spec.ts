@@ -152,25 +152,4 @@ describe('Recipient', () => {
             expect.objectContaining({ code: '14000' })
         );
     });
-
-    it('should serialize to plain and reconstruct via fromPlain', () => {
-        const billing = Paypal.create({
-            email: 'billing@company.com',
-        }).unwrap();
-
-        const recipient = Recipient.create({
-            type: RECIPIENT_TYPE.COMPANY,
-            name: 'Acme Corp',
-            taxResidenceCountry: 'DE',
-            address: '456 Berlin St',
-            taxId: 'DE123456789',
-            email: 'info@acme.com',
-            billing,
-        }).unwrap();
-
-        const plain = recipient.toPlain();
-        const restored = Recipient.fromPlain(plain);
-
-        expect(restored.equals(recipient)).toBe(true);
-    });
 });

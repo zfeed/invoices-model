@@ -64,36 +64,6 @@ export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
         );
     }
 
-    static fromPlain(plain: {
-        id: string;
-        action: string;
-        range: {
-            from: { amount: string; currency: string };
-            to: { amount: string; currency: string };
-        };
-        steps: {
-            id: string;
-            order: number;
-            groups: {
-                id: string;
-                requiredApprovals: number;
-                approvers: { id: string; name: string; email: string }[];
-                approvals: {
-                    approverId: string;
-                    createdAt: string;
-                    comment: string | null;
-                }[];
-            }[];
-        }[];
-    }) {
-        return new Authflow(
-            Id.fromPlain(plain.id),
-            Action.fromPlain(plain.action),
-            Range.fromPlain(plain.range),
-            plain.steps.map((s) => Step.fromPlain(s))
-        );
-    }
-
     apply(approval: Approval): Result<DomainError, Authflow> {
         if (!this._currentStep) {
             return Result.error(

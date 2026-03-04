@@ -96,18 +96,6 @@ export class Recipient
         };
     }
 
-    static fromPlain(plain: ReturnType<Recipient['toPlain']>) {
-        return new this(
-            plain.type,
-            plain.name,
-            plain.address,
-            plain.taxId,
-            Email.fromPlain(plain.email),
-            Country.fromPlain(plain.taxResidenceCountry),
-            Paypal.fromPlain(plain.billing)
-        );
-    }
-
     static create({
         type,
         name,

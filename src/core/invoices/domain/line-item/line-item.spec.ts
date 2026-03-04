@@ -113,18 +113,4 @@ describe('LineItem', () => {
             true
         );
     });
-
-    describe('toPlain / fromPlain', () => {
-        it('round-trips through toPlain and fromPlain', () => {
-            const lineItem = LineItem.create({
-                description: 'Product A',
-                price: { amount: '100', currency: 'USD' },
-                quantity: '2',
-            }).unwrap();
-
-            const restored = LineItem.fromPlain(lineItem.toPlain());
-
-            expect(restored.equals(lineItem)).toBe(true);
-        });
-    });
 });

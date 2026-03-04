@@ -35,7 +35,7 @@ describe('Country', () => {
     });
 
     it('should reconstruct from plain', () => {
-        const country = Country.fromPlain('US');
+        const country = Country.create('US').unwrap();
         expect(country.toPlain()).toBe('US');
     });
 });

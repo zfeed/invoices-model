@@ -19,10 +19,6 @@ export class Paypal
         return { type: this.type, data: { email: this.data.email.toString() } };
     }
 
-    static fromPlain(plain: ReturnType<Paypal['toPlain']>) {
-        return new Paypal({ email: Email.fromPlain(plain.data.email) });
-    }
-
     static create(data: { email: string }) {
         const emailResult = Email.create(data.email);
 

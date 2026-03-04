@@ -1,25 +1,23 @@
 import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/domain-codes';
 import { Approver } from '../approver/approver';
+import { Email } from '../email/email';
+import { Id } from '../id/id';
+import { Name } from '../name/name';
 import { GroupTemplate } from './group-template';
+
+const makeApprover = (id: string, name: string, email: string) =>
+    Approver.create({
+        id: Id.fromString(id),
+        name: Name.create(name).unwrap(),
+        email: Email.create(email).unwrap(),
+    }).unwrap();
 
 describe('GroupTemplate.create', () => {
     it('should create a group template successfully with unique approvers', () => {
         const approvers = [
-            Approver.fromPlain({
-                id: '1',
-                name: 'Alice',
-                email: 'alice@example.com',
-            }),
-            Approver.fromPlain({
-                id: '2',
-                name: 'Bob',
-                email: 'bob@example.com',
-            }),
-            Approver.fromPlain({
-                id: '3',
-                name: 'Charlie',
-                email: 'charlie@example.com',
-            }),
+            makeApprover('1', 'Alice', 'alice@example.com'),
+            makeApprover('2', 'Bob', 'bob@example.com'),
+            makeApprover('3', 'Charlie', 'charlie@example.com'),
         ];
 
         const result = GroupTemplate.create({
@@ -49,21 +47,9 @@ describe('GroupTemplate.create', () => {
 
     it('should fail to create a group template with duplicate approver IDs', () => {
         const approvers = [
-            Approver.fromPlain({
-                id: '1',
-                name: 'Alice',
-                email: 'alice@example.com',
-            }),
-            Approver.fromPlain({
-                id: '2',
-                name: 'Bob',
-                email: 'bob@example.com',
-            }),
-            Approver.fromPlain({
-                id: '1',
-                name: 'Alice Duplicate',
-                email: 'alice2@example.com',
-            }),
+            makeApprover('1', 'Alice', 'alice@example.com'),
+            makeApprover('2', 'Bob', 'bob@example.com'),
+            makeApprover('1', 'Alice Duplicate', 'alice2@example.com'),
         ];
 
         const result = GroupTemplate.create({
@@ -80,13 +66,7 @@ describe('GroupTemplate.create', () => {
     });
 
     it('should generate a unique ID for each group template', () => {
-        const approvers = [
-            Approver.fromPlain({
-                id: '1',
-                name: 'Alice',
-                email: 'alice@example.com',
-            }),
-        ];
+        const approvers = [makeApprover('1', 'Alice', 'alice@example.com')];
 
         const result1 = GroupTemplate.create({
             requiredApprovals: 1,
@@ -105,13 +85,7 @@ describe('GroupTemplate.create', () => {
     });
 
     it('should not have isApproved or approvals properties', () => {
-        const approvers = [
-            Approver.fromPlain({
-                id: '1',
-                name: 'Alice',
-                email: 'alice@example.com',
-            }),
-        ];
+        const approvers = [makeApprover('1', 'Alice', 'alice@example.com')];
 
         const result = GroupTemplate.create({
             requiredApprovals: 1,

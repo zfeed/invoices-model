@@ -335,7 +335,7 @@ describe('onInvoiceIssued', () => {
         const session = new Session(new PersistentManager(domainEvents));
 
         const existing = FinancialDocument.create({
-            referenceId: ReferenceId.fromPlain('INV-001'),
+            referenceId: ReferenceId.create('INV-001').unwrap(),
             value: Money.create('100', 'USD').unwrap(),
             authflows: [],
         }).unwrap();

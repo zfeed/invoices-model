@@ -18,10 +18,6 @@ export class Email implements Equatable<Email>, Mappable<string> {
         return Result.ok(new Email(value.toLowerCase()));
     }
 
-    static fromPlain(value: string) {
-        return new Email(value);
-    }
-
     equals(other: Email): boolean {
         return this._value === other._value;
     }

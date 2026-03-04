@@ -18,10 +18,6 @@ export class Action implements Equatable<Action>, Mappable<string> {
         return Result.ok(new Action(value));
     }
 
-    static fromPlain(value: string) {
-        return new Action(value);
-    }
-
     equals(other: Action): boolean {
         return this._value === other._value;
     }

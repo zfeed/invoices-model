@@ -24,7 +24,7 @@ export class CanApproverApprove {
         action: string,
         referenceId: string
     ): Promise<ApprovalAnswer> {
-        const validApproverId = Id.fromPlain(approverId);
+        const validApproverId = Id.fromString(approverId);
 
         const actionResult = Action.create(action);
         if (actionResult.isError()) {

@@ -8,10 +8,6 @@ export class Email implements Equatable<Email | string>, Mappable<string> {
         this._value = value;
     }
 
-    static fromPlain(value: string) {
-        return new Email(value);
-    }
-
     static create(value: string) {
         const error = checkEmailFormat(value);
 

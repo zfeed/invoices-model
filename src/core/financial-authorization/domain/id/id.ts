@@ -12,12 +12,8 @@ export class Id implements Equatable<Id>, Mappable<string> {
         return Result.ok(new Id(uuidv7()));
     }
 
-    static fromPlain(value: string) {
-        return new Id(value);
-    }
-
     static fromString(value: string) {
-        return Id.fromPlain(value);
+        return new Id(value);
     }
 
     equals(other: Id): boolean {

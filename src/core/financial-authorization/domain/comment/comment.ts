@@ -22,10 +22,6 @@ export class Comment implements Equatable<Comment>, Mappable<string | null> {
         return Result.ok(new Comment(value));
     }
 
-    static fromPlain(value: string | null) {
-        return new Comment(value);
-    }
-
     equals(other: Comment): boolean {
         return this._value === other._value;
     }

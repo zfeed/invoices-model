@@ -6,6 +6,15 @@ import { FinancialDocument } from '../../../../financial-authorization/domain/do
 import { Authflow } from '../../../../financial-authorization/domain/authflow/authflow';
 import { Money } from '../../../../financial-authorization/domain/money/money';
 import { ReferenceId } from '../../../../financial-authorization/domain/reference-id/reference-id';
+import { Id as FAId } from '../../../../financial-authorization/domain/id/id';
+import { Name as FAName } from '../../../../financial-authorization/domain/name/name';
+import { Email as FAEmail } from '../../../../financial-authorization/domain/email/email';
+import { Action } from '../../../../financial-authorization/domain/action/action';
+import { Order } from '../../../../financial-authorization/domain/order/order';
+import { Range } from '../../../../financial-authorization/domain/range/range';
+import { Approver } from '../../../../financial-authorization/domain/approver/approver';
+import { Group } from '../../../../financial-authorization/domain/groups/group';
+import { Step } from '../../../../financial-authorization/domain/step/step';
 import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice';
 import { CompleteDraftInvoice } from '../complete-draft-invoice/complete-draft-invoice';
 import { ProcessInvoice } from '../process-invoice/process-invoice';
@@ -52,41 +61,39 @@ const COMPLETE_DRAFT_REQUEST = {
 
 const APPROVER_ID = uuid();
 
-const createAuthorizationDocument = (referenceId: string) =>
-    FinancialDocument.create({
-        referenceId: ReferenceId.fromPlain(referenceId),
-        value: Money.fromPlain({ amount: '220', currency: 'USD' }),
-        authflows: [
-            Authflow.fromPlain({
-                id: uuid(),
-                action: 'pay',
-                range: {
-                    from: { amount: '0', currency: 'USD' },
-                    to: { amount: '100000', currency: 'USD' },
-                },
-                steps: [
-                    {
-                        id: uuid(),
-                        order: 0,
-                        groups: [
-                            {
-                                id: uuid(),
-                                requiredApprovals: 1,
-                                approvers: [
-                                    {
-                                        id: APPROVER_ID,
-                                        name: 'Alice',
-                                        email: 'alice@example.com',
-                                    },
-                                ],
-                                approvals: [],
-                            },
-                        ],
-                    },
-                ],
-            }),
-        ],
+const createAuthorizationDocument = (referenceId: string) => {
+    const approver = Approver.create({
+        id: FAId.fromString(APPROVER_ID),
+        name: FAName.create('Alice').unwrap(),
+        email: FAEmail.create('alice@example.com').unwrap(),
     }).unwrap();
+
+    const group = Group.create({
+        requiredApprovals: 1,
+        approvers: [approver],
+        approvals: [],
+    }).unwrap();
+
+    const step = Step.create({
+        order: Order.create(0).unwrap(),
+        groups: [group],
+    }).unwrap();
+
+    const authflow = Authflow.create({
+        action: Action.create('pay').unwrap(),
+        range: Range.create(
+            Money.create('0', 'USD').unwrap(),
+            Money.create('100000', 'USD').unwrap()
+        ).unwrap(),
+        steps: [step],
+    }).unwrap();
+
+    return FinancialDocument.create({
+        referenceId: ReferenceId.create(referenceId).unwrap(),
+        value: Money.create('220', 'USD').unwrap(),
+        authflows: [authflow],
+    }).unwrap();
+};
 
 describe('PayInvoice', () => {
     let session: Session;

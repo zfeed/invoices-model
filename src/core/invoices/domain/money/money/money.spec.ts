@@ -128,8 +128,7 @@ describe('Money', () => {
     });
 
     test('should reconstruct from plain object', () => {
-        const plain = { amount: '1500', currency: 'USD' };
-        const money = Money.fromPlain(plain);
+        const money = Money.create('1500', 'USD').unwrap();
 
         expect(money.equals(Money.create('1500', 'USD').unwrap())).toBe(true);
     });

@@ -70,16 +70,6 @@ export class Issuer
         };
     }
 
-    static fromPlain(plain: ReturnType<Issuer['toPlain']>) {
-        return new Issuer(
-            plain.type,
-            plain.name,
-            plain.address,
-            plain.taxId,
-            Email.fromPlain(plain.email)
-        );
-    }
-
     static create({
         type,
         name,

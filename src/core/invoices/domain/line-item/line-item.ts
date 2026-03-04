@@ -56,15 +56,6 @@ export class LineItem
         };
     }
 
-    static fromPlain(plain: ReturnType<LineItem['toPlain']>) {
-        return new LineItem(
-            UnitDescription.fromPlain(plain.description),
-            Money.fromPlain(plain.price),
-            UnitQuantity.fromPlain(plain.quantity),
-            Money.fromPlain(plain.total)
-        );
-    }
-
     static create({
         description,
         price,

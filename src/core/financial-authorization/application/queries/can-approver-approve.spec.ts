@@ -4,50 +4,71 @@ import { PersistentManager } from '../../../../infrastructure/persistent-manager
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
 import { CanApproverApprove } from './can-approver-approve';
 import { cleanDatabase } from '../../../../infrastructure/persistent-manager/clean-database';
+import { Action } from '../../domain/action/action';
+import { Approval } from '../../domain/approval/approval';
+import { Approver } from '../../domain/approver/approver';
+import { Authflow } from '../../domain/authflow/authflow';
+import { Email } from '../../domain/email/email';
+import { Group } from '../../domain/groups/group';
+import { Id } from '../../domain/id/id';
+import { Money } from '../../domain/money/money';
+import { Name } from '../../domain/name/name';
+import { Order } from '../../domain/order/order';
+import { Range } from '../../domain/range/range';
+import { ReferenceId } from '../../domain/reference-id/reference-id';
+import { Step } from '../../domain/step/step';
 
 const uuid = () => crypto.randomUUID();
+
+const testRange = Range.create(
+    Money.create('0', 'USD').unwrap(),
+    Money.create('100000', 'USD').unwrap()
+).unwrap();
+
+const makeApprover = (id: string, name: string, email: string) =>
+    Approver.create({
+        id: Id.fromString(id),
+        name: Name.create(name).unwrap(),
+        email: Email.create(email).unwrap(),
+    }).unwrap();
+
+const makeApproval = (approverId: string) =>
+    Approval.create({
+        approverId: Id.fromString(approverId),
+        comment: null,
+    }).unwrap();
 
 const createDocumentFixture = (overrides: {
     approverId: string;
     referenceId?: string;
 }) => {
     const ref = overrides.referenceId ?? uuid();
+    const approver = makeApprover(
+        overrides.approverId,
+        'Alice',
+        'alice@example.com'
+    );
+    const group = Group.create({
+        requiredApprovals: 1,
+        approvers: [approver],
+        approvals: [],
+    }).unwrap();
+    const step = Step.create({
+        order: Order.create(0).unwrap(),
+        groups: [group],
+    }).unwrap();
+    const authflow = Authflow.create({
+        action: Action.create('pay').unwrap(),
+        range: testRange,
+        steps: [step],
+    }).unwrap();
+    const document = FinancialDocument.create({
+        referenceId: ReferenceId.create(ref).unwrap(),
+        value: Money.create('10000', 'USD').unwrap(),
+        authflows: [authflow],
+    }).unwrap();
     return {
-        document: FinancialDocument.fromPlain({
-            id: uuid(),
-            referenceId: ref,
-            value: { amount: '10000', currency: 'USD' },
-            authflows: [
-                {
-                    id: uuid(),
-                    action: 'pay',
-                    range: {
-                        from: { amount: '0', currency: 'USD' },
-                        to: { amount: '100000', currency: 'USD' },
-                    },
-                    steps: [
-                        {
-                            id: uuid(),
-                            order: 0,
-                            groups: [
-                                {
-                                    id: uuid(),
-                                    requiredApprovals: 1,
-                                    approvers: [
-                                        {
-                                            id: overrides.approverId,
-                                            name: 'Alice',
-                                            email: 'alice@example.com',
-                                        },
-                                    ],
-                                    approvals: [],
-                                },
-                            ],
-                        },
-                    ],
-                },
-            ],
-        }),
+        document,
         referenceId: ref,
     };
 };
@@ -128,47 +149,27 @@ describe('CanApproverApprove', () => {
         );
         const approverId = uuid();
         const ref = uuid();
-        const document = FinancialDocument.fromPlain({
-            id: uuid(),
-            referenceId: ref,
-            value: { amount: '10000', currency: 'USD' },
-            authflows: [
-                {
-                    id: uuid(),
-                    action: 'pay',
-                    range: {
-                        from: { amount: '0', currency: 'USD' },
-                        to: { amount: '100000', currency: 'USD' },
-                    },
-                    steps: [
-                        {
-                            id: uuid(),
-                            order: 0,
-                            groups: [
-                                {
-                                    id: uuid(),
-                                    requiredApprovals: 1,
-                                    approvers: [
-                                        {
-                                            id: approverId,
-                                            name: 'Alice',
-                                            email: 'alice@example.com',
-                                        },
-                                    ],
-                                    approvals: [
-                                        {
-                                            approverId,
-                                            createdAt: new Date().toISOString(),
-                                            comment: null,
-                                        },
-                                    ],
-                                },
-                            ],
-                        },
-                    ],
-                },
-            ],
-        });
+        const approver = makeApprover(approverId, 'Alice', 'alice@example.com');
+        const approval = makeApproval(approverId);
+        const group = Group.create({
+            requiredApprovals: 1,
+            approvers: [approver],
+            approvals: [approval],
+        }).unwrap();
+        const step = Step.create({
+            order: Order.create(0).unwrap(),
+            groups: [group],
+        }).unwrap();
+        const authflow = Authflow.create({
+            action: Action.create('pay').unwrap(),
+            range: testRange,
+            steps: [step],
+        }).unwrap();
+        const document = FinancialDocument.create({
+            referenceId: ReferenceId.create(ref).unwrap(),
+            value: Money.create('10000', 'USD').unwrap(),
+            authflows: [authflow],
+        }).unwrap();
 
         {
             await using uow = await session.begin();
@@ -221,59 +222,40 @@ describe('CanApproverApprove', () => {
         const approverId2 = uuid();
         const ref = uuid();
 
-        const document = FinancialDocument.fromPlain({
-            id: uuid(),
-            referenceId: ref,
-            value: { amount: '10000', currency: 'USD' },
-            authflows: [
-                {
-                    id: uuid(),
-                    action: 'pay',
-                    range: {
-                        from: { amount: '0', currency: 'USD' },
-                        to: { amount: '100000', currency: 'USD' },
-                    },
-                    steps: [
-                        {
-                            id: uuid(),
-                            order: 0,
-                            groups: [
-                                {
-                                    id: uuid(),
-                                    requiredApprovals: 1,
-                                    approvers: [
-                                        {
-                                            id: approverId1,
-                                            name: 'Alice',
-                                            email: 'alice@example.com',
-                                        },
-                                    ],
-                                    approvals: [],
-                                },
-                            ],
-                        },
-                        {
-                            id: uuid(),
-                            order: 1,
-                            groups: [
-                                {
-                                    id: uuid(),
-                                    requiredApprovals: 1,
-                                    approvers: [
-                                        {
-                                            id: approverId2,
-                                            name: 'Bob',
-                                            email: 'bob@example.com',
-                                        },
-                                    ],
-                                    approvals: [],
-                                },
-                            ],
-                        },
-                    ],
-                },
-            ],
-        });
+        const approver1 = makeApprover(
+            approverId1,
+            'Alice',
+            'alice@example.com'
+        );
+        const approver2 = makeApprover(approverId2, 'Bob', 'bob@example.com');
+        const group1 = Group.create({
+            requiredApprovals: 1,
+            approvers: [approver1],
+            approvals: [],
+        }).unwrap();
+        const group2 = Group.create({
+            requiredApprovals: 1,
+            approvers: [approver2],
+            approvals: [],
+        }).unwrap();
+        const step1 = Step.create({
+            order: Order.create(0).unwrap(),
+            groups: [group1],
+        }).unwrap();
+        const step2 = Step.create({
+            order: Order.create(1).unwrap(),
+            groups: [group2],
+        }).unwrap();
+        const authflow = Authflow.create({
+            action: Action.create('pay').unwrap(),
+            range: testRange,
+            steps: [step1, step2],
+        }).unwrap();
+        const document = FinancialDocument.create({
+            referenceId: ReferenceId.create(ref).unwrap(),
+            value: Money.create('10000', 'USD').unwrap(),
+            authflows: [authflow],
+        }).unwrap();
 
         {
             await using uow = await session.begin();

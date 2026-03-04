@@ -81,41 +81,6 @@ export class FinancialDocument
         return Result.ok(doc);
     }
 
-    static fromPlain(plain: {
-        id: string;
-        referenceId: string;
-        value: { amount: string; currency: string };
-        authflows: {
-            id: string;
-            action: string;
-            range: {
-                from: { amount: string; currency: string };
-                to: { amount: string; currency: string };
-            };
-            steps: {
-                id: string;
-                order: number;
-                groups: {
-                    id: string;
-                    requiredApprovals: number;
-                    approvers: { id: string; name: string; email: string }[];
-                    approvals: {
-                        approverId: string;
-                        createdAt: string;
-                        comment: string | null;
-                    }[];
-                }[];
-            }[];
-        }[];
-    }) {
-        return new FinancialDocument(
-            Id.fromPlain(plain.id),
-            ReferenceId.fromPlain(plain.referenceId),
-            Money.fromPlain(plain.value),
-            plain.authflows.map((a) => Authflow.fromPlain(a))
-        );
-    }
-
     apply(action: Action, approval: Approval): Result<DomainError, undefined> {
         const authflow = this._authflows.find((a) => a.action.equals(action));
 

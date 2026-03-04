@@ -385,42 +385,6 @@ export class DraftInvoice
         return Result.ok(draftInvoice);
     }
 
-    static fromPlain(plain: ReturnType<DraftInvoice['toPlain']>) {
-        const id = Id.fromPlain(plain.id);
-        const status = DraftInvoiceStatus.fromString(plain.status).unwrap();
-        const lineItems = plain.lineItems
-            ? LineItems.fromPlain(plain.lineItems)
-            : null;
-        const vatRate = plain.vatRate ? VatRate.fromPlain(plain.vatRate) : null;
-        const total = plain.total ? Money.fromPlain(plain.total) : null;
-        const vatAmount = plain.vatAmount
-            ? Money.fromPlain(plain.vatAmount)
-            : null;
-        const issueDate = plain.issueDate
-            ? CalendarDate.fromPlain(plain.issueDate)
-            : null;
-        const dueDate = plain.dueDate
-            ? CalendarDate.fromPlain(plain.dueDate)
-            : null;
-        const issuer = plain.issuer ? Issuer.fromPlain(plain.issuer) : null;
-        const recipient = plain.recipient
-            ? Recipient.fromPlain(plain.recipient)
-            : null;
-
-        return new DraftInvoice(
-            id,
-            status,
-            lineItems,
-            total,
-            vatRate,
-            vatAmount,
-            issueDate,
-            dueDate,
-            issuer,
-            recipient
-        );
-    }
-
     toPlain() {
         return {
             id: this._id.toPlain(),

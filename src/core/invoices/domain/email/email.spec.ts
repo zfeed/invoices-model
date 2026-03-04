@@ -36,7 +36,7 @@ describe('Email', () => {
     });
 
     it('should reconstruct from plain', () => {
-        const email = Email.fromPlain('test@example.com');
+        const email = Email.create('test@example.com').unwrap();
         expect(email.toPlain()).toBe('test@example.com');
     });
 });

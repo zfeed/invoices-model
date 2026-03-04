@@ -63,33 +63,6 @@ export class AuthflowPolicy
         return Result.ok(policy);
     }
 
-    static fromPlain(plain: {
-        id: string;
-        action: string;
-        templates: {
-            id: string;
-            range: {
-                from: { amount: string; currency: string };
-                to: { amount: string; currency: string };
-            };
-            steps: {
-                id: string;
-                order: number;
-                groups: {
-                    id: string;
-                    requiredApprovals: number;
-                    approvers: { id: string; name: string; email: string }[];
-                }[];
-            }[];
-        }[];
-    }) {
-        return new AuthflowPolicy(
-            Id.fromPlain(plain.id),
-            Action.fromPlain(plain.action),
-            plain.templates.map((t) => AuthflowTemplate.fromPlain(t))
-        );
-    }
-
     selectAuthflow(amount: Money): Result<DomainError, Authflow> {
         const rangeError = checkTemplateInRange(this._templates, amount);
         if (rangeError) {

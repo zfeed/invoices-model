@@ -111,13 +111,4 @@ describe('VatRate', () => {
             expect(result.unwrap().equals(money)).toBe(true);
         });
     });
-
-    describe('toPlain / fromPlain', () => {
-        it('round-trips through toPlain and fromPlain', () => {
-            const vat = VatRate.create('20').unwrap();
-            const restored = VatRate.fromPlain(vat.toPlain());
-
-            expect(restored.equals(vat)).toBe(true);
-        });
-    });
 });

@@ -35,7 +35,7 @@ describe('Currency', () => {
     );
 
     test('should reconstruct from plain', () => {
-        const currency = Currency.fromPlain('USD');
+        const currency = Currency.create('USD').unwrap();
 
         expect(currency.equals(Currency.create('USD').unwrap())).toBe(true);
     });

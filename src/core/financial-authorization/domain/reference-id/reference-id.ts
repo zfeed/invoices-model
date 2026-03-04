@@ -18,10 +18,6 @@ export class ReferenceId implements Equatable<ReferenceId>, Mappable<string> {
         return Result.ok(new ReferenceId(value));
     }
 
-    static fromPlain(value: string) {
-        return new ReferenceId(value);
-    }
-
     equals(other: ReferenceId): boolean {
         return this._value === other._value;
     }

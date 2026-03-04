@@ -51,7 +51,7 @@ describe('CalendarDate', () => {
     });
 
     it('should reconstruct from plain', () => {
-        const date = CalendarDate.fromPlain('2023-01-01');
+        const date = CalendarDate.create('2023-01-01').unwrap();
         expect(date.toPlain()).toBe('2023-01-01');
     });
 });
