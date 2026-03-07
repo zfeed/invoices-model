@@ -25,7 +25,6 @@ const UUID_RE =
 
 export class PersistentManager implements PersistentManagerInterface<Entity> {
     private committed = false;
-    private rolledBack = false;
     private transaction: ControlledTransaction | null = null;
     private draftInvoiceStorage: DraftInvoiceStorage | null = null;
     private invoiceStorage: InvoiceStorage | null = null;
@@ -126,8 +125,6 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
             return;
         }
 
-        this.rolledBack = true;
-
         if (this.transaction) {
             await this.transaction.rollback().execute();
         }
@@ -136,11 +133,9 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
     async commit(
         collections: [EntityClass, Collection<Entity>][]
     ): Promise<void> {
-        if (this.committed || this.rolledBack) {
-            return;
+        if (this.committed) {
+            throw new Error('Transaction already committed');
         }
-
-        this.committed = true;
 
         const allEntities: Entity[] = [];
 
@@ -168,6 +163,7 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         }
 
         await this.getTransaction().commit().execute();
+        this.committed = true;
         await this.domainEvents.publishEvents(...allEntities);
     }
 
