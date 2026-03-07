@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify';
+import { AddressInfo } from 'net';
 import { createApp } from '../src/http/create-app';
 import { cleanDatabase } from '../src/infrastructure/persistent-manager/clean-database';
 
@@ -39,21 +39,16 @@ type TestResponse = {
     json: () => Promise<any>;
 };
 
-const toTestResponse = (res: {
-    statusCode: number;
-    json: () => any;
-}): TestResponse => ({
-    status: res.statusCode,
-    json: () => Promise.resolve(res.json()),
-});
-
 export const setupApp = () => {
-    let app: FastifyInstance;
+    let app: Awaited<ReturnType<typeof createApp>>;
+    let baseUrl: string;
 
     beforeEach(async () => {
         await cleanDatabase();
         app = await createApp();
-        await app.ready();
+        await app.listen({ port: 0 });
+        const { port } = app.server.address() as AddressInfo;
+        baseUrl = `http://localhost:${port}`;
     });
 
     afterEach(async () => {
@@ -63,44 +58,25 @@ export const setupApp = () => {
     const postJson = async (
         path: string,
         body: unknown
-    ): Promise<TestResponse> => {
-        const res = await app.inject({
+    ): Promise<TestResponse> =>
+        fetch(`${baseUrl}${path}`, {
             method: 'POST',
-            url: path,
             headers: { 'Content-Type': 'application/json' },
-            payload: JSON.stringify(body),
+            body: JSON.stringify(body),
         });
-        return toTestResponse(res);
-    };
 
-    const postRaw = async (
-        path: string,
-        body: string
-    ): Promise<TestResponse> => {
-        const res = await app.inject({
+    const postRaw = async (path: string, body: string): Promise<TestResponse> =>
+        fetch(`${baseUrl}${path}`, {
             method: 'POST',
-            url: path,
             headers: { 'Content-Type': 'application/json' },
-            payload: body,
+            body,
         });
-        return toTestResponse(res);
-    };
 
-    const post = async (path: string): Promise<TestResponse> => {
-        const res = await app.inject({
-            method: 'POST',
-            url: path,
-        });
-        return toTestResponse(res);
-    };
+    const post = async (path: string): Promise<TestResponse> =>
+        fetch(`${baseUrl}${path}`, { method: 'POST' });
 
-    const get = async (path: string): Promise<TestResponse> => {
-        const res = await app.inject({
-            method: 'GET',
-            url: path,
-        });
-        return toTestResponse(res);
-    };
+    const get = async (path: string): Promise<TestResponse> =>
+        fetch(`${baseUrl}${path}`);
 
     const getData = async (res: TestResponse) => (await res.json()).data;
 
