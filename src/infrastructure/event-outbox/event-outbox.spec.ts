@@ -1,6 +1,6 @@
 import dayjs from '../../lib/dayjs';
-import { cleanDatabase } from './clean-database';
-import { EventOutboxStorage } from './event-outbox-storage';
+import { cleanDatabase } from '../persistent-manager/clean-database';
+import { EventOutboxStorage } from './event-outbox';
 
 const ZERO_TIMEOUT = dayjs.duration(-1, 'seconds');
 const LONG_TIMEOUT = dayjs.duration(30, 'seconds');
