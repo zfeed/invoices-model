@@ -30,13 +30,19 @@ export class EventOutboxStorage {
         return new EventOutboxStorage(timeout, maxDeliveryAttempts, tx);
     }
 
-    async insert(event: { eventName: string; payload: unknown }) {
+    async insert(events: { eventName: string; payload: unknown }[]) {
+        if (events.length === 0) {
+            return;
+        }
+
         await this.db
             .insertInto('event_outbox')
-            .values({
-                event_name: event.eventName,
-                payload: JSON.stringify(event.payload),
-            })
+            .values(
+                events.map((event) => ({
+                    event_name: event.eventName,
+                    payload: JSON.stringify(event.payload),
+                }))
+            )
             .execute();
     }
 

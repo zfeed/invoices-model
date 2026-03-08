@@ -8,7 +8,9 @@ import {
     PersistentManager as PersistentManagerInterface,
 } from '../../core/shared/unit-of-work/unit-of-work.interface';
 import type { Collection } from '../../core/shared/unit-of-work/collection/collection';
+import dayjs from '../../lib/dayjs';
 import { kysely, ControlledTransaction } from '../../../database/kysely';
+import { EventOutboxStorage } from '../event-outbox/event-outbox';
 import { AuthflowPolicyStorage } from './authflow-policy-storage';
 import { DraftInvoiceStorage } from './draft-invoice-storage';
 import { FinancialDocumentStorage } from './financial-document-storage';
@@ -30,6 +32,7 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
     private invoiceStorage: InvoiceStorage | null = null;
     private financialDocumentStorage: FinancialDocumentStorage | null = null;
     private authflowPolicyStorage: AuthflowPolicyStorage | null = null;
+    private eventOutboxStorage: EventOutboxStorage | null = null;
 
     constructor(private readonly domainEvents: DomainEvents) {}
 
@@ -162,6 +165,15 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
             }
         }
 
+        await this.getEventOutboxStorage().insert(
+            allEntities.flatMap((entity) =>
+                entity.events.map((event) => ({
+                    eventName: event.name,
+                    payload: event.data,
+                }))
+            )
+        );
+
         await this.getTransaction().commit().execute();
         this.committed = true;
         await this.domainEvents.publishEvents(...allEntities);
@@ -175,6 +187,11 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
             this.transaction
         );
         this.authflowPolicyStorage = new AuthflowPolicyStorage(
+            this.transaction
+        );
+        this.eventOutboxStorage = EventOutboxStorage.create(
+            dayjs.duration(30, 'seconds'),
+            5,
             this.transaction
         );
     }
@@ -217,5 +234,13 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         }
 
         return this.authflowPolicyStorage;
+    }
+
+    private getEventOutboxStorage(): EventOutboxStorage {
+        if (!this.eventOutboxStorage) {
+            throw new Error('Transaction not initialized');
+        }
+
+        return this.eventOutboxStorage;
     }
 }
