@@ -12,7 +12,7 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn('created_at', sql`timestamptz`, (col) =>
             col.notNull().defaultTo(sql`now()`)
         )
-        .addColumn('processed_at', sql`timestamptz`)
+        .addColumn('delivered_at', sql`timestamptz`)
         .addColumn('delivery_attempts', 'integer', (col) =>
             col.notNull().defaultTo(0)
         )

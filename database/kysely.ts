@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { Kysely, PostgresDialect } from 'kysely';
+import { Kysely as BaseKysely, PostgresDialect } from 'kysely';
 import type {
     Transaction as BaseTransaction,
     ControlledTransaction as BaseControlledTransaction,
@@ -12,9 +12,10 @@ export const postgresDialect = new PostgresDialect({
     }),
 });
 
-export const kysely = new Kysely<DB>({
+export const kysely = new BaseKysely<DB>({
     dialect: postgresDialect,
 });
 
+export type Kysely = BaseKysely<DB>;
 export type Transaction = BaseTransaction<DB>;
 export type ControlledTransaction = BaseControlledTransaction<DB>;
