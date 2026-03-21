@@ -50,7 +50,7 @@ export class EventOutboxStorage<T extends EventClass = EventClass> {
         );
     }
 
-    async insert(events: DomainEvent<unknown>[]) {
+    async insert(events: InstanceType<T>[]) {
         if (events.length === 0) {
             return;
         }
@@ -67,7 +67,7 @@ export class EventOutboxStorage<T extends EventClass = EventClass> {
             .execute();
     }
 
-    async delivered(event: DomainEvent<unknown>) {
+    async delivered(event: InstanceType<T>) {
         await this.db
             .updateTable('event_outbox')
             .set({

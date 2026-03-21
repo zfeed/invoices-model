@@ -228,11 +228,22 @@ describe('EventOutboxStorage', () => {
         });
 
         it('should throw when event name has no registered class', async () => {
-            const storage = EventOutboxStorage.create([], LONG_TIMEOUT, 5);
-            await storage.insert([new InvoiceIssuedEvent({ id: '1' })]);
+            const storage = EventOutboxStorage.create(
+                [InvoicePaidEvent],
+                LONG_TIMEOUT,
+                5
+            );
+            await storage.insert([new InvoicePaidEvent({ id: '1' })]);
 
-            await expect(storage.poll(10)).rejects.toThrow(
-                'No event class registered for event name: invoice.issued'
+            // Replace with an event that has no registered class
+            const unregistered = EventOutboxStorage.create(
+                [EventOneEvent],
+                LONG_TIMEOUT,
+                5
+            );
+
+            await expect(unregistered.poll(10)).rejects.toThrow(
+                'No event class registered for event name: invoice.paid'
             );
         });
 
