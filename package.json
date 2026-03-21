@@ -30,6 +30,7 @@
         "vitest": "^4.0.18"
     },
     "dependencies": {
+        "@confluentinc/kafka-javascript": "^1.8.2",
         "@types/lodash": "^4.17.24",
         "dayjs": "^1.11.19",
         "decimal.js": "^10.6.0",
