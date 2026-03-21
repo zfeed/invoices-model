@@ -1,3 +1,4 @@
+import { DomainEvent } from '../../building-blocks/events/domain-event';
 import { type Duration } from '../../lib/dayjs';
 import { sql } from 'kysely';
 import {
@@ -30,7 +31,7 @@ export class EventOutboxStorage {
         return new EventOutboxStorage(timeout, maxDeliveryAttempts, tx);
     }
 
-    async insert(events: { eventName: string; payload: unknown }[]) {
+    async insert(events: DomainEvent<unknown>[]) {
         if (events.length === 0) {
             return;
         }
@@ -39,8 +40,8 @@ export class EventOutboxStorage {
             .insertInto('event_outbox')
             .values(
                 events.map((event) => ({
-                    event_name: event.eventName,
-                    payload: JSON.stringify(event.payload),
+                    event_name: event.name,
+                    payload: JSON.stringify(event.serialize()),
                 }))
             )
             .execute();
