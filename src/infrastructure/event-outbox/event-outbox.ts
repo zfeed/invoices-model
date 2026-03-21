@@ -21,32 +21,26 @@ type Options = {
     transaction?: ControlledTransaction;
 };
 
+type PollOptions = Options & {
+    maxDeliveryAttempts: number;
+    timeout: Duration;
+};
+
 export class EventOutboxStorage<T extends EventClass = EventClass> {
     private readonly registry: ReadonlyArray<T>;
 
-    private constructor(
-        registry: ReadonlyArray<T>,
-        timeout: Duration,
-        maxDeliveryAttempts: number
-    ) {
+    private constructor(registry: ReadonlyArray<T>) {
         this.registry = registry;
-        this.timeout = timeout;
-        this.maxDeliveryAttempts = maxDeliveryAttempts;
     }
-
-    private timeout: Duration;
-    private maxDeliveryAttempts: number;
 
     private db(options?: Options): Kysely | ControlledTransaction {
         return options?.transaction ?? defaultKysely;
     }
 
     static create<T extends EventClass>(
-        registry: ReadonlyArray<T>,
-        timeout: Duration,
-        maxDeliveryAttempts: number
+        registry: ReadonlyArray<T>
     ): EventOutboxStorage<T> {
-        return new EventOutboxStorage(registry, timeout, maxDeliveryAttempts);
+        return new EventOutboxStorage(registry);
     }
 
     async insert(events: InstanceType<T>[], options?: Options) {
@@ -76,8 +70,12 @@ export class EventOutboxStorage<T extends EventClass = EventClass> {
             .execute();
     }
 
-    async poll(limit: number, options?: Options): Promise<InstanceType<T>[]> {
+    async poll(
+        limit: number,
+        options: PollOptions
+    ): Promise<InstanceType<T>[]> {
         const db = this.db(options);
+        const { maxDeliveryAttempts, timeout } = options;
         const rows = await db
             .updateTable('event_outbox')
             .set({
@@ -91,14 +89,14 @@ export class EventOutboxStorage<T extends EventClass = EventClass> {
                     .selectFrom('event_outbox')
                     .select('id')
                     .where('delivered_at', 'is', null)
-                    .where('delivery_attempts', '<', this.maxDeliveryAttempts)
+                    .where('delivery_attempts', '<', maxDeliveryAttempts)
                     .where((eb) =>
                         eb.or([
                             eb('last_attempted_at', 'is', null),
                             eb(
                                 'last_attempted_at',
                                 '<',
-                                sql<Date>`now() - ${sql.lit(this.timeout.asSeconds())} * interval '1 second'`
+                                sql<Date>`now() - ${sql.lit(timeout.asSeconds())} * interval '1 second'`
                             ),
                         ])
                     )

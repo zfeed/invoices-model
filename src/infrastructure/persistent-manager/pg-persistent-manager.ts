@@ -185,11 +185,7 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         this.authflowPolicyStorage = new AuthflowPolicyStorage(
             this.transaction
         );
-        this.eventOutboxStorage = EventOutboxStorage.create(
-            [],
-            dayjs.duration(30, 'seconds'),
-            5
-        );
+        this.eventOutboxStorage = EventOutboxStorage.create([]);
     }
 
     private getTransaction(): ControlledTransaction {
