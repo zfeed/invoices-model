@@ -166,7 +166,8 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         }
 
         await this.getEventOutboxStorage().insert(
-            allEntities.flatMap((entity) => entity.events)
+            allEntities.flatMap((entity) => entity.events),
+            { transaction: this.getTransaction() }
         );
 
         await this.getTransaction().commit().execute();
@@ -187,8 +188,7 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         this.eventOutboxStorage = EventOutboxStorage.create(
             [],
             dayjs.duration(30, 'seconds'),
-            5,
-            this.transaction
+            5
         );
     }
 
