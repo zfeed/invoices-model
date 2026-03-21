@@ -93,10 +93,11 @@ describe('EventOutboxStorage', () => {
     describe('delivered', () => {
         it('should mark event as delivered so it is no longer polled', async () => {
             const storage = EventOutboxStorage.create(ZERO_TIMEOUT, 5);
-            await storage.insert([new InvoiceIssuedEvent({ id: '123' })]);
+            const event = new InvoiceIssuedEvent({ id: '123' });
+            await storage.insert([event]);
 
-            const [event] = await storage.poll(10);
-            await storage.delivered(event.id);
+            await storage.poll(10);
+            await storage.delivered(event);
 
             const events = await storage.poll(10);
             expect(events).toHaveLength(0);

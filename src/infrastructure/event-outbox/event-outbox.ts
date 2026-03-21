@@ -40,6 +40,7 @@ export class EventOutboxStorage {
             .insertInto('event_outbox')
             .values(
                 events.map((event) => ({
+                    id: event.id,
                     event_name: event.name,
                     payload: JSON.stringify(event.serialize()),
                 }))
@@ -47,13 +48,13 @@ export class EventOutboxStorage {
             .execute();
     }
 
-    async delivered(id: string) {
+    async delivered(event: DomainEvent<unknown>) {
         await this.db
             .updateTable('event_outbox')
             .set({
                 delivered_at: new Date().toISOString(),
             })
-            .where('id', '=', id)
+            .where('id', '=', event.id)
             .execute();
     }
 
