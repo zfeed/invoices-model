@@ -1,4 +1,7 @@
-import { DomainEvent } from '../../building-blocks/events/domain-event';
+import {
+    DomainEvent,
+    SerializedDomainEvent,
+} from '../../building-blocks/events/domain-event';
 import { type Duration } from '../../lib/dayjs';
 import { sql } from 'kysely';
 import {
@@ -7,15 +10,25 @@ import {
     type ControlledTransaction,
 } from '../../../database/kysely';
 
-export class EventOutboxStorage {
+type EventClass = (new (...args: never[]) => DomainEvent<unknown>) & {
+    matches(eventName: string): boolean;
+    deserialize(
+        serialized: SerializedDomainEvent<unknown>
+    ): DomainEvent<unknown>;
+};
+
+export class EventOutboxStorage<T extends EventClass = EventClass> {
     private readonly db: Kysely | ControlledTransaction;
+    private readonly registry: ReadonlyArray<T>;
 
     private constructor(
+        registry: ReadonlyArray<T>,
         timeout: Duration,
         maxDeliveryAttempts: number,
         tx?: ControlledTransaction
     ) {
         this.db = tx ?? defaultKysely;
+        this.registry = registry;
         this.timeout = timeout;
         this.maxDeliveryAttempts = maxDeliveryAttempts;
     }
@@ -23,12 +36,18 @@ export class EventOutboxStorage {
     private timeout: Duration;
     private maxDeliveryAttempts: number;
 
-    static create(
+    static create<T extends EventClass>(
+        registry: ReadonlyArray<T>,
         timeout: Duration,
         maxDeliveryAttempts: number,
         tx?: ControlledTransaction
-    ): EventOutboxStorage {
-        return new EventOutboxStorage(timeout, maxDeliveryAttempts, tx);
+    ): EventOutboxStorage<T> {
+        return new EventOutboxStorage(
+            registry,
+            timeout,
+            maxDeliveryAttempts,
+            tx
+        );
     }
 
     async insert(events: DomainEvent<unknown>[]) {
@@ -58,8 +77,8 @@ export class EventOutboxStorage {
             .execute();
     }
 
-    async poll(limit: number) {
-        return this.db
+    async poll(limit: number): Promise<InstanceType<T>[]> {
+        const rows = await this.db
             .updateTable('event_outbox')
             .set({
                 delivery_attempts: (eb) => eb('delivery_attempts', '+', 1),
@@ -90,5 +109,21 @@ export class EventOutboxStorage {
             )
             .returningAll()
             .execute();
+
+        return rows.map((row) => {
+            const EventCtor = this.registry.find((e) =>
+                e.matches(row.event_name)
+            );
+
+            if (!EventCtor) {
+                throw new Error(
+                    `No event class registered for event name: ${row.event_name}`
+                );
+            }
+
+            return EventCtor.deserialize(
+                row.payload as SerializedDomainEvent<unknown>
+            ) as InstanceType<T>;
+        });
     }
 }

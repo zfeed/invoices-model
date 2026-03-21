@@ -185,6 +185,7 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
             this.transaction
         );
         this.eventOutboxStorage = EventOutboxStorage.create(
+            [],
             dayjs.duration(30, 'seconds'),
             5,
             this.transaction
