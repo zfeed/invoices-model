@@ -47,17 +47,20 @@ TypeScript DDD codebase with two bounded contexts: **invoices** (OOP class-based
 
 ```
 src/
-  building-blocks/   # Result, Some, IO monads, DomainEvent base, errors
-  core/
+  building-blocks/   # Result monad, DomainEvent base, errors, interfaces (Equatable, Comparable), UnitOfWork
+  features/
     invoices/          # OOP class-based bounded context
       domain/          # Entities, value objects, events, checks
-      application/     # Use cases, unit-of-work interface
+      application/     # Use cases
+      infrastructure/  # In-memory storage, data mappers
+      http/            # Fastify routes and schemas
     financial-authorization/  # Functional bounded context
       domain/          # Plain types, factory functions, events, checks
-      application/     # Use cases, storage interfaces
-    shared/            # Cross-context interfaces (domain-events, optimistic concurrency)
-  infrastructure/    # In-memory implementations (store, storage, mappers, domain-events)
-  http/              # Hono HTTP layer (routes, schemas, validation)
+      application/     # Use cases, event handlers, queries
+      infrastructure/  # In-memory storage, data mappers
+      http/            # Fastify routes and schemas
+  infrastructure/    # Shared infra: domain-events impl, event outbox, persistent manager
+  http/              # Shared Fastify app setup, error handler, plugins
 e2e/                 # E2E tests (outside src/)
 ```
 
