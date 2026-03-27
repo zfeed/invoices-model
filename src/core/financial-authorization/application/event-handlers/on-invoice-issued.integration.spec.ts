@@ -1,6 +1,7 @@
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
 import { Session } from '../../../shared/unit-of-work/unit-of-work';
 import { PersistentManager } from '../../../../infrastructure/persistent-manager/pg-persistent-manager';
+import { EventOutboxStorage } from '../../../../infrastructure/event-outbox/event-outbox';
 import { CreateDraftInvoice } from '../../../invoices/application/commands/create-draft-invoice/create-draft-invoice';
 import { CompleteDraftInvoice } from '../../../invoices/application/commands/complete-draft-invoice/complete-draft-invoice';
 import { ISSUER_TYPE } from '../../../invoices/domain/issuer/issuer';
@@ -77,7 +78,9 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
     beforeEach(async () => {
         await cleanDatabase();
         domainEvents = new InMemoryDomainEvents();
-        session = new Session(new PersistentManager(domainEvents));
+        session = new Session(
+            new PersistentManager(domainEvents, EventOutboxStorage.create([]))
+        );
         createCommand = new CreateDraftInvoice(session);
         completeCommand = new CompleteDraftInvoice(session);
     });

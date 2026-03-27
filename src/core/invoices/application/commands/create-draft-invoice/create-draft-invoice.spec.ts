@@ -1,6 +1,7 @@
 import { Session } from '../../../../shared/unit-of-work/unit-of-work';
 import { PersistentManager } from '../../../../../infrastructure/persistent-manager/pg-persistent-manager';
 import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
+import { EventOutboxStorage } from '../../../../../infrastructure/event-outbox/event-outbox';
 import { CreateDraftInvoice } from './create-draft-invoice';
 import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
 import { DraftInvoiceCreatedEvent } from '../../../domain/draft-invoice/events/draft-invoice-created.event';
@@ -16,7 +17,9 @@ describe('CreateDraftInvoice', () => {
 
     beforeEach(() => {
         domainEvents = new InMemoryDomainEvents();
-        session = new Session(new PersistentManager(domainEvents));
+        session = new Session(
+            new PersistentManager(domainEvents, EventOutboxStorage.create([]))
+        );
         command = new CreateDraftInvoice(session);
     });
 

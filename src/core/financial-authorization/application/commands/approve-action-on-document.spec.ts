@@ -2,6 +2,7 @@ import { DOMAIN_ERROR_CODE } from '../../../../building-blocks/errors/domain/dom
 import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
 import { Session } from '../../../shared/unit-of-work/unit-of-work';
 import { PersistentManager } from '../../../../infrastructure/persistent-manager/pg-persistent-manager';
+import { EventOutboxStorage } from '../../../../infrastructure/event-outbox/event-outbox';
 import { Approver } from '../../domain/approver/approver';
 import { AuthflowTemplate } from '../../domain/authflow/authflow-template';
 import { FinancialDocument } from '../../domain/document/document';
@@ -103,7 +104,9 @@ describe('approveActionOnDocumentCommand', () => {
         approverId = fixtures.approver.id.toPlain();
 
         domainEvents = new InMemoryDomainEvents();
-        session = new Session(new PersistentManager(domainEvents));
+        session = new Session(
+            new PersistentManager(domainEvents, EventOutboxStorage.create([]))
+        );
 
         const createPolicy = new CreateAuthflowPolicy(session);
         await createPolicy.execute({

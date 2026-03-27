@@ -1,6 +1,7 @@
 import { Session } from '../../../../shared/unit-of-work/unit-of-work';
 import { PersistentManager } from '../../../../../infrastructure/persistent-manager/pg-persistent-manager';
 import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
+import { EventOutboxStorage } from '../../../../../infrastructure/event-outbox/event-outbox';
 import { CanApproverApprove } from '../../../../financial-authorization/application/queries/can-approver-approve';
 import { FinancialDocument } from '../../../../financial-authorization/domain/document/document';
 import { Authflow } from '../../../../financial-authorization/domain/authflow/authflow';
@@ -106,7 +107,9 @@ describe('PayInvoice', () => {
     beforeEach(async () => {
         await cleanDatabase();
         domainEvents = new InMemoryDomainEvents();
-        session = new Session(new PersistentManager(domainEvents));
+        session = new Session(
+            new PersistentManager(domainEvents, EventOutboxStorage.create([]))
+        );
         const canApproverApprove = new CanApproverApprove(session);
         createCommand = new CreateDraftInvoice(session);
         completeCommand = new CompleteDraftInvoice(session);
