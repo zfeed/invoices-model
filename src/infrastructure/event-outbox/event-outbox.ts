@@ -1,7 +1,7 @@
 import {
     DomainEvent,
     SerializedDomainEvent,
-} from '../../building-blocks/events/domain-event';
+} from '../../shared/events/domain-event';
 import { type Duration } from '../../lib/dayjs';
 import { sql } from 'kysely';
 import {

@@ -1,6 +1,6 @@
-import { DomainEvent } from '../../building-blocks/events/domain-event';
-import { PublishableEvents } from '../../building-blocks/events/event-publisher.interface';
-import { DomainEvents } from '../../core/shared/domain-events/domain-events.interface';
+import { DomainEvent } from '../../shared/events/domain-event';
+import { PublishableEvents } from '../../shared/events/event-publisher.interface';
+import { DomainEvents } from '../../shared/domain-events/domain-events.interface';
 
 type EventHandler<T = any> = (event: T) => Promise<void>;
 

@@ -1,3 +1,3 @@
-export { draftInvoicesPlugin } from './draft-invoices';
-export { invoicesPlugin } from './invoices';
-export { financialAuthorizationPlugin } from './financial-authorization';
+export { draftInvoicesPlugin } from '../../features/invoices/http/draft-invoices';
+export { invoicesPlugin } from '../../features/invoices/http/invoices';
+export { financialAuthorizationPlugin } from '../../features/financial-authorization/http';

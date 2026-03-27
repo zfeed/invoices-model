@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { DomainError } from '../building-blocks/errors/domain/domain.error';
-import { ApplicationError } from '../building-blocks/errors/application/application.error';
+import { DomainError } from '../shared/errors/domain/domain.error';
+import { ApplicationError } from '../shared/errors/application/application.error';
 import { ValidationError } from './validation';
 
 const isFastifyError = (err: unknown): err is Error & { code: string } =>

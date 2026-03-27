@@ -1,4 +1,4 @@
-import { DomainEvent } from '../../building-blocks/events/domain-event';
+import { DomainEvent } from '../../shared/events/domain-event';
 import dayjs from '../../lib/dayjs';
 import { cleanDatabase } from '../persistent-manager/clean-database';
 import { EventOutboxStorage } from './event-outbox';
