@@ -1,65 +1,59 @@
-# Domain-Driven Design Models
+# Modular Monolith
 
-This repository contains two domain models implemented using Domain-Driven Design (DDD) principles in TypeScript.
+## Goal
 
-## Domains Overview
+This project demonstrates how to build a **modular, scalable monolith** with clear and loosely coupled boundaries. Each module is self-contained — with its own domain model, application layer, infrastructure, and HTTP interface — while sharing a common set of building blocks. The goal is to show that a well-structured monolith can achieve the same degree of modularity and separation of concerns as a microservices architecture, without the operational overhead.
 
-### 1. Invoices Domain (`/invoices`)
+Both domains are designed using **Object-Oriented Programming** principles, with entities, value objects, and domain events as core building blocks.
 
-**Paradigm:** Object-Oriented Programming (OOP)
-
-The Invoices domain handles the creation and management of financial invoices. It follows a builder pattern where invoices start as mutable drafts and become immutable once finalized. Entities are implemented as classes with private fields, encapsulated state, and methods that enforce business rules.
-
-#### Core Entities
-
-| Entity           | Description                                                                                                                                                                 |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Invoice**      | Immutable entity representing a finalized invoice. Contains line items, issuer, recipient, dates, totals, and optional VAT. Created only when all required data is present. |
-| **DraftInvoice** | Mutable builder for creating invoices. All properties are optional until conversion to `Invoice`. Supports incremental updates.                                             |
-
-#### Value Objects
-
-| Value Object     | Description                                                               |
-| ---------------- | ------------------------------------------------------------------------- |
-| **Money**        | Monetary amount with currency, supports arithmetic operations             |
-| **Currency**     | ISO 4217 currency code                                                    |
-| **LineItem**     | Individual invoice line with description, quantity, unit price, and total |
-| **LineItems**    | Collection of line items with validation and subtotal calculation         |
-| **VatRate**      | VAT percentage that can be applied to money amounts                       |
-| **Issuer**       | Party issuing the invoice                                                 |
-| **Recipient**    | Party receiving the invoice, includes billing details                     |
-| **CalendarDate** | ISO 8601 date representation                                              |
-| **Email**        | Validated email address                                                   |
-| **Country**      | ISO country code                                                          |
-
-#### Domain Events
-
-- `DraftInvoiceCreatedEvent` — when a new draft is created
-- `DraftInvoiceUpdatedEvent` — when draft properties are modified
-- `DraftInvoiceFinishedEvent` — when draft is converted to invoice
-- `InvoiceCreatedEvent` — when a finalized invoice is created
+> This project is still under active development. New features will be added.
 
 ---
 
-### 2. Financial Authorization Domain (`/financial-authorization`)
+## Project Structure
 
-**Paradigm:** Functional Programming (FP)
+```
+src/
+  building-blocks/              # Result monad, DomainEvent base, errors, interfaces
+  features/
+    invoices/                   # Invoice module (OOP, class-based)
+      domain/                   # Entities, value objects, events, checks
+      application/              # Use cases
+      infrastructure/           # In-memory storage, data mappers
+      http/                     # Fastify routes and schemas
+    financial-authorization/    # Authorization module (OOP, class-based)
+      domain/                   # Entities, value objects, events, checks
+      application/              # Use cases, event handlers, queries
+      infrastructure/           # In-memory storage, data mappers
+      http/                     # Fastify routes and schemas
+  infrastructure/               # Shared infra: domain events, event outbox
+  http/                         # Shared Fastify app setup, error handler, plugins
+e2e/                            # End-to-end tests
+```
 
-The Financial Authorization domain models multi-step approval workflows for financial documents. It supports hierarchical approval structures with multiple authflows, steps, groups, and approvers. Entities are implemented as plain TypeScript types with factory functions, using functional composition with `Result` monads and libraries like Ramda for data transformations.
+---
 
-#### Core Entities
+## Domains Overview
 
-| Entity       | Description                                                                                                                                                |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Document** | Top-level entity representing a financial document requiring authorization. Contains multiple authflows for different actions.                             |
-| **Authflow** | Authorization flow for a specific action (e.g., "approve", "reject"). Contains ordered steps that must be completed. Approved when all steps are approved. |
-| **Step**     | Ordered step within an authflow. Contains groups of approvers. Approved when all groups are approved.                                                      |
-| **Group**    | Collection of approvers who can authorize a step. Approved when at least one approval exists.                                                              |
-| **Approver** | Person authorized to approve, identified by name and email.                                                                                                |
-| **Approval** | Record of an approval action with timestamp and optional comment.                                                                                          |
+### Invoices
 
-#### Approval Hierarchy
+Handles creation and lifecycle management of financial invoices. Invoices start as mutable drafts and become immutable once finalized. Implemented as OOP classes with private fields, encapsulated state, and methods that enforce business rules.
 
+**Core entities:** `Invoice`, `DraftInvoice`
+
+**Value objects:** `Money`, `Currency`, `LineItem`, `LineItems`, `VatRate`, `Issuer`, `Recipient`, `CalendarDate`, `Email`, `Country`
+
+**Domain events:** `DraftInvoiceCreatedEvent`, `DraftInvoiceUpdatedEvent`, `DraftInvoiceFinishedEvent`, `InvoiceCreatedEvent`
+
+---
+
+### Financial Authorization
+
+Models multi-step approval workflows for financial documents. Supports hierarchical approval structures with multiple authflows, steps, groups, and approvers. Implemented using OOP with plain TypeScript types and factory functions.
+
+**Core entities:** `Document`, `Authflow`, `Step`, `Group`, `Approver`, `Approval`
+
+**Approval hierarchy:**
 ```
 Document
 └── Authflow (action-specific workflow)
@@ -69,21 +63,9 @@ Document
             └── Approval (approval record)
 ```
 
-#### Validation Rules
-
-- No duplicate authflow actions per document
-- No duplicate step orders within an authflow
-- No duplicate approvers within a group
-- No duplicate approvals within a group
-- Approvals must reference existing approvers
-- Step order must be non-negative
-- Valid email format for approvers
-
 ---
 
-## Shared Building Blocks (`/building-blocks`)
-
-Common infrastructure shared across both domains:
+## Shared Building Blocks
 
 | Component             | Description                                  |
 | --------------------- | -------------------------------------------- |
@@ -95,48 +77,21 @@ Common infrastructure shared across both domains:
 | **Equatable**         | Interface for value object equality          |
 | **Comparable**        | Interface for value object comparison        |
 
-## PlantUML Diagrams (`/diagrams`)
+---
 
-Visual documentation of the domain models:
+## Further Reading
 
-- `invoice-class-diagram.puml` — Detailed Invoice aggregate structure
-- `draft-invoice-class-diagram.puml` — DraftInvoice entity diagram
-- `invoice-domain-overview.puml` — High-level domain overview
-- `invoice-state-diagram.puml` — Invoice lifecycle states
-- `invoice-events-sequence.puml` — Event flow during invoice creation
+### Books
 
-### Generating Diagrams
+- [Practical Object-Oriented Design in Ruby](https://www.amazon.com/Practical-Object-Oriented-Design-Ruby-Addison-Wesley/dp/0321721330) — Sandi Metz
+- [Object-Oriented Software Construction](https://www.amazon.com/Object-Oriented-Software-Construction-Book-CD-ROM/dp/0136291554) — Bertrand Meyer
+- [Patterns of Enterprise Application Architecture](https://www.amazon.com/Patterns-Enterprise-Application-Architecture-Martin/dp/0321127420) — Martin Fowler
+- [Designing Data-Intensive Applications](https://www.amazon.com/Designing-Data-Intensive-Applications-Reliable-Maintainable/dp/1098119061) — Martin Kleppmann
+- [Applying UML and Patterns](https://www.amazon.com/Applying-UML-Patterns-Introduction-Object-Oriented/dp/0130925691) — Craig Larman
 
-1. **PlantUML Online**: https://www.plantuml.com/plantuml/uml/
-2. **VS Code Extension**: PlantUML extension
-3. **Command Line**: PlantUML JAR file
+### Articles & Talks
 
-## Project Structure
-
-```
-├── building-blocks/       # Shared DDD infrastructure
-├── diagrams/              # PlantUML documentation
-├── financial-authorization/
-│   ├── approval/          # Approval value object
-│   ├── approver/          # Approver entity
-│   ├── authflow/          # Authorization flow
-│   ├── document/          # Document aggregate root
-│   ├── groups/            # Approver groups
-│   └── step/              # Approval steps
-└── invoices/
-    ├── application/       # Use cases and collections
-    └── domain/
-        ├── calendar-date/ # Date value object
-        ├── country/       # Country value object
-        ├── draft-invoice/ # Draft invoice entity
-        ├── email/         # Email value object
-        ├── id/            # ID value object
-        ├── invoice/       # Invoice aggregate root
-        ├── issuer/        # Issuer value object
-        ├── line-item/     # Line item value object
-        ├── line-items/    # Line items collection
-        ├── money/         # Money & currency
-        ├── numeric/       # Numeric utilities
-        ├── recipient/     # Recipient value object
-        └── vat-rate/      # VAT rate value object
-```
+- [Don't Mock Types You Don't Own](https://davesquared.net/2011/04/dont-mock-types-you-dont-own.html) — Dave Squared
+- [Integrated Tests Are A Scam](https://www.youtube.com/watch?v=VDfX44fZoMc) — J. B. Rainsberger
+- [TDD, Where Did It All Go Wrong](https://www.youtube.com/watch?v=EZ05e7EMOLM) — Ian Cooper
+- [TDD Revisited](https://www.youtube.com/watch?v=IN9lftH0cJc) — Ian Cooper
