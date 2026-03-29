@@ -109,6 +109,18 @@ export const setupApp = () => {
     };
 };
 
+export const waitFor = async (
+    fn: () => Promise<boolean>,
+    { timeout = 5000, interval = 100 } = {}
+): Promise<void> => {
+    const start = Date.now();
+    while (Date.now() - start < timeout) {
+        if (await fn()) return;
+        await new Promise((r) => setTimeout(r, interval));
+    }
+    throw new Error(`waitFor timed out after ${timeout}ms`);
+};
+
 export const resolveByPath = (obj: any, path: (string | number)[]): any =>
     path.reduce((acc, segment) => acc?.[segment], obj);
 
