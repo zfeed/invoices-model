@@ -14,7 +14,7 @@ import { OnInvoiceIssued } from './on-invoice-issued';
 import { cleanDatabase } from '../../../../infrastructure/persistent-manager/clean-database';
 
 const createInvoiceEvent = (id: string, amount = '100', currency = 'USD') =>
-    new InvoiceIssuedEvent({
+    InvoiceIssuedEvent.create({
         id,
         status: 'ISSUED',
         lineItems: {

@@ -54,6 +54,7 @@ Models multi-step approval workflows for financial documents. Supports hierarchi
 **Core entities:** `Document`, `Authflow`, `Step`, `Group`, `Approver`, `Approval`
 
 **Approval hierarchy:**
+
 ```
 Document
 └── Authflow (action-specific workflow)

@@ -76,7 +76,7 @@ export class FinancialDocument
             data.authflows
         );
 
-        doc._events.push(new DocumentCreatedEvent(doc.toPlain()));
+        doc._events.push(DocumentCreatedEvent.create(doc.toPlain()));
 
         return Result.ok(doc);
     }
@@ -108,7 +108,7 @@ export class FinancialDocument
             return Result.error(dupError);
         }
 
-        this._events.push(new DocumentApprovedEvent(this.toPlain()));
+        this._events.push(DocumentApprovedEvent.create(this.toPlain()));
 
         return Result.ok(undefined);
     }

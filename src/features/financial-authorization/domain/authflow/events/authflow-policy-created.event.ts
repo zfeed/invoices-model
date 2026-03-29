@@ -24,8 +24,4 @@ type Data = {
     }[];
 };
 
-export class AuthflowPolicyCreatedEvent extends DomainEvent<Data> {
-    constructor(data: Data) {
-        super(data);
-    }
-}
+export class AuthflowPolicyCreatedEvent extends DomainEvent<Data> {}

@@ -1,5 +1,6 @@
 import {
     DomainEvent,
+    DomainEventClass,
     SerializedDomainEvent,
 } from '../../shared/events/domain-event';
 import { type Duration } from '../../lib/dayjs';
@@ -10,12 +11,9 @@ import {
     type ControlledTransaction,
 } from '../../../database/kysely';
 
-type EventClass = (new (...args: never[]) => DomainEvent<unknown>) & {
-    matches(eventName: string): boolean;
-    deserialize(
-        serialized: SerializedDomainEvent<unknown>
-    ): DomainEvent<unknown>;
-};
+type EventClass = DomainEventClass;
+type EventInstance<T extends EventClass> =
+    T extends DomainEventClass<infer E> ? E : never;
 
 type Options = {
     transaction?: ControlledTransaction;
@@ -43,7 +41,7 @@ export class EventOutboxStorage<T extends EventClass = EventClass> {
         return new EventOutboxStorage(registry);
     }
 
-    async insert(events: InstanceType<T>[], options?: Options) {
+    async insert(events: EventInstance<T>[], options?: Options) {
         if (events.length === 0) {
             return;
         }
@@ -60,7 +58,7 @@ export class EventOutboxStorage<T extends EventClass = EventClass> {
             .execute();
     }
 
-    async delivered(event: InstanceType<T>, options?: Options) {
+    async delivered(event: EventInstance<T>, options?: Options) {
         await this.db(options)
             .updateTable('event_outbox')
             .set({
@@ -73,7 +71,7 @@ export class EventOutboxStorage<T extends EventClass = EventClass> {
     async poll(
         limit: number,
         options: PollOptions
-    ): Promise<InstanceType<T>[]> {
+    ): Promise<EventInstance<T>[]> {
         const db = this.db(options);
         const { maxDeliveryAttempts, timeout } = options;
         const rows = await db
@@ -121,7 +119,7 @@ export class EventOutboxStorage<T extends EventClass = EventClass> {
 
             return EventCtor.deserialize(
                 row.payload as SerializedDomainEvent<unknown>
-            ) as InstanceType<T>;
+            ) as EventInstance<T>;
         });
     }
 }

@@ -167,7 +167,7 @@ export class Invoice
         );
 
         if (!options.status) {
-            const event = new InvoiceIssuedEvent(invoice.toPlain());
+            const event = InvoiceIssuedEvent.create(invoice.toPlain());
             invoice._events.push(event);
         }
 
@@ -186,7 +186,7 @@ export class Invoice
 
         this._status = InvoiceStatus.processing();
 
-        this._events.push(new InvoiceProcessingEvent(this.toPlain()));
+        this._events.push(InvoiceProcessingEvent.create(this.toPlain()));
 
         return Result.ok(undefined);
     }
@@ -203,7 +203,7 @@ export class Invoice
 
         this._status = InvoiceStatus.paid();
 
-        this._events.push(new InvoicePaidEvent(this.toPlain()));
+        this._events.push(InvoicePaidEvent.create(this.toPlain()));
 
         return Result.ok(undefined);
     }
@@ -220,7 +220,7 @@ export class Invoice
 
         this._status = InvoiceStatus.failed();
 
-        this._events.push(new InvoiceFailedEvent(this.toPlain()));
+        this._events.push(InvoiceFailedEvent.create(this.toPlain()));
 
         return Result.ok(undefined);
     }
@@ -237,7 +237,7 @@ export class Invoice
 
         this._status = InvoiceStatus.cancelled();
 
-        this._events.push(new InvoiceCancelledEvent(this.toPlain()));
+        this._events.push(InvoiceCancelledEvent.create(this.toPlain()));
 
         return Result.ok(undefined);
     }

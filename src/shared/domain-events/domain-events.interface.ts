@@ -1,4 +1,4 @@
-import { DomainEvent } from '../events/domain-event';
+import { DomainEvent, DomainEventClass } from '../events/domain-event';
 import { PublishableEvents } from '../events/event-publisher.interface';
 
 export interface DomainEvents {
@@ -6,8 +6,8 @@ export interface DomainEvents {
         ...objects: PublishableEvents<DomainEvent<unknown>>[]
     ): Promise<void>;
 
-    subscribeToEvent<T extends DomainEvent<D>, D>(
-        eventClass: new (...args: any[]) => T,
+    subscribeToEvent<T extends DomainEvent<any>>(
+        eventClass: DomainEventClass<T>,
         handler: (event: T) => Promise<void>
     ): Promise<void>;
 }

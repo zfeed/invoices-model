@@ -3,47 +3,19 @@ import dayjs from '../../lib/dayjs';
 import { cleanDatabase } from '../persistent-manager/clean-database';
 import { EventOutboxStorage } from './event-outbox';
 
-class InvoiceIssuedEvent extends DomainEvent<{ id: string }> {
-    constructor(data: { id: string }) {
-        super(data);
-    }
-}
+class InvoiceIssuedEvent extends DomainEvent<{ id: string }> {}
 
-class InvoicePaidEvent extends DomainEvent<{ id: string }> {
-    constructor(data: { id: string }) {
-        super(data);
-    }
-}
+class InvoicePaidEvent extends DomainEvent<{ id: string }> {}
 
-class EventOneEvent extends DomainEvent<Record<string, never>> {
-    constructor() {
-        super({});
-    }
-}
+class EventOneEvent extends DomainEvent<Record<string, never>> {}
 
-class EventTwoEvent extends DomainEvent<Record<string, never>> {
-    constructor() {
-        super({});
-    }
-}
+class EventTwoEvent extends DomainEvent<Record<string, never>> {}
 
-class EventThreeEvent extends DomainEvent<Record<string, never>> {
-    constructor() {
-        super({});
-    }
-}
+class EventThreeEvent extends DomainEvent<Record<string, never>> {}
 
-class EventFirstEvent extends DomainEvent<Record<string, never>> {
-    constructor() {
-        super({});
-    }
-}
+class EventFirstEvent extends DomainEvent<Record<string, never>> {}
 
-class EventSecondEvent extends DomainEvent<Record<string, never>> {
-    constructor() {
-        super({});
-    }
-}
+class EventSecondEvent extends DomainEvent<Record<string, never>> {}
 
 const ZERO_TIMEOUT = dayjs.duration(-1, 'seconds');
 const LONG_TIMEOUT = dayjs.duration(30, 'seconds');
@@ -66,7 +38,7 @@ describe('EventOutboxStorage', () => {
     describe('insert', () => {
         it('should insert an event into the outbox', async () => {
             const storage = EventOutboxStorage.create(REGISTRY);
-            const event = new InvoiceIssuedEvent({ id: '123' });
+            const event = InvoiceIssuedEvent.create({ id: '123' });
             await storage.insert([event]);
 
             const events = await storage.poll(10, {
@@ -82,8 +54,8 @@ describe('EventOutboxStorage', () => {
         it('should insert multiple events in a single request', async () => {
             const storage = EventOutboxStorage.create(REGISTRY);
             await storage.insert([
-                new InvoiceIssuedEvent({ id: '1' }),
-                new InvoicePaidEvent({ id: '2' }),
+                InvoiceIssuedEvent.create({ id: '1' }),
+                InvoicePaidEvent.create({ id: '2' }),
             ]);
 
             const events = await storage.poll(10, {
@@ -111,7 +83,7 @@ describe('EventOutboxStorage', () => {
     describe('delivered', () => {
         it('should mark event as delivered so it is no longer polled', async () => {
             const storage = EventOutboxStorage.create(REGISTRY);
-            const event = new InvoiceIssuedEvent({ id: '123' });
+            const event = InvoiceIssuedEvent.create({ id: '123' });
             await storage.insert([event]);
 
             await storage.poll(10, {
@@ -132,8 +104,8 @@ describe('EventOutboxStorage', () => {
         it('should return undelivered events', async () => {
             const storage = EventOutboxStorage.create(REGISTRY);
             await storage.insert([
-                new InvoiceIssuedEvent({ id: '1' }),
-                new InvoicePaidEvent({ id: '2' }),
+                InvoiceIssuedEvent.create({ id: '1' }),
+                InvoicePaidEvent.create({ id: '2' }),
             ]);
 
             const events = await storage.poll(10, {
@@ -149,9 +121,9 @@ describe('EventOutboxStorage', () => {
         it('should respect the limit', async () => {
             const storage = EventOutboxStorage.create(REGISTRY);
             await storage.insert([
-                new EventOneEvent(),
-                new EventTwoEvent(),
-                new EventThreeEvent(),
+                EventOneEvent.create({}),
+                EventTwoEvent.create({}),
+                EventThreeEvent.create({}),
             ]);
 
             const events = await storage.poll(2, {
@@ -165,7 +137,7 @@ describe('EventOutboxStorage', () => {
         it('should track delivery attempts internally', async () => {
             const maxAttempts = 2;
             const storage = EventOutboxStorage.create(REGISTRY);
-            await storage.insert([new InvoiceIssuedEvent({ id: '1' })]);
+            await storage.insert([InvoiceIssuedEvent.create({ id: '1' })]);
 
             const opts = {
                 maxDeliveryAttempts: maxAttempts,
@@ -180,7 +152,7 @@ describe('EventOutboxStorage', () => {
 
         it('should not return events within the timeout window', async () => {
             const storage = EventOutboxStorage.create(REGISTRY);
-            await storage.insert([new InvoiceIssuedEvent({ id: '1' })]);
+            await storage.insert([InvoiceIssuedEvent.create({ id: '1' })]);
 
             const first = await storage.poll(10, {
                 maxDeliveryAttempts: 5,
@@ -197,7 +169,7 @@ describe('EventOutboxStorage', () => {
 
         it('should return events after the timeout has elapsed', async () => {
             const storage = EventOutboxStorage.create(REGISTRY);
-            await storage.insert([new InvoiceIssuedEvent({ id: '1' })]);
+            await storage.insert([InvoiceIssuedEvent.create({ id: '1' })]);
 
             await storage.poll(10, {
                 maxDeliveryAttempts: 5,
@@ -214,7 +186,7 @@ describe('EventOutboxStorage', () => {
         it('should not return events exceeding max delivery attempts', async () => {
             const maxAttempts = 3;
             const storage = EventOutboxStorage.create(REGISTRY);
-            await storage.insert([new InvoiceIssuedEvent({ id: '1' })]);
+            await storage.insert([InvoiceIssuedEvent.create({ id: '1' })]);
 
             const opts = {
                 maxDeliveryAttempts: maxAttempts,
@@ -230,7 +202,7 @@ describe('EventOutboxStorage', () => {
 
         it('should throw when event name has no registered class', async () => {
             const storage = EventOutboxStorage.create([InvoicePaidEvent]);
-            await storage.insert([new InvoicePaidEvent({ id: '1' })]);
+            await storage.insert([InvoicePaidEvent.create({ id: '1' })]);
 
             // Replace with an event that has no registered class
             const unregistered = EventOutboxStorage.create([EventOneEvent]);
@@ -247,8 +219,8 @@ describe('EventOutboxStorage', () => {
 
         it('should pick oldest events first when limited', async () => {
             const storage = EventOutboxStorage.create(REGISTRY);
-            await storage.insert([new EventFirstEvent()]);
-            await storage.insert([new EventSecondEvent()]);
+            await storage.insert([EventFirstEvent.create({})]);
+            await storage.insert([EventSecondEvent.create({})]);
 
             const events = await storage.poll(1, {
                 maxDeliveryAttempts: 5,

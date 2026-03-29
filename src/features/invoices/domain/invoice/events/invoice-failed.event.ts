@@ -53,8 +53,4 @@ type Data = {
     };
 };
 
-export class InvoiceFailedEvent extends DomainEvent<Data> {
-    constructor(data: Data) {
-        super(data);
-    }
-}
+export class InvoiceFailedEvent extends DomainEvent<Data> {}

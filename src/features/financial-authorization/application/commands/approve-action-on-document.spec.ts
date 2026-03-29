@@ -120,7 +120,7 @@ describe('approveActionOnDocumentCommand', () => {
         );
         await onInvoiceIssuedHandler.register();
         await domainEvents.publishEvents({
-            events: [new InvoiceIssuedEvent(INVOICE_DATA)],
+            events: [InvoiceIssuedEvent.create(INVOICE_DATA)],
         });
 
         command = new ApproveActionOnDocument(session);

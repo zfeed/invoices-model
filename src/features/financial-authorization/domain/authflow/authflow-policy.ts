@@ -58,7 +58,9 @@ export class AuthflowPolicy
             data.templates
         );
 
-        policy._events.push(new AuthflowPolicyCreatedEvent(policy.toPlain()));
+        policy._events.push(
+            AuthflowPolicyCreatedEvent.create(policy.toPlain())
+        );
 
         return Result.ok(policy);
     }

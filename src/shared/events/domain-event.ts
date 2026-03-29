@@ -1,6 +1,6 @@
 import { v7 as uuidv7 } from 'uuid';
 
-function deriveName(className: string): string {
+export function deriveName(className: string): string {
     const words = className
         .replace(/Event$/, '')
         .split(/(?=[A-Z])/)
@@ -16,17 +16,41 @@ export type SerializedDomainEvent<T = unknown> = {
     data: T;
 };
 
+export type DomainEventClass<E extends DomainEvent<any> = DomainEvent<any>> = {
+    readonly prototype: E;
+    readonly name: string;
+    create(data: E['data']): E;
+    deserialize(serialized: SerializedDomainEvent<E['data']>): E;
+    matches(eventName: string): boolean;
+};
+
 export abstract class DomainEvent<T> {
     id: string;
     name: string;
     createdAt: string;
     data: T;
 
-    constructor(data: T) {
-        this.id = uuidv7();
-        this.name = this.buildName();
-        this.createdAt = new Date().toISOString();
-        this.data = data;
+    protected constructor(fields: SerializedDomainEvent<T>) {
+        this.id = fields.id;
+        this.name = fields.name;
+        this.createdAt = fields.createdAt;
+        this.data = fields.data;
+    }
+
+    static create<E extends DomainEvent<any>>(
+        this: { prototype: E; name: string },
+        data: E['data']
+    ): E {
+        const EventCtor = this as unknown as new (
+            fields: SerializedDomainEvent<E['data']>
+        ) => E;
+
+        return new EventCtor({
+            id: uuidv7(),
+            name: deriveName(this.name),
+            createdAt: new Date().toISOString(),
+            data,
+        });
     }
 
     serialize(): SerializedDomainEvent<T> {
@@ -38,22 +62,18 @@ export abstract class DomainEvent<T> {
         };
     }
 
-    static deserialize<E extends DomainEvent<D>, D>(
-        this: new (data: D) => E,
-        serialized: SerializedDomainEvent<D>
+    static deserialize<E extends DomainEvent<any>>(
+        this: { prototype: E },
+        serialized: SerializedDomainEvent<E['data']>
     ): E {
-        const event = new this(serialized.data);
-        event.id = serialized.id;
-        event.name = serialized.name;
-        event.createdAt = serialized.createdAt;
-        return event;
+        const EventCtor = this as unknown as new (
+            fields: SerializedDomainEvent<E['data']>
+        ) => E;
+
+        return new EventCtor(serialized);
     }
 
     static matches(eventName: string): boolean {
         return deriveName(this.name) === eventName;
-    }
-
-    private buildName(): string {
-        return deriveName(this.constructor.name);
     }
 }

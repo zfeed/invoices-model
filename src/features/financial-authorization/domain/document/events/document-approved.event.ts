@@ -37,8 +37,4 @@ type Data = {
     }[];
 };
 
-export class DocumentApprovedEvent extends DomainEvent<Data> {
-    constructor(data: Data) {
-        super(data);
-    }
-}
+export class DocumentApprovedEvent extends DomainEvent<Data> {}

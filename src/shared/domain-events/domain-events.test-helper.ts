@@ -2,17 +2,9 @@ import { DomainEvent } from '../events/domain-event';
 import { PublishableEvents } from '../events/event-publisher.interface';
 import { DomainEvents } from './domain-events.interface';
 
-class OrderPlacedEvent extends DomainEvent<{ orderId: string }> {
-    constructor(orderId: string) {
-        super({ orderId });
-    }
-}
+class OrderPlacedEvent extends DomainEvent<{ orderId: string }> {}
 
-class OrderCancelledEvent extends DomainEvent<{ orderId: string }> {
-    constructor(orderId: string) {
-        super({ orderId });
-    }
-}
+class OrderCancelledEvent extends DomainEvent<{ orderId: string }> {}
 
 class FakePublisher implements PublishableEvents<DomainEvent<unknown>> {
     events: DomainEvent<unknown>[] = [];
@@ -54,7 +46,7 @@ export function testDomainEvents(config: DomainEventsTestConfig): void {
                 );
                 await config.beforeStart?.();
                 await domainEvents.publishEvents(
-                    new FakePublisher(new OrderPlacedEvent('order-1'))
+                    new FakePublisher(OrderPlacedEvent.create({ orderId: 'order-1' }))
                 );
                 await config.afterPublish?.();
 
@@ -77,7 +69,9 @@ export function testDomainEvents(config: DomainEventsTestConfig): void {
                 );
                 await config.beforeStart?.();
                 await domainEvents.publishEvents(
-                    new FakePublisher(new OrderCancelledEvent('order-1'))
+                    new FakePublisher(
+                        OrderCancelledEvent.create({ orderId: 'order-1' })
+                    )
                 );
                 await config.afterPublish?.();
 
@@ -102,7 +96,7 @@ export function testDomainEvents(config: DomainEventsTestConfig): void {
                 );
                 await config.beforeStart?.();
                 await domainEvents.publishEvents(
-                    new FakePublisher(new OrderPlacedEvent('order-1'))
+                    new FakePublisher(OrderPlacedEvent.create({ orderId: 'order-1' }))
                 );
                 await config.afterPublish?.();
 
@@ -122,8 +116,8 @@ export function testDomainEvents(config: DomainEventsTestConfig): void {
                 await config.beforeStart?.();
                 await domainEvents.publishEvents(
                     new FakePublisher(
-                        new OrderPlacedEvent('order-1'),
-                        new OrderPlacedEvent('order-2')
+                        OrderPlacedEvent.create({ orderId: 'order-1' }),
+                        OrderPlacedEvent.create({ orderId: 'order-2' })
                     )
                 );
                 await config.afterPublish?.();
@@ -142,8 +136,10 @@ export function testDomainEvents(config: DomainEventsTestConfig): void {
                 );
                 await config.beforeStart?.();
                 await domainEvents.publishEvents(
-                    new FakePublisher(new OrderPlacedEvent('order-1')),
-                    new FakePublisher(new OrderPlacedEvent('order-2'))
+                    new FakePublisher(OrderPlacedEvent.create({ orderId: 'order-1' })),
+                    new FakePublisher(
+                        OrderPlacedEvent.create({ orderId: 'order-2' })
+                    )
                 );
                 await config.afterPublish?.();
 
@@ -169,8 +165,8 @@ export function testDomainEvents(config: DomainEventsTestConfig): void {
                 await config.beforeStart?.();
                 await domainEvents.publishEvents(
                     new FakePublisher(
-                        new OrderPlacedEvent('order-1'),
-                        new OrderCancelledEvent('order-2')
+                        OrderPlacedEvent.create({ orderId: 'order-1' }),
+                        OrderCancelledEvent.create({ orderId: 'order-2' })
                     )
                 );
                 await config.afterPublish?.();
@@ -194,7 +190,7 @@ export function testDomainEvents(config: DomainEventsTestConfig): void {
 
                 await expect(
                     domainEvents.publishEvents(
-                        new FakePublisher(new OrderPlacedEvent('order-1'))
+                        new FakePublisher(OrderPlacedEvent.create({ orderId: 'order-1' }))
                     )
                 ).resolves.not.toThrow();
             });

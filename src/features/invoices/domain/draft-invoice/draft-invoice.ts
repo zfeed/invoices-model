@@ -160,7 +160,7 @@ export class DraftInvoice
 
         this._status = DraftInvoiceStatus.completed();
 
-        this._events.push(new DraftInvoiceFinishedEvent(this.toPlain()));
+        this._events.push(DraftInvoiceFinishedEvent.create(this.toPlain()));
 
         return result;
     }
@@ -177,7 +177,7 @@ export class DraftInvoice
 
         this._status = DraftInvoiceStatus.archived();
 
-        this._events.push(new DraftInvoiceArchivedEvent(this.toPlain()));
+        this._events.push(DraftInvoiceArchivedEvent.create(this.toPlain()));
 
         return Result.ok(undefined);
     }
@@ -194,7 +194,7 @@ export class DraftInvoice
 
         this._status = DraftInvoiceStatus.draft();
 
-        this._events.push(new DraftInvoiceDraftedEvent(this.toPlain()));
+        this._events.push(DraftInvoiceDraftedEvent.create(this.toPlain()));
 
         return Result.ok(undefined);
     }
@@ -221,7 +221,7 @@ export class DraftInvoice
 
         this._calculateTotal();
 
-        this._events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
+        this._events.push(DraftInvoiceUpdatedEvent.create(this.toPlain()));
 
         return Result.ok(undefined);
     }
@@ -244,7 +244,7 @@ export class DraftInvoice
 
         this._calculateTotal();
 
-        this._events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
+        this._events.push(DraftInvoiceUpdatedEvent.create(this.toPlain()));
 
         return Result.ok(undefined);
     }
@@ -274,7 +274,7 @@ export class DraftInvoice
         }
 
         this._issuer = issuer;
-        this._events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
+        this._events.push(DraftInvoiceUpdatedEvent.create(this.toPlain()));
 
         return Result.ok(undefined);
     }
@@ -286,7 +286,7 @@ export class DraftInvoice
         }
 
         this._recipient = recipient;
-        this._events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
+        this._events.push(DraftInvoiceUpdatedEvent.create(this.toPlain()));
 
         return Result.ok(undefined);
     }
@@ -309,7 +309,7 @@ export class DraftInvoice
 
         this._dueDate = dueDate;
 
-        this._events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
+        this._events.push(DraftInvoiceUpdatedEvent.create(this.toPlain()));
 
         return Result.ok(undefined);
     }
@@ -332,7 +332,7 @@ export class DraftInvoice
 
         this._issueDate = issueDate;
 
-        this._events.push(new DraftInvoiceUpdatedEvent(this.toPlain()));
+        this._events.push(DraftInvoiceUpdatedEvent.create(this.toPlain()));
 
         return Result.ok(undefined);
     }
@@ -379,7 +379,7 @@ export class DraftInvoice
         const draftInvoice = new DraftInvoice(id, DraftInvoiceStatus.draft());
 
         draftInvoice._events.push(
-            new DraftInvoiceCreatedEvent(draftInvoice.toPlain())
+            DraftInvoiceCreatedEvent.create(draftInvoice.toPlain())
         );
 
         return Result.ok(draftInvoice);
