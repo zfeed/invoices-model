@@ -22,6 +22,7 @@ export class AuthflowPolicyStorage {
         const policy = await this.tx
             .selectFrom('policies')
             .where('action', '=', action)
+            .orderBy('id', 'desc')
             .selectAll()
             .executeTakeFirst();
 
