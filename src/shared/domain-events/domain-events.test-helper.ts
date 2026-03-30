@@ -46,7 +46,9 @@ export function testDomainEvents(config: DomainEventsTestConfig): void {
                 );
                 await config.beforeStart?.();
                 await domainEvents.publishEvents(
-                    new FakePublisher(OrderPlacedEvent.create({ orderId: 'order-1' }))
+                    new FakePublisher(
+                        OrderPlacedEvent.create({ orderId: 'order-1' })
+                    )
                 );
                 await config.afterPublish?.();
 
@@ -96,7 +98,9 @@ export function testDomainEvents(config: DomainEventsTestConfig): void {
                 );
                 await config.beforeStart?.();
                 await domainEvents.publishEvents(
-                    new FakePublisher(OrderPlacedEvent.create({ orderId: 'order-1' }))
+                    new FakePublisher(
+                        OrderPlacedEvent.create({ orderId: 'order-1' })
+                    )
                 );
                 await config.afterPublish?.();
 
@@ -136,7 +140,9 @@ export function testDomainEvents(config: DomainEventsTestConfig): void {
                 );
                 await config.beforeStart?.();
                 await domainEvents.publishEvents(
-                    new FakePublisher(OrderPlacedEvent.create({ orderId: 'order-1' })),
+                    new FakePublisher(
+                        OrderPlacedEvent.create({ orderId: 'order-1' })
+                    ),
                     new FakePublisher(
                         OrderPlacedEvent.create({ orderId: 'order-2' })
                     )
@@ -190,7 +196,9 @@ export function testDomainEvents(config: DomainEventsTestConfig): void {
 
                 await expect(
                     domainEvents.publishEvents(
-                        new FakePublisher(OrderPlacedEvent.create({ orderId: 'order-1' }))
+                        new FakePublisher(
+                            OrderPlacedEvent.create({ orderId: 'order-1' })
+                        )
                     )
                 ).resolves.not.toThrow();
             });

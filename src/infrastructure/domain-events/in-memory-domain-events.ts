@@ -18,8 +18,7 @@ export class InMemoryDomainEvents implements DomainEvents {
                 const handlers =
                     this.handlers.get(
                         event.constructor as unknown as DomainEventClass
-                    ) ??
-                    [];
+                    ) ?? [];
                 for (const handler of handlers) {
                     await handler(event);
                 }

@@ -1,6 +1,8 @@
 import { DomainEvent, DomainEventClass } from '../events/domain-event';
 import { PublishableEvents } from '../events/event-publisher.interface';
 
+export type EventHandler<T = unknown> = (event: T) => Promise<void>;
+
 export interface DomainEvents {
     publishEvents(
         ...objects: PublishableEvents<DomainEvent<unknown>>[]
@@ -8,6 +10,6 @@ export interface DomainEvents {
 
     subscribeToEvent<T extends DomainEvent<any>>(
         eventClass: DomainEventClass<T>,
-        handler: (event: T) => Promise<void>
+        handler: EventHandler<T>
     ): Promise<void>;
 }
