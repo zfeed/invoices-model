@@ -5,7 +5,8 @@ export default defineConfig({
         globals: true,
         environment: 'node',
         include: ['e2e/**/*.e2e.spec.ts'],
-        setupFiles: ['dotenv/config'],
+        setupFiles: ['dotenv/config', 'e2e/setup.ts'],
+        globalSetup: ['e2e/global-setup.ts'],
         fileParallelism: false,
     },
 });

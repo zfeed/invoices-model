@@ -1,6 +1,4 @@
-import { AddressInfo } from 'net';
-import { createApp } from '../src/http/create-app';
-import { cleanDatabase } from '../src/infrastructure/persistent-manager/clean-database';
+import { inject } from 'vitest';
 
 export const COMPLETE_DRAFT_REQUEST = {
     lineItems: [
@@ -40,20 +38,7 @@ type TestResponse = {
 };
 
 export const setupApp = () => {
-    let app: Awaited<ReturnType<typeof createApp>>;
-    let baseUrl: string;
-
-    beforeEach(async () => {
-        await cleanDatabase();
-        app = await createApp();
-        await app.listen({ port: 0 });
-        const { port } = app.server.address() as AddressInfo;
-        baseUrl = `http://localhost:${port}`;
-    });
-
-    afterEach(async () => {
-        await app.close();
-    });
+    const baseUrl = inject('e2eBaseUrl');
 
     const postJson = async (
         path: string,

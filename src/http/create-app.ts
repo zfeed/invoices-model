@@ -4,6 +4,7 @@ import { Session } from '../shared/unit-of-work/unit-of-work';
 import { PersistentManager } from '../infrastructure/persistent-manager/pg-persistent-manager';
 import { InMemoryDomainEvents } from '../infrastructure/domain-events/in-memory-domain-events';
 import { EventOutboxStorage } from '../infrastructure/event-outbox/event-outbox';
+import { kysely } from '../../database/kysely';
 import {
     draftInvoicesPlugin,
     invoicesPlugin,
@@ -27,6 +28,7 @@ export const createApp = async () => {
     app.setErrorHandler(errorHandler);
     app.addHook('onClose', async () => {
         await commands.shutdown();
+        await kysely.destroy();
     });
 
     app.register(draftInvoicesPlugin(commands));

@@ -6,10 +6,12 @@ import type {
 } from 'kysely';
 import { DB } from 'kysely-codegen';
 
+export const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+});
+
 export const postgresDialect = new PostgresDialect({
-    pool: new Pool({
-        connectionString: process.env.DATABASE_URL,
-    }),
+    pool,
 });
 
 export const kysely = new BaseKysely<DB>({
