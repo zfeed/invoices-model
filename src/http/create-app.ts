@@ -2,7 +2,6 @@ import Fastify from 'fastify';
 import { bootstrap } from '../bootstrap';
 import { Session } from '../shared/unit-of-work/unit-of-work';
 import { PersistentManager } from '../infrastructure/persistent-manager/pg-persistent-manager';
-import { InMemoryDomainEvents } from '../infrastructure/domain-events/in-memory-domain-events';
 import { EventOutboxStorage } from '../infrastructure/event-outbox/event-outbox';
 import { kysely } from '../../database/kysely';
 import {
@@ -11,9 +10,25 @@ import {
     financialAuthorizationPlugin,
 } from './plugins';
 import { errorHandler } from './error-handler';
+import { KafkaDomainEvents } from '../infrastructure/domain-events/kafka/kafka-domain-events';
 
 export const createApp = async () => {
-    const domainEvents = new InMemoryDomainEvents();
+    const domainEvents = new KafkaDomainEvents({
+        topicPrefix: process.env.KAFKA_TOPIC_PREFIX,
+        kafka: {
+            global: {
+                kafkaJS: {
+                    brokers: process.env.KAFKA_BROKERS?.split(',') || [],
+                    clientId: process.env.KAFKA_CLIENT_ID || 'invoices-model',
+                    logLevel: 0,
+                },
+            },
+            producer: {},
+            consumer: {
+                'group.id': process.env.KAFKA_GROUP_ID || 'invoices-model',
+            },
+        },
+    });
     const commands = await bootstrap({
         session: new Session(
             new PersistentManager(domainEvents, EventOutboxStorage.create([]))

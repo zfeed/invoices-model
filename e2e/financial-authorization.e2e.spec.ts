@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import {
     setupApp,
     COMPLETE_DRAFT_REQUEST,
@@ -47,6 +48,27 @@ const createPolicyAndIssueInvoice = async () => {
     const invoice = await getData(
         await post(`/invoices/drafts/${draft.id}/complete`)
     );
+
+    await vi.waitUntil(
+        async () => {
+            const res = await get(
+                `/documents/${invoice.id}/can-approve?approverId=${approverId}&action=pay`
+            );
+
+            if (res.status !== 200) {
+                return false;
+            }
+
+            const json = await res.json();
+
+            return json.data?.answer === 'YES';
+        },
+        {
+            timeout: 5_000,
+            interval: 100,
+        }
+    );
+
     return { invoice, approverId };
 };
 
