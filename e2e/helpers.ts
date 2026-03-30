@@ -109,18 +109,6 @@ export const setupApp = () => {
     };
 };
 
-export const waitFor = async (
-    fn: () => Promise<boolean>,
-    { timeout = 5000, interval = 100 } = {}
-): Promise<void> => {
-    const start = Date.now();
-    while (Date.now() - start < timeout) {
-        if (await fn()) return;
-        await new Promise((r) => setTimeout(r, interval));
-    }
-    throw new Error(`waitFor timed out after ${timeout}ms`);
-};
-
 export const resolveByPath = (obj: any, path: (string | number)[]): any =>
     path.reduce((acc, segment) => acc?.[segment], obj);
 
@@ -228,42 +216,10 @@ export const INVOICE_SHAPE = {
     recipient: expect.objectContaining(recipient),
 };
 
-const approver = {
-    id: expect.any(String),
-    name: expect.any(String),
-    email: expect.any(String),
-};
-
-const groupTemplate = {
-    id: expect.any(String),
-    requiredApprovals: expect.any(Number),
-    approvers: expect.arrayContaining([expect.objectContaining(approver)]),
-};
-
-const stepTemplate = {
-    id: expect.any(String),
-    order: expect.any(Number),
-    groups: expect.arrayContaining([expect.objectContaining(groupTemplate)]),
-};
-
-const templateShape = {
-    id: expect.any(String),
-    range: { from: money, to: money },
-    steps: expect.any(Array),
-};
-
 export const AUTHFLOW_POLICY_SHAPE = {
     id: expect.any(String),
     action: expect.any(String),
     templates: expect.any(Array),
-};
-
-const approval = {
-    approverId: expect.any(String),
-    createdAt: expect.any(String),
-    comment: expect.toSatisfy(
-        (v: unknown) => typeof v === 'string' || v === null
-    ),
 };
 
 const group = {

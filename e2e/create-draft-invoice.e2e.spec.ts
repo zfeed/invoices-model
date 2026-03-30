@@ -5,7 +5,6 @@ import {
     tooLong,
     expectValidationError,
     EMPTY_DRAFT_SHAPE,
-    POPULATED_DRAFT_SHAPE,
 } from './helpers';
 
 const { postJson, postRaw } = setupApp();
