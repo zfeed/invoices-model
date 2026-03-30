@@ -4,6 +4,9 @@ import { PublishableEvents } from '../events/event-publisher.interface';
 export type EventHandler<T = unknown> = (event: T) => Promise<void>;
 
 export interface DomainEvents {
+    start(): Promise<void>;
+    stop(): Promise<void>;
+
     publishEvents(
         ...objects: PublishableEvents<DomainEvent<unknown>>[]
     ): Promise<void>;

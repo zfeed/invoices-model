@@ -10,6 +10,10 @@ type EventHandler<T = any> = (event: T) => Promise<void>;
 export class InMemoryDomainEvents implements DomainEvents {
     private handlers = new Map<DomainEventClass, EventHandler[]>();
 
+    async start(): Promise<void> {}
+
+    async stop(): Promise<void> {}
+
     async publishEvents(
         ...objects: PublishableEvents<DomainEvent<unknown>>[]
     ): Promise<void> {

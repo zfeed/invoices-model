@@ -41,5 +41,7 @@ export const bootstrap = async (infra: Infrastructure) => {
         createAuthflowPolicy: new CreateAuthflowPolicy(infra.session),
         approveActionOnDocument: new ApproveActionOnDocument(infra.session),
         canApproverApprove,
+        start: async () => infra.domainEvents.start(),
+        shutdown: async () => infra.domainEvents.stop(),
     };
 };

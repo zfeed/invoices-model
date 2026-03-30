@@ -20,9 +20,14 @@ export const createApp = async () => {
         domainEvents,
     });
 
+    await commands.start();
+
     const app = Fastify();
 
     app.setErrorHandler(errorHandler);
+    app.addHook('onClose', async () => {
+        await commands.shutdown();
+    });
 
     app.register(draftInvoicesPlugin(commands));
     app.register(invoicesPlugin(commands));
