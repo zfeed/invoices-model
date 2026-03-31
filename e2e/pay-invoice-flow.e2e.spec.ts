@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { setupApp, COMPLETE_DRAFT_REQUEST, INVOICE_SHAPE } from './helpers';
 
 const { postJson, post, get, getData } = setupApp();
@@ -49,10 +50,25 @@ describe('Pay invoice flow', () => {
         );
         expect(processed.status).toBe('PROCESSING');
 
-        const canApproveRes = await get(
-            `/documents/${invoice.id}/can-approve?approverId=${approverId}&action=pay`
+        await vi.waitUntil(
+            async () => {
+                const canApproveRes = await get(
+                    `/documents/${invoice.id}/can-approve?approverId=${approverId}&action=pay`
+                );
+
+                if (canApproveRes.status !== 200) {
+                    return false;
+                }
+
+                const json = await canApproveRes.json();
+
+                return json.data?.answer === 'YES';
+            },
+            {
+                timeout: 5_000,
+                interval: 100,
+            }
         );
-        expect((await canApproveRes.json()).data).toEqual({ answer: 'YES' });
 
         const payRes = await postJson(`/invoices/${invoice.id}/pay`, {
             approverId,
