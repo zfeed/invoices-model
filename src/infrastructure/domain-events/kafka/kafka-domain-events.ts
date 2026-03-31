@@ -29,9 +29,9 @@ export class KafkaDomainEvents implements DomainEvents {
     }
 
     async start(): Promise<void> {
-        const topics = [...this.handlers.keys()]
-            .map((eventClass) => deriveName(eventClass.name))
-            .map((topic) => this.applyTopicPrefix(topic));
+        const topics = [...this.handlers.keys()].map((eventClass) =>
+            deriveName(eventClass.name)
+        );
 
         if (this.forceTopicCreation) {
             await this.kafka.ensureTopics(topics);
@@ -87,7 +87,7 @@ export class KafkaDomainEvents implements DomainEvents {
             ...objects
                 .flatMap((object) => object.events)
                 .map((event) => ({
-                    topic: this.applyTopicPrefix(event.name),
+                    topic: event.name,
                     message: {
                         value: JSON.stringify(event.serialize()),
                     },
@@ -105,10 +105,6 @@ export class KafkaDomainEvents implements DomainEvents {
         ].map(([topic, messages]) => ({ topic, messages }));
     }
 
-    private applyTopicPrefix(topic: string): string {
-        return this.topicPrefix ? `${this.topicPrefix}-${topic}` : topic;
-    }
-
     private getHandlersAndEvents({
         topic,
         value,
@@ -119,8 +115,7 @@ export class KafkaDomainEvents implements DomainEvents {
         const eventClasses = [...this.handlers.keys()];
 
         const eventClass = eventClasses.find(
-            (eventClass) =>
-                this.applyTopicPrefix(deriveName(eventClass.name)) === topic
+            (eventClass) => deriveName(eventClass.name) === topic
         );
 
         if (!eventClass) {
