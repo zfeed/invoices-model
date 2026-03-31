@@ -14,6 +14,7 @@ import { KafkaDomainEvents } from '../infrastructure/domain-events/kafka/kafka-d
 
 export const createApp = async () => {
     const domainEvents = new KafkaDomainEvents({
+        topicPrefix: process.env.KAFKA_TOPIC_PREFIX,
         forceTopicCreation: true,
         kafka: {
             global: {
