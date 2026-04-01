@@ -3,14 +3,12 @@ import {
     DomainEventClass,
     deriveName,
 } from '../../../shared/events/domain-event';
-import { setTimeout as sleep } from 'node:timers/promises';
 import {
     EventHandler,
     DomainEvents,
 } from '../../../shared/domain-events/domain-events.interface';
 import { PublishableEvents } from '../../../shared/events/event-publisher.interface';
 import { Kafka, KafkaConfig } from './kafka';
-import dayjs from '../../../lib/dayjs';
 
 export class KafkaDomainEvents implements DomainEvents {
     private readonly handlers = new Map<DomainEventClass, EventHandler[]>();
@@ -50,7 +48,6 @@ export class KafkaDomainEvents implements DomainEvents {
             await Promise.all(handlers.map((handler) => handler(event)));
         });
 
-        await sleep(dayjs.duration(500, 'milliseconds').asMilliseconds());
     }
 
     async stop(): Promise<void> {
