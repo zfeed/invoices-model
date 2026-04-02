@@ -22,6 +22,11 @@ TypeScript DDD codebase with two bounded contexts: **invoices** (OOP class-based
 - Status types use class hierarchies with static factory methods (e.g., `InvoiceStatus.issued()`), transition guards, `fromPlain` for trusted reconstruction, and `fromString` for validated parsing.
 - Event names are auto-derived from class name: `DraftInvoiceCreatedEvent` → `draft-invoice.created` (dot-separated kebab-case).
 
+## Git
+
+- Use conventional commits (e.g., `fix:`, `feat:`, `refactor:`, `test:`, `chore:`).
+- Do not include `Co-Authored-By` in commit messages.
+
 ## Formatting
 
 - After all changes to files, run `npm run format` to format the code.
