@@ -41,10 +41,7 @@ export const createApp = async () => {
     const domainEventsBus = createDomainEventsBus();
     const commands = await bootstrap({
         session: new Session(
-            new PersistentManager(
-                domainEventsBus,
-                EventOutboxStorage.create([])
-            )
+            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
         ),
         domainEventsBus,
     });

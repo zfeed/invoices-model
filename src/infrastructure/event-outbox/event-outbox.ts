@@ -1,5 +1,4 @@
 import {
-    DomainEvent,
     DomainEventClass,
     SerializedDomainEvent,
 } from '../../shared/events/domain-event';
@@ -22,26 +21,28 @@ type Options = {
 type PollOptions = Options & {
     maxDeliveryAttempts: number;
     timeout: Duration;
+    eventNames: string[];
 };
 
+type Payload = Record<string, unknown>;
+
 export class EventOutboxStorage<T extends EventClass = EventClass> {
-    private readonly registry: ReadonlyArray<T>;
-
-    private constructor(registry: ReadonlyArray<T>) {
-        this.registry = registry;
-    }
-
     private db(options?: Options): Kysely | ControlledTransaction {
         return options?.transaction ?? defaultKysely;
     }
 
-    static create<T extends EventClass>(
-        registry: ReadonlyArray<T>
-    ): EventOutboxStorage<T> {
-        return new EventOutboxStorage(registry);
+    static create<T extends EventClass>(): EventOutboxStorage<T> {
+        return new EventOutboxStorage();
     }
 
-    async insert(events: EventInstance<T>[], options?: Options) {
+    async insert(
+        events: {
+            id: string;
+            name: string;
+            event: Payload;
+        }[],
+        options?: Options
+    ) {
         if (events.length === 0) {
             return;
         }
@@ -52,26 +53,23 @@ export class EventOutboxStorage<T extends EventClass = EventClass> {
                 events.map((event) => ({
                     id: event.id,
                     event_name: event.name,
-                    payload: JSON.stringify(event.serialize()),
+                    payload: JSON.stringify(event),
                 }))
             )
             .execute();
     }
 
-    async delivered(event: EventInstance<T>, options?: Options) {
+    async delivered(eventId: string, options?: Options) {
         await this.db(options)
             .updateTable('event_outbox')
             .set({
                 delivered_at: new Date().toISOString(),
             })
-            .where('id', '=', event.id)
+            .where('id', '=', eventId)
             .execute();
     }
 
-    async poll(
-        limit: number,
-        options: PollOptions
-    ): Promise<EventInstance<T>[]> {
+    async poll(limit: number, options: PollOptions) {
         const db = this.db(options);
         const { maxDeliveryAttempts, timeout } = options;
         const rows = await db
@@ -98,6 +96,7 @@ export class EventOutboxStorage<T extends EventClass = EventClass> {
                             ),
                         ])
                     )
+                    .where('event_name', 'in', options.eventNames)
                     .orderBy('created_at', 'asc')
                     .limit(limit)
                     .forUpdate()
@@ -106,20 +105,6 @@ export class EventOutboxStorage<T extends EventClass = EventClass> {
             .returningAll()
             .execute();
 
-        return rows.map((row) => {
-            const EventCtor = this.registry.find((e) =>
-                e.matches(row.event_name)
-            );
-
-            if (!EventCtor) {
-                throw new Error(
-                    `No event class registered for event name: ${row.event_name}`
-                );
-            }
-
-            return EventCtor.deserialize(
-                row.payload as SerializedDomainEvent<unknown>
-            ) as EventInstance<T>;
-        });
+        return rows.map((row) => row.payload as Payload);
     }
 }

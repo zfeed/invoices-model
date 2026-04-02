@@ -95,7 +95,7 @@ describe('onInvoiceIssued', () => {
         const session = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
 
@@ -121,7 +121,7 @@ describe('onInvoiceIssued', () => {
         const session = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
 
@@ -152,7 +152,7 @@ describe('onInvoiceIssued', () => {
         const session = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
 
@@ -182,7 +182,7 @@ describe('onInvoiceIssued', () => {
         const session = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
 
@@ -206,7 +206,7 @@ describe('onInvoiceIssued', () => {
         const session = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
 
@@ -234,7 +234,7 @@ describe('onInvoiceIssued', () => {
         const session = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
 
@@ -273,7 +273,7 @@ describe('onInvoiceIssued', () => {
         const session = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
 
@@ -310,7 +310,7 @@ describe('onInvoiceIssued', () => {
         const session = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
 
@@ -333,7 +333,7 @@ describe('onInvoiceIssued', () => {
         const session = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
 
@@ -362,7 +362,7 @@ describe('onInvoiceIssued', () => {
         const session = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
 
@@ -392,7 +392,7 @@ describe('onInvoiceIssued', () => {
         const session = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
 
@@ -428,7 +428,7 @@ describe('onInvoiceIssued', () => {
         const session = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
 
@@ -458,7 +458,7 @@ describe('onInvoiceIssued', () => {
         const session = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
 
@@ -494,13 +494,13 @@ describe('onInvoiceIssued', () => {
         const session1 = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
         const session2 = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
 

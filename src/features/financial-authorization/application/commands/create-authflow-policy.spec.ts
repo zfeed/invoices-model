@@ -30,7 +30,7 @@ describe('createAuthflowPolicyCommand', () => {
         const session = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
         const command = new CreateAuthflowPolicy(session);
@@ -53,7 +53,7 @@ describe('createAuthflowPolicyCommand', () => {
         const session = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
         const command = new CreateAuthflowPolicy(session);
@@ -78,7 +78,7 @@ describe('createAuthflowPolicyCommand', () => {
         const session = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
         const command = new CreateAuthflowPolicy(session);
@@ -106,7 +106,7 @@ describe('createAuthflowPolicyCommand', () => {
         const session = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
         const command = new CreateAuthflowPolicy(session);
@@ -126,7 +126,7 @@ describe('createAuthflowPolicyCommand', () => {
         const session = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
         const command = new CreateAuthflowPolicy(session);
@@ -152,7 +152,7 @@ describe('createAuthflowPolicyCommand', () => {
         const session = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
         const command = new CreateAuthflowPolicy(session);

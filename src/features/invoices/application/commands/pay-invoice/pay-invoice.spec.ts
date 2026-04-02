@@ -110,7 +110,7 @@ describe('PayInvoice', () => {
         session = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
         const canApproverApprove = new CanApproverApprove(session);

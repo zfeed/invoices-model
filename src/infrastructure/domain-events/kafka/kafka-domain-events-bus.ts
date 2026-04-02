@@ -1,7 +1,6 @@
 import {
     DomainEvent,
     DomainEventClass,
-    deriveName,
 } from '../../../shared/events/domain-event';
 import {
     EventHandler,
@@ -28,7 +27,7 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
 
     async start(): Promise<void> {
         const topics = [...this.handlers.keys()]
-            .map((eventClass) => deriveName(eventClass.name))
+            .map((eventClass) => eventClass.eventName())
             .map((topic) => this.applyTopicPrefix(topic));
 
         if (this.forceTopicCreation) {
@@ -116,7 +115,7 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
 
         const eventClass = eventClasses.find(
             (eventClass) =>
-                this.applyTopicPrefix(deriveName(eventClass.name)) === topic
+                this.applyTopicPrefix(eventClass.eventName()) === topic
         );
 
         if (!eventClass) {

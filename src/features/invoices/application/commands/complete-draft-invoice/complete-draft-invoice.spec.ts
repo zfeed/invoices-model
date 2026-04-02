@@ -56,7 +56,7 @@ describe('CompleteDraftInvoice', () => {
         session = new Session(
             new PersistentManager(
                 domainEventsBus,
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
         createCommand = new CreateDraftInvoice(session);

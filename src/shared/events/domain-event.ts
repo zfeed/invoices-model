@@ -1,6 +1,6 @@
 import { v7 as uuidv7 } from 'uuid';
 
-export function deriveName(className: string): string {
+function deriveName(className: string): string {
     const words = className
         .replace(/Event$/, '')
         .split(/(?=[A-Z])/)
@@ -22,6 +22,7 @@ export type DomainEventClass<E extends DomainEvent<any> = DomainEvent<any>> = {
     create(data: E['data']): E;
     deserialize(serialized: SerializedDomainEvent<E['data']>): E;
     matches(eventName: string): boolean;
+    eventName(): string;
 };
 
 export abstract class DomainEvent<T> {
@@ -51,6 +52,10 @@ export abstract class DomainEvent<T> {
             createdAt: new Date().toISOString(),
             data,
         });
+    }
+
+    static eventName() {
+        return deriveName(this.name);
     }
 
     serialize(): SerializedDomainEvent<T> {

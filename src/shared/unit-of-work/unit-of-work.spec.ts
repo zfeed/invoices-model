@@ -24,7 +24,7 @@ describe('UnitOfWork contract', () => {
             const session = new Session(
                 new PersistentManager(
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create([])
+                    EventOutboxStorage.create()
                 )
             );
 
@@ -43,7 +43,7 @@ describe('UnitOfWork contract', () => {
             const session = new Session(
                 new PersistentManager(
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create([])
+                    EventOutboxStorage.create()
                 )
             );
 
@@ -64,7 +64,7 @@ describe('UnitOfWork contract', () => {
             const session = new Session(
                 new PersistentManager(
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create([])
+                    EventOutboxStorage.create()
                 )
             );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
@@ -88,7 +88,7 @@ describe('UnitOfWork contract', () => {
             const session = new Session(
                 new PersistentManager(
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create([])
+                    EventOutboxStorage.create()
                 )
             );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
@@ -134,7 +134,7 @@ describe('UnitOfWork contract', () => {
             const session = new Session(
                 new PersistentManager(
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create([])
+                    EventOutboxStorage.create()
                 )
             );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
@@ -160,7 +160,7 @@ describe('UnitOfWork contract', () => {
             const session = new Session(
                 new PersistentManager(
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create([])
+                    EventOutboxStorage.create()
                 )
             );
 
@@ -178,7 +178,7 @@ describe('UnitOfWork contract', () => {
             const session = new Session(
                 new PersistentManager(
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create([])
+                    EventOutboxStorage.create()
                 )
             );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
@@ -217,7 +217,7 @@ describe('UnitOfWork contract', () => {
             const session = new Session(
                 new PersistentManager(
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create([])
+                    EventOutboxStorage.create()
                 )
             );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
@@ -240,7 +240,7 @@ describe('UnitOfWork contract', () => {
             const session = new Session(
                 new PersistentManager(
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create([])
+                    EventOutboxStorage.create()
                 )
             );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();

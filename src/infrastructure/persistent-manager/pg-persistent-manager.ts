@@ -170,7 +170,13 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         }
 
         await this.eventOutboxStorage.insert(
-            allEntities.flatMap((entity) => entity.events),
+            allEntities
+                .flatMap((entity) => entity.events)
+                .map((event) => ({
+                    id: event.id,
+                    name: event.name,
+                    event: event.serialize(),
+                })),
             { transaction: this.getTransaction() }
         );
 

@@ -81,7 +81,7 @@ describe('CanApproverApprove', () => {
         const session = new Session(
             new PersistentManager(
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
         const question = new CanApproverApprove(session);
@@ -99,7 +99,7 @@ describe('CanApproverApprove', () => {
         const session = new Session(
             new PersistentManager(
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
         const approverId = uuid();
@@ -128,7 +128,7 @@ describe('CanApproverApprove', () => {
         const session = new Session(
             new PersistentManager(
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
         const approverId = uuid();
@@ -157,7 +157,7 @@ describe('CanApproverApprove', () => {
         const session = new Session(
             new PersistentManager(
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
         const approverId = uuid();
@@ -205,7 +205,7 @@ describe('CanApproverApprove', () => {
         const session = new Session(
             new PersistentManager(
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
         const approverId = uuid();
@@ -234,7 +234,7 @@ describe('CanApproverApprove', () => {
         const session = new Session(
             new PersistentManager(
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create([])
+                EventOutboxStorage.create()
             )
         );
         const approverId1 = uuid();

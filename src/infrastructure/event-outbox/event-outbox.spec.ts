@@ -7,15 +7,15 @@ class InvoiceIssuedEvent extends DomainEvent<{ id: string }> {}
 
 class InvoicePaidEvent extends DomainEvent<{ id: string }> {}
 
-class EventOneEvent extends DomainEvent<Record<string, never>> {}
+class EventOneEvent extends DomainEvent<Record<string, { id: string }>> {}
 
-class EventTwoEvent extends DomainEvent<Record<string, never>> {}
+class EventTwoEvent extends DomainEvent<Record<string, { id: string }>> {}
 
-class EventThreeEvent extends DomainEvent<Record<string, never>> {}
+class EventThreeEvent extends DomainEvent<Record<string, { id: string }>> {}
 
-class EventFirstEvent extends DomainEvent<Record<string, never>> {}
+class EventFirstEvent extends DomainEvent<Record<string, { id: string }>> {}
 
-class EventSecondEvent extends DomainEvent<Record<string, never>> {}
+class EventSecondEvent extends DomainEvent<Record<string, { id: string }>> {}
 
 const ZERO_TIMEOUT = dayjs.duration(-1, 'seconds');
 const LONG_TIMEOUT = dayjs.duration(30, 'seconds');
@@ -30,6 +30,14 @@ const REGISTRY = [
     EventSecondEvent,
 ];
 
+const EVENT_NAMES = REGISTRY.map((eventClass) => eventClass.eventName());
+
+const serializeEvent = (event: DomainEvent<unknown>) => ({
+    id: event.id,
+    name: event.name,
+    event: event.serialize(),
+});
+
 describe('EventOutboxStorage', () => {
     beforeEach(async () => {
         await cleanDatabase();
@@ -37,28 +45,32 @@ describe('EventOutboxStorage', () => {
 
     describe('insert', () => {
         it('should insert an event into the outbox', async () => {
-            const storage = EventOutboxStorage.create(REGISTRY);
+            const storage = EventOutboxStorage.create();
             const event = InvoiceIssuedEvent.create({ id: '123' });
-            await storage.insert([event]);
+            await storage.insert([serializeEvent(event)]);
 
             const events = await storage.poll(10, {
+                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: LONG_TIMEOUT,
             });
 
             expect(events).toHaveLength(1);
             expect(events[0].name).toBe('invoice.issued');
-            expect(events[0].data).toEqual({ id: '123' });
+            expect(events[0]).toEqual(serializeEvent(event));
         });
 
         it('should insert multiple events in a single request', async () => {
-            const storage = EventOutboxStorage.create(REGISTRY);
+            const storage = EventOutboxStorage.create();
+            const invoiceIssued = InvoiceIssuedEvent.create({ id: '1' });
+            const invoicePaid = InvoicePaidEvent.create({ id: '2' });
             await storage.insert([
-                InvoiceIssuedEvent.create({ id: '1' }),
-                InvoicePaidEvent.create({ id: '2' }),
+                serializeEvent(invoiceIssued),
+                serializeEvent(invoicePaid),
             ]);
 
             const events = await storage.poll(10, {
+                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: LONG_TIMEOUT,
             });
@@ -69,10 +81,11 @@ describe('EventOutboxStorage', () => {
         });
 
         it('should not fail when inserting empty array', async () => {
-            const storage = EventOutboxStorage.create(REGISTRY);
+            const storage = EventOutboxStorage.create();
             await storage.insert([]);
 
             const events = await storage.poll(10, {
+                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: LONG_TIMEOUT,
             });
@@ -82,17 +95,19 @@ describe('EventOutboxStorage', () => {
 
     describe('delivered', () => {
         it('should mark event as delivered so it is no longer polled', async () => {
-            const storage = EventOutboxStorage.create(REGISTRY);
+            const storage = EventOutboxStorage.create();
             const event = InvoiceIssuedEvent.create({ id: '123' });
-            await storage.insert([event]);
+            await storage.insert([serializeEvent(event)]);
 
             await storage.poll(10, {
+                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: ZERO_TIMEOUT,
             });
-            await storage.delivered(event);
+            await storage.delivered(event.id);
 
             const events = await storage.poll(10, {
+                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: ZERO_TIMEOUT,
             });
@@ -102,13 +117,16 @@ describe('EventOutboxStorage', () => {
 
     describe('poll', () => {
         it('should return undelivered events', async () => {
-            const storage = EventOutboxStorage.create(REGISTRY);
+            const storage = EventOutboxStorage.create();
+            const invoiceIssued = InvoiceIssuedEvent.create({ id: '1' });
+            const invoicePaid = InvoicePaidEvent.create({ id: '2' });
             await storage.insert([
-                InvoiceIssuedEvent.create({ id: '1' }),
-                InvoicePaidEvent.create({ id: '2' }),
+                serializeEvent(invoiceIssued),
+                serializeEvent(invoicePaid),
             ]);
 
             const events = await storage.poll(10, {
+                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: LONG_TIMEOUT,
             });
@@ -119,14 +137,15 @@ describe('EventOutboxStorage', () => {
         });
 
         it('should respect the limit', async () => {
-            const storage = EventOutboxStorage.create(REGISTRY);
+            const storage = EventOutboxStorage.create();
             await storage.insert([
-                EventOneEvent.create({}),
-                EventTwoEvent.create({}),
-                EventThreeEvent.create({}),
+                serializeEvent(EventOneEvent.create({})),
+                serializeEvent(EventTwoEvent.create({})),
+                serializeEvent(EventThreeEvent.create({})),
             ]);
 
             const events = await storage.poll(2, {
+                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: LONG_TIMEOUT,
             });
@@ -136,10 +155,13 @@ describe('EventOutboxStorage', () => {
 
         it('should track delivery attempts internally', async () => {
             const maxAttempts = 2;
-            const storage = EventOutboxStorage.create(REGISTRY);
-            await storage.insert([InvoiceIssuedEvent.create({ id: '1' })]);
+            const storage = EventOutboxStorage.create();
+            await storage.insert([
+                serializeEvent(InvoiceIssuedEvent.create({ id: '1' })),
+            ]);
 
             const opts = {
+                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: maxAttempts,
                 timeout: ZERO_TIMEOUT,
             };
@@ -151,16 +173,20 @@ describe('EventOutboxStorage', () => {
         });
 
         it('should not return events within the timeout window', async () => {
-            const storage = EventOutboxStorage.create(REGISTRY);
-            await storage.insert([InvoiceIssuedEvent.create({ id: '1' })]);
+            const storage = EventOutboxStorage.create();
+            await storage.insert([
+                serializeEvent(InvoiceIssuedEvent.create({ id: '1' })),
+            ]);
 
             const first = await storage.poll(10, {
+                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: LONG_TIMEOUT,
             });
             expect(first).toHaveLength(1);
 
             const second = await storage.poll(10, {
+                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: LONG_TIMEOUT,
             });
@@ -168,15 +194,19 @@ describe('EventOutboxStorage', () => {
         });
 
         it('should return events after the timeout has elapsed', async () => {
-            const storage = EventOutboxStorage.create(REGISTRY);
-            await storage.insert([InvoiceIssuedEvent.create({ id: '1' })]);
+            const storage = EventOutboxStorage.create();
+            await storage.insert([
+                serializeEvent(InvoiceIssuedEvent.create({ id: '1' })),
+            ]);
 
             await storage.poll(10, {
+                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: ZERO_TIMEOUT,
             });
 
             const events = await storage.poll(10, {
+                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: ZERO_TIMEOUT,
             });
@@ -185,10 +215,13 @@ describe('EventOutboxStorage', () => {
 
         it('should not return events exceeding max delivery attempts', async () => {
             const maxAttempts = 3;
-            const storage = EventOutboxStorage.create(REGISTRY);
-            await storage.insert([InvoiceIssuedEvent.create({ id: '1' })]);
+            const storage = EventOutboxStorage.create();
+            await storage.insert([
+                serializeEvent(InvoiceIssuedEvent.create({ id: '1' })),
+            ]);
 
             const opts = {
+                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: maxAttempts,
                 timeout: ZERO_TIMEOUT,
             };
@@ -200,29 +233,30 @@ describe('EventOutboxStorage', () => {
             expect(events).toHaveLength(0);
         });
 
-        it('should throw when event name has no registered class', async () => {
-            const storage = EventOutboxStorage.create([InvoicePaidEvent]);
-            await storage.insert([InvoicePaidEvent.create({ id: '1' })]);
+        it('should return only events matching the requested event names', async () => {
+            const storage = EventOutboxStorage.create();
+            await storage.insert([
+                serializeEvent(InvoiceIssuedEvent.create({ id: '1' })),
+                serializeEvent(InvoicePaidEvent.create({ id: '2' })),
+            ]);
 
-            // Replace with an event that has no registered class
-            const unregistered = EventOutboxStorage.create([EventOneEvent]);
+            const events = await storage.poll(10, {
+                eventNames: ['invoice.paid'],
+                maxDeliveryAttempts: 5,
+                timeout: LONG_TIMEOUT,
+            });
 
-            await expect(
-                unregistered.poll(10, {
-                    maxDeliveryAttempts: 5,
-                    timeout: LONG_TIMEOUT,
-                })
-            ).rejects.toThrow(
-                'No event class registered for event name: invoice.paid'
-            );
+            expect(events).toHaveLength(1);
+            expect(events[0].name).toBe('invoice.paid');
         });
 
         it('should pick oldest events first when limited', async () => {
-            const storage = EventOutboxStorage.create(REGISTRY);
-            await storage.insert([EventFirstEvent.create({})]);
-            await storage.insert([EventSecondEvent.create({})]);
+            const storage = EventOutboxStorage.create();
+            await storage.insert([serializeEvent(EventFirstEvent.create({}))]);
+            await storage.insert([serializeEvent(EventSecondEvent.create({}))]);
 
             const events = await storage.poll(1, {
+                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: LONG_TIMEOUT,
             });
