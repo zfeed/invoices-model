@@ -7,6 +7,7 @@ import {
     DomainEventsBus,
 } from '../../../shared/domain-events/domain-events-bus.interface';
 import { PublishableEvents } from '../../../shared/events/event-publisher.interface';
+import { EventOutboxStorage } from '../../event-outbox/event-outbox';
 import { Kafka, KafkaConfig } from './kafka';
 
 export class KafkaDomainEventsBus implements DomainEventsBus {
@@ -17,13 +18,17 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
 
     constructor(config: {
         kafka: KafkaConfig;
+        eventOutboxStorage: EventOutboxStorage;
         topicPrefix?: string;
         forceTopicCreation?: boolean;
     }) {
         this.kafka = new Kafka(config.kafka);
+        this.eventOutboxStorage = config.eventOutboxStorage;
         this.topicPrefix = config.topicPrefix;
         this.forceTopicCreation = config.forceTopicCreation;
     }
+
+    private readonly eventOutboxStorage: EventOutboxStorage;
 
     async start(): Promise<void> {
         const topics = [...this.handlers.keys()]
@@ -64,6 +69,14 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
         await this.kafka.producer.sendBatch({
             topicMessages,
         });
+
+        const eventIds = objects.flatMap((object) =>
+            object.events.map((event) => event.id)
+        );
+
+        await Promise.all(
+            eventIds.map((eventId) => this.eventOutboxStorage.delivered(eventId))
+        );
     }
 
     async subscribeToEvent<T extends DomainEvent<unknown>>(

@@ -10,38 +10,40 @@ import {
     financialAuthorizationPlugin,
 } from './plugins';
 import { errorHandler } from './error-handler';
-import { InMemoryDomainEventsBus } from '../infrastructure/domain-events/in-memory-domain-events-bus';
 import { KafkaDomainEventsBus } from '../infrastructure/domain-events/kafka/kafka-domain-events-bus';
 
 const createDomainEventsBus = () => {
-    if (process.env.DOMAIN_EVENTS_BUS !== 'kafka') {
-        return new InMemoryDomainEventsBus();
-    }
+    const eventOutboxStorage = EventOutboxStorage.create();
 
-    return new KafkaDomainEventsBus({
-        topicPrefix: process.env.KAFKA_TOPIC_PREFIX,
-        forceTopicCreation: true,
-        kafka: {
-            global: {
-                kafkaJS: {
-                    brokers: process.env.KAFKA_BROKERS?.split(',') || [],
-                    clientId: process.env.KAFKA_CLIENT_ID || 'invoices-model',
-                    logLevel: 0,
+    return {
+        domainEventsBus: new KafkaDomainEventsBus({
+            eventOutboxStorage,
+            topicPrefix: process.env.KAFKA_TOPIC_PREFIX,
+            forceTopicCreation: true,
+            kafka: {
+                global: {
+                    kafkaJS: {
+                        brokers: process.env.KAFKA_BROKERS?.split(',') || [],
+                        clientId:
+                            process.env.KAFKA_CLIENT_ID || 'invoices-model',
+                        logLevel: 0,
+                    },
+                },
+                producer: {},
+                consumer: {
+                    'group.id': process.env.KAFKA_GROUP_ID || 'invoices-model',
                 },
             },
-            producer: {},
-            consumer: {
-                'group.id': process.env.KAFKA_GROUP_ID || 'invoices-model',
-            },
-        },
-    });
+        }),
+        eventOutboxStorage,
+    };
 };
 
 export const createApp = async () => {
-    const domainEventsBus = createDomainEventsBus();
+    const { domainEventsBus, eventOutboxStorage } = createDomainEventsBus();
     const commands = await bootstrap({
         session: new Session(
-            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
+            new PersistentManager(domainEventsBus, eventOutboxStorage)
         ),
         domainEventsBus,
     });

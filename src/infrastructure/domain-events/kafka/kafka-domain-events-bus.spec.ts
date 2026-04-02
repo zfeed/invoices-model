@@ -3,6 +3,7 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { testDomainEventsBus } from '../../../shared/domain-events/domain-events-bus.test-helper';
 import { KafkaDomainEventsBus } from './kafka-domain-events-bus';
 import dayjs from '../../../lib/dayjs';
+import { EventOutboxStorage } from '../../event-outbox/event-outbox';
 
 let domainEventsBus: KafkaDomainEventsBus;
 
@@ -12,6 +13,7 @@ testDomainEventsBus({
         const random = hash('sha256', Math.random().toString()).slice(0, 5);
 
         domainEventsBus = new KafkaDomainEventsBus({
+            eventOutboxStorage: EventOutboxStorage.create(),
             forceTopicCreation: true,
             topicPrefix: random,
             kafka: {
