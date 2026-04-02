@@ -1,4 +1,4 @@
-import { DomainEvents } from '../../../../shared/domain-events/domain-events.interface';
+import { DomainEventsBus } from '../../../../shared/domain-events/domain-events-bus.interface';
 import { Session } from '../../../../shared/unit-of-work/unit-of-work';
 import { InvoiceIssuedEvent } from '../../../invoices/domain/invoice/events/invoice-issued.event';
 import { AuthflowPolicy } from '../../domain/authflow/authflow-policy';
@@ -9,12 +9,13 @@ import { ReferenceId } from '../../domain/reference-id/reference-id';
 export class OnInvoiceIssued {
     constructor(
         private readonly session: Session,
-        private readonly domainEvents: DomainEvents
+        private readonly domainEventsBus: DomainEventsBus
     ) {}
 
     public async register() {
-        await this.domainEvents.subscribeToEvent(InvoiceIssuedEvent, (event) =>
-            this.handle(event)
+        await this.domainEventsBus.subscribeToEvent(
+            InvoiceIssuedEvent,
+            (event) => this.handle(event)
         );
     }
 

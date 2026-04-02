@@ -5,12 +5,12 @@ import {
 } from '../../../shared/events/domain-event';
 import {
     EventHandler,
-    DomainEvents,
-} from '../../../shared/domain-events/domain-events.interface';
+    DomainEventsBus,
+} from '../../../shared/domain-events/domain-events-bus.interface';
 import { PublishableEvents } from '../../../shared/events/event-publisher.interface';
 import { Kafka, KafkaConfig } from './kafka';
 
-export class KafkaDomainEvents implements DomainEvents {
+export class KafkaDomainEventsBus implements DomainEventsBus {
     private readonly handlers = new Map<DomainEventClass, EventHandler[]>();
     readonly kafka: Kafka;
     private topicPrefix?: string;
@@ -47,7 +47,6 @@ export class KafkaDomainEvents implements DomainEvents {
 
             await Promise.all(handlers.map((handler) => handler(event)));
         });
-
     }
 
     async stop(): Promise<void> {

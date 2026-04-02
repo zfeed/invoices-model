@@ -1,6 +1,6 @@
 import { Session } from '../../../../../shared/unit-of-work/unit-of-work';
 import { PersistentManager } from '../../../../../infrastructure/persistent-manager/pg-persistent-manager';
-import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
+import { InMemoryDomainEventsBus } from '../../../../../infrastructure/domain-events/in-memory-domain-events-bus';
 import { EventOutboxStorage } from '../../../../../infrastructure/event-outbox/event-outbox';
 import { CanApproverApprove } from '../../../../financial-authorization/application/queries/can-approver-approve';
 import { FinancialDocument } from '../../../../financial-authorization/domain/document/document';
@@ -98,7 +98,7 @@ const createAuthorizationDocument = (referenceId: string) => {
 
 describe('PayInvoice', () => {
     let session: Session;
-    let domainEvents: InMemoryDomainEvents;
+    let domainEventsBus: InMemoryDomainEventsBus;
     let createCommand: CreateDraftInvoice;
     let completeCommand: CompleteDraftInvoice;
     let processCommand: ProcessInvoice;
@@ -106,9 +106,12 @@ describe('PayInvoice', () => {
 
     beforeEach(async () => {
         await cleanDatabase();
-        domainEvents = new InMemoryDomainEvents();
+        domainEventsBus = new InMemoryDomainEventsBus();
         session = new Session(
-            new PersistentManager(domainEvents, EventOutboxStorage.create([]))
+            new PersistentManager(
+                domainEventsBus,
+                EventOutboxStorage.create([])
+            )
         );
         const canApproverApprove = new CanApproverApprove(session);
         createCommand = new CreateDraftInvoice(session);
@@ -172,7 +175,7 @@ describe('PayInvoice', () => {
 
     it('should publish InvoicePaidEvent', async () => {
         const paidEvents: InvoicePaidEvent[] = [];
-        await domainEvents.subscribeToEvent(InvoicePaidEvent, async (e) => {
+        await domainEventsBus.subscribeToEvent(InvoicePaidEvent, async (e) => {
             paidEvents.push(e);
         });
 

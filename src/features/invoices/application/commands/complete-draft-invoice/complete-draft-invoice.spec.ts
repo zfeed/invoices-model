@@ -1,6 +1,6 @@
 import { Session } from '../../../../../shared/unit-of-work/unit-of-work';
 import { PersistentManager } from '../../../../../infrastructure/persistent-manager/pg-persistent-manager';
-import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
+import { InMemoryDomainEventsBus } from '../../../../../infrastructure/domain-events/in-memory-domain-events-bus';
 import { EventOutboxStorage } from '../../../../../infrastructure/event-outbox/event-outbox';
 import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice';
 import { CompleteDraftInvoice } from './complete-draft-invoice';
@@ -47,14 +47,17 @@ const COMPLETE_DRAFT_REQUEST = {
 
 describe('CompleteDraftInvoice', () => {
     let session: Session;
-    let domainEvents: InMemoryDomainEvents;
+    let domainEventsBus: InMemoryDomainEventsBus;
     let createCommand: CreateDraftInvoice;
     let completeCommand: CompleteDraftInvoice;
 
     beforeEach(() => {
-        domainEvents = new InMemoryDomainEvents();
+        domainEventsBus = new InMemoryDomainEventsBus();
         session = new Session(
-            new PersistentManager(domainEvents, EventOutboxStorage.create([]))
+            new PersistentManager(
+                domainEventsBus,
+                EventOutboxStorage.create([])
+            )
         );
         createCommand = new CreateDraftInvoice(session);
         completeCommand = new CompleteDraftInvoice(session);
@@ -125,7 +128,7 @@ describe('CompleteDraftInvoice', () => {
     describe('domain events', () => {
         it('should publish DraftInvoiceFinishedEvent with draft data', async () => {
             const finishedEvents: DraftInvoiceFinishedEvent[] = [];
-            await domainEvents.subscribeToEvent(
+            await domainEventsBus.subscribeToEvent(
                 DraftInvoiceFinishedEvent,
                 async (e) => {
                     finishedEvents.push(e);
@@ -151,7 +154,7 @@ describe('CompleteDraftInvoice', () => {
 
         it('should publish InvoiceIssuedEvent with invoice data', async () => {
             const invoiceEvents: InvoiceIssuedEvent[] = [];
-            await domainEvents.subscribeToEvent(
+            await domainEventsBus.subscribeToEvent(
                 InvoiceIssuedEvent,
                 async (e) => {
                     invoiceEvents.push(e);
@@ -178,13 +181,13 @@ describe('CompleteDraftInvoice', () => {
         it('should publish both draft finished and invoice issued events', async () => {
             const finishedEvents: DraftInvoiceFinishedEvent[] = [];
             const invoiceEvents: InvoiceIssuedEvent[] = [];
-            await domainEvents.subscribeToEvent(
+            await domainEventsBus.subscribeToEvent(
                 DraftInvoiceFinishedEvent,
                 async (e) => {
                     finishedEvents.push(e);
                 }
             );
-            await domainEvents.subscribeToEvent(
+            await domainEventsBus.subscribeToEvent(
                 InvoiceIssuedEvent,
                 async (e) => {
                     invoiceEvents.push(e);

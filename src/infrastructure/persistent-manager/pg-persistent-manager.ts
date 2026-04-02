@@ -2,7 +2,7 @@ import { AuthflowPolicy } from '../../features/financial-authorization/domain/au
 import { FinancialDocument } from '../../features/financial-authorization/domain/document/document';
 import { DraftInvoice } from '../../features/invoices/domain/draft-invoice/draft-invoice';
 import { Invoice } from '../../features/invoices/domain/invoice/invoice';
-import { DomainEvents } from '../../shared/domain-events/domain-events.interface';
+import { DomainEventsBus } from '../../shared/domain-events/domain-events-bus.interface';
 import {
     EntityClass,
     PersistentManager as PersistentManagerInterface,
@@ -33,13 +33,13 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
     private authflowPolicyStorage: AuthflowPolicyStorage | null = null;
 
     constructor(
-        private readonly domainEvents: DomainEvents,
+        private readonly domainEventsBus: DomainEventsBus,
         private readonly eventOutboxStorage: EventOutboxStorage
     ) {}
 
     async fork(): Promise<PersistentManagerInterface<Entity>> {
         const newManager = new PersistentManager(
-            this.domainEvents,
+            this.domainEventsBus,
             this.eventOutboxStorage
         );
         await newManager.initTransaction();
@@ -176,7 +176,7 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
 
         await this.getTransaction().commit().execute();
         this.committed = true;
-        await this.domainEvents.publishEvents(...allEntities);
+        await this.domainEventsBus.publishEvents(...allEntities);
     }
 
     private async initTransaction(): Promise<void> {

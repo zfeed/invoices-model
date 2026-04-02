@@ -1,6 +1,6 @@
 import { Session } from '../../../../../shared/unit-of-work/unit-of-work';
 import { PersistentManager } from '../../../../../infrastructure/persistent-manager/pg-persistent-manager';
-import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
+import { InMemoryDomainEventsBus } from '../../../../../infrastructure/domain-events/in-memory-domain-events-bus';
 import { EventOutboxStorage } from '../../../../../infrastructure/event-outbox/event-outbox';
 import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice';
 import { ArchiveDraftInvoice } from '../archive-draft-invoice/archive-draft-invoice';
@@ -10,15 +10,18 @@ import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application
 
 describe('DraftDraftInvoice', () => {
     let session: Session;
-    let domainEvents: InMemoryDomainEvents;
+    let domainEventsBus: InMemoryDomainEventsBus;
     let createCommand: CreateDraftInvoice;
     let archiveCommand: ArchiveDraftInvoice;
     let draftCommand: DraftDraftInvoice;
 
     beforeEach(() => {
-        domainEvents = new InMemoryDomainEvents();
+        domainEventsBus = new InMemoryDomainEventsBus();
         session = new Session(
-            new PersistentManager(domainEvents, EventOutboxStorage.create([]))
+            new PersistentManager(
+                domainEventsBus,
+                EventOutboxStorage.create([])
+            )
         );
         createCommand = new CreateDraftInvoice(session);
         archiveCommand = new ArchiveDraftInvoice(session);
@@ -44,7 +47,7 @@ describe('DraftDraftInvoice', () => {
 
     it('should publish DraftInvoiceDraftedEvent', async () => {
         const draftedEvents: DraftInvoiceDraftedEvent[] = [];
-        await domainEvents.subscribeToEvent(
+        await domainEventsBus.subscribeToEvent(
             DraftInvoiceDraftedEvent,
             async (e) => {
                 draftedEvents.push(e);

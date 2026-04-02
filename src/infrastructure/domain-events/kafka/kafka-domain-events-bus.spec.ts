@@ -1,17 +1,17 @@
 import { hash } from 'node:crypto';
 import { setTimeout as sleep } from 'node:timers/promises';
-import { testDomainEvents } from '../../../shared/domain-events/domain-events.test-helper';
-import { KafkaDomainEvents } from './kafka-domain-events';
+import { testDomainEventsBus } from '../../../shared/domain-events/domain-events-bus.test-helper';
+import { KafkaDomainEventsBus } from './kafka-domain-events-bus';
 import dayjs from '../../../lib/dayjs';
 
-let domainEvents: KafkaDomainEvents;
+let domainEventsBus: KafkaDomainEventsBus;
 
-testDomainEvents({
-    typeName: KafkaDomainEvents.name,
-    createDomainEvents: () => {
+testDomainEventsBus({
+    typeName: KafkaDomainEventsBus.name,
+    createDomainEventsBus: () => {
         const random = hash('sha256', Math.random().toString()).slice(0, 5);
 
-        domainEvents = new KafkaDomainEvents({
+        domainEventsBus = new KafkaDomainEventsBus({
             forceTopicCreation: true,
             topicPrefix: random,
             kafka: {
@@ -29,16 +29,16 @@ testDomainEvents({
             },
         });
 
-        return domainEvents;
+        return domainEventsBus;
     },
     beforeStart: async () => {
-        await domainEvents.start();
+        await domainEventsBus.start();
         await sleep(dayjs.duration(500, 'milliseconds').asMilliseconds());
     },
     afterPublish: async () => {
         await sleep(dayjs.duration(500, 'milliseconds').asMilliseconds());
     },
     afterStop: async () => {
-        await domainEvents.stop();
+        await domainEventsBus.stop();
     },
 });

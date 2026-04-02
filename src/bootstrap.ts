@@ -1,4 +1,4 @@
-import { DomainEvents } from './shared/domain-events/domain-events.interface';
+import { DomainEventsBus } from './shared/domain-events/domain-events-bus.interface';
 import { Session } from './shared/unit-of-work/unit-of-work';
 import { CreateDraftInvoice } from './features/invoices/application/commands/create-draft-invoice/create-draft-invoice';
 import { UpdateDraftInvoice } from './features/invoices/application/commands/update-draft-invoice/update-draft-invoice';
@@ -16,13 +16,13 @@ import { OnInvoiceIssued } from './features/financial-authorization/application/
 
 type Infrastructure = {
     session: Session;
-    domainEvents: DomainEvents;
+    domainEventsBus: DomainEventsBus;
 };
 
 export const bootstrap = async (infra: Infrastructure) => {
     const onInvoiceIssued = new OnInvoiceIssued(
         infra.session,
-        infra.domainEvents
+        infra.domainEventsBus
     );
     await onInvoiceIssued.register();
 
@@ -41,7 +41,7 @@ export const bootstrap = async (infra: Infrastructure) => {
         createAuthflowPolicy: new CreateAuthflowPolicy(infra.session),
         approveActionOnDocument: new ApproveActionOnDocument(infra.session),
         canApproverApprove,
-        start: async () => infra.domainEvents.start(),
-        shutdown: async () => infra.domainEvents.stop(),
+        start: async () => infra.domainEventsBus.start(),
+        shutdown: async () => infra.domainEventsBus.stop(),
     };
 };

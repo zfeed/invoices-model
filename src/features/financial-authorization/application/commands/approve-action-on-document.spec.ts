@@ -1,5 +1,5 @@
 import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes';
-import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
+import { InMemoryDomainEventsBus } from '../../../../infrastructure/domain-events/in-memory-domain-events-bus';
 import { Session } from '../../../../shared/unit-of-work/unit-of-work';
 import { PersistentManager } from '../../../../infrastructure/persistent-manager/pg-persistent-manager';
 import { EventOutboxStorage } from '../../../../infrastructure/event-outbox/event-outbox';
@@ -93,7 +93,7 @@ const INVOICE_DATA = {
 
 describe('approveActionOnDocumentCommand', () => {
     let session: Session;
-    let domainEvents: InMemoryDomainEvents;
+    let domainEventsBus: InMemoryDomainEventsBus;
     let command: ApproveActionOnDocument;
     let approverId: string;
 
@@ -103,9 +103,12 @@ describe('approveActionOnDocumentCommand', () => {
         const fixtures = createTemplate();
         approverId = fixtures.approver.id.toPlain();
 
-        domainEvents = new InMemoryDomainEvents();
+        domainEventsBus = new InMemoryDomainEventsBus();
         session = new Session(
-            new PersistentManager(domainEvents, EventOutboxStorage.create([]))
+            new PersistentManager(
+                domainEventsBus,
+                EventOutboxStorage.create([])
+            )
         );
 
         const createPolicy = new CreateAuthflowPolicy(session);
@@ -116,10 +119,10 @@ describe('approveActionOnDocumentCommand', () => {
 
         const onInvoiceIssuedHandler = new OnInvoiceIssued(
             session,
-            domainEvents
+            domainEventsBus
         );
         await onInvoiceIssuedHandler.register();
-        await domainEvents.publishEvents({
+        await domainEventsBus.publishEvents({
             events: [InvoiceIssuedEvent.create(INVOICE_DATA)],
         });
 
@@ -171,7 +174,7 @@ describe('approveActionOnDocumentCommand', () => {
 
     it('should publish DocumentApprovedEvent', async () => {
         const approvedEvents: DocumentApprovedEvent[] = [];
-        await domainEvents.subscribeToEvent(
+        await domainEventsBus.subscribeToEvent(
             DocumentApprovedEvent,
             async (e) => {
                 approvedEvents.push(e);

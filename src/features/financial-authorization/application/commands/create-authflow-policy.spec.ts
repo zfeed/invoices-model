@@ -1,5 +1,5 @@
 import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes';
-import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
+import { InMemoryDomainEventsBus } from '../../../../infrastructure/domain-events/in-memory-domain-events-bus';
 import { Session } from '../../../../shared/unit-of-work/unit-of-work';
 import { PersistentManager } from '../../../../infrastructure/persistent-manager/pg-persistent-manager';
 import { EventOutboxStorage } from '../../../../infrastructure/event-outbox/event-outbox';
@@ -26,9 +26,12 @@ const template = (from: string, to: string) =>
 describe('createAuthflowPolicyCommand', () => {
     beforeEach(cleanDatabase);
     it('should create and save a policy', async () => {
-        const domainEvents = new InMemoryDomainEvents();
+        const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(domainEvents, EventOutboxStorage.create([]))
+            new PersistentManager(
+                domainEventsBus,
+                EventOutboxStorage.create([])
+            )
         );
         const command = new CreateAuthflowPolicy(session);
 
@@ -46,9 +49,12 @@ describe('createAuthflowPolicyCommand', () => {
     });
 
     it('should persist the policy in storage', async () => {
-        const domainEvents = new InMemoryDomainEvents();
+        const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(domainEvents, EventOutboxStorage.create([]))
+            new PersistentManager(
+                domainEventsBus,
+                EventOutboxStorage.create([])
+            )
         );
         const command = new CreateAuthflowPolicy(session);
 
@@ -68,14 +74,17 @@ describe('createAuthflowPolicyCommand', () => {
     });
 
     it('should publish an AuthflowPolicyCreatedEvent', async () => {
-        const domainEvents = new InMemoryDomainEvents();
+        const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(domainEvents, EventOutboxStorage.create([]))
+            new PersistentManager(
+                domainEventsBus,
+                EventOutboxStorage.create([])
+            )
         );
         const command = new CreateAuthflowPolicy(session);
 
         const published: AuthflowPolicyCreatedEvent[] = [];
-        await domainEvents.subscribeToEvent(
+        await domainEventsBus.subscribeToEvent(
             AuthflowPolicyCreatedEvent,
             async (event) => {
                 published.push(event);
@@ -93,9 +102,12 @@ describe('createAuthflowPolicyCommand', () => {
     });
 
     it('should throw when ranges overlap', async () => {
-        const domainEvents = new InMemoryDomainEvents();
+        const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(domainEvents, EventOutboxStorage.create([]))
+            new PersistentManager(
+                domainEventsBus,
+                EventOutboxStorage.create([])
+            )
         );
         const command = new CreateAuthflowPolicy(session);
 
@@ -110,9 +122,12 @@ describe('createAuthflowPolicyCommand', () => {
     });
 
     it('should not persist the policy when validation fails', async () => {
-        const domainEvents = new InMemoryDomainEvents();
+        const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(domainEvents, EventOutboxStorage.create([]))
+            new PersistentManager(
+                domainEventsBus,
+                EventOutboxStorage.create([])
+            )
         );
         const command = new CreateAuthflowPolicy(session);
 
@@ -133,14 +148,17 @@ describe('createAuthflowPolicyCommand', () => {
     });
 
     it('should not publish events when validation fails', async () => {
-        const domainEvents = new InMemoryDomainEvents();
+        const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(domainEvents, EventOutboxStorage.create([]))
+            new PersistentManager(
+                domainEventsBus,
+                EventOutboxStorage.create([])
+            )
         );
         const command = new CreateAuthflowPolicy(session);
 
         const published: AuthflowPolicyCreatedEvent[] = [];
-        await domainEvents.subscribeToEvent(
+        await domainEventsBus.subscribeToEvent(
             AuthflowPolicyCreatedEvent,
             async (event) => {
                 published.push(event);

@@ -1,6 +1,6 @@
 import { Session } from '../../../../../shared/unit-of-work/unit-of-work';
 import { PersistentManager } from '../../../../../infrastructure/persistent-manager/pg-persistent-manager';
-import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
+import { InMemoryDomainEventsBus } from '../../../../../infrastructure/domain-events/in-memory-domain-events-bus';
 import { EventOutboxStorage } from '../../../../../infrastructure/event-outbox/event-outbox';
 import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice';
 import { UpdateDraftInvoice } from './update-draft-invoice';
@@ -11,14 +11,17 @@ import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
 
 describe('UpdateDraftInvoice', () => {
     let session: Session;
-    let domainEvents: InMemoryDomainEvents;
+    let domainEventsBus: InMemoryDomainEventsBus;
     let createCommand: CreateDraftInvoice;
     let updateCommand: UpdateDraftInvoice;
 
     beforeEach(() => {
-        domainEvents = new InMemoryDomainEvents();
+        domainEventsBus = new InMemoryDomainEventsBus();
         session = new Session(
-            new PersistentManager(domainEvents, EventOutboxStorage.create([]))
+            new PersistentManager(
+                domainEventsBus,
+                EventOutboxStorage.create([])
+            )
         );
         createCommand = new CreateDraftInvoice(session);
         updateCommand = new UpdateDraftInvoice(session);
@@ -232,7 +235,7 @@ describe('UpdateDraftInvoice', () => {
             const created = await createCommand.execute({});
 
             const updatedEvents: DraftInvoiceUpdatedEvent[] = [];
-            await domainEvents.subscribeToEvent(
+            await domainEventsBus.subscribeToEvent(
                 DraftInvoiceUpdatedEvent,
                 async (e) => {
                     updatedEvents.push(e);
@@ -258,7 +261,7 @@ describe('UpdateDraftInvoice', () => {
             const created = await createCommand.execute({});
 
             const updatedEvents: DraftInvoiceUpdatedEvent[] = [];
-            await domainEvents.subscribeToEvent(
+            await domainEventsBus.subscribeToEvent(
                 DraftInvoiceUpdatedEvent,
                 async (e) => {
                     updatedEvents.push(e);

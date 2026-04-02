@@ -1,4 +1,4 @@
-import { InMemoryDomainEvents } from '../../../../infrastructure/domain-events/in-memory-domain-events';
+import { InMemoryDomainEventsBus } from '../../../../infrastructure/domain-events/in-memory-domain-events-bus';
 import { Session } from '../../../../shared/unit-of-work/unit-of-work';
 import { PersistentManager } from '../../../../infrastructure/persistent-manager/pg-persistent-manager';
 import { EventOutboxStorage } from '../../../../infrastructure/event-outbox/event-outbox';
@@ -71,15 +71,18 @@ const seedPolicy = async (session: Session) => {
 
 describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
     let session: Session;
-    let domainEvents: InMemoryDomainEvents;
+    let domainEventsBus: InMemoryDomainEventsBus;
     let createCommand: CreateDraftInvoice;
     let completeCommand: CompleteDraftInvoice;
 
     beforeEach(async () => {
         await cleanDatabase();
-        domainEvents = new InMemoryDomainEvents();
+        domainEventsBus = new InMemoryDomainEventsBus();
         session = new Session(
-            new PersistentManager(domainEvents, EventOutboxStorage.create([]))
+            new PersistentManager(
+                domainEventsBus,
+                EventOutboxStorage.create([])
+            )
         );
         createCommand = new CreateDraftInvoice(session);
         completeCommand = new CompleteDraftInvoice(session);
@@ -87,7 +90,7 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
 
     describe('without policy', () => {
         beforeEach(async () => {
-            const handler = new OnInvoiceIssued(session, domainEvents);
+            const handler = new OnInvoiceIssued(session, domainEventsBus);
             await handler.register();
         });
 
@@ -155,7 +158,7 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
     describe('with policy', () => {
         beforeEach(async () => {
             await seedPolicy(session);
-            const handler = new OnInvoiceIssued(session, domainEvents);
+            const handler = new OnInvoiceIssued(session, domainEventsBus);
             await handler.register();
         });
 

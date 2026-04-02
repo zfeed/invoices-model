@@ -1,6 +1,6 @@
 import { DomainEvent } from '../events/domain-event';
 import { PublishableEvents } from '../events/event-publisher.interface';
-import { DomainEvents } from './domain-events.interface';
+import { DomainEventsBus } from './domain-events-bus.interface';
 
 class OrderPlacedEvent extends DomainEvent<{ orderId: string }> {}
 
@@ -14,20 +14,20 @@ class FakePublisher implements PublishableEvents<DomainEvent<unknown>> {
     }
 }
 
-export interface DomainEventsTestConfig {
+export interface DomainEventsBusTestConfig {
     typeName: string;
-    createDomainEvents: () => DomainEvents;
+    createDomainEventsBus: () => DomainEventsBus;
     beforeStart?: () => Promise<void>;
     afterStop?: () => Promise<void>;
     afterPublish?: () => Promise<void>;
 }
 
-export function testDomainEvents(config: DomainEventsTestConfig): void {
-    describe(`${config.typeName} - DomainEvents implementation`, () => {
-        let domainEvents: DomainEvents;
+export function testDomainEventsBus(config: DomainEventsBusTestConfig): void {
+    describe(`${config.typeName} - DomainEventsBus implementation`, () => {
+        let domainEventsBus: DomainEventsBus;
 
         beforeEach(() => {
-            domainEvents = config.createDomainEvents();
+            domainEventsBus = config.createDomainEventsBus();
         });
 
         afterEach(async () => {
@@ -38,14 +38,14 @@ export function testDomainEvents(config: DomainEventsTestConfig): void {
             it('should call the handler when a matching event is published', async () => {
                 const collected: DomainEvent<unknown>[] = [];
 
-                await domainEvents.subscribeToEvent(
+                await domainEventsBus.subscribeToEvent(
                     OrderPlacedEvent,
                     async (event) => {
                         collected.push(event);
                     }
                 );
                 await config.beforeStart?.();
-                await domainEvents.publishEvents(
+                await domainEventsBus.publishEvents(
                     new FakePublisher(
                         OrderPlacedEvent.create({ orderId: 'order-1' })
                     )
@@ -63,14 +63,14 @@ export function testDomainEvents(config: DomainEventsTestConfig): void {
             it('should not call the handler when a different event is published', async () => {
                 const collected: DomainEvent<unknown>[] = [];
 
-                await domainEvents.subscribeToEvent(
+                await domainEventsBus.subscribeToEvent(
                     OrderPlacedEvent,
                     async (event) => {
                         collected.push(event);
                     }
                 );
                 await config.beforeStart?.();
-                await domainEvents.publishEvents(
+                await domainEventsBus.publishEvents(
                     new FakePublisher(
                         OrderCancelledEvent.create({ orderId: 'order-1' })
                     )
@@ -84,20 +84,20 @@ export function testDomainEvents(config: DomainEventsTestConfig): void {
                 const collected1: DomainEvent<unknown>[] = [];
                 const collected2: DomainEvent<unknown>[] = [];
 
-                await domainEvents.subscribeToEvent(
+                await domainEventsBus.subscribeToEvent(
                     OrderPlacedEvent,
                     async (event) => {
                         collected1.push(event);
                     }
                 );
-                await domainEvents.subscribeToEvent(
+                await domainEventsBus.subscribeToEvent(
                     OrderPlacedEvent,
                     async (event) => {
                         collected2.push(event);
                     }
                 );
                 await config.beforeStart?.();
-                await domainEvents.publishEvents(
+                await domainEventsBus.publishEvents(
                     new FakePublisher(
                         OrderPlacedEvent.create({ orderId: 'order-1' })
                     )
@@ -111,14 +111,14 @@ export function testDomainEvents(config: DomainEventsTestConfig): void {
             it('should handle multiple events from a single publisher', async () => {
                 const collected: DomainEvent<unknown>[] = [];
 
-                await domainEvents.subscribeToEvent(
+                await domainEventsBus.subscribeToEvent(
                     OrderPlacedEvent,
                     async (event) => {
                         collected.push(event);
                     }
                 );
                 await config.beforeStart?.();
-                await domainEvents.publishEvents(
+                await domainEventsBus.publishEvents(
                     new FakePublisher(
                         OrderPlacedEvent.create({ orderId: 'order-1' }),
                         OrderPlacedEvent.create({ orderId: 'order-2' })
@@ -132,14 +132,14 @@ export function testDomainEvents(config: DomainEventsTestConfig): void {
             it('should handle multiple publishers', async () => {
                 const collected: DomainEvent<unknown>[] = [];
 
-                await domainEvents.subscribeToEvent(
+                await domainEventsBus.subscribeToEvent(
                     OrderPlacedEvent,
                     async (event) => {
                         collected.push(event);
                     }
                 );
                 await config.beforeStart?.();
-                await domainEvents.publishEvents(
+                await domainEventsBus.publishEvents(
                     new FakePublisher(
                         OrderPlacedEvent.create({ orderId: 'order-1' })
                     ),
@@ -156,20 +156,20 @@ export function testDomainEvents(config: DomainEventsTestConfig): void {
                 const placedCollected: DomainEvent<unknown>[] = [];
                 const cancelledCollected: DomainEvent<unknown>[] = [];
 
-                await domainEvents.subscribeToEvent(
+                await domainEventsBus.subscribeToEvent(
                     OrderPlacedEvent,
                     async (event) => {
                         placedCollected.push(event);
                     }
                 );
-                await domainEvents.subscribeToEvent(
+                await domainEventsBus.subscribeToEvent(
                     OrderCancelledEvent,
                     async (event) => {
                         cancelledCollected.push(event);
                     }
                 );
                 await config.beforeStart?.();
-                await domainEvents.publishEvents(
+                await domainEventsBus.publishEvents(
                     new FakePublisher(
                         OrderPlacedEvent.create({ orderId: 'order-1' }),
                         OrderCancelledEvent.create({ orderId: 'order-2' })
@@ -195,7 +195,7 @@ export function testDomainEvents(config: DomainEventsTestConfig): void {
                 await config.beforeStart?.();
 
                 await expect(
-                    domainEvents.publishEvents(
+                    domainEventsBus.publishEvents(
                         new FakePublisher(
                             OrderPlacedEvent.create({ orderId: 'order-1' })
                         )
@@ -206,14 +206,14 @@ export function testDomainEvents(config: DomainEventsTestConfig): void {
             it('should do nothing when publishing an empty publisher', async () => {
                 const collected: DomainEvent<unknown>[] = [];
 
-                await domainEvents.subscribeToEvent(
+                await domainEventsBus.subscribeToEvent(
                     OrderPlacedEvent,
                     async (event) => {
                         collected.push(event);
                     }
                 );
                 await config.beforeStart?.();
-                await domainEvents.publishEvents(new FakePublisher());
+                await domainEventsBus.publishEvents(new FakePublisher());
                 await config.afterPublish?.();
 
                 expect(collected).toHaveLength(0);

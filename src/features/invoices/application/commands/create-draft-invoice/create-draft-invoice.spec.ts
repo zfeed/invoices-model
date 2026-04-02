@@ -1,6 +1,6 @@
 import { Session } from '../../../../../shared/unit-of-work/unit-of-work';
 import { PersistentManager } from '../../../../../infrastructure/persistent-manager/pg-persistent-manager';
-import { InMemoryDomainEvents } from '../../../../../infrastructure/domain-events/in-memory-domain-events';
+import { InMemoryDomainEventsBus } from '../../../../../infrastructure/domain-events/in-memory-domain-events-bus';
 import { EventOutboxStorage } from '../../../../../infrastructure/event-outbox/event-outbox';
 import { CreateDraftInvoice } from './create-draft-invoice';
 import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
@@ -12,13 +12,16 @@ import { Id } from '../../../domain/id/id';
 
 describe('CreateDraftInvoice', () => {
     let session: Session;
-    let domainEvents: InMemoryDomainEvents;
+    let domainEventsBus: InMemoryDomainEventsBus;
     let command: CreateDraftInvoice;
 
     beforeEach(() => {
-        domainEvents = new InMemoryDomainEvents();
+        domainEventsBus = new InMemoryDomainEventsBus();
         session = new Session(
-            new PersistentManager(domainEvents, EventOutboxStorage.create([]))
+            new PersistentManager(
+                domainEventsBus,
+                EventOutboxStorage.create([])
+            )
         );
         command = new CreateDraftInvoice(session);
     });
@@ -221,7 +224,7 @@ describe('CreateDraftInvoice', () => {
     describe('domain events', () => {
         it('should publish DraftInvoiceCreatedEvent for an empty draft', async () => {
             const createdEvents: DraftInvoiceCreatedEvent[] = [];
-            await domainEvents.subscribeToEvent(
+            await domainEventsBus.subscribeToEvent(
                 DraftInvoiceCreatedEvent,
                 async (e) => {
                     createdEvents.push(e);
@@ -245,13 +248,13 @@ describe('CreateDraftInvoice', () => {
         it('should publish DraftInvoiceCreatedEvent and DraftInvoiceUpdatedEvent when line items are added', async () => {
             const createdEvents: DraftInvoiceCreatedEvent[] = [];
             const updatedEvents: DraftInvoiceUpdatedEvent[] = [];
-            await domainEvents.subscribeToEvent(
+            await domainEventsBus.subscribeToEvent(
                 DraftInvoiceCreatedEvent,
                 async (e) => {
                     createdEvents.push(e);
                 }
             );
-            await domainEvents.subscribeToEvent(
+            await domainEventsBus.subscribeToEvent(
                 DraftInvoiceUpdatedEvent,
                 async (e) => {
                     updatedEvents.push(e);
@@ -291,7 +294,7 @@ describe('CreateDraftInvoice', () => {
 
         it('should publish a DraftInvoiceUpdatedEvent per line item added', async () => {
             const updatedEvents: DraftInvoiceUpdatedEvent[] = [];
-            await domainEvents.subscribeToEvent(
+            await domainEventsBus.subscribeToEvent(
                 DraftInvoiceUpdatedEvent,
                 async (e) => {
                     updatedEvents.push(e);

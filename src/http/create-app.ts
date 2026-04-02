@@ -10,10 +10,15 @@ import {
     financialAuthorizationPlugin,
 } from './plugins';
 import { errorHandler } from './error-handler';
-import { KafkaDomainEvents } from '../infrastructure/domain-events/kafka/kafka-domain-events';
+import { InMemoryDomainEventsBus } from '../infrastructure/domain-events/in-memory-domain-events-bus';
+import { KafkaDomainEventsBus } from '../infrastructure/domain-events/kafka/kafka-domain-events-bus';
 
-export const createApp = async () => {
-    const domainEvents = new KafkaDomainEvents({
+const createDomainEventsBus = () => {
+    if (process.env.DOMAIN_EVENTS_BUS !== 'kafka') {
+        return new InMemoryDomainEventsBus();
+    }
+
+    return new KafkaDomainEventsBus({
         topicPrefix: process.env.KAFKA_TOPIC_PREFIX,
         forceTopicCreation: true,
         kafka: {
@@ -30,11 +35,18 @@ export const createApp = async () => {
             },
         },
     });
+};
+
+export const createApp = async () => {
+    const domainEventsBus = createDomainEventsBus();
     const commands = await bootstrap({
         session: new Session(
-            new PersistentManager(domainEvents, EventOutboxStorage.create([]))
+            new PersistentManager(
+                domainEventsBus,
+                EventOutboxStorage.create([])
+            )
         ),
-        domainEvents,
+        domainEventsBus,
     });
 
     await commands.start();

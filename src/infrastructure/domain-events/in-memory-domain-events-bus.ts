@@ -3,11 +3,11 @@ import {
     DomainEventClass,
 } from '../../shared/events/domain-event';
 import { PublishableEvents } from '../../shared/events/event-publisher.interface';
-import { DomainEvents } from '../../shared/domain-events/domain-events.interface';
+import { DomainEventsBus } from '../../shared/domain-events/domain-events-bus.interface';
 
 type EventHandler<T = any> = (event: T) => Promise<void>;
 
-export class InMemoryDomainEvents implements DomainEvents {
+export class InMemoryDomainEventsBus implements DomainEventsBus {
     private handlers = new Map<DomainEventClass, EventHandler[]>();
 
     async start(): Promise<void> {}
