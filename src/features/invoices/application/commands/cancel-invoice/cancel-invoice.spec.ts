@@ -52,10 +52,7 @@ describe('CancelInvoice', () => {
     beforeEach(() => {
         domainEventsBus = new InMemoryDomainEventsBus();
         session = new Session(
-            new PersistentManager(
-                domainEventsBus,
-                EventOutboxStorage.create()
-            )
+            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
         );
         createCommand = new CreateDraftInvoice(session);
         completeCommand = new CompleteDraftInvoice(session);

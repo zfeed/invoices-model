@@ -105,10 +105,7 @@ describe('approveActionOnDocumentCommand', () => {
 
         domainEventsBus = new InMemoryDomainEventsBus();
         session = new Session(
-            new PersistentManager(
-                domainEventsBus,
-                EventOutboxStorage.create()
-            )
+            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
         );
 
         const createPolicy = new CreateAuthflowPolicy(session);

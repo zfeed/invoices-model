@@ -93,10 +93,7 @@ describe('onInvoiceIssued', () => {
     it('should create a new financial document when invoice is created', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(
-                domainEventsBus,
-                EventOutboxStorage.create()
-            )
+            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
         );
 
         await seedPolicy(session);
@@ -119,10 +116,7 @@ describe('onInvoiceIssued', () => {
     it('should create a document with an authflow selected from the policy', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(
-                domainEventsBus,
-                EventOutboxStorage.create()
-            )
+            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
         );
 
         await seedPolicy(session);
@@ -150,10 +144,7 @@ describe('onInvoiceIssued', () => {
     it('should select the correct authflow range for the invoice amount', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(
-                domainEventsBus,
-                EventOutboxStorage.create()
-            )
+            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
         );
 
         await seedPolicy(session);
@@ -180,10 +171,7 @@ describe('onInvoiceIssued', () => {
     it('should create a document with empty authflows when no policy exists', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(
-                domainEventsBus,
-                EventOutboxStorage.create()
-            )
+            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
         );
 
         const handler = new OnInvoiceIssued(session, domainEventsBus);
@@ -204,10 +192,7 @@ describe('onInvoiceIssued', () => {
     it('should create a document with empty authflows when amount is outside policy ranges', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(
-                domainEventsBus,
-                EventOutboxStorage.create()
-            )
+            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
         );
 
         await seedPolicy(session);
@@ -232,10 +217,7 @@ describe('onInvoiceIssued', () => {
     it('should create documents with different referenceIds for different invoices', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(
-                domainEventsBus,
-                EventOutboxStorage.create()
-            )
+            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
         );
 
         await seedPolicy(session);
@@ -271,10 +253,7 @@ describe('onInvoiceIssued', () => {
     it('should not create a duplicate document when invoice with same id is created twice', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(
-                domainEventsBus,
-                EventOutboxStorage.create()
-            )
+            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
         );
 
         await seedPolicy(session);
@@ -308,10 +287,7 @@ describe('onInvoiceIssued', () => {
     it('should not create a document when no event is published', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(
-                domainEventsBus,
-                EventOutboxStorage.create()
-            )
+            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
         );
 
         const handler = new OnInvoiceIssued(session, domainEventsBus);
@@ -331,10 +307,7 @@ describe('onInvoiceIssued', () => {
     it('should use event data id as the document referenceId', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(
-                domainEventsBus,
-                EventOutboxStorage.create()
-            )
+            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
         );
 
         await seedPolicy(session);
@@ -360,10 +333,7 @@ describe('onInvoiceIssued', () => {
     it('should generate a unique document id for each new document', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(
-                domainEventsBus,
-                EventOutboxStorage.create()
-            )
+            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
         );
 
         await seedPolicy(session);
@@ -390,10 +360,7 @@ describe('onInvoiceIssued', () => {
     it('should not overwrite a pre-existing document in storage', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(
-                domainEventsBus,
-                EventOutboxStorage.create()
-            )
+            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
         );
 
         const existing = FinancialDocument.create({
@@ -426,10 +393,7 @@ describe('onInvoiceIssued', () => {
     it('should handle many events for different invoices', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(
-                domainEventsBus,
-                EventOutboxStorage.create()
-            )
+            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
         );
 
         await seedPolicy(session);
@@ -456,10 +420,7 @@ describe('onInvoiceIssued', () => {
     it('should only react to events published after subscription', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(
-                domainEventsBus,
-                EventOutboxStorage.create()
-            )
+            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
         );
 
         await publishEvent(domainEventsBus, createInvoiceEvent('INV-BEFORE'));
@@ -492,16 +453,10 @@ describe('onInvoiceIssued', () => {
     it('should see committed documents across separate session instances', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session1 = new Session(
-            new PersistentManager(
-                domainEventsBus,
-                EventOutboxStorage.create()
-            )
+            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
         );
         const session2 = new Session(
-            new PersistentManager(
-                domainEventsBus,
-                EventOutboxStorage.create()
-            )
+            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
         );
 
         await seedPolicy(session1);

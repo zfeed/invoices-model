@@ -18,10 +18,7 @@ describe('CreateDraftInvoice', () => {
     beforeEach(() => {
         domainEventsBus = new InMemoryDomainEventsBus();
         session = new Session(
-            new PersistentManager(
-                domainEventsBus,
-                EventOutboxStorage.create()
-            )
+            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
         );
         command = new CreateDraftInvoice(session);
     });

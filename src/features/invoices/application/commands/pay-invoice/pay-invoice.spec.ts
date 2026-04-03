@@ -108,10 +108,7 @@ describe('PayInvoice', () => {
         await cleanDatabase();
         domainEventsBus = new InMemoryDomainEventsBus();
         session = new Session(
-            new PersistentManager(
-                domainEventsBus,
-                EventOutboxStorage.create()
-            )
+            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
         );
         const canApproverApprove = new CanApproverApprove(session);
         createCommand = new CreateDraftInvoice(session);

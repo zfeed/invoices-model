@@ -105,6 +105,9 @@ export class EventOutboxStorage<T extends EventClass = EventClass> {
             .returningAll()
             .execute();
 
-        return rows.map((row) => row.payload as Payload);
+        return rows.map((row) => ({
+            eventName: row.event_name,
+            payload: row.payload as Payload,
+        }));
     }
 }

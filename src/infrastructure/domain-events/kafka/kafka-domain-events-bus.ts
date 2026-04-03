@@ -9,12 +9,15 @@ import {
 import { PublishableEvents } from '../../../shared/events/event-publisher.interface';
 import { EventOutboxStorage } from '../../event-outbox/event-outbox';
 import { Kafka, KafkaConfig } from './kafka';
+import { Scheduler } from './sheduler';
+import dayjs from '../../../lib/dayjs';
 
 export class KafkaDomainEventsBus implements DomainEventsBus {
     private readonly handlers = new Map<DomainEventClass, EventHandler[]>();
     readonly kafka: Kafka;
     private topicPrefix?: string;
     private forceTopicCreation?: boolean;
+    private sheduler: Scheduler;
 
     constructor(config: {
         kafka: KafkaConfig;
@@ -26,6 +29,10 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
         this.eventOutboxStorage = config.eventOutboxStorage;
         this.topicPrefix = config.topicPrefix;
         this.forceTopicCreation = config.forceTopicCreation;
+        this.sheduler = new Scheduler({
+            job: this.outbox.bind(this),
+            interval: dayjs.duration(30, 'seconds'),
+        });
     }
 
     private readonly eventOutboxStorage: EventOutboxStorage;
@@ -51,10 +58,13 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
 
             await Promise.all(handlers.map((handler) => handler(event)));
         });
+
+        await this.sheduler.start();
     }
 
     async stop(): Promise<void> {
         await this.kafka.stop();
+        await this.sheduler.stop();
     }
 
     async publishEvents(
@@ -75,7 +85,9 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
         );
 
         await Promise.all(
-            eventIds.map((eventId) => this.eventOutboxStorage.delivered(eventId))
+            eventIds.map((eventId) =>
+                this.eventOutboxStorage.delivered(eventId)
+            )
         );
     }
 
@@ -142,5 +154,40 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
         const handlers = this.handlers.get(eventClass) ?? [];
 
         return { event, handlers };
+    }
+
+    private getEventClassByEventName(eventName: string) {
+        const eventClasses = [...this.handlers.keys()];
+
+        const eventClass = eventClasses.find(
+            (eventClass) => eventClass.eventName() === eventName
+        );
+
+        return eventClass;
+    }
+
+    private async outbox() {
+        const records = await this.eventOutboxStorage.poll(10, {
+            eventNames: [...this.handlers.keys()].map((eventClass) =>
+                eventClass.eventName()
+            ),
+            timeout: dayjs.duration(5, 'minutes'),
+            maxDeliveryAttempts: 10,
+        });
+
+        const publishers = records
+            .map(({ eventName, payload }) => {
+                const EventClass = this.getEventClassByEventName(eventName);
+                if (!EventClass) {
+                    throw new Error('Unexpected, EventClass not registered');
+                }
+
+                return EventClass.deserialize(payload as any);
+            })
+            .map((event) => ({
+                events: [event],
+            }));
+
+        await this.publishEvents(...publishers);
     }
 }

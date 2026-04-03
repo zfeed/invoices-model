@@ -56,8 +56,8 @@ describe('EventOutboxStorage', () => {
             });
 
             expect(events).toHaveLength(1);
-            expect(events[0].name).toBe('invoice.issued');
-            expect(events[0]).toEqual(serializeEvent(event));
+            expect(events[0].eventName).toBe('invoice.issued');
+            expect(events[0].payload).toEqual(serializeEvent(event));
         });
 
         it('should insert multiple events in a single request', async () => {
@@ -76,7 +76,7 @@ describe('EventOutboxStorage', () => {
             });
 
             expect(events).toHaveLength(2);
-            const names = events.map((e) => e.name).sort();
+            const names = events.map((e) => e.eventName).sort();
             expect(names).toEqual(['invoice.issued', 'invoice.paid']);
         });
 
@@ -132,7 +132,7 @@ describe('EventOutboxStorage', () => {
             });
 
             expect(events).toHaveLength(2);
-            const names = events.map((e) => e.name).sort();
+            const names = events.map((e) => e.eventName).sort();
             expect(names).toEqual(['invoice.issued', 'invoice.paid']);
         });
 
@@ -247,7 +247,7 @@ describe('EventOutboxStorage', () => {
             });
 
             expect(events).toHaveLength(1);
-            expect(events[0].name).toBe('invoice.paid');
+            expect(events[0].eventName).toBe('invoice.paid');
         });
 
         it('should pick oldest events first when limited', async () => {
@@ -262,7 +262,7 @@ describe('EventOutboxStorage', () => {
             });
 
             expect(events).toHaveLength(1);
-            expect(events[0].name).toBe('event.first');
+            expect(events[0].eventName).toBe('event.first');
         });
     });
 });
