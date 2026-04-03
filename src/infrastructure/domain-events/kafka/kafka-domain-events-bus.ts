@@ -10,7 +10,14 @@ import { PublishableEvents } from '../../../shared/events/event-publisher.interf
 import { EventOutboxStorage } from '../../event-outbox/event-outbox';
 import { Kafka, KafkaConfig } from './kafka';
 import { Scheduler } from './sheduler';
-import dayjs from '../../../lib/dayjs';
+import { Duration } from '../../../lib/dayjs';
+
+export type PollingConfig = {
+    interval: Duration;
+    timeout: Duration;
+    maxDeliveryAttempts: number;
+    batchSize: number;
+};
 
 export class KafkaDomainEventsBus implements DomainEventsBus {
     private readonly handlers = new Map<DomainEventClass, EventHandler[]>();
@@ -18,20 +25,23 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
     private topicPrefix?: string;
     private forceTopicCreation?: boolean;
     private sheduler: Scheduler;
+    private polling: PollingConfig;
 
     constructor(config: {
         kafka: KafkaConfig;
         eventOutboxStorage: EventOutboxStorage;
         topicPrefix?: string;
         forceTopicCreation?: boolean;
+        polling: PollingConfig;
     }) {
         this.kafka = new Kafka(config.kafka);
         this.eventOutboxStorage = config.eventOutboxStorage;
         this.topicPrefix = config.topicPrefix;
         this.forceTopicCreation = config.forceTopicCreation;
+        this.polling = config.polling;
         this.sheduler = new Scheduler({
             job: this.outbox.bind(this),
-            interval: dayjs.duration(30, 'seconds'),
+            interval: config.polling.interval,
         });
     }
 
@@ -167,13 +177,16 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
     }
 
     private async outbox() {
-        const records = await this.eventOutboxStorage.poll(10, {
-            eventNames: [...this.handlers.keys()].map((eventClass) =>
-                eventClass.eventName()
-            ),
-            timeout: dayjs.duration(5, 'minutes'),
-            maxDeliveryAttempts: 10,
-        });
+        const records = await this.eventOutboxStorage.poll(
+            this.polling.batchSize,
+            {
+                eventNames: [...this.handlers.keys()].map((eventClass) =>
+                    eventClass.eventName()
+                ),
+                timeout: this.polling.timeout,
+                maxDeliveryAttempts: this.polling.maxDeliveryAttempts,
+            }
+        );
 
         const publishers = records
             .map(({ eventName, payload }) => {

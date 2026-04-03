@@ -29,6 +29,12 @@ testDomainEventsBus({
                     'group.id': `${random}-my-test-group`,
                 },
             },
+            polling: {
+                interval: dayjs.duration(30, 'seconds'),
+                timeout: dayjs.duration(5, 'minutes'),
+                maxDeliveryAttempts: 10,
+                batchSize: 10,
+            },
         });
 
         return domainEventsBus;

@@ -11,6 +11,7 @@ import {
 } from './plugins';
 import { errorHandler } from './error-handler';
 import { KafkaDomainEventsBus } from '../infrastructure/domain-events/kafka/kafka-domain-events-bus';
+import dayjs from '../lib/dayjs';
 
 const createDomainEventsBus = () => {
     const eventOutboxStorage = EventOutboxStorage.create();
@@ -33,6 +34,20 @@ const createDomainEventsBus = () => {
                 consumer: {
                     'group.id': process.env.KAFKA_GROUP_ID || 'invoices-model',
                 },
+            },
+            polling: {
+                interval: dayjs.duration(
+                    Number(process.env.OUTBOX_POLLING_INTERVAL_S || 30),
+                    'seconds'
+                ),
+                timeout: dayjs.duration(
+                    Number(process.env.OUTBOX_POLLING_TIMEOUT_M || 5),
+                    'minutes'
+                ),
+                maxDeliveryAttempts: Number(
+                    process.env.OUTBOX_MAX_DELIVERY_ATTEMPTS || 10
+                ),
+                batchSize: Number(process.env.OUTBOX_BATCH_SIZE || 10),
             },
         }),
         eventOutboxStorage,
