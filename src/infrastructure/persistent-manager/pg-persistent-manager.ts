@@ -175,7 +175,7 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
                 .map((event) => ({
                     id: event.id,
                     name: event.name,
-                    event: event.serialize(),
+                    payload: event.serialize(),
                 })),
             { transaction: this.getTransaction() }
         );

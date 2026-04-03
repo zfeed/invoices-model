@@ -35,7 +35,7 @@ const EVENT_NAMES = REGISTRY.map((eventClass) => eventClass.eventName());
 const serializeEvent = (event: DomainEvent<unknown>) => ({
     id: event.id,
     name: event.name,
-    event: event.serialize(),
+    payload: event.serialize(),
 });
 
 describe('EventOutboxStorage', () => {
@@ -57,7 +57,7 @@ describe('EventOutboxStorage', () => {
 
             expect(events).toHaveLength(1);
             expect(events[0].eventName).toBe('invoice.issued');
-            expect(events[0].payload).toEqual(serializeEvent(event));
+            expect(events[0].payload).toEqual(serializeEvent(event).payload);
         });
 
         it('should insert multiple events in a single request', async () => {

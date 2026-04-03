@@ -39,7 +39,7 @@ export class EventOutboxStorage<T extends EventClass = EventClass> {
         events: {
             id: string;
             name: string;
-            event: Payload;
+            payload: Payload;
         }[],
         options?: Options
     ) {
@@ -53,7 +53,7 @@ export class EventOutboxStorage<T extends EventClass = EventClass> {
                 events.map((event) => ({
                     id: event.id,
                     event_name: event.name,
-                    payload: JSON.stringify(event),
+                    payload: JSON.stringify(event.payload),
                 }))
             )
             .execute();
