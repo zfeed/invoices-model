@@ -14,75 +14,90 @@ export type CreateBatchPayoutRequestBody = {
     items: {
         receiver: string;
         amount: CurrencyValue;
-        recipientType?: string;
+        recipient_type?: string;
         note?: string;
-        senderItemId?: string;
-        recipientWallet?: string;
-        alternateNotificationMethod?: {
+        sender_item_id?: string;
+        recipient_wallet?: string;
+        alternate_notification_method?: {
             phone?: {
-                countryCode: string;
-                nationalNumber: string;
-                extensionNumber?: string;
+                country_code: string;
+                national_number: string;
+                extension_number?: string;
             };
         };
-        notificationLanguage?: string;
-        applicationContext?: {
-            socialFeedPrivacy?: string;
-            hollerUrl?: string;
-            logoUrl?: string;
+        notification_language?: string;
+        application_context?: {
+            social_feed_privacy?: string;
+            holler_url?: string;
+            logo_url?: string;
         };
     }[];
-    senderBatchHeader: {
-        senderBatchId?: string;
-        emailSubject?: string;
-        emailMessage?: string;
+    sender_batch_header: {
+        sender_batch_id?: string;
+        email_subject?: string;
+        email_message?: string;
         note?: string;
-        recipientType?: string;
+        recipient_type?: string;
     };
 };
 
 export type CreateBatchPayoutResponse = {
-    batchHeader: {
-        senderBatchHeader: {
-            senderBatchId: string;
-            emailSubject: string;
-            emailMessage: string;
+    batch_header: {
+        sender_batch_header: {
+            sender_batch_id: string;
+            email_subject: string;
+            email_message: string;
         };
-        payoutBatchId: string;
-        batchStatus: string;
+        payout_batch_id: string;
+        batch_status: string;
     };
-    batchStatus: string;
-    timeCreated?: string;
+    links: {
+        href: string;
+        rel: string;
+        method: string;
+        encType: string;
+    }[];
 };
 
 export type ShowPayoutBatchDetailsQuery = {
     fields: string;
     page: number;
-    pageSize: number;
-    totalRequired: boolean;
+    page_size: number;
+    total_required: boolean;
 };
 
 export type PayoutItem = {
-    payoutItemId: string;
-    transactionStatus: string;
-    payoutItemFee: CurrencyValue;
-    payoutBatchId: string;
-    payoutItem: {
-        recipientType: string;
+    payout_item_id: string;
+    transaction_status: string;
+    payout_item_fee: CurrencyValue;
+    payout_batch_id: string;
+    payout_item: {
+        recipient_type: string;
         amount: CurrencyValue;
         note: string;
         receiver: string;
-        senderItemId: string;
-        recipientWallet: string;
+        sender_item_id: string;
+        recipient_wallet: string;
         purpose: string;
     };
-    timeProcessed: string;
+    time_processed: string;
     errors?: {
         name: string;
         message: string;
-        informationLink: string;
-        details: any[];
-        links: any[];
+        debug_id: string;
+        information_link: string;
+        details: {
+            field: string;
+            value: string;
+            location: string;
+            issue: string;
+            description: string;
+        }[];
+        links: {
+            href: string;
+            rel: string;
+            method: string;
+        }[];
     };
     links: {
         href: string;
@@ -93,17 +108,19 @@ export type PayoutItem = {
 };
 
 export type ShowPayoutBatchDetailsResponse = {
-    batchHeader: {
-        senderBatchHeader: {
-            senderBatchId: string;
-            emailSubject: string;
-            emailMessage: string;
+    total_items: number;
+    total_pages: number;
+    batch_header: {
+        sender_batch_header: {
+            sender_batch_id: string;
+            email_subject: string;
+            email_message: string;
         };
-        payoutBatchId: string;
-        batchStatus: BatchStatus;
-        timeCreated?: string;
-        timeCompleted?: string;
-        fundingSource: string;
+        payout_batch_id: string;
+        batch_status: BatchStatus;
+        time_created?: string;
+        time_completed?: string;
+        funding_source: string;
         amount: CurrencyValue;
         fees: CurrencyValue;
     };

@@ -5,11 +5,11 @@ export type GetAccessTokenByClientCredentialsRequestBody = {
 };
 
 export type GetAccessTokenByClientCredentialsResponseBody = {
-    accessToken: string;
+    access_token: string;
     scope: string;
-    tokenType: string;
-    appId: string;
-    expiresIn: number;
+    token_type: string;
+    app_id: string;
+    expires_in: number;
     nonce: string;
 };
 

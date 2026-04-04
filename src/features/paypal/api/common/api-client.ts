@@ -31,7 +31,7 @@ type PostRequest = RequestBase & {
 };
 
 type SuccessResponse<T> = {
-    statusCode: 200;
+    statusCode: 200 | 201;
     headers: IncomingHttpHeaders;
     body: T;
 };

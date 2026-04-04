@@ -1,5 +1,7 @@
-import { ApiClient } from '../common/api-client';
+import { Result } from '../../../../shared/result';
+import { ApiClient, ApiResponse } from '../common/api-client';
 import { Path } from '../common/path';
+import { TokenManager } from '../common/token-manager';
 
 import {
     CreateBatchPayoutRequestBody,
@@ -9,20 +11,26 @@ import {
 } from './payouts.types';
 
 export class Payouts {
-    constructor(readonly client: ApiClient) {}
+    constructor(
+        readonly client: ApiClient,
+        private readonly tokenManager: TokenManager
+    ) {}
 
-    createBatchPayout(
-        body: CreateBatchPayoutRequestBody,
-        options: {
-            accessToken: string;
+    async createBatchPayout(
+        body: CreateBatchPayoutRequestBody
+    ): Promise<Result<Error, ApiResponse<CreateBatchPayoutResponse>>> {
+        const token = await this.tokenManager.getAccessToken();
+
+        if (token.isError()) {
+            return token as Result<Error, never>;
         }
-    ) {
+
         return this.client.post<CreateBatchPayoutResponse>({
             uri: {
                 path: Path.create`v1/payments/payouts`,
             },
             headers: {
-                authorization: `Bearer ${options.accessToken}`,
+                authorization: `Bearer ${token.unwrap()}`,
             },
             body,
         });
@@ -30,9 +38,14 @@ export class Payouts {
 
     async showPayoutBatchDetails(
         payoutBatchId: string,
-        accessToken: string,
         query?: ShowPayoutBatchDetailsQuery
-    ) {
+    ): Promise<Result<Error, ApiResponse<ShowPayoutBatchDetailsResponse>>> {
+        const token = await this.tokenManager.getAccessToken();
+
+        if (token.isError()) {
+            return token as Result<Error, never>;
+        }
+
         return this.client.get<ShowPayoutBatchDetailsResponse>({
             uri: {
                 path: Path.create`v1/payments/payouts/${payoutBatchId}`,
@@ -40,13 +53,13 @@ export class Payouts {
                     ? {
                           fields: query.fields,
                           page: String(query.page),
-                          pageSize: String(query.pageSize),
-                          totalRequired: String(query.totalRequired),
+                          page_size: String(query.page_size),
+                          total_required: String(query.total_required),
                       }
                     : undefined,
             },
             headers: {
-                authorization: `Bearer ${accessToken}`,
+                authorization: `Bearer ${token.unwrap()}`,
             },
         });
     }
