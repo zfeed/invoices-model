@@ -1,22 +1,14 @@
-import { DomainError } from './errors/domain/domain.error';
-
 export enum RESULT_TYPE {
     ERROR,
     OK,
 }
 
-export class Result<
-    L extends DomainError,
-    R,
-    T extends RESULT_TYPE = RESULT_TYPE,
-> {
-    static ok<L extends DomainError = never, T = never>(
-        value: T
-    ): Result<L, T, RESULT_TYPE.OK> {
+export class Result<L, R, T extends RESULT_TYPE = RESULT_TYPE> {
+    static ok<L = never, T = never>(value: T): Result<L, T, RESULT_TYPE.OK> {
         return new Result<L, T, RESULT_TYPE.OK>(RESULT_TYPE.OK, value);
     }
 
-    static error<T extends DomainError = never, R = never>(
+    static error<T = never, R = never>(
         value: T
     ): Result<T, R, RESULT_TYPE.ERROR> {
         return new Result<T, R, RESULT_TYPE.ERROR>(RESULT_TYPE.ERROR, value);
