@@ -4,6 +4,7 @@ import type { IncomingHttpHeaders } from 'undici/types/header';
 import { Result } from '../../../../shared/result';
 import { PayPalError, PayPalOAuthError } from './error';
 import { Path } from './path';
+import { Retry, RetryConfig } from './retry';
 
 type Hooks = {
     onRequest?: (options: Dispatcher.DispatchOptions) => void;
@@ -14,6 +15,7 @@ type Hooks = {
 export type Config = {
     baseUrl: URL;
     hooks?: Hooks;
+    retry?: RetryConfig;
 };
 
 type RequestBase = {
@@ -53,9 +55,11 @@ export type ApiResponse<T = unknown> =
 
 export class ApiClient {
     private client: Client;
+    private retry: Retry | null;
 
     constructor(private config: Config) {
         this.client = new Client(config.baseUrl);
+        this.retry = config.retry ? new Retry(config.retry) : null;
     }
 
     async get<R>(request: RequestBase): Promise<Result<Error, ApiResponse<R>>> {
@@ -96,7 +100,7 @@ export class ApiClient {
         });
     }
 
-    private async send<R>(
+    private async sendOnce<R>(
         options: Dispatcher.RequestOptions
     ): Promise<Result<Error, ApiResponse<R>>> {
         this.config.hooks?.onRequest?.(options);
@@ -121,5 +125,18 @@ export class ApiClient {
                 error instanceof Error ? error : new Error(String(error))
             );
         }
+    }
+
+    private async send<R>(
+        options: Dispatcher.RequestOptions
+    ): Promise<Result<Error, ApiResponse<R>>> {
+        if (!this.retry) {
+            return this.sendOnce(options);
+        }
+
+        return this.retry.execute(
+            () => this.sendOnce<R>(options),
+            (result) => result.isOk() && result.unwrap().statusCode === 429
+        );
     }
 }
