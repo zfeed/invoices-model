@@ -20,18 +20,14 @@ export class Payouts {
         body: CreateBatchPayoutRequestBody,
         options?: { requestId?: string }
     ): Promise<Result<Error, ApiResponse<CreateBatchPayoutResponse>>> {
-        const token = await this.tokenManager.getAccessToken();
-
-        if (token.isError()) {
-            return token as Result<Error, never>;
-        }
+        const token = (await this.tokenManager.getAccessToken()).unwrap();
 
         return this.client.post<CreateBatchPayoutResponse>({
             uri: {
                 path: Path.create`v1/payments/payouts`,
             },
             headers: {
-                authorization: `Bearer ${token.unwrap()}`,
+                authorization: `Bearer ${token}`,
                 ...(options?.requestId && {
                     'paypal-request-id': options.requestId,
                 }),
