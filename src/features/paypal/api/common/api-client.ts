@@ -1,6 +1,7 @@
 import { Client, Dispatcher } from 'undici';
 import type { IncomingHttpHeaders } from 'undici/types/header';
 
+import { Duration } from '../../../../lib/dayjs';
 import { Result } from '../../../../shared/result';
 import { PayPalError, PayPalOAuthError } from './error';
 import { Path } from './path';
@@ -16,6 +17,8 @@ export type Config = {
     baseUrl: URL;
     hooks?: Hooks;
     retry?: RetryConfig;
+    timeout?: Duration;
+    maxResponseSizeBytes?: number;
 };
 
 type RequestBase = {
@@ -56,10 +59,14 @@ export type ApiResponse<T = unknown> =
 export class ApiClient {
     private client: Client;
     private retry: Retry | null;
+    private timeoutMs: number | undefined;
 
     constructor(private config: Config) {
-        this.client = new Client(config.baseUrl);
+        this.client = new Client(config.baseUrl, {
+            maxResponseSize: config.maxResponseSizeBytes,
+        });
         this.retry = config.retry ? new Retry(config.retry) : null;
+        this.timeoutMs = config.timeout?.asMilliseconds();
     }
 
     async get<R>(request: RequestBase): Promise<Result<Error, ApiResponse<R>>> {
@@ -106,7 +113,11 @@ export class ApiClient {
         this.config.hooks?.onRequest?.(options);
 
         try {
-            const response = await this.client.request(options);
+            const response = await this.client.request({
+                ...options,
+                headersTimeout: this.timeoutMs,
+                bodyTimeout: this.timeoutMs,
+            });
 
             this.config.hooks?.onResponse?.(response);
 
