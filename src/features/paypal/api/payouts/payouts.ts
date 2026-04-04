@@ -18,7 +18,7 @@ export class Payouts {
 
     async createBatchPayout(
         body: CreateBatchPayoutRequestBody,
-        options?: { requestId?: string }
+        options?: { idempotencyKey?: string }
     ): Promise<Result<Error, ApiResponse<CreateBatchPayoutResponse>>> {
         const token = (await this.tokenManager.getAccessToken()).unwrap();
 
@@ -28,8 +28,8 @@ export class Payouts {
             },
             headers: {
                 authorization: `Bearer ${token}`,
-                ...(options?.requestId && {
-                    'paypal-request-id': options.requestId,
+                ...(options?.idempotencyKey && {
+                    'paypal-request-id': options.idempotencyKey,
                 }),
             },
             body,
