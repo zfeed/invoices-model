@@ -17,7 +17,8 @@ export class Payouts {
     ) {}
 
     async createBatchPayout(
-        body: CreateBatchPayoutRequestBody
+        body: CreateBatchPayoutRequestBody,
+        options?: { requestId?: string }
     ): Promise<Result<Error, ApiResponse<CreateBatchPayoutResponse>>> {
         const token = await this.tokenManager.getAccessToken();
 
@@ -31,6 +32,9 @@ export class Payouts {
             },
             headers: {
                 authorization: `Bearer ${token.unwrap()}`,
+                ...(options?.requestId && {
+                    'paypal-request-id': options.requestId,
+                }),
             },
             body,
         });
