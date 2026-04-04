@@ -20,15 +20,14 @@ export class Login {
         return this.client.post<GetAccessTokenByClientCredentialsResponseBody>({
             uri: {
                 path: Path.create`v1/oauth2/token`,
-                query: {
-                    grant_type: 'client_credentials',
-                },
             },
             headers: {
                 'content-type': 'application/x-www-form-urlencoded',
                 authorization: `Basic ${credentials}`,
             },
-            body: {},
+            body: {
+                grant_type: 'client_credentials',
+            },
         });
     }
 

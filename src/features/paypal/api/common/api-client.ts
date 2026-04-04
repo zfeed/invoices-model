@@ -60,7 +60,7 @@ export class ApiClient {
 
     async get<R>(request: RequestBase): Promise<Result<Error, ApiResponse<R>>> {
         return this.send<R>({
-            path: request.uri.path.value,
+            path: `/${request.uri.path.value}`,
             query: request.uri.query,
             origin: this.config.baseUrl,
             method: 'GET',
@@ -73,16 +73,26 @@ export class ApiClient {
     async post<R>(
         request: PostRequest
     ): Promise<Result<Error, ApiResponse<R>>> {
+        const contentType =
+            request.headers?.['content-type'] ?? 'application/json';
+
+        const body =
+            contentType === 'application/x-www-form-urlencoded'
+                ? new URLSearchParams(
+                      request.body as Record<string, string>
+                  ).toString()
+                : JSON.stringify(request.body);
+
         return this.send<R>({
-            path: request.uri.path.value,
+            path: `/${request.uri.path.value}`,
             query: request.uri.query,
             origin: this.config.baseUrl,
             method: 'POST',
             headers: {
-                'content-type': 'application/json',
+                'content-type': contentType,
                 ...request.headers,
             },
-            body: JSON.stringify(request.body),
+            body,
         });
     }
 
@@ -96,7 +106,8 @@ export class ApiClient {
 
             this.config.hooks?.onResponse?.(response);
 
-            const body: unknown = await response.body.json();
+            const text = (await response.body.text()).trim();
+            const body: unknown = text.length > 0 ? JSON.parse(text) : null;
 
             return Result.ok({
                 statusCode: response.statusCode,
