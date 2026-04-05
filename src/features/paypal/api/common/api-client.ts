@@ -33,19 +33,37 @@ type PostRequest = RequestBase & {
     body: Record<string, unknown>;
 };
 
-type SuccessResponse<T> = {
+export type SuccessResponse<T> = {
     statusCode: 200 | 201;
     headers: IncomingHttpHeaders;
     body: T;
 };
 
-type ErrorResponse = {
-    statusCode: 400 | 403 | 404 | 405 | 409 | 415 | 422 | 429 | 500 | 503;
+export type ClientErrorStatusCode =
+    | 400
+    | 401
+    | 403
+    | 404
+    | 405
+    | 409
+    | 415
+    | 422;
+
+export type RetryableErrorStatusCode = 429 | 500 | 503;
+
+export type ClientErrorResponse = {
+    statusCode: Exclude<ClientErrorStatusCode, 401>;
     headers: IncomingHttpHeaders;
     body: PayPalError;
 };
 
-type OAuthErrorResponse = {
+export type RetryableErrorResponse = {
+    statusCode: RetryableErrorStatusCode;
+    headers: IncomingHttpHeaders;
+    body: PayPalError;
+};
+
+export type OAuthErrorResponse = {
     statusCode: 401;
     headers: IncomingHttpHeaders;
     body: PayPalOAuthError;
@@ -53,7 +71,8 @@ type OAuthErrorResponse = {
 
 export type ApiResponse<T = unknown> =
     | SuccessResponse<T>
-    | ErrorResponse
+    | ClientErrorResponse
+    | RetryableErrorResponse
     | OAuthErrorResponse;
 
 export class ApiClient {
