@@ -13,13 +13,10 @@ import { CreateAuthflowPolicy } from './features/financial-authorization/applica
 import { ApproveActionOnDocument } from './features/financial-authorization/application/commands/approve-action-on-document';
 import { CanApproverApprove } from './features/financial-authorization/application/queries/can-approver-approve';
 import { OnInvoiceIssued } from './features/financial-authorization/application/event-handlers/on-invoice-issued';
-import { OnInvoiceProcessing } from './features/paypal/handlers/on-invoice-processing';
-import { Payouts } from './features/paypal/async/payouts/payouts';
 
 type Infrastructure = {
     session: Session;
     domainEventsBus: DomainEventsBus;
-    payouts: Payouts;
 };
 
 export const bootstrap = async (infra: Infrastructure) => {
@@ -28,12 +25,6 @@ export const bootstrap = async (infra: Infrastructure) => {
         infra.domainEventsBus
     );
     await onInvoiceIssued.register();
-
-    const onInvoiceProcessing = new OnInvoiceProcessing(
-        infra.payouts,
-        infra.domainEventsBus
-    );
-    await onInvoiceProcessing.register();
 
     const canApproverApprove = new CanApproverApprove(infra.session);
 

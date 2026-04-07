@@ -12,7 +12,6 @@ import {
 import { errorHandler } from './error-handler';
 import { KafkaDomainEventsBus } from '../infrastructure/domain-events/kafka/kafka-domain-events-bus';
 import PgBoss from 'pg-boss';
-import { AsyncPaypal } from '../features/paypal/async/paypal';
 import dayjs from '../lib/dayjs';
 
 const createDomainEventsBus = () => {
@@ -62,21 +61,11 @@ export const createApp = async () => {
     const boss = new PgBoss(process.env.DATABASE_URL!);
     await boss.start();
 
-    const paypal = new AsyncPaypal(boss, domainEventsBus, {
-        baseUrl: new URL(process.env.PAYPAL_BASE_URL!),
-        credentials: {
-            clientId: process.env.PAYPAL_CLIENT_ID!,
-            clientSecret: process.env.PAYPAL_CLIENT_SECRET!,
-        },
-    });
-    await paypal.payouts.register();
-
     const commands = await bootstrap({
         session: new Session(
             new PersistentManager(domainEventsBus, eventOutboxStorage)
         ),
         domainEventsBus,
-        payouts: paypal.payouts,
     });
 
     await commands.start();
