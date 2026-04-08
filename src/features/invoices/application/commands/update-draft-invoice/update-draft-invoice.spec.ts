@@ -46,14 +46,14 @@ describe('UpdateDraftInvoice', () => {
         });
 
         expect(result.lineItems).not.toBeNull();
-        expect(result.lineItems!.items).toHaveLength(1);
-        expect(result.lineItems!.items[0]).toEqual(
+        expect(result.lineItems!).toHaveLength(1);
+        expect(result.lineItems![0]).toEqual(
             expect.objectContaining({
                 description: 'Consulting',
                 quantity: '2',
             })
         );
-        expect(result.total).toEqual({ amount: '200', currency: 'USD' });
+        expect(result.totalAmount).toBe('200');
     });
 
     it('should add line items to a draft that had none', async () => {
@@ -69,14 +69,14 @@ describe('UpdateDraftInvoice', () => {
             ],
         });
 
-        expect(result.lineItems!.items).toHaveLength(1);
-        expect(result.lineItems!.items[0]).toEqual(
+        expect(result.lineItems!).toHaveLength(1);
+        expect(result.lineItems![0]).toEqual(
             expect.objectContaining({
                 description: 'New item',
                 quantity: '3',
             })
         );
-        expect(result.total).toEqual({ amount: '600', currency: 'USD' });
+        expect(result.totalAmount).toBe('600');
     });
 
     it('should update vat rate', async () => {
@@ -95,8 +95,8 @@ describe('UpdateDraftInvoice', () => {
         });
 
         expect(result.vatRate).toBe('0.2');
-        expect(result.total).toEqual({ amount: '120', currency: 'USD' });
-        expect(result.vatAmount).toEqual({ amount: '20', currency: 'USD' });
+        expect(result.totalAmount).toBe('120');
+        expect(result.vatAmount).toBe('20');
     });
 
     it('should update issue date', async () => {
@@ -203,9 +203,9 @@ describe('UpdateDraftInvoice', () => {
             },
         });
 
-        expect(result.lineItems!.items).toHaveLength(1);
+        expect(result.lineItems!).toHaveLength(1);
         expect(result.vatRate).toBe('0.15');
-        expect(result.total).toEqual({ amount: '115', currency: 'USD' });
+        expect(result.totalAmount).toBe('115');
         expect(result.issueDate).toBe('2025-01-01');
         expect(result.dueDate).toBe('2025-02-01');
         expect(result.issuer).not.toBeNull();

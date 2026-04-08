@@ -7,6 +7,7 @@ import { Paypal } from '../../../domain/billing/paypal/paypal';
 import { Recipient, RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
 import { VatRate } from '../../../domain/vat-rate/vat-rate';
 import { Session } from '../../../../../shared/unit-of-work/unit-of-work';
+import { DraftInvoiceDto } from '../../queries/get-draft-invoice/draft-invoice.dto';
 
 export class CreateDraftInvoice {
     constructor(private readonly session: Session) {}
@@ -92,6 +93,6 @@ export class CreateDraftInvoice {
 
         await unitOfWork.commit();
 
-        return draftInvoice.toPlain();
+        return DraftInvoiceDto.fromDraftInvoice(draftInvoice);
     }
 }

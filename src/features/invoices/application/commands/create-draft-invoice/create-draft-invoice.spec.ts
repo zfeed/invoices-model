@@ -30,9 +30,11 @@ describe('CreateDraftInvoice', () => {
             expect.objectContaining({
                 id: expect.any(String),
                 lineItems: null,
-                total: null,
+                totalAmount: null,
+                totalCurrency: null,
                 vatRate: null,
                 vatAmount: null,
+                vatCurrency: null,
                 issueDate: null,
                 dueDate: null,
                 issuer: null,
@@ -67,14 +69,15 @@ describe('CreateDraftInvoice', () => {
         });
 
         expect(result.lineItems).not.toBeNull();
-        expect(result.lineItems!.items).toHaveLength(1);
-        expect(result.lineItems!.items[0]).toEqual(
+        expect(result.lineItems!).toHaveLength(1);
+        expect(result.lineItems![0]).toEqual(
             expect.objectContaining({
                 description: 'Consulting',
                 quantity: '2',
             })
         );
-        expect(result.total).toEqual({ amount: '200', currency: 'USD' });
+        expect(result.totalAmount).toBe('200');
+        expect(result.totalCurrency).toBe('USD');
     });
 
     it('should create a draft invoice with multiple line items', async () => {
@@ -93,8 +96,8 @@ describe('CreateDraftInvoice', () => {
             ],
         });
 
-        expect(result.lineItems!.items).toHaveLength(2);
-        expect(result.total).toEqual({ amount: '650', currency: 'USD' });
+        expect(result.lineItems!).toHaveLength(2);
+        expect(result.totalAmount).toBe('650');
     });
 
     it('should create a draft invoice with vat rate', async () => {
@@ -110,8 +113,8 @@ describe('CreateDraftInvoice', () => {
         });
 
         expect(result.vatRate).toBe('0.2');
-        expect(result.total).toEqual({ amount: '120', currency: 'USD' });
-        expect(result.vatAmount).toEqual({ amount: '20', currency: 'USD' });
+        expect(result.totalAmount).toBe('120');
+        expect(result.vatAmount).toBe('20');
     });
 
     it('should create a draft invoice with issue date', async () => {
@@ -209,9 +212,9 @@ describe('CreateDraftInvoice', () => {
         });
 
         expect(result.lineItems).not.toBeNull();
-        expect(result.total).toEqual({ amount: '220', currency: 'USD' });
+        expect(result.totalAmount).toBe('220');
         expect(result.vatRate).toBe('0.1');
-        expect(result.vatAmount).toEqual({ amount: '20', currency: 'USD' });
+        expect(result.vatAmount).toBe('20');
         expect(result.issueDate).toBe('2025-01-01');
         expect(result.dueDate).toBe('2025-02-01');
         expect(result.issuer).not.toBeNull();

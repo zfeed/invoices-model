@@ -3,6 +3,7 @@ import { ApplicationError } from '../../../../../shared/errors/application/appli
 import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
 import { Id } from '../../../domain/id/id';
 import { Session } from '../../../../../shared/unit-of-work/unit-of-work';
+import { DraftInvoiceDto } from '../../queries/get-draft-invoice/draft-invoice.dto';
 
 export class DraftDraftInvoice {
     constructor(private readonly session: Session) {}
@@ -25,6 +26,6 @@ export class DraftDraftInvoice {
 
         await unitOfWork.commit();
 
-        return draftInvoice.toPlain();
+        return DraftInvoiceDto.fromDraftInvoice(draftInvoice);
     }
 }

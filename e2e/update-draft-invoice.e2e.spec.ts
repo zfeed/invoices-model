@@ -25,21 +25,23 @@ describe('POST /invoices/drafts/:id/update', () => {
         const json = await res.json();
         expect(json.data.id).toBe(draft.id);
         expect(json.data.status).toBe('DRAFT');
-        expect(json.data.lineItems.items).toHaveLength(1);
-        expect(json.data.lineItems.items[0]).toEqual({
+        expect(json.data.lineItems).toHaveLength(1);
+        expect(json.data.lineItems[0]).toEqual({
             id: expect.any(String),
             description: 'Consulting',
-            price: { amount: '100', currency: 'USD' },
+            priceAmount: '100',
+            priceCurrency: 'USD',
             quantity: '2',
-            total: { amount: '200', currency: 'USD' },
+            totalAmount: '200',
+            totalCurrency: 'USD',
         });
-        expect(json.data.lineItems.subtotal).toEqual({
-            amount: '200',
-            currency: 'USD',
-        });
+        expect(json.data.subtotalAmount).toBe('200');
+        expect(json.data.subtotalCurrency).toBe('USD');
         expect(json.data.vatRate).toBe('0.2');
-        expect(json.data.vatAmount).toEqual({ amount: '40', currency: 'USD' });
-        expect(json.data.total).toEqual({ amount: '240', currency: 'USD' });
+        expect(json.data.vatAmount).toBe('40');
+        expect(json.data.vatCurrency).toBe('USD');
+        expect(json.data.totalAmount).toBe('240');
+        expect(json.data.totalCurrency).toBe('USD');
     });
 
     it('updates with empty body', async () => {

@@ -16,7 +16,7 @@ describe('POST /invoices/drafts/:id/complete', () => {
         expect(json.data).toEqual(INVOICE_SHAPE);
         expect(json.data.status).toBe('ISSUED');
         expect(json.data.id).toEqual(expect.any(String));
-        expect(json.data.lineItems.items).toHaveLength(1);
+        expect(json.data.lineItems).toHaveLength(1);
         expect(json.data.issueDate).toBe('2025-01-01');
         expect(json.data.dueDate).toBe('2025-02-01');
     });

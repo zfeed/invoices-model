@@ -53,9 +53,7 @@ describe('GET /invoices/:id', () => {
     });
 
     it('returns 422 for non-existent invoice', async () => {
-        const res = await get(
-            '/invoices/00000000-0000-0000-0000-000000000000'
-        );
+        const res = await get('/invoices/00000000-0000-0000-0000-000000000000');
         expect(res.status).toBe(422);
         const json = await res.json();
         expect(json.error.code).toBe('A1000');

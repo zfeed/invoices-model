@@ -24,20 +24,23 @@ describe('POST /invoices/drafts/calculate', () => {
         const json = await res.json();
         expect(json.data.id).toEqual(expect.any(String));
         expect(json.data.status).toBe('DRAFT');
-        expect(json.data.lineItems.items).toHaveLength(1);
-        expect(json.data.lineItems.items[0]).toEqual({
+        expect(json.data.lineItems).toHaveLength(1);
+        expect(json.data.lineItems[0]).toEqual({
+            id: expect.any(String),
             description: 'Service',
-            price: { amount: '200', currency: 'USD' },
+            priceAmount: '200',
+            priceCurrency: 'USD',
             quantity: '3',
-            total: { amount: '600', currency: 'USD' },
+            totalAmount: '600',
+            totalCurrency: 'USD',
         });
-        expect(json.data.lineItems.subtotal).toEqual({
-            amount: '600',
-            currency: 'USD',
-        });
+        expect(json.data.subtotalAmount).toBe('600');
+        expect(json.data.subtotalCurrency).toBe('USD');
         expect(json.data.vatRate).toBe('0.1');
-        expect(json.data.vatAmount).toEqual({ amount: '60', currency: 'USD' });
-        expect(json.data.total).toEqual({ amount: '660', currency: 'USD' });
+        expect(json.data.vatAmount).toBe('60');
+        expect(json.data.vatCurrency).toBe('USD');
+        expect(json.data.totalAmount).toBe('660');
+        expect(json.data.totalCurrency).toBe('USD');
         expect(json.data.issueDate).toBeNull();
         expect(json.data.dueDate).toBeNull();
         expect(json.data.issuer).toBeNull();
