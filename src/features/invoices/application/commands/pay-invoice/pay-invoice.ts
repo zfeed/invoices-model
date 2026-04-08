@@ -4,6 +4,7 @@ import { CanApproverApprove } from '../../../../financial-authorization/applicat
 import { Id } from '../../../domain/id/id';
 import { Invoice } from '../../../domain/invoice/invoice';
 import { Session } from '../../../../../shared/unit-of-work/unit-of-work';
+import { InvoiceDto } from '../../queries/get-invoice/invoice.dto';
 
 export class PayInvoice {
     constructor(
@@ -42,6 +43,6 @@ export class PayInvoice {
 
         await unitOfWork.commit();
 
-        return invoice.toPlain();
+        return InvoiceDto.fromInvoice(invoice);
     }
 }

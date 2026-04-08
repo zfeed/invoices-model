@@ -57,6 +57,7 @@ export class DraftInvoiceDataMapper extends DraftInvoice {
                 lineItemRows.length > 0
                     ? {
                           items: lineItemRows.map((r) => ({
+                              id: { value: r.draft_invoice_line_item_id! },
                               description: {
                                   value: r.draft_invoice_line_item_description!,
                               },

@@ -106,6 +106,7 @@ export class InvoiceStorage {
             .whenNotMatched()
             .thenInsertValues(
                 record.lineItems.items.map((item) => ({
+                    id: item.id.value,
                     invoice_id: record.id.value,
                     description: item.description.value,
                     price_amount: item.price.amount.value,

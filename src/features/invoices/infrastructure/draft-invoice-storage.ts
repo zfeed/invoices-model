@@ -124,6 +124,7 @@ export class DraftInvoiceStorage {
                 .insertInto('draft_invoice_line_items')
                 .values(
                     record.lineItems.items.map((item) => ({
+                        id: item.id.value,
                         draft_invoice_id: record.id.value,
                         description: item.description.value,
                         price_amount: item.price.amount.value,

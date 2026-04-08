@@ -1,4 +1,5 @@
 import { Equatable, Mappable, Result } from '../../../../shared';
+import { Id } from '../id/id';
 import { Money } from '../money/money/money';
 import { UnitDescription } from './unit-description/unit-description';
 import { UnitQuantity } from './unit-quantity/unit-quantity';
@@ -6,21 +7,28 @@ import { UnitQuantity } from './unit-quantity/unit-quantity';
 export class LineItem
     implements Equatable<LineItem>, Mappable<ReturnType<LineItem['toPlain']>>
 {
+    protected _id: Id;
     protected _price: Money;
     protected _description: UnitDescription;
     protected _quantity: UnitQuantity;
     protected _total: Money;
 
     protected constructor(
+        id: Id,
         description: UnitDescription,
         price: Money,
         quantity: UnitQuantity,
         total: Money
     ) {
+        this._id = id;
         this._description = description;
         this._price = price;
         this._quantity = quantity;
         this._total = total;
+    }
+
+    get id(): Id {
+        return this._id;
     }
 
     get price(): Money {
@@ -49,6 +57,7 @@ export class LineItem
 
     toPlain() {
         return {
+            id: this._id.toPlain(),
             description: this._description.toPlain(),
             price: this._price.toPlain(),
             quantity: this._quantity.toPlain(),
@@ -93,7 +102,13 @@ export class LineItem
         const unitTotal = unitPrice.multiplyBy(unitQuantity.value);
 
         return Result.ok(
-            new LineItem(unitDescription, unitPrice, unitQuantity, unitTotal)
+            new LineItem(
+                Id.create().unwrap(),
+                unitDescription,
+                unitPrice,
+                unitQuantity,
+                unitTotal
+            )
         );
     }
 }

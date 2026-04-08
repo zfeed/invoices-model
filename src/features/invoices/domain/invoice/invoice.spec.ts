@@ -122,12 +122,14 @@ describe('Invoice', () => {
                     lineItems: {
                         items: [
                             {
+                                id: expect.any(String),
                                 description: 'Item 1',
                                 price: { amount: '50', currency: 'USD' },
                                 quantity: '2',
                                 total: { amount: '100', currency: 'USD' },
                             },
                             {
+                                id: expect.any(String),
                                 description: 'Item 2',
                                 price: { amount: '100', currency: 'USD' },
                                 quantity: '1',

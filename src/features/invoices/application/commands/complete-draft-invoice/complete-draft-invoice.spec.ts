@@ -91,9 +91,11 @@ describe('CompleteDraftInvoice', () => {
                 vatRate: '0.1',
             })
         );
-        expect(result.lineItems.items).toHaveLength(1);
-        expect(result.total).toEqual({ amount: '220', currency: 'USD' });
-        expect(result.vatAmount).toEqual({ amount: '20', currency: 'USD' });
+        expect(result.lineItems).toHaveLength(1);
+        expect(result.totalAmount).toBe('220');
+        expect(result.totalCurrency).toBe('USD');
+        expect(result.vatAmount).toBe('20');
+        expect(result.vatCurrency).toBe('USD');
         expect(result.issuer).not.toBeNull();
         expect(result.recipient).not.toBeNull();
     });

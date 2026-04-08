@@ -4,6 +4,7 @@ import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
 import { Id } from '../../../domain/id/id';
 import { Invoice } from '../../../domain/invoice/invoice';
 import { Session } from '../../../../../shared/unit-of-work/unit-of-work';
+import { InvoiceDto } from '../../queries/get-invoice/invoice.dto';
 
 export class CompleteDraftInvoice {
     constructor(private readonly session: Session) {}
@@ -28,6 +29,6 @@ export class CompleteDraftInvoice {
 
         await unitOfWork.commit();
 
-        return invoice.toPlain();
+        return InvoiceDto.fromInvoice(invoice);
     }
 }

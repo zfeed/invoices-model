@@ -1,4 +1,5 @@
 import { LineItem } from '../../domain/line-item/line-item';
+import { IdDataMapper, IdRecord } from './id.data-mapper';
 import { MoneyDataMapper, MoneyRecord } from './money.data-mapper';
 import {
     UnitDescriptionDataMapper,
@@ -10,6 +11,7 @@ import {
 } from './unit-quantity.data-mapper';
 
 export type LineItemRecord = {
+    id: IdRecord;
     description: UnitDescriptionRecord;
     price: MoneyRecord;
     quantity: UnitQuantityRecord;
@@ -26,6 +28,7 @@ export class LineItemDataMapper extends LineItem {
 
     static fromRecord(record: LineItemRecord): LineItemDataMapper {
         return new LineItemDataMapper(
+            IdDataMapper.fromRecord(record.id),
             UnitDescriptionDataMapper.fromRecord(record.description),
             MoneyDataMapper.fromRecord(record.price),
             UnitQuantityDataMapper.fromRecord(record.quantity),
@@ -35,6 +38,7 @@ export class LineItemDataMapper extends LineItem {
 
     toRecord(): LineItemRecord {
         return {
+            id: IdDataMapper.from(this._id).toRecord(),
             description: UnitDescriptionDataMapper.from(
                 this._description
             ).toRecord(),

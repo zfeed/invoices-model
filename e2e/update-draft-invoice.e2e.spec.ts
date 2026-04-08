@@ -27,6 +27,7 @@ describe('POST /invoices/drafts/:id/update', () => {
         expect(json.data.status).toBe('DRAFT');
         expect(json.data.lineItems.items).toHaveLength(1);
         expect(json.data.lineItems.items[0]).toEqual({
+            id: expect.any(String),
             description: 'Consulting',
             price: { amount: '100', currency: 'USD' },
             quantity: '2',

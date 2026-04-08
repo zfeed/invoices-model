@@ -53,6 +53,7 @@ export class InvoiceDataMapper extends Invoice {
             status: { value: row.status as INVOICE_STATUS },
             lineItems: {
                 items: lineItemRows.map((r) => ({
+                    id: { value: r.invoice_line_item_id! },
                     description: {
                         value: r.invoice_line_item_description!,
                     },

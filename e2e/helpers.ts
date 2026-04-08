@@ -176,29 +176,55 @@ export const POPULATED_DRAFT_SHAPE = {
     recipient: expect.objectContaining(recipient),
 };
 
+const dtoIssuer = {
+    type: expect.any(String),
+    name: expect.any(String),
+    address: expect.any(String),
+    taxId: expect.any(String),
+    email: expect.any(String),
+};
+
+const dtoRecipient = {
+    type: expect.any(String),
+    name: expect.any(String),
+    address: expect.any(String),
+    taxId: expect.any(String),
+    email: expect.any(String),
+    taxResidenceCountry: expect.any(String),
+    paypalEmail: expect.toSatisfy(
+        (v: unknown) => typeof v === 'string' || v === null
+    ),
+};
+
+const dtoLineItem = {
+    id: expect.any(String),
+    description: expect.any(String),
+    priceAmount: expect.any(String),
+    priceCurrency: expect.any(String),
+    quantity: expect.any(String),
+    totalAmount: expect.any(String),
+    totalCurrency: expect.any(String),
+};
+
+const nullableString = expect.toSatisfy(
+    (v: unknown) => typeof v === 'string' || v === null
+);
+
 export const INVOICE_SHAPE = {
     id: expect.any(String),
     status: expect.any(String),
-    lineItems: {
-        items: expect.arrayContaining([expect.objectContaining(lineItem)]),
-        subtotal: money,
-    },
-    total: money,
-    vatRate: expect.toSatisfy(
-        (v: unknown) => typeof v === 'string' || v === null
-    ),
-    vatAmount: expect.toSatisfy(
-        (v: unknown) =>
-            v === null ||
-            (typeof v === 'object' &&
-                v !== null &&
-                'amount' in v &&
-                'currency' in v)
-    ),
+    subtotalAmount: expect.any(String),
+    subtotalCurrency: expect.any(String),
+    totalAmount: expect.any(String),
+    totalCurrency: expect.any(String),
+    vatRate: nullableString,
+    vatAmount: nullableString,
+    vatCurrency: nullableString,
     issueDate: expect.any(String),
     dueDate: expect.any(String),
-    issuer: expect.objectContaining(issuer),
-    recipient: expect.objectContaining(recipient),
+    issuer: dtoIssuer,
+    recipient: dtoRecipient,
+    lineItems: expect.arrayContaining([expect.objectContaining(dtoLineItem)]),
 };
 
 export const AUTHFLOW_POLICY_SHAPE = {
