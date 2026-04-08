@@ -4,11 +4,7 @@ import {
 } from '../../shared/events/domain-event';
 import { type Duration } from '../../lib/dayjs';
 import { sql } from 'kysely';
-import {
-    kysely as defaultKysely,
-    type Kysely,
-    type ControlledTransaction,
-} from '../../../database/kysely';
+import type { Kysely, ControlledTransaction } from '../../../database/kysely';
 
 type EventClass = DomainEventClass;
 type EventInstance<T extends EventClass> =
@@ -27,12 +23,14 @@ type PollOptions = Options & {
 type Payload = Record<string, unknown>;
 
 export class EventOutboxStorage<T extends EventClass = EventClass> {
+    constructor(private readonly kysely: Kysely) {}
+
     private db(options?: Options): Kysely | ControlledTransaction {
-        return options?.transaction ?? defaultKysely;
+        return options?.transaction ?? this.kysely;
     }
 
-    static create<T extends EventClass>(): EventOutboxStorage<T> {
-        return new EventOutboxStorage();
+    static create<T extends EventClass>(kysely: Kysely): EventOutboxStorage<T> {
+        return new EventOutboxStorage(kysely);
     }
 
     async insert(

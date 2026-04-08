@@ -5,6 +5,7 @@ import { InMemoryDomainEventsBus } from '../../../../infrastructure/domain-event
 import { EventOutboxStorage } from '../../../../infrastructure/event-outbox/event-outbox';
 import { CanApproverApprove } from './can-approver-approve';
 import { cleanDatabase } from '../../../../infrastructure/persistent-manager/clean-database';
+import { kysely } from '../../../../../database/kysely';
 import { Action } from '../../domain/action/action';
 import { Approval } from '../../domain/approval/approval';
 import { Approver } from '../../domain/approver/approver';
@@ -75,13 +76,14 @@ const createDocumentFixture = (overrides: {
 };
 
 describe('CanApproverApprove', () => {
-    beforeEach(cleanDatabase);
+    beforeEach(() => cleanDatabase(kysely));
 
     it('should return UNKNOWN when document does not exist', async () => {
         const session = new Session(
             new PersistentManager(
+                kysely,
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create()
+                EventOutboxStorage.create(kysely)
             )
         );
         const question = new CanApproverApprove(session);
@@ -98,8 +100,9 @@ describe('CanApproverApprove', () => {
     it('should return YES when approver can approve the action', async () => {
         const session = new Session(
             new PersistentManager(
+                kysely,
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create()
+                EventOutboxStorage.create(kysely)
             )
         );
         const approverId = uuid();
@@ -127,8 +130,9 @@ describe('CanApproverApprove', () => {
     it('should return NO when approver is not in any group', async () => {
         const session = new Session(
             new PersistentManager(
+                kysely,
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create()
+                EventOutboxStorage.create(kysely)
             )
         );
         const approverId = uuid();
@@ -156,8 +160,9 @@ describe('CanApproverApprove', () => {
     it('should return NO when authflow is already approved', async () => {
         const session = new Session(
             new PersistentManager(
+                kysely,
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create()
+                EventOutboxStorage.create(kysely)
             )
         );
         const approverId = uuid();
@@ -204,8 +209,9 @@ describe('CanApproverApprove', () => {
     it('should return NO when action does not exist on the document', async () => {
         const session = new Session(
             new PersistentManager(
+                kysely,
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create()
+                EventOutboxStorage.create(kysely)
             )
         );
         const approverId = uuid();
@@ -233,8 +239,9 @@ describe('CanApproverApprove', () => {
     it('should return NO when approver is in a later step', async () => {
         const session = new Session(
             new PersistentManager(
+                kysely,
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create()
+                EventOutboxStorage.create(kysely)
             )
         );
         const approverId1 = uuid();

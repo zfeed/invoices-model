@@ -2,6 +2,7 @@ import { Session } from '../../../../../shared/unit-of-work/unit-of-work';
 import { PersistentManager } from '../../../../../infrastructure/persistent-manager/pg-persistent-manager';
 import { InMemoryDomainEventsBus } from '../../../../../infrastructure/domain-events/in-memory-domain-events-bus';
 import { EventOutboxStorage } from '../../../../../infrastructure/event-outbox/event-outbox';
+import { kysely } from '../../../../../../database/kysely';
 import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice';
 import { ArchiveDraftInvoice } from './archive-draft-invoice';
 import { DraftInvoiceArchivedEvent } from '../../../domain/draft-invoice/events/draft-invoice-archived.event';
@@ -16,7 +17,11 @@ describe('ArchiveDraftInvoice', () => {
     beforeEach(() => {
         domainEventsBus = new InMemoryDomainEventsBus();
         session = new Session(
-            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
+            new PersistentManager(
+                kysely,
+                domainEventsBus,
+                EventOutboxStorage.create(kysely)
+            )
         );
         createCommand = new CreateDraftInvoice(session);
         archiveCommand = new ArchiveDraftInvoice(session);

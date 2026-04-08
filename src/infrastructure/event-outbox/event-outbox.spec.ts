@@ -2,6 +2,7 @@ import { DomainEvent } from '../../shared/events/domain-event';
 import dayjs from '../../lib/dayjs';
 import { cleanDatabase } from '../persistent-manager/clean-database';
 import { EventOutboxStorage } from './event-outbox';
+import { kysely } from '../../../database/kysely';
 
 class InvoiceIssuedEvent extends DomainEvent<{ id: string }> {}
 
@@ -40,12 +41,12 @@ const serializeEvent = (event: DomainEvent<unknown>) => ({
 
 describe('EventOutboxStorage', () => {
     beforeEach(async () => {
-        await cleanDatabase();
+        await cleanDatabase(kysely);
     });
 
     describe('insert', () => {
         it('should insert an event into the outbox', async () => {
-            const storage = EventOutboxStorage.create();
+            const storage = EventOutboxStorage.create(kysely);
             const event = InvoiceIssuedEvent.create({ id: '123' });
             await storage.insert([serializeEvent(event)]);
 
@@ -61,7 +62,7 @@ describe('EventOutboxStorage', () => {
         });
 
         it('should insert multiple events in a single request', async () => {
-            const storage = EventOutboxStorage.create();
+            const storage = EventOutboxStorage.create(kysely);
             const invoiceIssued = InvoiceIssuedEvent.create({ id: '1' });
             const invoicePaid = InvoicePaidEvent.create({ id: '2' });
             await storage.insert([
@@ -81,7 +82,7 @@ describe('EventOutboxStorage', () => {
         });
 
         it('should not fail when inserting empty array', async () => {
-            const storage = EventOutboxStorage.create();
+            const storage = EventOutboxStorage.create(kysely);
             await storage.insert([]);
 
             const events = await storage.poll(10, {
@@ -95,7 +96,7 @@ describe('EventOutboxStorage', () => {
 
     describe('delivered', () => {
         it('should mark event as delivered so it is no longer polled', async () => {
-            const storage = EventOutboxStorage.create();
+            const storage = EventOutboxStorage.create(kysely);
             const event = InvoiceIssuedEvent.create({ id: '123' });
             await storage.insert([serializeEvent(event)]);
 
@@ -117,7 +118,7 @@ describe('EventOutboxStorage', () => {
 
     describe('poll', () => {
         it('should return undelivered events', async () => {
-            const storage = EventOutboxStorage.create();
+            const storage = EventOutboxStorage.create(kysely);
             const invoiceIssued = InvoiceIssuedEvent.create({ id: '1' });
             const invoicePaid = InvoicePaidEvent.create({ id: '2' });
             await storage.insert([
@@ -137,7 +138,7 @@ describe('EventOutboxStorage', () => {
         });
 
         it('should respect the limit', async () => {
-            const storage = EventOutboxStorage.create();
+            const storage = EventOutboxStorage.create(kysely);
             await storage.insert([
                 serializeEvent(EventOneEvent.create({})),
                 serializeEvent(EventTwoEvent.create({})),
@@ -155,7 +156,7 @@ describe('EventOutboxStorage', () => {
 
         it('should track delivery attempts internally', async () => {
             const maxAttempts = 2;
-            const storage = EventOutboxStorage.create();
+            const storage = EventOutboxStorage.create(kysely);
             await storage.insert([
                 serializeEvent(InvoiceIssuedEvent.create({ id: '1' })),
             ]);
@@ -173,7 +174,7 @@ describe('EventOutboxStorage', () => {
         });
 
         it('should not return events within the timeout window', async () => {
-            const storage = EventOutboxStorage.create();
+            const storage = EventOutboxStorage.create(kysely);
             await storage.insert([
                 serializeEvent(InvoiceIssuedEvent.create({ id: '1' })),
             ]);
@@ -194,7 +195,7 @@ describe('EventOutboxStorage', () => {
         });
 
         it('should return events after the timeout has elapsed', async () => {
-            const storage = EventOutboxStorage.create();
+            const storage = EventOutboxStorage.create(kysely);
             await storage.insert([
                 serializeEvent(InvoiceIssuedEvent.create({ id: '1' })),
             ]);
@@ -215,7 +216,7 @@ describe('EventOutboxStorage', () => {
 
         it('should not return events exceeding max delivery attempts', async () => {
             const maxAttempts = 3;
-            const storage = EventOutboxStorage.create();
+            const storage = EventOutboxStorage.create(kysely);
             await storage.insert([
                 serializeEvent(InvoiceIssuedEvent.create({ id: '1' })),
             ]);
@@ -234,7 +235,7 @@ describe('EventOutboxStorage', () => {
         });
 
         it('should return only events matching the requested event names', async () => {
-            const storage = EventOutboxStorage.create();
+            const storage = EventOutboxStorage.create(kysely);
             await storage.insert([
                 serializeEvent(InvoiceIssuedEvent.create({ id: '1' })),
                 serializeEvent(InvoicePaidEvent.create({ id: '2' })),
@@ -251,7 +252,7 @@ describe('EventOutboxStorage', () => {
         });
 
         it('should pick oldest events first when limited', async () => {
-            const storage = EventOutboxStorage.create();
+            const storage = EventOutboxStorage.create(kysely);
             await storage.insert([serializeEvent(EventFirstEvent.create({}))]);
             await storage.insert([serializeEvent(EventSecondEvent.create({}))]);
 

@@ -1,7 +1,7 @@
 import { sql } from 'kysely';
-import { kysely } from '../../../database/kysely';
+import type { Kysely } from '../../../database/kysely';
 
-export const cleanDatabase = async () => {
+export const cleanDatabase = async (kysely: Kysely) => {
     await sql`
         DO $$ DECLARE t text;
         BEGIN

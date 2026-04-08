@@ -6,6 +6,7 @@ import dayjs from '../../../lib/dayjs';
 import { EventOutboxStorage } from '../../event-outbox/event-outbox';
 import { DomainEvent } from '../../../shared/events/domain-event';
 import { cleanDatabase } from '../../persistent-manager/clean-database';
+import { kysely } from '../../../../database/kysely';
 
 let domainEventsBus: KafkaDomainEventsBus;
 
@@ -29,7 +30,7 @@ testDomainEventsBus({
         const random = hash('sha256', Math.random().toString()).slice(0, 5);
 
         domainEventsBus = new KafkaDomainEventsBus({
-            eventOutboxStorage: EventOutboxStorage.create(),
+            eventOutboxStorage: EventOutboxStorage.create(kysely),
             forceTopicCreation: true,
             topicPrefix: random,
             kafka: createKafkaConfig(random),
@@ -68,9 +69,9 @@ describe('KafkaDomainEventsBus - outbox polling', () => {
     let eventOutboxStorage: EventOutboxStorage;
 
     beforeEach(async () => {
-        await cleanDatabase();
+        await cleanDatabase(kysely);
         const random = hash('sha256', Math.random().toString()).slice(0, 5);
-        eventOutboxStorage = EventOutboxStorage.create();
+        eventOutboxStorage = EventOutboxStorage.create(kysely);
 
         bus = new KafkaDomainEventsBus({
             eventOutboxStorage,

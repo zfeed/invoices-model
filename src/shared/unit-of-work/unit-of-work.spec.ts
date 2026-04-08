@@ -5,6 +5,7 @@ import { Session } from './unit-of-work';
 import { PersistentManager } from '../../infrastructure/persistent-manager/pg-persistent-manager';
 import { InMemoryDomainEventsBus } from '../../infrastructure/domain-events/in-memory-domain-events-bus';
 import { EventOutboxStorage } from '../../infrastructure/event-outbox/event-outbox';
+import { kysely } from '../../../database/kysely';
 import { Invoice } from '../../features/invoices/domain/invoice/invoice';
 import { CalendarDate } from '../../features/invoices/domain/calendar-date/calendar-date';
 import {
@@ -23,8 +24,9 @@ describe('UnitOfWork contract', () => {
         it('should return null for a non-existing entity', async () => {
             const session = new Session(
                 new PersistentManager(
+                    kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create()
+                    EventOutboxStorage.create(kysely)
                 )
             );
 
@@ -42,8 +44,9 @@ describe('UnitOfWork contract', () => {
         it('should make entity available via get within the same unit of work', async () => {
             const session = new Session(
                 new PersistentManager(
+                    kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create()
+                    EventOutboxStorage.create(kysely)
                 )
             );
 
@@ -63,8 +66,9 @@ describe('UnitOfWork contract', () => {
         it('should persist a newly added entity', async () => {
             const session = new Session(
                 new PersistentManager(
+                    kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create()
+                    EventOutboxStorage.create(kysely)
                 )
             );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
@@ -87,8 +91,9 @@ describe('UnitOfWork contract', () => {
         it('should persist modifications made to a tracked entity', async () => {
             const session = new Session(
                 new PersistentManager(
+                    kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create()
+                    EventOutboxStorage.create(kysely)
                 )
             );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
@@ -133,8 +138,9 @@ describe('UnitOfWork contract', () => {
         it('should return the same reference when getting the same entity twice', async () => {
             const session = new Session(
                 new PersistentManager(
+                    kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create()
+                    EventOutboxStorage.create(kysely)
                 )
             );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
@@ -159,8 +165,9 @@ describe('UnitOfWork contract', () => {
         it('should return the added instance without roundtripping through the store', async () => {
             const session = new Session(
                 new PersistentManager(
+                    kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create()
+                    EventOutboxStorage.create(kysely)
                 )
             );
 
@@ -177,8 +184,9 @@ describe('UnitOfWork contract', () => {
         it('should return distinct instances across different units of work', async () => {
             const session = new Session(
                 new PersistentManager(
+                    kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create()
+                    EventOutboxStorage.create(kysely)
                 )
             );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
@@ -216,8 +224,9 @@ describe('UnitOfWork contract', () => {
         it('should not expose uncommitted additions to other units of work', async () => {
             const session = new Session(
                 new PersistentManager(
+                    kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create()
+                    EventOutboxStorage.create(kysely)
                 )
             );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
@@ -239,8 +248,9 @@ describe('UnitOfWork contract', () => {
         it('should persist changes to different entity types independently', async () => {
             const session = new Session(
                 new PersistentManager(
+                    kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create()
+                    EventOutboxStorage.create(kysely)
                 )
             );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();

@@ -8,7 +8,7 @@ import {
     PersistentManager as PersistentManagerInterface,
 } from '../../shared/unit-of-work/unit-of-work.interface';
 import type { Collection } from '../../shared/unit-of-work/collection/collection';
-import { kysely, ControlledTransaction } from '../../../database/kysely';
+import type { Kysely, ControlledTransaction } from '../../../database/kysely';
 import { EventOutboxStorage } from '../event-outbox/event-outbox';
 import { AuthflowPolicyStorage } from '../../features/financial-authorization/infrastructure/authflow-policy-storage';
 import { DraftInvoiceStorage } from '../../features/invoices/infrastructure/draft-invoice-storage';
@@ -33,12 +33,14 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
     private authflowPolicyStorage: AuthflowPolicyStorage | null = null;
 
     constructor(
+        private readonly kysely: Kysely,
         private readonly domainEventsBus: DomainEventsBus,
         private readonly eventOutboxStorage: EventOutboxStorage
     ) {}
 
     async fork(): Promise<PersistentManagerInterface<Entity>> {
         const newManager = new PersistentManager(
+            this.kysely,
             this.domainEventsBus,
             this.eventOutboxStorage
         );
@@ -186,7 +188,7 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
     }
 
     private async initTransaction(): Promise<void> {
-        this.transaction = await kysely.startTransaction().execute();
+        this.transaction = await this.kysely.startTransaction().execute();
         this.draftInvoiceStorage = new DraftInvoiceStorage(this.transaction);
         this.invoiceStorage = new InvoiceStorage(this.transaction);
         this.financialDocumentStorage = new FinancialDocumentStorage(

@@ -61,5 +61,3 @@ export async function processInvoicePaypalTransaction(
         delay = Math.floor(delay * input.polling.factor);
     }
 }
-
-

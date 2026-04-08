@@ -10,6 +10,7 @@ import { AuthflowPolicy } from '../../domain/authflow/authflow-policy';
 import { AuthflowPolicyCreatedEvent } from '../../domain/authflow/events/authflow-policy-created.event';
 import { CreateAuthflowPolicy } from './create-authflow-policy';
 import { cleanDatabase } from '../../../../infrastructure/persistent-manager/clean-database';
+import { kysely } from '../../../../../database/kysely';
 
 const range = (from: string, to: string) =>
     Range.create(
@@ -24,11 +25,15 @@ const template = (from: string, to: string) =>
     }).unwrap();
 
 describe('createAuthflowPolicyCommand', () => {
-    beforeEach(cleanDatabase);
+    beforeEach(() => cleanDatabase(kysely));
     it('should create and save a policy', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
+            new PersistentManager(
+                kysely,
+                domainEventsBus,
+                EventOutboxStorage.create(kysely)
+            )
         );
         const command = new CreateAuthflowPolicy(session);
 
@@ -48,7 +53,11 @@ describe('createAuthflowPolicyCommand', () => {
     it('should persist the policy in storage', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
+            new PersistentManager(
+                kysely,
+                domainEventsBus,
+                EventOutboxStorage.create(kysely)
+            )
         );
         const command = new CreateAuthflowPolicy(session);
 
@@ -70,7 +79,11 @@ describe('createAuthflowPolicyCommand', () => {
     it('should publish an AuthflowPolicyCreatedEvent', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
+            new PersistentManager(
+                kysely,
+                domainEventsBus,
+                EventOutboxStorage.create(kysely)
+            )
         );
         const command = new CreateAuthflowPolicy(session);
 
@@ -95,7 +108,11 @@ describe('createAuthflowPolicyCommand', () => {
     it('should throw when ranges overlap', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
+            new PersistentManager(
+                kysely,
+                domainEventsBus,
+                EventOutboxStorage.create(kysely)
+            )
         );
         const command = new CreateAuthflowPolicy(session);
 
@@ -112,7 +129,11 @@ describe('createAuthflowPolicyCommand', () => {
     it('should not persist the policy when validation fails', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
+            new PersistentManager(
+                kysely,
+                domainEventsBus,
+                EventOutboxStorage.create(kysely)
+            )
         );
         const command = new CreateAuthflowPolicy(session);
 
@@ -135,7 +156,11 @@ describe('createAuthflowPolicyCommand', () => {
     it('should not publish events when validation fails', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
+            new PersistentManager(
+                kysely,
+                domainEventsBus,
+                EventOutboxStorage.create(kysely)
+            )
         );
         const command = new CreateAuthflowPolicy(session);
 

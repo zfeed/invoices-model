@@ -46,7 +46,7 @@ const readPollingConfig = () => ({
 });
 
 const createDomainEventsBus = () => {
-    const eventOutboxStorage = EventOutboxStorage.create();
+    const eventOutboxStorage = EventOutboxStorage.create(kysely);
 
     return {
         domainEventsBus: new KafkaDomainEventsBus({
@@ -92,7 +92,7 @@ export const createApp = async () => {
     const temporalClient = await createTemporalClient();
 
     const session = new Session(
-        new PersistentManager(domainEventsBus, eventOutboxStorage)
+        new PersistentManager(kysely, domainEventsBus, eventOutboxStorage)
     );
 
     const commands = await bootstrap({

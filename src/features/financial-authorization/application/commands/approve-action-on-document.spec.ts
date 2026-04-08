@@ -20,6 +20,7 @@ import { CreateAuthflowPolicy } from './create-authflow-policy';
 import { OnInvoiceIssued } from '../event-handlers/on-invoice-issued';
 import { ApproveActionOnDocument } from './approve-action-on-document';
 import { cleanDatabase } from '../../../../infrastructure/persistent-manager/clean-database';
+import { kysely } from '../../../../../database/kysely';
 
 const range = (from: string, to: string) =>
     Range.create(
@@ -98,14 +99,18 @@ describe('approveActionOnDocumentCommand', () => {
     let approverId: string;
 
     beforeEach(async () => {
-        await cleanDatabase();
+        await cleanDatabase(kysely);
 
         const fixtures = createTemplate();
         approverId = fixtures.approver.id.toPlain();
 
         domainEventsBus = new InMemoryDomainEventsBus();
         session = new Session(
-            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
+            new PersistentManager(
+                kysely,
+                domainEventsBus,
+                EventOutboxStorage.create(kysely)
+            )
         );
 
         const createPolicy = new CreateAuthflowPolicy(session);

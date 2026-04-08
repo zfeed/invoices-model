@@ -14,6 +14,7 @@ import { Action } from '../../domain/action/action';
 import { FinancialDocument } from '../../domain/document/document';
 import { OnInvoiceIssued } from './on-invoice-issued';
 import { cleanDatabase } from '../../../../infrastructure/persistent-manager/clean-database';
+import { kysely } from '../../../../../database/kysely';
 
 const COMPLETE_DRAFT_REQUEST = {
     lineItems: [
@@ -76,10 +77,14 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
     let completeCommand: CompleteDraftInvoice;
 
     beforeEach(async () => {
-        await cleanDatabase();
+        await cleanDatabase(kysely);
         domainEventsBus = new InMemoryDomainEventsBus();
         session = new Session(
-            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
+            new PersistentManager(
+                kysely,
+                domainEventsBus,
+                EventOutboxStorage.create(kysely)
+            )
         );
         createCommand = new CreateDraftInvoice(session);
         completeCommand = new CompleteDraftInvoice(session);

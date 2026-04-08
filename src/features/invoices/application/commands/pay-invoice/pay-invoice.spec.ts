@@ -25,6 +25,7 @@ import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application
 import { ISSUER_TYPE } from '../../../domain/issuer/issuer';
 import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
 import { cleanDatabase } from '../../../../../infrastructure/persistent-manager/clean-database';
+import { kysely } from '../../../../../../database/kysely';
 
 const uuid = () => crypto.randomUUID();
 
@@ -105,10 +106,14 @@ describe('PayInvoice', () => {
     let payCommand: PayInvoice;
 
     beforeEach(async () => {
-        await cleanDatabase();
+        await cleanDatabase(kysely);
         domainEventsBus = new InMemoryDomainEventsBus();
         session = new Session(
-            new PersistentManager(domainEventsBus, EventOutboxStorage.create())
+            new PersistentManager(
+                kysely,
+                domainEventsBus,
+                EventOutboxStorage.create(kysely)
+            )
         );
         const canApproverApprove = new CanApproverApprove(session);
         createCommand = new CreateDraftInvoice(session);
