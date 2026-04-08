@@ -1,9 +1,9 @@
 import { ApplicationFailure } from '@temporalio/activity';
 import { CreateBatchPayoutRequestBody } from '../../../paypal/api/payouts/payouts.types';
-import { PayPal } from '../../../paypal/api/paypal';
+import { Paypal } from '../../../paypal/api/paypal';
 
 export class CreatePayout {
-    constructor(private paypal: PayPal) {}
+    constructor(private paypal: Paypal) {}
 
     async execute(invoiceId: string, body: CreateBatchPayoutRequestBody) {
         const result = await this.paypal.payouts.createBatchPayout(body, {

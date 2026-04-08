@@ -1,5 +1,5 @@
 import { ApplicationFailure } from '@temporalio/activity';
-import { PayPal } from '../../../paypal/api/paypal';
+import { Paypal } from '../../../paypal/api/paypal';
 import { BatchStatus } from '../../../paypal/api/payouts/payouts.types';
 
 export type FetchPayoutStatusResult =
@@ -7,7 +7,7 @@ export type FetchPayoutStatusResult =
     | { result: 'failed' };
 
 export class FetchPayoutStatus {
-    constructor(private paypal: PayPal) {}
+    constructor(private paypal: Paypal) {}
 
     async execute(payoutBatchId: string): Promise<FetchPayoutStatusResult> {
         const result =

@@ -1,4 +1,4 @@
-import { PayPal } from '../../../paypal/api/paypal';
+import { Paypal } from '../../../paypal/api/paypal';
 import { Session } from '../../../../shared/unit-of-work/unit-of-work';
 import { CreatePayout } from './create-payout.activity';
 import { FetchPayoutStatus } from './fetch-payout-status.activity';
@@ -13,7 +13,7 @@ export type Activities = {
 };
 
 export const buildActivities = (deps: {
-    paypal: PayPal;
+    paypal: Paypal;
     session: Session;
 }): Activities => {
     const createPayout = new CreatePayout(deps.paypal);
