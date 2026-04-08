@@ -1,108 +1,33 @@
-import { Connection, WorkflowClient } from '@temporalio/client';
+import { WorkflowClient } from '@temporalio/client';
 import { Container } from './container';
-import { bootstrap } from '../bootstrap';
 import { Session } from '../shared/unit-of-work/unit-of-work';
-import { PersistentManager } from '../infrastructure/persistent-manager/pg-persistent-manager';
 import { EventOutboxStorage } from '../infrastructure/event-outbox/event-outbox';
-import { kysely } from '../../database/kysely';
 import { KafkaDomainEventsBus } from '../infrastructure/domain-events/kafka/kafka-domain-events-bus';
-import dayjs from '../lib/dayjs';
 import { TemporalWorker } from '../worker';
 import { Paypal } from '../features/paypal/api/paypal';
-import { config } from '../config';
+import { createTemporalClient } from './dependencies/temporal-client';
+import { createPaypal } from './dependencies/paypal';
+import { createEventOutboxStorage } from './dependencies/event-outbox-storage';
+import { createKafkaDomainEventsBus } from './dependencies/kafka-domain-events-bus';
+import { createSession } from './dependencies/session';
+import { createTemporalWorker } from './dependencies/temporal-worker';
 
-const createTemporalClient = async () => {
-    const connection = await Connection.connect({
-        address: config.temporal.address,
-    });
-    return new WorkflowClient({
-        connection,
-        namespace: config.temporal.namespace,
-    });
-};
-
-const createPaypal = () =>
-    new Paypal({
-        baseUrl: new URL(config.paypal.baseUrl),
-        credentials: {
-            clientId: config.paypal.credentials.clientId,
-            clientSecret: config.paypal.credentials.clientSecret,
-        },
-    });
-
-const createDomainEventsBus = () => {
-    const eventOutboxStorage = EventOutboxStorage.create(kysely);
-
-    return {
-        domainEventsBus: new KafkaDomainEventsBus({
-            eventOutboxStorage,
-            topicPrefix: config.kafka.topicPrefix,
-            forceTopicCreation: true,
-            kafka: {
-                global: {
-                    kafkaJS: {
-                        brokers: config.kafka.brokers,
-                        clientId: config.kafka.clientId,
-                        logLevel: 0,
-                    },
-                },
-                producer: {},
-                consumer: {
-                    'group.id': config.kafka.groupId,
-                },
-            },
-            polling: {
-                interval: dayjs.duration(
-                    config.outbox.pollingIntervalSeconds,
-                    'seconds'
-                ),
-                timeout: dayjs.duration(
-                    config.outbox.pollingTimeoutMinutes,
-                    'minutes'
-                ),
-                maxDeliveryAttempts: config.outbox.maxDeliveryAttempts,
-                batchSize: config.outbox.batchSize,
-            },
-        }),
-        eventOutboxStorage,
-    };
-};
-
-export const registerDependencies = async (): Promise<{
-    container: Container;
-    commands: Awaited<ReturnType<typeof bootstrap>>;
-}> => {
+export const registerDependencies = async (): Promise<Container> => {
     const container = new Container();
 
-    const { domainEventsBus, eventOutboxStorage } = createDomainEventsBus();
+    const eventOutboxStorage = createEventOutboxStorage();
+    const domainEventsBus = createKafkaDomainEventsBus(eventOutboxStorage);
+    const session = createSession(domainEventsBus, eventOutboxStorage);
     const temporalClient = await createTemporalClient();
-    const session = new Session(
-        new PersistentManager(kysely, domainEventsBus, eventOutboxStorage)
-    );
     const paypal = createPaypal();
+    const temporalWorker = createTemporalWorker(paypal, session);
 
     container.register(Session, session);
-    container.register(KafkaDomainEventsBus, domainEventsBus);
     container.register(EventOutboxStorage, eventOutboxStorage);
+    container.register(KafkaDomainEventsBus, domainEventsBus);
     container.register(WorkflowClient, temporalClient);
     container.register(Paypal, paypal);
+    container.register(TemporalWorker, temporalWorker);
 
-    const invoicePaypalWorker = new TemporalWorker({
-        temporal: {
-            nativeConnectionOptions: { address: config.temporal.address },
-        },
-        paypal,
-        session,
-    });
-    container.register(TemporalWorker, invoicePaypalWorker);
-
-    const commands = await bootstrap({
-        session,
-        domainEventsBus,
-        temporalClient,
-        paypalPolling: config.paypal.polling,
-        kysely,
-    });
-
-    return { container, commands };
+    return container;
 };
