@@ -11,17 +11,21 @@ import { createEventOutboxStorage } from './dependencies/event-outbox-storage';
 import { createKafkaDomainEventsBus } from './dependencies/kafka-domain-events-bus';
 import { createSession } from './dependencies/session';
 import { createTemporalWorker } from './dependencies/temporal-worker';
+import { Logger } from '../shared/logger/logger';
+import { createLogger } from './dependencies/logger';
 
 export const registerDependencies = async (): Promise<Container> => {
     const container = new Container();
 
+    const logger = createLogger();
     const eventOutboxStorage = createEventOutboxStorage();
     const domainEventsBus = createKafkaDomainEventsBus(eventOutboxStorage);
     const session = createSession(domainEventsBus, eventOutboxStorage);
     const temporalClient = await createTemporalClient();
     const paypal = createPaypal();
-    const temporalWorker = createTemporalWorker(paypal, session);
+    const temporalWorker = createTemporalWorker(paypal, session, logger);
 
+    container.register(Logger, logger);
     container.register(Session, session);
     container.register(EventOutboxStorage, eventOutboxStorage);
     container.register(KafkaDomainEventsBus, domainEventsBus);

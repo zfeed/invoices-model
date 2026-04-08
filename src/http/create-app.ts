@@ -9,13 +9,14 @@ import {
 import { errorHandler } from './error-handler';
 import { TemporalWorker } from '../worker';
 import { registerDependencies } from '../container/register-dependencies';
+import { Container } from '../container/container';
 import { bootstrap } from '../bootstrap';
 import { Session } from '../shared/unit-of-work/unit-of-work';
 import { KafkaDomainEventsBus } from '../infrastructure/domain-events/kafka/kafka-domain-events-bus';
 import { config } from '../config';
 
-export const createApp = async () => {
-    const container = await registerDependencies();
+export const createApp = async (container?: Container) => {
+    container = container ?? (await registerDependencies());
 
     const temporalClient = container.getOrThrow(WorkflowClient);
     const invoicePaypalWorker = container.getOrThrow(TemporalWorker);

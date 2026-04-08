@@ -1,11 +1,15 @@
 import 'dotenv/config';
 import { createApp } from './create-app';
+import { registerDependencies } from '../container/register-dependencies';
+import { Logger } from '../shared/logger/logger';
 
 const main = async () => {
-    const app = await createApp();
+    const container = await registerDependencies();
+    const logger = container.getOrThrow(Logger);
+    const app = await createApp(container);
 
     const shutdown = async (signal: string) => {
-        console.log(`Received ${signal}, shutting down...`);
+        logger.info(`Received ${signal}, shutting down...`);
         await app.close();
         process.exit(0);
     };
@@ -15,10 +19,10 @@ const main = async () => {
 
     app.listen({ port: 3000 }, (err, address) => {
         if (err) {
-            console.error(err);
+            logger.error('Failed to start server', { err: err.message });
             process.exit(1);
         }
-        console.log(`Server running on ${address}`);
+        logger.info(`Server running on ${address}`);
     });
 };
 

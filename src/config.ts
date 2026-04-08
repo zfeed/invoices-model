@@ -29,6 +29,9 @@ const schema = z.object({
         groupId: z.string().min(1),
         topicPrefix: z.string().min(1),
     }),
+    logger: z.object({
+        level: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+    }),
     outbox: z.object({
         pollingIntervalSeconds: z.coerce.number().int().positive(),
         pollingTimeoutMinutes: z.coerce.number().int().positive(),
@@ -64,6 +67,9 @@ export const config: Config = schema.parse({
         clientId: process.env.KAFKA_CLIENT_ID,
         groupId: process.env.KAFKA_GROUP_ID,
         topicPrefix: process.env.KAFKA_TOPIC_PREFIX,
+    },
+    logger: {
+        level: process.env.LOG_LEVEL,
     },
     outbox: {
         pollingIntervalSeconds: process.env.OUTBOX_POLLING_INTERVAL_S,

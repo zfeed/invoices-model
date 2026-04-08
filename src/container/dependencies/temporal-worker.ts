@@ -1,11 +1,13 @@
 import { TemporalWorker } from '../../worker';
 import { Paypal } from '../../features/paypal/api/paypal';
 import { Session } from '../../shared/unit-of-work/unit-of-work';
+import { Logger } from '../../shared/logger/logger';
 import { config } from '../../config';
 
 export const createTemporalWorker = (
     paypal: Paypal,
-    session: Session
+    session: Session,
+    logger: Logger
 ): TemporalWorker =>
     new TemporalWorker({
         temporal: {
@@ -13,4 +15,5 @@ export const createTemporalWorker = (
         },
         paypal,
         session,
+        logger,
     });
