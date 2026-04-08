@@ -25,7 +25,7 @@ describe('Invoice lifecycle flows', () => {
             expect(updateRes.status).toBe(200);
             const updated = await getData(updateRes);
             expect(updated).toEqual(POPULATED_DRAFT_SHAPE);
-            expect(updated.lineItems.items).toHaveLength(1);
+            expect(updated.lineItems).toHaveLength(1);
 
             const completeRes = await post(
                 `/invoices/drafts/${draft.id}/complete`

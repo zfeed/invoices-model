@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { KafkaContainer } from '@testcontainers/kafka';
 import { PostgreSqlContainer } from '@testcontainers/postgresql';
+import { TestWorkflowEnvironment } from '@temporalio/testing';
 
 const POSTGRES_IMAGE = 'postgres:18.2';
 const KAFKA_IMAGE = 'confluentinc/cp-kafka:7.8.0';
@@ -12,7 +13,7 @@ export type StartedE2EEnvironment = {
 };
 
 export const startE2EEnvironment = async (): Promise<StartedE2EEnvironment> => {
-    const [postgres, kafka] = await Promise.all([
+    const [postgres, kafka, temporal] = await Promise.all([
         new PostgreSqlContainer(POSTGRES_IMAGE)
             .withDatabase('invoices_model_e2e')
             .withUsername('postgres')
@@ -32,7 +33,10 @@ export const startE2EEnvironment = async (): Promise<StartedE2EEnvironment> => {
                 '/tmp': 'rw,noexec,nosuid,size=512m,uid=1000,gid=1000,mode=1777',
             })
             .start(),
+        TestWorkflowEnvironment.createLocal(),
     ]);
+
+    const temporalAddress = temporal.address;
 
     return {
         env: {
@@ -44,9 +48,15 @@ export const startE2EEnvironment = async (): Promise<StartedE2EEnvironment> => {
             KAFKA_CLIENT_ID: `invoices-model-e2e`,
             KAFKA_GROUP_ID: `invoices-model-e2e`,
             KAFKA_TOPIC_PREFIX: `invoices-model-e2e`,
+            TEMPORAL_ADDRESS: temporalAddress,
+            TEMPORAL_NAMESPACE: 'default',
         },
         stop: async () => {
-            await Promise.allSettled([kafka.stop(), postgres.stop()]);
+            await Promise.allSettled([
+                temporal.teardown(),
+                kafka.stop(),
+                postgres.stop(),
+            ]);
         },
     };
 };

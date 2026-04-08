@@ -9,14 +9,24 @@ import { DraftDraftInvoice } from './features/invoices/application/commands/draf
 import { ProcessInvoice } from './features/invoices/application/commands/process-invoice/process-invoice';
 import { CancelInvoice } from './features/invoices/application/commands/cancel-invoice/cancel-invoice';
 import { PayInvoice } from './features/invoices/application/commands/pay-invoice/pay-invoice';
+import { GetInvoice } from './features/invoices/application/queries/get-invoice/get-invoice';
 import { CreateAuthflowPolicy } from './features/financial-authorization/application/commands/create-authflow-policy';
 import { ApproveActionOnDocument } from './features/financial-authorization/application/commands/approve-action-on-document';
 import { CanApproverApprove } from './features/financial-authorization/application/queries/can-approver-approve';
 import { OnInvoiceIssued } from './features/financial-authorization/application/event-handlers/on-invoice-issued';
+import { WorkflowClient } from '@temporalio/client';
+import {
+    OnInvoiceProcessing,
+    PollingConfig,
+} from './features/invoice-paypal-transaction/on-invoice-processing.event-handler';
+import { Kysely } from '../database/kysely';
 
 type Infrastructure = {
     session: Session;
     domainEventsBus: DomainEventsBus;
+    temporalClient: WorkflowClient;
+    paypalPolling: PollingConfig;
+    kysely: Kysely;
 };
 
 export const bootstrap = async (infra: Infrastructure) => {
@@ -25,6 +35,13 @@ export const bootstrap = async (infra: Infrastructure) => {
         infra.domainEventsBus
     );
     await onInvoiceIssued.register();
+
+    const onInvoiceProcessing = new OnInvoiceProcessing(
+        infra.domainEventsBus,
+        infra.temporalClient,
+        infra.paypalPolling
+    );
+    await onInvoiceProcessing.register();
 
     const canApproverApprove = new CanApproverApprove(infra.session);
 
@@ -38,6 +55,7 @@ export const bootstrap = async (infra: Infrastructure) => {
         processInvoice: new ProcessInvoice(infra.session),
         cancelInvoice: new CancelInvoice(infra.session),
         payInvoice: new PayInvoice(infra.session, canApproverApprove),
+        getInvoice: new GetInvoice(infra.kysely),
         createAuthflowPolicy: new CreateAuthflowPolicy(infra.session),
         approveActionOnDocument: new ApproveActionOnDocument(infra.session),
         canApproverApprove,

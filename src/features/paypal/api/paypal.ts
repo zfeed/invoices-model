@@ -8,7 +8,7 @@ type Credentials = {
     clientSecret: string;
 };
 
-export class PayPal {
+export class Paypal {
     login: Login;
     payouts: Payouts;
 

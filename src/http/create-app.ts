@@ -11,8 +11,39 @@ import {
 } from './plugins';
 import { errorHandler } from './error-handler';
 import { KafkaDomainEventsBus } from '../infrastructure/domain-events/kafka/kafka-domain-events-bus';
-import PgBoss from 'pg-boss';
 import dayjs from '../lib/dayjs';
+import { Connection, WorkflowClient } from '@temporalio/client';
+import { TemporalWorker } from '../worker';
+import { Paypal } from '../features/paypal/api/paypal';
+
+const temporalAddress = () => process.env.TEMPORAL_ADDRESS || 'localhost:7233';
+
+const createTemporalClient = async () => {
+    const connection = await Connection.connect({
+        address: temporalAddress(),
+    });
+    return new WorkflowClient({
+        connection,
+        namespace: process.env.TEMPORAL_NAMESPACE || 'default',
+    });
+};
+
+const createPaypal = () =>
+    new Paypal({
+        baseUrl: new URL(
+            process.env.PAYPAL_BASE_URL || 'https://api-m.sandbox.paypal.com'
+        ),
+        credentials: {
+            clientId: process.env.PAYPAL_CLIENT_ID || '',
+            clientSecret: process.env.PAYPAL_CLIENT_SECRET || '',
+        },
+    });
+
+const readPollingConfig = () => ({
+    maxAttempts: Number(process.env.PAYPAL_POLL_MAX_ATTEMPTS || 8),
+    initialDelayMs: Number(process.env.PAYPAL_POLL_INITIAL_DELAY_MS || 5000),
+    factor: Number(process.env.PAYPAL_POLL_FACTOR || 2),
+});
 
 const createDomainEventsBus = () => {
     const eventOutboxStorage = EventOutboxStorage.create();
@@ -58,24 +89,36 @@ const createDomainEventsBus = () => {
 export const createApp = async () => {
     const { domainEventsBus, eventOutboxStorage } = createDomainEventsBus();
 
-    const boss = new PgBoss(process.env.DATABASE_URL!);
-    await boss.start();
+    const temporalClient = await createTemporalClient();
+
+    const session = new Session(
+        new PersistentManager(domainEventsBus, eventOutboxStorage)
+    );
 
     const commands = await bootstrap({
-        session: new Session(
-            new PersistentManager(domainEventsBus, eventOutboxStorage)
-        ),
+        session,
         domainEventsBus,
+        temporalClient,
+        paypalPolling: readPollingConfig(),
+        kysely,
     });
 
     await commands.start();
+
+    const invoicePaypalWorker = new TemporalWorker({
+        temporal: { nativeConnectionOptions: { address: temporalAddress() } },
+        paypal: createPaypal(),
+        session,
+    });
+    void invoicePaypalWorker.start();
 
     const app = Fastify();
 
     app.setErrorHandler(errorHandler);
     app.addHook('onClose', async () => {
+        await invoicePaypalWorker.shutdown();
         await commands.shutdown();
-        await boss.stop();
+        await temporalClient.connection.close();
         await kysely.destroy();
     });
 

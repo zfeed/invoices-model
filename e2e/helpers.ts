@@ -147,35 +147,6 @@ const recipient = {
     billing,
 };
 
-export const EMPTY_DRAFT_SHAPE = {
-    id: expect.any(String),
-    status: expect.any(String),
-    lineItems: null,
-    total: null,
-    vatRate: null,
-    vatAmount: null,
-    issueDate: null,
-    dueDate: null,
-    issuer: null,
-    recipient: null,
-};
-
-export const POPULATED_DRAFT_SHAPE = {
-    id: expect.any(String),
-    status: expect.any(String),
-    lineItems: {
-        items: expect.arrayContaining([expect.objectContaining(lineItem)]),
-        subtotal: money,
-    },
-    total: money,
-    vatRate: expect.any(String),
-    vatAmount: money,
-    issueDate: expect.any(String),
-    dueDate: expect.any(String),
-    issuer: expect.objectContaining(issuer),
-    recipient: expect.objectContaining(recipient),
-};
-
 const dtoIssuer = {
     type: expect.any(String),
     name: expect.any(String),
@@ -209,6 +180,40 @@ const dtoLineItem = {
 const nullableString = expect.toSatisfy(
     (v: unknown) => typeof v === 'string' || v === null
 );
+
+export const EMPTY_DRAFT_SHAPE = {
+    id: expect.any(String),
+    status: expect.any(String),
+    subtotalAmount: null,
+    subtotalCurrency: null,
+    totalAmount: null,
+    totalCurrency: null,
+    vatRate: null,
+    vatAmount: null,
+    vatCurrency: null,
+    issueDate: null,
+    dueDate: null,
+    issuer: null,
+    recipient: null,
+    lineItems: null,
+};
+
+export const POPULATED_DRAFT_SHAPE = {
+    id: expect.any(String),
+    status: expect.any(String),
+    subtotalAmount: expect.any(String),
+    subtotalCurrency: expect.any(String),
+    totalAmount: expect.any(String),
+    totalCurrency: expect.any(String),
+    vatRate: nullableString,
+    vatAmount: nullableString,
+    vatCurrency: nullableString,
+    issueDate: expect.any(String),
+    dueDate: expect.any(String),
+    issuer: expect.objectContaining(dtoIssuer),
+    recipient: expect.objectContaining(dtoRecipient),
+    lineItems: expect.arrayContaining([expect.objectContaining(dtoLineItem)]),
+};
 
 export const INVOICE_SHAPE = {
     id: expect.any(String),
