@@ -7,13 +7,14 @@ import { EventOutboxStorage } from '../../event-outbox/event-outbox';
 import { DomainEvent } from '../../../shared/events/domain-event';
 import { cleanDatabase } from '../../persistent-manager/clean-database';
 import { kysely } from '../../../../database/kysely';
+import { config } from '../../../config';
 
 let domainEventsBus: KafkaDomainEventsBus;
 
 const createKafkaConfig = (random: string) => ({
     global: {
         kafkaJS: {
-            brokers: process.env.KAFKA_BROKERS?.split(',') || [],
+            brokers: config.kafka.brokers,
             clientId: `${random}-example-client`,
             logLevel: 0,
         },

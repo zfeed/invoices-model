@@ -9,35 +9,26 @@ import { KafkaDomainEventsBus } from '../infrastructure/domain-events/kafka/kafk
 import dayjs from '../lib/dayjs';
 import { TemporalWorker } from '../worker';
 import { Paypal } from '../features/paypal/api/paypal';
-
-const temporalAddress = () => process.env.TEMPORAL_ADDRESS || 'localhost:7233';
+import { config } from '../config';
 
 const createTemporalClient = async () => {
     const connection = await Connection.connect({
-        address: temporalAddress(),
+        address: config.temporal.address,
     });
     return new WorkflowClient({
         connection,
-        namespace: process.env.TEMPORAL_NAMESPACE || 'default',
+        namespace: config.temporal.namespace,
     });
 };
 
 const createPaypal = () =>
     new Paypal({
-        baseUrl: new URL(
-            process.env.PAYPAL_BASE_URL || 'https://api-m.sandbox.paypal.com'
-        ),
+        baseUrl: new URL(config.paypal.baseUrl),
         credentials: {
-            clientId: process.env.PAYPAL_CLIENT_ID || '',
-            clientSecret: process.env.PAYPAL_CLIENT_SECRET || '',
+            clientId: config.paypal.credentials.clientId,
+            clientSecret: config.paypal.credentials.clientSecret,
         },
     });
-
-const readPollingConfig = () => ({
-    maxAttempts: Number(process.env.PAYPAL_POLL_MAX_ATTEMPTS || 8),
-    initialDelayMs: Number(process.env.PAYPAL_POLL_INITIAL_DELAY_MS || 5000),
-    factor: Number(process.env.PAYPAL_POLL_FACTOR || 2),
-});
 
 const createDomainEventsBus = () => {
     const eventOutboxStorage = EventOutboxStorage.create(kysely);
@@ -45,35 +36,32 @@ const createDomainEventsBus = () => {
     return {
         domainEventsBus: new KafkaDomainEventsBus({
             eventOutboxStorage,
-            topicPrefix: process.env.KAFKA_TOPIC_PREFIX,
+            topicPrefix: config.kafka.topicPrefix,
             forceTopicCreation: true,
             kafka: {
                 global: {
                     kafkaJS: {
-                        brokers: process.env.KAFKA_BROKERS?.split(',') || [],
-                        clientId:
-                            process.env.KAFKA_CLIENT_ID || 'invoices-model',
+                        brokers: config.kafka.brokers,
+                        clientId: config.kafka.clientId,
                         logLevel: 0,
                     },
                 },
                 producer: {},
                 consumer: {
-                    'group.id': process.env.KAFKA_GROUP_ID || 'invoices-model',
+                    'group.id': config.kafka.groupId,
                 },
             },
             polling: {
                 interval: dayjs.duration(
-                    Number(process.env.OUTBOX_POLLING_INTERVAL_S || 30),
+                    config.outbox.pollingIntervalSeconds,
                     'seconds'
                 ),
                 timeout: dayjs.duration(
-                    Number(process.env.OUTBOX_POLLING_TIMEOUT_M || 5),
+                    config.outbox.pollingTimeoutMinutes,
                     'minutes'
                 ),
-                maxDeliveryAttempts: Number(
-                    process.env.OUTBOX_MAX_DELIVERY_ATTEMPTS || 10
-                ),
-                batchSize: Number(process.env.OUTBOX_BATCH_SIZE || 10),
+                maxDeliveryAttempts: config.outbox.maxDeliveryAttempts,
+                batchSize: config.outbox.batchSize,
             },
         }),
         eventOutboxStorage,
@@ -100,7 +88,9 @@ export const registerDependencies = async (): Promise<{
     container.register(Paypal, paypal);
 
     const invoicePaypalWorker = new TemporalWorker({
-        temporal: { nativeConnectionOptions: { address: temporalAddress() } },
+        temporal: {
+            nativeConnectionOptions: { address: config.temporal.address },
+        },
         paypal,
         session,
     });
@@ -110,7 +100,7 @@ export const registerDependencies = async (): Promise<{
         session,
         domainEventsBus,
         temporalClient,
-        paypalPolling: readPollingConfig(),
+        paypalPolling: config.paypal.polling,
         kysely,
     });
 

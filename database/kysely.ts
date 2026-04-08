@@ -5,9 +5,10 @@ import type {
     ControlledTransaction as BaseControlledTransaction,
 } from 'kysely';
 import { DB } from 'kysely-codegen';
+import { config } from '../src/config';
 
 export const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: config.database.url,
 });
 
 export const postgresDialect = new PostgresDialect({
