@@ -38,10 +38,19 @@ const payInvoice = (commands: Commands) => async (app: FastifyInstance) => {
     );
 };
 
+const getInvoice = (commands: Commands) => async (app: FastifyInstance) => {
+    app.get<{ Params: { id: string } }>('/invoices/:id', async (request) => {
+        const id = request.params.id;
+        const result = await commands.getInvoice.execute(id);
+        return { data: result };
+    });
+};
+
 // Main plugin to register all invoice routes
 export const invoicesPlugin =
     (commands: Commands) => async (app: FastifyInstance) => {
         await app.register(processInvoice(commands));
         await app.register(cancelInvoice(commands));
         await app.register(payInvoice(commands));
+        await app.register(getInvoice(commands));
     };
