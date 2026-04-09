@@ -19,7 +19,10 @@ export const registerDependencies = async (): Promise<Container> => {
 
     const logger = createLogger();
     const eventOutboxStorage = createEventOutboxStorage();
-    const domainEventsBus = createKafkaDomainEventsBus(eventOutboxStorage);
+    const domainEventsBus = createKafkaDomainEventsBus(
+        eventOutboxStorage,
+        logger
+    );
     const session = createSession(domainEventsBus, eventOutboxStorage);
     const temporalClient = await createTemporalClient();
     const paypal = createPaypal();
