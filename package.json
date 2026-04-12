@@ -33,6 +33,11 @@
     },
     "dependencies": {
         "@confluentinc/kafka-javascript": "^1.8.2",
+        "@opentelemetry/api": "^1.9.1",
+        "@opentelemetry/instrumentation-pino": "^0.60.0",
+        "@opentelemetry/sdk-logs": "^0.214.0",
+        "@opentelemetry/sdk-node": "^0.214.0",
+        "@opentelemetry/sdk-trace-base": "^2.6.1",
         "@temporalio/activity": "^1.11.1",
         "@temporalio/client": "^1.11.1",
         "@temporalio/testing": "^1.11.1",
