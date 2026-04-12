@@ -11,6 +11,10 @@ export class PinoLogger extends Logger {
         this.#pino = pino;
     }
 
+    trace(message: string, context?: LogContext): void {
+        this.#pino.trace(context ?? {}, message);
+    }
+
     debug(message: string, context?: LogContext): void {
         this.#pino.debug(context ?? {}, message);
     }

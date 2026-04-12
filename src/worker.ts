@@ -7,7 +7,6 @@ import {
 } from '@temporalio/worker';
 import { Session } from './shared/unit-of-work/unit-of-work';
 import { Logger } from './shared/logger/logger';
-import { toTemporalLogger } from './infrastructure/logger/temporal-logger-adapter';
 
 let runtimeInstalled = false;
 import { Paypal } from './features/paypal/api/paypal';
@@ -46,7 +45,7 @@ export class TemporalWorker {
         });
 
         if (!runtimeInstalled) {
-            Runtime.install({ logger: toTemporalLogger(this.logger) });
+            Runtime.install({ logger: this.logger });
             runtimeInstalled = true;
         }
 

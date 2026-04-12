@@ -7,7 +7,7 @@ export const toKafkaLogger = (
 ): KafkaJS.Logger => {
     const withNamespace = (extra?: object): LogContext => ({
         ...(namespace ? { namespace } : {}),
-        ...(extra as LogContext | undefined),
+        ...extra,
     });
 
     return {
