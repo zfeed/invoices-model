@@ -5,7 +5,7 @@ import { Logger } from '../shared/logger/logger';
 
 const main = async () => {
     const container = await registerDependencies();
-    const logger = container.getOrThrow(Logger);
+    const logger = container.getOrThrow<Logger>(Logger);
     const app = await createApp(container);
 
     const shutdown = async (signal: string) => {

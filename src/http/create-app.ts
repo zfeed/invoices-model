@@ -14,12 +14,15 @@ import { bootstrap } from '../bootstrap';
 import { Session } from '../shared/unit-of-work/unit-of-work';
 import { KafkaDomainEventsBus } from '../infrastructure/domain-events/kafka/kafka-domain-events-bus';
 import { config } from '../config';
+import { pino as Pino, Logger as PinoInstance } from 'pino';
 
 export const createApp = async (container?: Container) => {
     container = container ?? (await registerDependencies());
 
-    const temporalClient = container.getOrThrow(WorkflowClient);
-    const invoicePaypalWorker = container.getOrThrow(TemporalWorker);
+    const pino = container.getOrThrow<PinoInstance>(Pino);
+    const temporalClient = container.getOrThrow<WorkflowClient>(WorkflowClient);
+    const invoicePaypalWorker =
+        container.getOrThrow<TemporalWorker>(TemporalWorker);
 
     const commands = await bootstrap({
         session: container.getOrThrow(Session),
@@ -32,7 +35,9 @@ export const createApp = async (container?: Container) => {
     await commands.start();
     void invoicePaypalWorker.start();
 
-    const app = Fastify();
+    const app = Fastify({
+        loggerInstance: pino,
+    });
 
     app.setErrorHandler(errorHandler);
     app.addHook('onClose', async () => {

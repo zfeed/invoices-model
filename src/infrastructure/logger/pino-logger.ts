@@ -1,14 +1,14 @@
-import pino, { Logger as PinoInstance } from 'pino';
+import { Logger as PinoInstance } from 'pino';
 import { Logger, LogContext } from '../../shared/logger/logger';
 
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type LoggerOptions = { pino: PinoInstance };
 
 export class PinoLogger extends Logger {
     readonly #pino: PinoInstance;
 
-    constructor(level: LogLevel) {
+    constructor({ pino }: LoggerOptions) {
         super();
-        this.#pino = pino({ level });
+        this.#pino = pino;
     }
 
     debug(message: string, context?: LogContext): void {

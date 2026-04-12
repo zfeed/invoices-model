@@ -1,5 +1,8 @@
 import { Logger } from '../../shared/logger/logger';
-import { PinoLogger } from '../../infrastructure/logger/pino-logger';
-import { config } from '../../config';
+import {
+    PinoLogger,
+    LoggerOptions,
+} from '../../infrastructure/logger/pino-logger';
 
-export const createLogger = (): Logger => new PinoLogger(config.logger.level);
+export const createLogger = (loggerOptions: LoggerOptions): Logger =>
+    new PinoLogger(loggerOptions);
