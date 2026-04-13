@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { z } from 'zod';
 
 const schema = z.object({
@@ -31,6 +32,9 @@ const schema = z.object({
     }),
     logger: z.object({
         level: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+    }),
+    otel: z.object({
+        logsEndpoint: z.string().url(),
     }),
     outbox: z.object({
         pollingIntervalSeconds: z.coerce.number().int().positive(),
@@ -70,6 +74,9 @@ export const config: Config = schema.parse({
     },
     logger: {
         level: process.env.LOG_LEVEL,
+    },
+    otel: {
+        logsEndpoint: process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT,
     },
     outbox: {
         pollingIntervalSeconds: process.env.OUTBOX_POLLING_INTERVAL_S,

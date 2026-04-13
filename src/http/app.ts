@@ -1,5 +1,4 @@
 import '../instrumentation';
-import 'dotenv/config';
 import { createApp } from './create-app';
 import { registerDependencies } from '../container/register-dependencies';
 import { Logger } from '../shared/logger/logger';
