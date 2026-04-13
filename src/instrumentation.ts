@@ -4,6 +4,7 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { BatchLogRecordProcessor } from '@opentelemetry/sdk-logs';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 import { PinoInstrumentation } from '@opentelemetry/instrumentation-pino';
+import { PgInstrumentation } from '@opentelemetry/instrumentation-pg';
 import { FastifyOtelInstrumentation } from '@fastify/otel';
 import { config } from './config';
 
@@ -20,6 +21,7 @@ const sdk = new NodeSDK({
     logRecordProcessor: new BatchLogRecordProcessor(logExporter),
     instrumentations: [
         new PinoInstrumentation(),
+        new PgInstrumentation(),
         new FastifyOtelInstrumentation({ registerOnInitialization: true }),
     ],
 });
