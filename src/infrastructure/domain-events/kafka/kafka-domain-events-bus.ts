@@ -11,6 +11,9 @@ import { EventOutboxStorage } from '../../event-outbox/event-outbox';
 import { Kafka, KafkaConfig } from './kafka';
 import { Scheduler } from './sheduler';
 import { Duration } from '../../../lib/dayjs';
+import { trace, SpanKind, SpanStatusCode } from '@opentelemetry/api';
+
+const tracer = trace.getTracer('domain-events-bus');
 
 export type PollingConfig = {
     interval: Duration;
@@ -66,7 +69,35 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
                 value: message.value,
             });
 
-            await Promise.all(handlers.map((handler) => handler(event)));
+            await tracer.startActiveSpan(
+                `${topic} handle`,
+                {
+                    kind: SpanKind.CONSUMER,
+                    attributes: {
+                        'messaging.system': 'kafka',
+                        'messaging.operation.type': 'receive',
+                        'messaging.destination.name': topic,
+                        'domain_events.event_name': event.name,
+                        'domain_events.handlers_count': handlers.length,
+                    },
+                },
+                async (span) => {
+                    try {
+                        await Promise.all(
+                            handlers.map((handler) => handler(event))
+                        );
+                    } catch (error) {
+                        span.recordException(error as Error);
+                        span.setStatus({
+                            code: SpanStatusCode.ERROR,
+                            message: (error as Error).message,
+                        });
+                        throw error;
+                    } finally {
+                        span.end();
+                    }
+                }
+            );
         });
 
         await this.sheduler.start();
@@ -86,18 +117,45 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
             return;
         }
 
-        await this.kafka.producer.sendBatch({
-            topicMessages,
-        });
+        await tracer.startActiveSpan(
+            'domain-events publish',
+            {
+                kind: SpanKind.PRODUCER,
+                attributes: {
+                    'messaging.system': 'kafka',
+                    'messaging.operation.type': 'publish',
+                    'domain_events.topics': topicMessages.map((tm) => tm.topic),
+                    'domain_events.event_count': objects.flatMap(
+                        (o) => o.events
+                    ).length,
+                },
+            },
+            async (span) => {
+                try {
+                    await this.kafka.producer.sendBatch({
+                        topicMessages,
+                    });
 
-        const eventIds = objects.flatMap((object) =>
-            object.events.map((event) => event.id)
-        );
+                    const eventIds = objects.flatMap((object) =>
+                        object.events.map((event) => event.id)
+                    );
 
-        await Promise.all(
-            eventIds.map((eventId) =>
-                this.eventOutboxStorage.delivered(eventId)
-            )
+                    await Promise.all(
+                        eventIds.map((eventId) =>
+                            this.eventOutboxStorage.delivered(eventId)
+                        )
+                    );
+                } catch (error) {
+                    span.recordException(error as Error);
+                    span.setStatus({
+                        code: SpanStatusCode.ERROR,
+                        message: (error as Error).message,
+                    });
+                    throw error;
+                } finally {
+                    span.end();
+                }
+            }
         );
     }
 
