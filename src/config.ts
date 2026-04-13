@@ -35,6 +35,7 @@ const schema = z.object({
     }),
     otel: z.object({
         logsEndpoint: z.string().url(),
+        tracesEndpoint: z.string().url(),
     }),
     outbox: z.object({
         pollingIntervalSeconds: z.coerce.number().int().positive(),
@@ -77,6 +78,7 @@ export const config: Config = schema.parse({
     },
     otel: {
         logsEndpoint: process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT,
+        tracesEndpoint: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT,
     },
     outbox: {
         pollingIntervalSeconds: process.env.OUTBOX_POLLING_INTERVAL_S,
