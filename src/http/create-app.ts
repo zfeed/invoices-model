@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import { WorkflowClient } from '@temporalio/client';
+import { SpanKind, trace } from '@opentelemetry/api';
 import { kysely } from '../../database/kysely';
 import {
     draftInvoicesPlugin,
@@ -15,15 +16,15 @@ import { Session } from '../shared/unit-of-work/unit-of-work';
 import { KafkaDomainEventsBus } from '../infrastructure/domain-events/kafka/kafka-domain-events-bus';
 import { config } from '../config';
 import { pino as Pino, Logger as PinoInstance } from 'pino';
+import { withSpan } from '../shared/tracing/with-span';
 
-export const createApp = async (container?: Container) => {
-    container = container ?? (await registerDependencies());
+const tracer = trace.getTracer('application');
 
-    const pino = container.getOrThrow<PinoInstance>(Pino);
-    const temporalClient = container.getOrThrow<WorkflowClient>(WorkflowClient);
-    const invoicePaypalWorker =
-        container.getOrThrow<TemporalWorker>(TemporalWorker);
-
+const startBootstrap = async (
+    container: Container,
+    temporalClient: WorkflowClient,
+    invoicePaypalWorker: TemporalWorker
+) => {
     const commands = await bootstrap({
         session: container.getOrThrow(Session),
         domainEventsBus: container.getOrThrow(KafkaDomainEventsBus),
@@ -34,6 +35,30 @@ export const createApp = async (container?: Container) => {
 
     await commands.start();
     void invoicePaypalWorker.start();
+
+    return commands;
+};
+
+export const createApp = async (container?: Container) => {
+    const resolvedContainer = container ?? (await registerDependencies());
+
+    const pino = resolvedContainer.getOrThrow<PinoInstance>(Pino);
+    const temporalClient =
+        resolvedContainer.getOrThrow<WorkflowClient>(WorkflowClient);
+    const invoicePaypalWorker =
+        resolvedContainer.getOrThrow<TemporalWorker>(TemporalWorker);
+
+    const commands = await withSpan(
+        tracer,
+        'bootstrap application',
+        () =>
+            startBootstrap(
+                resolvedContainer,
+                temporalClient,
+                invoicePaypalWorker
+            ),
+        { kind: SpanKind.INTERNAL }
+    );
 
     const app = Fastify({
         loggerInstance: pino,

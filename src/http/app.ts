@@ -1,29 +1,47 @@
 import '../instrumentation';
+import { SpanKind, trace } from '@opentelemetry/api';
 import { createApp } from './create-app';
 import { registerDependencies } from '../container/register-dependencies';
 import { Logger } from '../shared/logger/logger';
+import { withSpan } from '../shared/tracing/with-span';
 
-const main = async () => {
-    const container = await registerDependencies();
+const tracer = trace.getTracer('application');
+
+const PORT = 3000;
+
+type App = Awaited<ReturnType<typeof createApp>>;
+
+const shutdown = async (signal: string, app: App, logger: Logger) => {
+    logger.info(`Received ${signal}, shutting down...`);
+    await app.close();
+    process.exit(0);
+};
+
+const startup = async () => {
+    const container = await withSpan(tracer, 'register dependencies', () =>
+        registerDependencies()
+    );
+
     const logger = container.getOrThrow<Logger>(Logger);
     const app = await createApp(container);
 
-    const shutdown = async (signal: string) => {
-        logger.info(`Received ${signal}, shutting down...`);
-        await app.close();
-        process.exit(0);
-    };
+    process.on('SIGTERM', () => shutdown('SIGTERM', app, logger));
+    process.on('SIGINT', () => shutdown('SIGINT', app, logger));
 
-    process.on('SIGTERM', () => shutdown('SIGTERM'));
-    process.on('SIGINT', () => shutdown('SIGINT'));
+    const address = await withSpan(
+        tracer,
+        'listen application',
+        () => app.listen({ port: PORT }),
+        { kind: SpanKind.INTERNAL, attributes: { 'server.port': PORT } }
+    );
 
-    app.listen({ port: 3000 }, (err, address) => {
-        if (err) {
-            logger.error('Failed to start server', { err: err.message });
-            process.exit(1);
-        }
-        logger.info(`Server running on ${address}`);
-    });
+    logger.info(`Server running on ${address}`);
 };
 
-main();
+withSpan(tracer, 'start application', startup, {
+    kind: SpanKind.INTERNAL,
+    attributes: { 'server.port': PORT },
+}).catch((error: unknown) => {
+    process.stderr.write(`Failed to start application: ${String(error)}\n`);
+    process.exit(1);
+});

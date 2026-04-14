@@ -11,9 +11,10 @@ import { EventOutboxStorage } from '../../event-outbox/event-outbox';
 import { Kafka, KafkaConfig } from './kafka';
 import { Scheduler } from './sheduler';
 import { Duration } from '../../../lib/dayjs';
-import { trace, SpanKind, SpanStatusCode } from '@opentelemetry/api';
+import { trace, SpanKind } from '@opentelemetry/api';
 import { KafkaJS } from '@confluentinc/kafka-javascript';
 import { extractKafkaContext, injectKafkaHeaders } from './kafka-tracing';
+import { withSpan } from '../../../shared/tracing/with-span';
 
 const tracer = trace.getTracer('domain-events-bus');
 
@@ -73,35 +74,22 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
 
             const parentContext = extractKafkaContext(message.headers);
 
-            await tracer.startActiveSpan(
-                `${topic} handle`,
+            await withSpan(
+                tracer,
+                `process ${topic}`,
+                () => Promise.all(handlers.map((handler) => handler(event))),
                 {
                     kind: SpanKind.CONSUMER,
                     attributes: {
                         'messaging.system': 'kafka',
-                        'messaging.operation.type': 'receive',
+                        'messaging.operation.type': 'process',
+                        'messaging.operation.name': 'process',
                         'messaging.destination.name': topic,
                         'domain_events.event_name': event.name,
                         'domain_events.handlers_count': handlers.length,
                     },
                 },
-                parentContext,
-                async (span) => {
-                    try {
-                        await Promise.all(
-                            handlers.map((handler) => handler(event))
-                        );
-                    } catch (error) {
-                        span.recordException(error as Error);
-                        span.setStatus({
-                            code: SpanStatusCode.ERROR,
-                            message: (error as Error).message,
-                        });
-                        throw error;
-                    } finally {
-                        span.end();
-                    }
-                }
+                parentContext
             );
         });
 
@@ -122,48 +110,37 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
             return;
         }
 
-        await tracer.startActiveSpan(
-            'domain-events publish',
+        const messageCount = objects.flatMap((o) => o.events).length;
+
+        await withSpan(
+            tracer,
+            'publish events',
+            async (span) => {
+                span.setAttribute(
+                    'messaging.destination.names',
+                    topicMessages.map((tm) => tm.topic)
+                );
+
+                await this.kafka.producer.sendBatch({ topicMessages });
+
+                const eventIds = objects.flatMap((object) =>
+                    object.events.map((event) => event.id)
+                );
+
+                await Promise.all(
+                    eventIds.map((eventId) =>
+                        this.eventOutboxStorage.delivered(eventId)
+                    )
+                );
+            },
             {
                 kind: SpanKind.PRODUCER,
                 attributes: {
                     'messaging.system': 'kafka',
-                    'messaging.operation.type': 'publish',
-                    'domain_events.event_count': objects.flatMap(
-                        (o) => o.events
-                    ).length,
+                    'messaging.operation.type': 'send',
+                    'messaging.operation.name': 'publish',
+                    'messaging.batch.message_count': messageCount,
                 },
-            },
-            async (span) => {
-                try {
-                    span.setAttribute(
-                        'domain_events.topics',
-                        topicMessages.map((tm) => tm.topic)
-                    );
-
-                    await this.kafka.producer.sendBatch({
-                        topicMessages,
-                    });
-
-                    const eventIds = objects.flatMap((object) =>
-                        object.events.map((event) => event.id)
-                    );
-
-                    await Promise.all(
-                        eventIds.map((eventId) =>
-                            this.eventOutboxStorage.delivered(eventId)
-                        )
-                    );
-                } catch (error) {
-                    span.recordException(error as Error);
-                    span.setStatus({
-                        code: SpanStatusCode.ERROR,
-                        message: (error as Error).message,
-                    });
-                    throw error;
-                } finally {
-                    span.end();
-                }
             }
         );
     }
