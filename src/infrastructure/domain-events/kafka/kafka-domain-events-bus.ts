@@ -12,6 +12,8 @@ import { Kafka, KafkaConfig } from './kafka';
 import { Scheduler } from './sheduler';
 import { Duration } from '../../../lib/dayjs';
 import { trace, SpanKind, SpanStatusCode } from '@opentelemetry/api';
+import { KafkaJS } from '@confluentinc/kafka-javascript';
+import { extractKafkaContext, injectKafkaHeaders } from './kafka-tracing';
 
 const tracer = trace.getTracer('domain-events-bus');
 
@@ -69,6 +71,8 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
                 value: message.value,
             });
 
+            const parentContext = extractKafkaContext(message.headers);
+
             await tracer.startActiveSpan(
                 `${topic} handle`,
                 {
@@ -81,6 +85,7 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
                         'domain_events.handlers_count': handlers.length,
                     },
                 },
+                parentContext,
                 async (span) => {
                     try {
                         await Promise.all(
@@ -124,7 +129,6 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
                 attributes: {
                     'messaging.system': 'kafka',
                     'messaging.operation.type': 'publish',
-                    'domain_events.topics': topicMessages.map((tm) => tm.topic),
                     'domain_events.event_count': objects.flatMap(
                         (o) => o.events
                     ).length,
@@ -132,6 +136,11 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
             },
             async (span) => {
                 try {
+                    span.setAttribute(
+                        'domain_events.topics',
+                        topicMessages.map((tm) => tm.topic)
+                    );
+
                     await this.kafka.producer.sendBatch({
                         topicMessages,
                     });
@@ -170,25 +179,30 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
 
     private toTopicMessages(
         objects: PublishableEvents<DomainEvent<unknown>>[]
-    ): { topic: string; messages: { value: string }[] }[] {
+    ): {
+        topic: string;
+        messages: { value: string; headers: KafkaJS.IHeaders }[];
+    }[] {
         return [
             ...objects
                 .flatMap((object) => object.events)
-                .map((event) => ({
-                    topic: this.applyTopicPrefix(event.name),
-                    message: {
-                        value: JSON.stringify(event.serialize()),
-                    },
-                }))
-                .reduce<Map<string, { value: string }[]>>(
-                    (messagesByTopic, { topic, message }) => {
-                        const messages = messagesByTopic.get(topic) ?? [];
-                        messages.push(message);
-                        messagesByTopic.set(topic, messages);
-                        return messagesByTopic;
-                    },
-                    new Map()
-                )
+                .map((event) => {
+                    return {
+                        topic: this.applyTopicPrefix(event.name),
+                        message: {
+                            value: JSON.stringify(event.serialize()),
+                            headers: injectKafkaHeaders(),
+                        },
+                    };
+                })
+                .reduce<
+                    Map<string, { value: string; headers: KafkaJS.IHeaders }[]>
+                >((messagesByTopic, { topic, message }) => {
+                    const messages = messagesByTopic.get(topic) ?? [];
+                    messages.push(message);
+                    messagesByTopic.set(topic, messages);
+                    return messagesByTopic;
+                }, new Map())
                 .entries(),
         ].map(([topic, messages]) => ({ topic, messages }));
     }
