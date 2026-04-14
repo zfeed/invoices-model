@@ -10,6 +10,41 @@ Both domains are designed using **Object-Oriented Programming** principles, with
 
 ---
 
+## Key Project Decisions
+
+### OOP domain model with collection-style repositories and a pluggable unit of work
+
+The core domain is modeled with rich OOP entities and value objects that own their invariants and behavior instead of pushing business logic into service layers. Persistence is accessed through collection-like repositories exposed by the unit of work, for example `uow.collection(Invoice).get(...)` or `add(...)`, which keeps application code close to the domain language.
+
+The unit of work itself is pluggable. `Session.begin()` forks a persistence manager, tracks loaded entities through identity maps, commits all tracked changes in one transaction, and can be backed by different storage implementations without changing domain code.
+
+### Errors are represented explicitly with `Result`
+
+Instead of mixing expected business failures with thrown exceptions, the project uses an Either-style `Result` type to model success and failure explicitly. Domain and application code return `Result.error(...)` for validation and business-rule failures, which makes error paths visible in function signatures and easier to compose and test.
+
+Exceptions are reserved for unexpected failures or broken assumptions, while expected domain outcomes are returned as values.
+
+### The API distinguishes contract errors from business errors
+
+The HTTP layer separates malformed requests from valid requests that fail business rules:
+
+- `400 Bad Request` is used for contract errors such as invalid JSON or schema/validation failures.
+- `422 Unprocessable Entity` is used for domain and application errors when the request shape is valid but the requested operation is not allowed by business rules.
+
+That distinction keeps clients from conflating transport/input problems with real domain rejections.
+
+### Full OpenTelemetry support
+
+The project is instrumented end to end with OpenTelemetry. It exports traces, logs, and metrics, and includes instrumentation for Fastify, HTTP, PostgreSQL, Pino, Undici, and Temporal components. Manual spans are also used around application startup, request handling, domain event delivery, and outbox polling so internal workflow is observable, not just framework edges.
+
+### Transactional outbox for reliable event delivery
+
+Domain events are written to `event_outbox` in the same database transaction as aggregate state changes. After commit, the bus publishes them and the outbox can poll and retry undelivered records with delivery-attempt tracking and time-based backoff.
+
+This prevents lost events when a write succeeds but event delivery fails, and gives the system a built-in recovery path for transient messaging problems.
+
+---
+
 ## Project Structure
 
 ```
