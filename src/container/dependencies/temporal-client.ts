@@ -1,4 +1,5 @@
 import { Connection, WorkflowClient } from '@temporalio/client';
+import { OpenTelemetryWorkflowClientInterceptor } from '@temporalio/interceptors-opentelemetry';
 import { config } from '../../config';
 
 export const createTemporalClient = async (): Promise<WorkflowClient> => {
@@ -8,5 +9,6 @@ export const createTemporalClient = async (): Promise<WorkflowClient> => {
     return new WorkflowClient({
         connection,
         namespace: config.temporal.namespace,
+        interceptors: [new OpenTelemetryWorkflowClientInterceptor()],
     });
 };

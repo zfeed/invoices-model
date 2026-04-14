@@ -5,8 +5,13 @@ import {
     Worker,
     NativeConnectionOptions,
 } from '@temporalio/worker';
+import {
+    OpenTelemetryActivityInboundInterceptor,
+    makeWorkflowExporter,
+} from '@temporalio/interceptors-opentelemetry/lib/worker';
 import { Session } from './shared/unit-of-work/unit-of-work';
 import { Logger } from './shared/logger/logger';
+import { resource, traceExporter } from './instrumentation';
 
 let runtimeInstalled = false;
 import { Paypal } from './features/paypal/api/paypal';
@@ -61,6 +66,30 @@ export class TemporalWorker {
                 'features/invoice-paypal-transaction/workflow/process-invoice-paypal-transaction.workflow.ts'
             ),
             activities: this.activities,
+            interceptors: {
+                workflowModules: [
+                    require.resolve('./features/invoice-paypal-transaction/workflow/workflow-interceptors'),
+                ],
+                activity: [
+                    (ctx) => ({
+                        inbound: new OpenTelemetryActivityInboundInterceptor(
+                            ctx
+                        ),
+                    }),
+                ],
+            },
+            sinks: {
+                // @temporalio/interceptors-opentelemetry still bundles
+                // @opentelemetry/sdk-trace-base@1.x while this app runs on 2.x, so
+                // `makeWorkflowExporter`'s declared parameter types come from 1.x and
+                // don't match our 2.x `OTLPTraceExporter`. Runtime is compatible — only
+                // `.export(spans, cb)` is invoked on the exporter, and 2.x `ReadableSpan`
+                // is a structural superset of 1.x (adds `instrumentationScope`).
+                // Tracked upstream: https://github.com/temporalio/sdk-typescript/issues/1658
+                // Drop this suppression once the interceptor package upgrades to OTel 2.x.
+                // @ts-expect-error upstream OTel v1/v2 SDK duplication (see issue #1658)
+                exporter: makeWorkflowExporter(traceExporter, resource),
+            },
         });
 
         this.logger.info('Temporal worker started');

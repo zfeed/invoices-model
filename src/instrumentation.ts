@@ -3,6 +3,8 @@ import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { BatchLogRecordProcessor } from '@opentelemetry/sdk-logs';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
+import { resourceFromAttributes } from '@opentelemetry/resources';
+import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 import { PinoInstrumentation } from '@opentelemetry/instrumentation-pino';
 import { PgInstrumentation } from '@opentelemetry/instrumentation-pg';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
@@ -12,16 +14,23 @@ import { UndiciInstrumentation } from '@opentelemetry/instrumentation-undici';
 import { FastifyOtelInstrumentation } from '@fastify/otel';
 import { config } from './config';
 
-const traceExporter = new OTLPTraceExporter({
+export const resource = resourceFromAttributes({
+    [ATTR_SERVICE_NAME]: 'invoices-model',
+});
+
+export const traceExporter = new OTLPTraceExporter({
     url: config.otel.tracesEndpoint,
 });
+
+const spanProcessor = new BatchSpanProcessor(traceExporter);
 
 const logExporter = new OTLPLogExporter({
     url: config.otel.logsEndpoint,
 });
 
 const sdk = new NodeSDK({
-    spanProcessors: [new BatchSpanProcessor(traceExporter)],
+    resource,
+    spanProcessors: [spanProcessor],
     logRecordProcessor: new BatchLogRecordProcessor(logExporter),
     instrumentations: [
         new HttpInstrumentation(),

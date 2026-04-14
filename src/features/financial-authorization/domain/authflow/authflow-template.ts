@@ -6,9 +6,9 @@ import { StepTemplate } from '../step/step-template';
 import { Authflow } from './authflow';
 import { checkTemplateNoDuplicateStepOrders } from './checks/check-template-no-duplicate-step-orders';
 
-export class AuthflowTemplate
-    implements Mappable<ReturnType<AuthflowTemplate['toPlain']>>
-{
+export class AuthflowTemplate implements Mappable<
+    ReturnType<AuthflowTemplate['toPlain']>
+> {
     protected _id: Id;
     protected _range: Range;
     protected _steps: StepTemplate[];

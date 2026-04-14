@@ -4,9 +4,9 @@ import { Id } from '../id/id';
 import { Order } from '../order/order';
 import { Step } from './step';
 
-export class StepTemplate
-    implements Mappable<ReturnType<StepTemplate['toPlain']>>
-{
+export class StepTemplate implements Mappable<
+    ReturnType<StepTemplate['toPlain']>
+> {
     protected _id: Id;
     protected _order: Order;
     protected _groups: GroupTemplate[];

@@ -5,9 +5,9 @@ import { Group } from './group';
 import { checkTemplateApproversNotEmpty } from './checks/check-template-approvers-not-empty';
 import { checkTemplateNoDuplicateApprovers } from './checks/check-template-no-duplicate-approvers';
 
-export class GroupTemplate
-    implements Mappable<ReturnType<GroupTemplate['toPlain']>>
-{
+export class GroupTemplate implements Mappable<
+    ReturnType<GroupTemplate['toPlain']>
+> {
     protected _id: Id;
     protected _requiredApprovals: number;
     protected _approvers: Approver[];
