@@ -23,6 +23,11 @@ import {
 
 type Temporal = {
     nativeConnectionOptions: NativeConnectionOptions;
+    namespace: string;
+    metrics: {
+        endpoint: string;
+        exportIntervalMs: number;
+    };
 };
 
 export class TemporalWorker {
@@ -50,7 +55,19 @@ export class TemporalWorker {
         });
 
         if (!runtimeInstalled) {
-            Runtime.install({ logger: this.logger });
+            Runtime.install({
+                logger: this.logger,
+                telemetryOptions: {
+                    metrics: {
+                        otel: {
+                            url: this.temporal.metrics.endpoint,
+                            http: true,
+                            metricsExportInterval:
+                                this.temporal.metrics.exportIntervalMs,
+                        },
+                    },
+                },
+            });
             runtimeInstalled = true;
         }
 
@@ -60,6 +77,7 @@ export class TemporalWorker {
 
         this.worker = await Worker.create({
             connection: this.nativeConnection,
+            namespace: this.temporal.namespace,
             taskQueue: INVOICE_PAYPAL_TX_TASK_QUEUE,
             workflowsPath: path.resolve(
                 __dirname,

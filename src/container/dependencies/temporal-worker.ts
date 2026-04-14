@@ -12,6 +12,11 @@ export const createTemporalWorker = (
     new TemporalWorker({
         temporal: {
             nativeConnectionOptions: { address: config.temporal.address },
+            namespace: config.temporal.namespace,
+            metrics: {
+                endpoint: config.otel.metricsEndpoint,
+                exportIntervalMs: config.otel.metricsExportIntervalMs,
+            },
         },
         paypal,
         session,

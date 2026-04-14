@@ -83,6 +83,18 @@ services:
             - ./tempo/config.yaml:/etc/tempo/config.yaml
             - tempodata:/var/tempo
 
+    prometheus:
+        image: prom/prometheus:v3.1.0
+        ports:
+            - '9090:9090'
+        command:
+            - --config.file=/etc/prometheus/config.yaml
+            - --web.enable-otlp-receiver
+            - --enable-feature=native-histograms
+        volumes:
+            - ./prometheus/config.yaml:/etc/prometheus/config.yaml
+            - prometheusdata:/prometheus
+
     grafana:
         image: grafana/grafana:12.4.2
         ports:
@@ -99,6 +111,7 @@ services:
         depends_on:
             - loki
             - tempo
+            - prometheus
 
 volumes:
     pgdata:
@@ -106,3 +119,4 @@ volumes:
     lokidata:
     grafanadata:
     tempodata:
+    prometheusdata:
