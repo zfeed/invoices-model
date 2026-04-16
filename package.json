@@ -5,11 +5,11 @@
     "scripts": {
         "start": "tsc --noEmit && tsx src/http/app.ts",
         "start:debug": "node --inspect --import tsx src/http/app.ts",
-        "test": "node --import tsx test/run-tests.ts",
-        "test:watch": "node --import tsx test/watch-tests.ts",
+        "test": "vitest run",
+        "test:watch": "vitest",
         "coverage": "vitest run --coverage",
-        "test:e2e": "node --import tsx e2e/run-e2e.ts",
-        "test:e2e:watch": "node --import tsx e2e/watch-e2e.ts",
+        "test:e2e": "vitest run --config vitest.e2e.config.ts",
+        "test:e2e:watch": "vitest --config vitest.e2e.config.ts",
         "format": "prettier --write .",
         "format:check": "prettier --check .",
         "kysely:generate": "kysely-codegen"
