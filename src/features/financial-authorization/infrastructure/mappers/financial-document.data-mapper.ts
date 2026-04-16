@@ -1,12 +1,12 @@
-import { FinancialDocument } from '../../domain/document/document';
-import type { FinancialDocumentStorage } from '../financial-document-storage';
-import { AuthflowDataMapper, AuthflowRecord } from './authflow.data-mapper';
-import { IdDataMapper, IdRecord } from './id.data-mapper';
-import { MoneyDataMapper, MoneyRecord } from './money.data-mapper';
+import { FinancialDocument } from '../../domain/document/document.ts';
+import type { FinancialDocumentStorage } from '../financial-document-storage.ts';
+import { AuthflowDataMapper, AuthflowRecord } from './authflow.data-mapper.ts';
+import { IdDataMapper, IdRecord } from './id.data-mapper.ts';
+import { MoneyDataMapper, MoneyRecord } from './money.data-mapper.ts';
 import {
     ReferenceIdDataMapper,
     ReferenceIdRecord,
-} from './reference-id.data-mapper';
+} from './reference-id.data-mapper.ts';
 
 export type FinancialDocumentRecord = {
     id: IdRecord;

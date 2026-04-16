@@ -1,9 +1,9 @@
-import { DomainError, Mappable, Result } from '../../../../shared';
-import { Approver } from '../approver/approver';
-import { Id } from '../id/id';
-import { Group } from './group';
-import { checkTemplateApproversNotEmpty } from './checks/check-template-approvers-not-empty';
-import { checkTemplateNoDuplicateApprovers } from './checks/check-template-no-duplicate-approvers';
+import { DomainError, Mappable, Result } from '../../../../shared/index.ts';
+import { Approver } from '../approver/approver.ts';
+import { Id } from '../id/id.ts';
+import { Group } from './group.ts';
+import { checkTemplateApproversNotEmpty } from './checks/check-template-approvers-not-empty.ts';
+import { checkTemplateNoDuplicateApprovers } from './checks/check-template-no-duplicate-approvers.ts';
 
 export class GroupTemplate implements Mappable<
     ReturnType<GroupTemplate['toPlain']>

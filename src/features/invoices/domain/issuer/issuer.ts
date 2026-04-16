@@ -1,6 +1,6 @@
-import { Equatable, Mappable, Result } from '../../../../shared';
-import { Email } from '../email/email';
-import { checkIssuerNonEmpty } from './checks/check-issuer-non-empty';
+import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { Email } from '../email/email.ts';
+import { checkIssuerNonEmpty } from './checks/check-issuer-non-empty.ts';
 
 export enum ISSUER_TYPE {
     INDIVIDUAL = 'INDIVIDUAL',

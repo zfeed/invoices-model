@@ -1,6 +1,6 @@
-import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes';
-import { DomainError } from '../../../../../shared/errors/domain/domain.error';
-import { Approval } from '../../approval/approval';
+import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes.ts';
+import { DomainError } from '../../../../../shared/errors/domain/domain.error.ts';
+import { Approval } from '../../approval/approval.ts';
 
 export function checkNoDuplicateApprovals(
     approvals: Approval[]

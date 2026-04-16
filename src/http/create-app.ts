@@ -1,22 +1,22 @@
 import Fastify from 'fastify';
 import { WorkflowClient } from '@temporalio/client';
 import { SpanKind, trace } from '@opentelemetry/api';
-import { kysely } from '../../database/kysely';
+import { kysely } from '../../database/kysely.ts';
 import {
     draftInvoicesPlugin,
     invoicesPlugin,
     financialAuthorizationPlugin,
-} from './plugins';
-import { errorHandler } from './error-handler';
-import { TemporalWorker } from '../worker';
-import { registerDependencies } from '../container/register-dependencies';
-import { Container } from '../container/container';
-import { bootstrap } from '../bootstrap';
-import { Session } from '../shared/unit-of-work/unit-of-work';
-import { KafkaDomainEventsBus } from '../infrastructure/domain-events/kafka/kafka-domain-events-bus';
-import { config } from '../config';
+} from './plugins/index.ts';
+import { errorHandler } from './error-handler.ts';
+import { TemporalWorker } from '../worker.ts';
+import { registerDependencies } from '../container/register-dependencies.ts';
+import { Container } from '../container/container.ts';
+import { bootstrap } from '../bootstrap.ts';
+import { Session } from '../shared/unit-of-work/unit-of-work.ts';
+import { KafkaDomainEventsBus } from '../infrastructure/domain-events/kafka/kafka-domain-events-bus.ts';
+import { config } from '../config.ts';
 import { pino as Pino, Logger as PinoInstance } from 'pino';
-import { withSpan } from '../shared/tracing/with-span';
+import { withSpan } from '../shared/tracing/with-span.ts';
 
 const tracer = trace.getTracer('application');
 

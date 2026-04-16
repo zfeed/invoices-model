@@ -1,18 +1,18 @@
-import { Session } from '../../../../../shared/unit-of-work/unit-of-work';
-import { PersistentManager } from '../../../../../infrastructure/persistent-manager/pg-persistent-manager';
-import { InMemoryDomainEventsBus } from '../../../../../infrastructure/domain-events/in-memory-domain-events-bus';
-import { EventOutboxStorage } from '../../../../../infrastructure/event-outbox/event-outbox';
-import { kysely } from '../../../../../../database/kysely';
-import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice';
-import { CompleteDraftInvoice } from './complete-draft-invoice';
-import { DraftInvoiceFinishedEvent } from '../../../domain/draft-invoice/events/draft-invoice-finished.event';
-import { InvoiceIssuedEvent } from '../../../domain/invoice/events/invoice-issued.event';
-import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application/application-codes';
-import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes';
-import { Invoice } from '../../../domain/invoice/invoice';
-import { Id } from '../../../domain/id/id';
-import { ISSUER_TYPE } from '../../../domain/issuer/issuer';
-import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
+import { Session } from '../../../../../shared/unit-of-work/unit-of-work.ts';
+import { PersistentManager } from '../../../../../infrastructure/persistent-manager/pg-persistent-manager.ts';
+import { InMemoryDomainEventsBus } from '../../../../../infrastructure/domain-events/in-memory-domain-events-bus.ts';
+import { EventOutboxStorage } from '../../../../../infrastructure/event-outbox/event-outbox.ts';
+import { kysely } from '../../../../../../database/kysely.ts';
+import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice.ts';
+import { CompleteDraftInvoice } from './complete-draft-invoice.ts';
+import { DraftInvoiceFinishedEvent } from '../../../domain/draft-invoice/events/draft-invoice-finished.event.ts';
+import { InvoiceIssuedEvent } from '../../../domain/invoice/events/invoice-issued.event.ts';
+import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application/application-codes.ts';
+import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes.ts';
+import { Invoice } from '../../../domain/invoice/invoice.ts';
+import { Id } from '../../../domain/id/id.ts';
+import { ISSUER_TYPE } from '../../../domain/issuer/issuer.ts';
+import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient.ts';
 
 const COMPLETE_DRAFT_REQUEST = {
     lineItems: [

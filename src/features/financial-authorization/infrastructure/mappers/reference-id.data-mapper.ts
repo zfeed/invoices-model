@@ -1,4 +1,4 @@
-import { ReferenceId } from '../../domain/reference-id/reference-id';
+import { ReferenceId } from '../../domain/reference-id/reference-id.ts';
 
 export type ReferenceIdRecord = {
     value: string;

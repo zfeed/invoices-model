@@ -1,7 +1,7 @@
-import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application/application-codes';
-import { ApplicationError } from '../../../../../shared/errors/application/application.error';
-import { Kysely } from '../../../../../../database/kysely';
-import { InvoiceDto } from './invoice.dto';
+import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application/application-codes.ts';
+import { ApplicationError } from '../../../../../shared/errors/application/application.error.ts';
+import { Kysely } from '../../../../../../database/kysely.ts';
+import { InvoiceDto } from './invoice.dto.ts';
 
 export class GetInvoice {
     constructor(private readonly kysely: Kysely) {}

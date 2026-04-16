@@ -1,7 +1,7 @@
-import { Recipient, RECIPIENT_TYPE } from '../../domain/recipient/recipient';
-import { CountryDataMapper, CountryRecord } from './country.data-mapper';
-import { EmailDataMapper, EmailRecord } from './email.data-mapper';
-import { PaypalDataMapper, PaypalRecord } from './paypal.data-mapper';
+import { Recipient, RECIPIENT_TYPE } from '../../domain/recipient/recipient.ts';
+import { CountryDataMapper, CountryRecord } from './country.data-mapper.ts';
+import { EmailDataMapper, EmailRecord } from './email.data-mapper.ts';
+import { PaypalDataMapper, PaypalRecord } from './paypal.data-mapper.ts';
 
 export type RecipientRecord = {
     type: RECIPIENT_TYPE;

@@ -1,4 +1,4 @@
-import { Action } from '../../domain/action/action';
+import { Action } from '../../domain/action/action.ts';
 
 export type ActionRecord = {
     value: string;

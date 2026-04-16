@@ -1,23 +1,23 @@
-import { DraftInvoice } from '../../features/invoices/domain/draft-invoice/draft-invoice';
-import { Id } from '../../features/invoices/domain/id/id';
-import { LineItem } from '../../features/invoices/domain/line-item/line-item';
-import { Session } from './unit-of-work';
-import { PersistentManager } from '../../infrastructure/persistent-manager/pg-persistent-manager';
-import { InMemoryDomainEventsBus } from '../../infrastructure/domain-events/in-memory-domain-events-bus';
-import { EventOutboxStorage } from '../../infrastructure/event-outbox/event-outbox';
-import { kysely } from '../../../database/kysely';
-import { Invoice } from '../../features/invoices/domain/invoice/invoice';
-import { CalendarDate } from '../../features/invoices/domain/calendar-date/calendar-date';
+import { DraftInvoice } from '../../features/invoices/domain/draft-invoice/draft-invoice.ts';
+import { Id } from '../../features/invoices/domain/id/id.ts';
+import { LineItem } from '../../features/invoices/domain/line-item/line-item.ts';
+import { Session } from './unit-of-work.ts';
+import { PersistentManager } from '../../infrastructure/persistent-manager/pg-persistent-manager.ts';
+import { InMemoryDomainEventsBus } from '../../infrastructure/domain-events/in-memory-domain-events-bus.ts';
+import { EventOutboxStorage } from '../../infrastructure/event-outbox/event-outbox.ts';
+import { kysely } from '../../../database/kysely.ts';
+import { Invoice } from '../../features/invoices/domain/invoice/invoice.ts';
+import { CalendarDate } from '../../features/invoices/domain/calendar-date/calendar-date.ts';
 import {
     Issuer,
     ISSUER_TYPE,
-} from '../../features/invoices/domain/issuer/issuer';
+} from '../../features/invoices/domain/issuer/issuer.ts';
 import {
     Recipient,
     RECIPIENT_TYPE,
-} from '../../features/invoices/domain/recipient/recipient';
-import { Paypal } from '../../features/invoices/domain/billing/paypal/paypal';
-import { UnitDescription } from '../../features/invoices/domain/line-item/unit-description/unit-description';
+} from '../../features/invoices/domain/recipient/recipient.ts';
+import { Paypal } from '../../features/invoices/domain/billing/paypal/paypal.ts';
+import { UnitDescription } from '../../features/invoices/domain/line-item/unit-description/unit-description.ts';
 
 describe('UnitOfWork contract', () => {
     describe('Collection.get', () => {

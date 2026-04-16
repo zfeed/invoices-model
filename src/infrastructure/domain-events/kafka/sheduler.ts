@@ -1,5 +1,5 @@
 import { setTimeout } from 'node:timers/promises';
-import { Duration } from '../../../lib/dayjs';
+import { Duration } from '../../../lib/dayjs.ts';
 
 type Job = () => Promise<void>;
 

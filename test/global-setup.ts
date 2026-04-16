@@ -1,5 +1,5 @@
-import { startTestEnvironment } from './runtime/environment';
-import { migrateToLatest } from './runtime/migrate';
+import { startTestEnvironment } from './runtime/environment.ts';
+import { migrateToLatest } from './runtime/migrate.ts';
 
 export default async function setup() {
     const environment = await startTestEnvironment();

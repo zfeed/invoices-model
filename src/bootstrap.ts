@@ -1,25 +1,25 @@
-import { DomainEventsBus } from './shared/domain-events/domain-events-bus.interface';
-import { Session } from './shared/unit-of-work/unit-of-work';
-import { CreateDraftInvoice } from './features/invoices/application/commands/create-draft-invoice/create-draft-invoice';
-import { UpdateDraftInvoice } from './features/invoices/application/commands/update-draft-invoice/update-draft-invoice';
-import { CalculateDraftInvoice } from './features/invoices/application/commands/calculate-draft-invoice/calculate-draft-invoice';
-import { CompleteDraftInvoice } from './features/invoices/application/commands/complete-draft-invoice/complete-draft-invoice';
-import { ArchiveDraftInvoice } from './features/invoices/application/commands/archive-draft-invoice/archive-draft-invoice';
-import { DraftDraftInvoice } from './features/invoices/application/commands/draft-draft-invoice/draft-draft-invoice';
-import { ProcessInvoice } from './features/invoices/application/commands/process-invoice/process-invoice';
-import { CancelInvoice } from './features/invoices/application/commands/cancel-invoice/cancel-invoice';
-import { PayInvoice } from './features/invoices/application/commands/pay-invoice/pay-invoice';
-import { GetInvoice } from './features/invoices/application/queries/get-invoice/get-invoice';
-import { CreateAuthflowPolicy } from './features/financial-authorization/application/commands/create-authflow-policy';
-import { ApproveActionOnDocument } from './features/financial-authorization/application/commands/approve-action-on-document';
-import { CanApproverApprove } from './features/financial-authorization/application/queries/can-approver-approve';
-import { OnInvoiceIssued } from './features/financial-authorization/application/event-handlers/on-invoice-issued';
+import { DomainEventsBus } from './shared/domain-events/domain-events-bus.interface.ts';
+import { Session } from './shared/unit-of-work/unit-of-work.ts';
+import { CreateDraftInvoice } from './features/invoices/application/commands/create-draft-invoice/create-draft-invoice.ts';
+import { UpdateDraftInvoice } from './features/invoices/application/commands/update-draft-invoice/update-draft-invoice.ts';
+import { CalculateDraftInvoice } from './features/invoices/application/commands/calculate-draft-invoice/calculate-draft-invoice.ts';
+import { CompleteDraftInvoice } from './features/invoices/application/commands/complete-draft-invoice/complete-draft-invoice.ts';
+import { ArchiveDraftInvoice } from './features/invoices/application/commands/archive-draft-invoice/archive-draft-invoice.ts';
+import { DraftDraftInvoice } from './features/invoices/application/commands/draft-draft-invoice/draft-draft-invoice.ts';
+import { ProcessInvoice } from './features/invoices/application/commands/process-invoice/process-invoice.ts';
+import { CancelInvoice } from './features/invoices/application/commands/cancel-invoice/cancel-invoice.ts';
+import { PayInvoice } from './features/invoices/application/commands/pay-invoice/pay-invoice.ts';
+import { GetInvoice } from './features/invoices/application/queries/get-invoice/get-invoice.ts';
+import { CreateAuthflowPolicy } from './features/financial-authorization/application/commands/create-authflow-policy.ts';
+import { ApproveActionOnDocument } from './features/financial-authorization/application/commands/approve-action-on-document.ts';
+import { CanApproverApprove } from './features/financial-authorization/application/queries/can-approver-approve.ts';
+import { OnInvoiceIssued } from './features/financial-authorization/application/event-handlers/on-invoice-issued.ts';
 import { WorkflowClient } from '@temporalio/client';
 import {
     OnInvoiceProcessing,
     PollingConfig,
-} from './features/invoice-paypal-transaction/on-invoice-processing.event-handler';
-import { Kysely } from '../database/kysely';
+} from './features/invoice-paypal-transaction/on-invoice-processing.event-handler.ts';
+import { Kysely } from '../database/kysely.ts';
 
 type Infrastructure = {
     session: Session;

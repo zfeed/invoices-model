@@ -1,13 +1,13 @@
-import { CalendarDate } from '../calendar-date/calendar-date';
-import { Id } from '../id/id';
-import { Issuer, ISSUER_TYPE } from '../issuer/issuer';
-import { LineItem } from '../line-item/line-item';
-import { Money } from '../money/money/money';
-import { Paypal } from '../billing/paypal/paypal';
-import { Recipient, RECIPIENT_TYPE } from '../recipient/recipient';
-import { VatRate } from '../vat-rate/vat-rate';
-import { DraftInvoice } from './draft-invoice';
-import { DraftInvoiceStatus } from '../status/draft-invoice-status';
+import { CalendarDate } from '../calendar-date/calendar-date.ts';
+import { Id } from '../id/id.ts';
+import { Issuer, ISSUER_TYPE } from '../issuer/issuer.ts';
+import { LineItem } from '../line-item/line-item.ts';
+import { Money } from '../money/money/money.ts';
+import { Paypal } from '../billing/paypal/paypal.ts';
+import { Recipient, RECIPIENT_TYPE } from '../recipient/recipient.ts';
+import { VatRate } from '../vat-rate/vat-rate.ts';
+import { DraftInvoice } from './draft-invoice.ts';
+import { DraftInvoiceStatus } from '../status/draft-invoice-status.ts';
 
 describe('DraftInvoice', () => {
     it('should create a draft invoice instance with missing data', () => {

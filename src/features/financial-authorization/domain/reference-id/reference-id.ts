@@ -1,5 +1,5 @@
-import { Equatable, Mappable, Result } from '../../../../shared';
-import { checkReferenceIdNotBlank } from './checks/check-reference-id-not-blank';
+import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { checkReferenceIdNotBlank } from './checks/check-reference-id-not-blank.ts';
 
 export class ReferenceId implements Equatable<ReferenceId>, Mappable<string> {
     protected _value: string;

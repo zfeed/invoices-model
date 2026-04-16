@@ -1,7 +1,7 @@
-import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes';
-import { DomainError } from '../../../../../shared/errors/domain/domain.error';
-import { Approval } from '../../approval/approval';
-import { Approver } from '../../approver/approver';
+import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes.ts';
+import { DomainError } from '../../../../../shared/errors/domain/domain.error.ts';
+import { Approval } from '../../approval/approval.ts';
+import { Approver } from '../../approver/approver.ts';
 
 export function checkApproverExists(
     approvers: Approver[],

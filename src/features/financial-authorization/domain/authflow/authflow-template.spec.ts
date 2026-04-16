@@ -1,14 +1,14 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes';
-import { Approver } from '../approver/approver';
-import { Email } from '../email/email';
-import { GroupTemplate } from '../groups/group-template';
-import { Id } from '../id/id';
-import { Money } from '../money/money';
-import { Name } from '../name/name';
-import { Order } from '../order/order';
-import { Range } from '../range/range';
-import { StepTemplate } from '../step/step-template';
-import { AuthflowTemplate } from './authflow-template';
+import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { Approver } from '../approver/approver.ts';
+import { Email } from '../email/email.ts';
+import { GroupTemplate } from '../groups/group-template.ts';
+import { Id } from '../id/id.ts';
+import { Money } from '../money/money.ts';
+import { Name } from '../name/name.ts';
+import { Order } from '../order/order.ts';
+import { Range } from '../range/range.ts';
+import { StepTemplate } from '../step/step-template.ts';
+import { AuthflowTemplate } from './authflow-template.ts';
 
 const testRange = Range.create(
     Money.create('0', 'USD').unwrap(),

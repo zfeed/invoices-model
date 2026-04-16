@@ -1,5 +1,5 @@
-import { Equatable, Result } from '../../../../../shared';
-import { checkCurrencyCode } from './checks/check-currency-code';
+import { Equatable, Result } from '../../../../../shared/index.ts';
+import { checkCurrencyCode } from './checks/check-currency-code.ts';
 
 export class Currency implements Equatable<Currency> {
     protected _code: string;

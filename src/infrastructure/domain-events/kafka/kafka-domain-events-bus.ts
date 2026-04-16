@@ -1,20 +1,20 @@
 import {
     DomainEvent,
     DomainEventClass,
-} from '../../../shared/events/domain-event';
+} from '../../../shared/events/domain-event.ts';
 import {
     EventHandler,
     DomainEventsBus,
-} from '../../../shared/domain-events/domain-events-bus.interface';
-import { PublishableEvents } from '../../../shared/events/event-publisher.interface';
-import { EventOutboxStorage } from '../../event-outbox/event-outbox';
-import { Kafka, KafkaConfig } from './kafka';
-import { Scheduler } from './sheduler';
-import { Duration } from '../../../lib/dayjs';
+} from '../../../shared/domain-events/domain-events-bus.interface.ts';
+import { PublishableEvents } from '../../../shared/events/event-publisher.interface.ts';
+import { EventOutboxStorage } from '../../event-outbox/event-outbox.ts';
+import { Kafka, KafkaConfig } from './kafka.ts';
+import { Scheduler } from './sheduler.ts';
+import { Duration } from '../../../lib/dayjs.ts';
 import { trace, SpanKind } from '@opentelemetry/api';
 import { KafkaJS } from '@confluentinc/kafka-javascript';
-import { extractKafkaContext, injectKafkaHeaders } from './kafka-tracing';
-import { withSpan } from '../../../shared/tracing/with-span';
+import { extractKafkaContext, injectKafkaHeaders } from './kafka-tracing.ts';
+import { withSpan } from '../../../shared/tracing/with-span.ts';
 
 const tracer = trace.getTracer('domain-events-bus');
 

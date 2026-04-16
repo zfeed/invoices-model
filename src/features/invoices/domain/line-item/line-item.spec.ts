@@ -1,8 +1,8 @@
-import { testEquatable } from '../../../../shared/equatable.test-helper';
-import { Money } from '../money/money/money';
-import { LineItem } from './line-item';
-import { UnitDescription } from './unit-description/unit-description';
-import { UnitQuantity } from './unit-quantity/unit-quantity';
+import { testEquatable } from '../../../../shared/equatable.test-helper.ts';
+import { Money } from '../money/money/money.ts';
+import { LineItem } from './line-item.ts';
+import { UnitDescription } from './unit-description/unit-description.ts';
+import { UnitQuantity } from './unit-quantity/unit-quantity.ts';
 
 describe('LineItem', () => {
     testEquatable({

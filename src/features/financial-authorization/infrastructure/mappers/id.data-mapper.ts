@@ -1,4 +1,4 @@
-import { Id } from '../../domain/id/id';
+import { Id } from '../../domain/id/id.ts';
 
 export type IdRecord = {
     value: string;

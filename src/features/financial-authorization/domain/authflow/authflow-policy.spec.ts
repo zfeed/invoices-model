@@ -1,17 +1,17 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes';
-import { Approver } from '../approver/approver';
-import { Email } from '../email/email';
-import { GroupTemplate } from '../groups/group-template';
-import { Id } from '../id/id';
-import { Money } from '../money/money';
-import { Name } from '../name/name';
-import { Order } from '../order/order';
-import { Range } from '../range/range';
-import { AuthflowTemplate } from './authflow-template';
-import { AuthflowPolicy } from './authflow-policy';
-import { StepTemplate } from '../step/step-template';
-import { AuthflowPolicyCreatedEvent } from './events/authflow-policy-created.event';
-import { Action } from '../action/action';
+import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { Approver } from '../approver/approver.ts';
+import { Email } from '../email/email.ts';
+import { GroupTemplate } from '../groups/group-template.ts';
+import { Id } from '../id/id.ts';
+import { Money } from '../money/money.ts';
+import { Name } from '../name/name.ts';
+import { Order } from '../order/order.ts';
+import { Range } from '../range/range.ts';
+import { AuthflowTemplate } from './authflow-template.ts';
+import { AuthflowPolicy } from './authflow-policy.ts';
+import { StepTemplate } from '../step/step-template.ts';
+import { AuthflowPolicyCreatedEvent } from './events/authflow-policy-created.event.ts';
+import { Action } from '../action/action.ts';
 
 const range = (from: string, to: string) =>
     Range.create(

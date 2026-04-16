@@ -1,8 +1,8 @@
-import { Authflow } from '../../domain/authflow/authflow';
-import { ActionDataMapper, ActionRecord } from './action.data-mapper';
-import { IdDataMapper, IdRecord } from './id.data-mapper';
-import { RangeDataMapper, RangeRecord } from './range.data-mapper';
-import { StepDataMapper, StepRecord } from './step.data-mapper';
+import { Authflow } from '../../domain/authflow/authflow.ts';
+import { ActionDataMapper, ActionRecord } from './action.data-mapper.ts';
+import { IdDataMapper, IdRecord } from './id.data-mapper.ts';
+import { RangeDataMapper, RangeRecord } from './range.data-mapper.ts';
+import { StepDataMapper, StepRecord } from './step.data-mapper.ts';
 
 export type AuthflowRecord = {
     id: IdRecord;

@@ -3,7 +3,7 @@ import {
     DomainError,
     Equatable,
     Result,
-} from '../../../../shared';
+} from '../../../../shared/index.ts';
 
 export enum INVOICE_STATUS {
     ISSUED = 'ISSUED',

@@ -1,5 +1,5 @@
-import { testDomainEventsBus } from '../../shared/domain-events/domain-events-bus.test-helper';
-import { InMemoryDomainEventsBus } from './in-memory-domain-events-bus';
+import { testDomainEventsBus } from '../../shared/domain-events/domain-events-bus.test-helper.ts';
+import { InMemoryDomainEventsBus } from './in-memory-domain-events-bus.ts';
 
 testDomainEventsBus({
     typeName: 'InMemoryDomainEventsBus',

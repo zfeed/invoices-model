@@ -1,5 +1,5 @@
-import { Equatable, Mappable, Result } from '../../../../../shared';
-import { checkDescriptionNonEmpty } from './checks/check-description-non-empty';
+import { Equatable, Mappable, Result } from '../../../../../shared/index.ts';
+import { checkDescriptionNonEmpty } from './checks/check-description-non-empty.ts';
 
 export class UnitDescription
     implements Equatable<UnitDescription>, Mappable<string>

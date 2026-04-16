@@ -1,4 +1,5 @@
-import path from 'path';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
     NativeConnection,
     Runtime,
@@ -8,18 +9,21 @@ import {
 import {
     OpenTelemetryActivityInboundInterceptor,
     makeWorkflowExporter,
-} from '@temporalio/interceptors-opentelemetry/lib/worker';
-import { Session } from './shared/unit-of-work/unit-of-work';
-import { Logger } from './shared/logger/logger';
-import { resource, traceExporter } from './instrumentation';
+} from '@temporalio/interceptors-opentelemetry/lib/worker/index.js';
+import { Session } from './shared/unit-of-work/unit-of-work.ts';
+import { Logger } from './shared/logger/logger.ts';
+import { resource, traceExporter } from './instrumentation.ts';
 
 let runtimeInstalled = false;
-import { Paypal } from './features/paypal/api/paypal';
+import { Paypal } from './features/paypal/api/paypal.ts';
 import {
     INVOICE_PAYPAL_TX_TASK_QUEUE,
     buildActivities,
     Activities,
-} from './features/invoice-paypal-transaction';
+} from './features/invoice-paypal-transaction/index.ts';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 type Temporal = {
     nativeConnectionOptions: NativeConnectionOptions;

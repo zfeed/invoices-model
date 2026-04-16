@@ -1,5 +1,5 @@
-import { EntityClass, PersistentManager } from '../unit-of-work.interface';
-import { IdentityMap } from '../identity-map/identity-map';
+import { EntityClass, PersistentManager } from '../unit-of-work.interface.ts';
+import { IdentityMap } from '../identity-map/identity-map.ts';
 
 export class Collection<T extends { id: { toString(): string } }> {
     private readonly identityMap = new IdentityMap<T>();

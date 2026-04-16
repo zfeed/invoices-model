@@ -1,5 +1,5 @@
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared';
-import { LineItem } from '../../line-item/line-item';
+import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared/index.ts';
+import { LineItem } from '../../line-item/line-item.ts';
 
 export function checkNoDuplicate(lineItems: LineItem[]): DomainError | null {
     for (let i = 0; i < lineItems.length; i++) {

@@ -1,12 +1,12 @@
-import { CalendarDate } from '../../../domain/calendar-date/calendar-date';
-import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
-import { Id } from '../../../domain/id/id';
-import { Issuer, ISSUER_TYPE } from '../../../domain/issuer/issuer';
-import { LineItem } from '../../../domain/line-item/line-item';
-import { Paypal } from '../../../domain/billing/paypal/paypal';
-import { Recipient, RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
-import { VatRate } from '../../../domain/vat-rate/vat-rate';
-import { DraftInvoiceDto } from '../../queries/get-draft-invoice/draft-invoice.dto';
+import { CalendarDate } from '../../../domain/calendar-date/calendar-date.ts';
+import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice.ts';
+import { Id } from '../../../domain/id/id.ts';
+import { Issuer, ISSUER_TYPE } from '../../../domain/issuer/issuer.ts';
+import { LineItem } from '../../../domain/line-item/line-item.ts';
+import { Paypal } from '../../../domain/billing/paypal/paypal.ts';
+import { Recipient, RECIPIENT_TYPE } from '../../../domain/recipient/recipient.ts';
+import { VatRate } from '../../../domain/vat-rate/vat-rate.ts';
+import { DraftInvoiceDto } from '../../queries/get-draft-invoice/draft-invoice.dto.ts';
 
 export class CalculateDraftInvoice {
     public execute(request: {

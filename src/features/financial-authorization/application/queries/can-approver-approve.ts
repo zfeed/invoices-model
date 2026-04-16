@@ -1,8 +1,8 @@
-import { Session } from '../../../../shared/unit-of-work/unit-of-work';
-import { Action } from '../../domain/action/action';
-import { FinancialDocument } from '../../domain/document/document';
-import { Id } from '../../domain/id/id';
-import { ReferenceId } from '../../domain/reference-id/reference-id';
+import { Session } from '../../../../shared/unit-of-work/unit-of-work.ts';
+import { Action } from '../../domain/action/action.ts';
+import { FinancialDocument } from '../../domain/document/document.ts';
+import { Id } from '../../domain/id/id.ts';
+import { ReferenceId } from '../../domain/reference-id/reference-id.ts';
 
 export type ApprovalAnswer = 'YES' | 'NO' | 'UNKNOWN';
 

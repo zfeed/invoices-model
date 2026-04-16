@@ -1,5 +1,5 @@
-import { testEquatable } from '../../../../shared/equatable.test-helper';
-import { Id } from './id';
+import { testEquatable } from '../../../../shared/equatable.test-helper.ts';
+import { Id } from './id.ts';
 
 describe(Id, () => {
     it('should create an id', () => {

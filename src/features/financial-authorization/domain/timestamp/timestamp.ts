@@ -1,4 +1,4 @@
-import { Equatable, Mappable } from '../../../../shared';
+import { Equatable, Mappable } from '../../../../shared/index.ts';
 
 export class Timestamp implements Equatable<Timestamp>, Mappable<string> {
     protected _value: Date;

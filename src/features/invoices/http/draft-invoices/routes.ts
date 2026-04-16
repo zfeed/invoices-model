@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { Commands } from '../../../../http/types';
-import { parse } from '../../../../http/validation';
-import { draftInvoiceSchema } from './schemas';
+import { Commands } from '../../../../http/types.ts';
+import { parse } from '../../../../http/validation.ts';
+import { draftInvoiceSchema } from './schemas.ts';
 
 // Route handlers
 const createDraftInvoice =

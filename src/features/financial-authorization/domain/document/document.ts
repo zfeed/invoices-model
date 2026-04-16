@@ -3,18 +3,18 @@ import {
     DomainError,
     Mappable,
     Result,
-} from '../../../../shared';
-import { DomainEvent } from '../../../../shared/events/domain-event';
-import { PublishableEvents } from '../../../../shared/events/event-publisher.interface';
-import { Action } from '../action/action';
-import { Approval } from '../approval/approval';
-import { Authflow } from '../authflow/authflow';
-import { Id } from '../id/id';
-import { Money } from '../money/money';
-import { ReferenceId } from '../reference-id/reference-id';
-import { checkNoDuplicateAuthflowActions } from './checks/check-no-duplicate-authflow-actions';
-import { DocumentApprovedEvent } from './events/document-approved.event';
-import { DocumentCreatedEvent } from './events/document-created.event';
+} from '../../../../shared/index.ts';
+import { DomainEvent } from '../../../../shared/events/domain-event.ts';
+import { PublishableEvents } from '../../../../shared/events/event-publisher.interface.ts';
+import { Action } from '../action/action.ts';
+import { Approval } from '../approval/approval.ts';
+import { Authflow } from '../authflow/authflow.ts';
+import { Id } from '../id/id.ts';
+import { Money } from '../money/money.ts';
+import { ReferenceId } from '../reference-id/reference-id.ts';
+import { checkNoDuplicateAuthflowActions } from './checks/check-no-duplicate-authflow-actions.ts';
+import { DocumentApprovedEvent } from './events/document-approved.event.ts';
+import { DocumentCreatedEvent } from './events/document-created.event.ts';
 
 export class FinancialDocument
     implements

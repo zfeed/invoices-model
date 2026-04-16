@@ -1,6 +1,6 @@
-import { DOMAIN_ERROR_CODE } from '../../../../../shared';
-import { DomainError } from '../../../../../shared/errors/domain/domain.error';
-import { LineItems } from '../../line-items/line-items';
+import { DOMAIN_ERROR_CODE } from '../../../../../shared/index.ts';
+import { DomainError } from '../../../../../shared/errors/domain/domain.error.ts';
+import { LineItems } from '../../line-items/line-items.ts';
 
 export function checkLineItemsNotEmpty(
     lineItems: LineItems | null

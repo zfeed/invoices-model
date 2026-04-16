@@ -1,14 +1,14 @@
-import { Result } from '../../../../shared/result';
-import { ApiClient, ApiResponse } from '../common/api-client';
-import { Path } from '../common/path';
-import { TokenManager } from '../common/token-manager';
+import { Result } from '../../../../shared/result.ts';
+import { ApiClient, ApiResponse } from '../common/api-client.ts';
+import { Path } from '../common/path.ts';
+import { TokenManager } from '../common/token-manager.ts';
 
 import {
     CreateBatchPayoutRequestBody,
     CreateBatchPayoutResponse,
     ShowPayoutBatchDetailsQuery,
     ShowPayoutBatchDetailsResponse,
-} from './payouts.types';
+} from './payouts.types.ts';
 
 export class Payouts {
     constructor(

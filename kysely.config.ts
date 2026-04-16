@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { defineConfig } from 'kysely-ctl';
-import { postgresDialect } from './database/kysely';
+import { postgresDialect } from './database/kysely.ts';
 
 export default defineConfig({
     dialect: postgresDialect,

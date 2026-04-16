@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared';
+import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared/index.ts';
 
 export function checkRecipientNonEmpty(
     field: string,

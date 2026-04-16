@@ -1,6 +1,6 @@
-import { DomainEvent } from '../events/domain-event';
-import { PublishableEvents } from '../events/event-publisher.interface';
-import { DomainEventsBus } from './domain-events-bus.interface';
+import { DomainEvent } from '../events/domain-event.ts';
+import { PublishableEvents } from '../events/event-publisher.interface.ts';
+import { DomainEventsBus } from './domain-events-bus.interface.ts';
 
 class OrderPlacedEvent extends DomainEvent<{ orderId: string }> {}
 

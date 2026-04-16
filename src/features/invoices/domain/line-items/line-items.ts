@@ -1,9 +1,9 @@
-import { Equatable, Mappable, Result } from '../../../../shared';
-import { LineItem } from '../line-item/line-item';
-import { Money } from '../money/money/money';
-import { checkNoDuplicate } from './checks/check-no-duplicate';
-import { checkNonEmpty } from './checks/check-non-empty';
-import { checkSameCurrency } from './checks/check-same-currency';
+import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { LineItem } from '../line-item/line-item.ts';
+import { Money } from '../money/money/money.ts';
+import { checkNoDuplicate } from './checks/check-no-duplicate.ts';
+import { checkNonEmpty } from './checks/check-non-empty.ts';
+import { checkSameCurrency } from './checks/check-same-currency.ts';
 
 export class LineItems
     implements

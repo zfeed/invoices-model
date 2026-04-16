@@ -1,4 +1,4 @@
-import { Name } from '../../domain/name/name';
+import { Name } from '../../domain/name/name.ts';
 
 export type NameRecord = {
     value: string;

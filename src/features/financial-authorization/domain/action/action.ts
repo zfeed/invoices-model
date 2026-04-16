@@ -1,5 +1,5 @@
-import { Equatable, Mappable, Result } from '../../../../shared';
-import { checkActionNotBlank } from './checks/check-action-not-blank';
+import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { checkActionNotBlank } from './checks/check-action-not-blank.ts';
 
 export class Action implements Equatable<Action>, Mappable<string> {
     protected _value: string;

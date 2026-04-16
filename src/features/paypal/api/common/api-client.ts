@@ -1,11 +1,12 @@
 import { Client, Dispatcher } from 'undici';
-import type { IncomingHttpHeaders } from 'undici/types/header';
 
-import { Duration } from '../../../../lib/dayjs';
-import { Result } from '../../../../shared/result';
-import { PayPalError, PayPalOAuthError } from './error';
-import { Path } from './path';
-import { Retry, RetryConfig } from './retry';
+import { Duration } from '../../../../lib/dayjs.ts';
+import { Result } from '../../../../shared/result.ts';
+import { PayPalError, PayPalOAuthError } from './error.ts';
+import { Path } from './path.ts';
+import { Retry, RetryConfig } from './retry.ts';
+
+type ResponseHeaders = Dispatcher.ResponseData['headers'];
 
 type Hooks = {
     onRequest?: (options: Dispatcher.DispatchOptions) => void;
@@ -35,7 +36,7 @@ type PostRequest = RequestBase & {
 
 export type SuccessResponse<T> = {
     statusCode: 200 | 201;
-    headers: IncomingHttpHeaders;
+    headers: ResponseHeaders;
     body: T;
 };
 
@@ -53,19 +54,19 @@ export type RetryableErrorStatusCode = 429 | 500 | 503;
 
 export type ClientErrorResponse = {
     statusCode: Exclude<ClientErrorStatusCode, 401>;
-    headers: IncomingHttpHeaders;
+    headers: ResponseHeaders;
     body: PayPalError;
 };
 
 export type RetryableErrorResponse = {
     statusCode: RetryableErrorStatusCode;
-    headers: IncomingHttpHeaders;
+    headers: ResponseHeaders;
     body: PayPalError;
 };
 
 export type OAuthErrorResponse = {
     statusCode: 401;
-    headers: IncomingHttpHeaders;
+    headers: ResponseHeaders;
     body: PayPalOAuthError;
 };
 

@@ -1,9 +1,9 @@
 import {
     DomainEvent,
     DomainEventClass,
-} from '../../shared/events/domain-event';
-import { PublishableEvents } from '../../shared/events/event-publisher.interface';
-import { DomainEventsBus } from '../../shared/domain-events/domain-events-bus.interface';
+} from '../../shared/events/domain-event.ts';
+import { PublishableEvents } from '../../shared/events/event-publisher.interface.ts';
+import { DomainEventsBus } from '../../shared/domain-events/domain-events-bus.interface.ts';
 
 type EventHandler<T = any> = (event: T) => Promise<void>;
 

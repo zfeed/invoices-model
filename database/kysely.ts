@@ -5,7 +5,7 @@ import type {
     ControlledTransaction as BaseControlledTransaction,
 } from 'kysely';
 import { DB } from 'kysely-codegen';
-import { config } from '../src/config';
+import { config } from '../src/config.ts';
 
 export const pool = new Pool({
     connectionString: config.database.url,

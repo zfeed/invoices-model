@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { Commands } from '../../../../http/types';
-import { parse } from '../../../../http/validation';
-import { payInvoiceSchema } from './schemas';
+import { Commands } from '../../../../http/types.ts';
+import { parse } from '../../../../http/validation.ts';
+import { payInvoiceSchema } from './schemas.ts';
 
 // Route handlers
 const processInvoice = (commands: Commands) => async (app: FastifyInstance) => {

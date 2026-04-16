@@ -1,7 +1,7 @@
-import { Equatable, Mappable, Result } from '../../../../shared';
-import { Money } from '../money/money';
-import { checkCurrenciesEqual } from './checks/check-currencies-equal';
-import { checkFromNotGreaterThanTo } from './checks/check-from-not-greater-than-to';
+import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { Money } from '../money/money.ts';
+import { checkCurrenciesEqual } from './checks/check-currencies-equal.ts';
+import { checkFromNotGreaterThanTo } from './checks/check-from-not-greater-than-to.ts';
 
 export class Range
     implements Equatable<Range>, Mappable<ReturnType<Range['toPlain']>>

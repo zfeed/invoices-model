@@ -3,26 +3,26 @@ import {
     DomainError,
     Mappable,
     Result,
-} from '../../../../shared';
-import { PublishableEvents } from '../../../../shared/events';
-import { CalendarDate } from '../calendar-date/calendar-date';
-import { Id } from '../id/id';
-import { checkDates } from '../invoice/checks/check-dates';
-import { Invoice } from '../invoice/invoice';
-import { Issuer } from '../issuer/issuer';
-import { LineItem } from '../line-item/line-item';
-import { LineItems, ReadOnlyLineItems } from '../line-items/line-items';
-import { Money } from '../money/money/money';
-import { Recipient } from '../recipient/recipient';
-import { VatRate } from '../vat-rate/vat-rate';
-import { checkDraftInvoiceComplete } from './checks/check-draft-invoice-complete';
-import { checkLineItemsNotEmpty } from './checks/check-line-items-not-empty';
-import { DraftInvoiceArchivedEvent } from './events/draft-invoice-archived.event';
-import { DraftInvoiceCreatedEvent } from './events/draft-invoice-created.event';
-import { DraftInvoiceDraftedEvent } from './events/draft-invoice-drafted.event';
-import { DraftInvoiceFinishedEvent } from './events/draft-invoice-finished.event';
-import { DraftInvoiceUpdatedEvent } from './events/draft-invoice-updated.event';
-import { DraftInvoiceStatus } from '../status/draft-invoice-status';
+} from '../../../../shared/index.ts';
+import { PublishableEvents } from '../../../../shared/events/index.ts';
+import { CalendarDate } from '../calendar-date/calendar-date.ts';
+import { Id } from '../id/id.ts';
+import { checkDates } from '../invoice/checks/check-dates.ts';
+import { Invoice } from '../invoice/invoice.ts';
+import { Issuer } from '../issuer/issuer.ts';
+import { LineItem } from '../line-item/line-item.ts';
+import { LineItems, ReadOnlyLineItems } from '../line-items/line-items.ts';
+import { Money } from '../money/money/money.ts';
+import { Recipient } from '../recipient/recipient.ts';
+import { VatRate } from '../vat-rate/vat-rate.ts';
+import { checkDraftInvoiceComplete } from './checks/check-draft-invoice-complete.ts';
+import { checkLineItemsNotEmpty } from './checks/check-line-items-not-empty.ts';
+import { DraftInvoiceArchivedEvent } from './events/draft-invoice-archived.event.ts';
+import { DraftInvoiceCreatedEvent } from './events/draft-invoice-created.event.ts';
+import { DraftInvoiceDraftedEvent } from './events/draft-invoice-drafted.event.ts';
+import { DraftInvoiceFinishedEvent } from './events/draft-invoice-finished.event.ts';
+import { DraftInvoiceUpdatedEvent } from './events/draft-invoice-updated.event.ts';
+import { DraftInvoiceStatus } from '../status/draft-invoice-status.ts';
 
 export class DraftInvoice
     implements

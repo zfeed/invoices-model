@@ -1,6 +1,6 @@
 import { proxyActivities, sleep } from '@temporalio/workflow';
-import type { CreateBatchPayoutRequestBody } from '../../paypal/api/payouts/payouts.types';
-import type { Activities } from './activities';
+import type { CreateBatchPayoutRequestBody } from '../../paypal/api/payouts/payouts.types.ts';
+import type { Activities } from './activities/index.ts';
 
 export type ProcessInvoicePaypalTransactionInput = {
     invoiceId: string;

@@ -1,9 +1,9 @@
 import dayjs from 'dayjs';
-import { DraftInvoice } from '../../domain/draft-invoice/draft-invoice';
-import { DRAFT_INVOICE_STATUS } from '../../domain/status/status';
-import { ISSUER_TYPE } from '../../domain/issuer/issuer';
-import { RECIPIENT_TYPE } from '../../domain/recipient/recipient';
-import type { DraftInvoiceStorage } from '../draft-invoice-storage';
+import { DraftInvoice } from '../../domain/draft-invoice/draft-invoice.ts';
+import { DRAFT_INVOICE_STATUS } from '../../domain/status/status.ts';
+import { ISSUER_TYPE } from '../../domain/issuer/issuer.ts';
+import { RECIPIENT_TYPE } from '../../domain/recipient/recipient.ts';
+import type { DraftInvoiceStorage } from '../draft-invoice-storage.ts';
 
 export type DraftInvoiceRow = Awaited<
     ReturnType<DraftInvoiceStorage['select']>
@@ -11,17 +11,17 @@ export type DraftInvoiceRow = Awaited<
 import {
     CalendarDateDataMapper,
     CalendarDateRecord,
-} from './calendar-date.data-mapper';
+} from './calendar-date.data-mapper.ts';
 import {
     DraftInvoiceStatusDataMapper,
     DraftInvoiceStatusRecord,
-} from './draft-invoice-status.data-mapper';
-import { IdDataMapper, IdRecord } from './id.data-mapper';
-import { IssuerDataMapper, IssuerRecord } from './issuer.data-mapper';
-import { LineItemsDataMapper, LineItemsRecord } from './line-items.data-mapper';
-import { MoneyDataMapper, MoneyRecord } from './money.data-mapper';
-import { RecipientDataMapper, RecipientRecord } from './recipient.data-mapper';
-import { VatRateDataMapper, VatRateRecord } from './vat-rate.data-mapper';
+} from './draft-invoice-status.data-mapper.ts';
+import { IdDataMapper, IdRecord } from './id.data-mapper.ts';
+import { IssuerDataMapper, IssuerRecord } from './issuer.data-mapper.ts';
+import { LineItemsDataMapper, LineItemsRecord } from './line-items.data-mapper.ts';
+import { MoneyDataMapper, MoneyRecord } from './money.data-mapper.ts';
+import { RecipientDataMapper, RecipientRecord } from './recipient.data-mapper.ts';
+import { VatRateDataMapper, VatRateRecord } from './vat-rate.data-mapper.ts';
 
 export type DraftInvoiceRecord = {
     id: IdRecord;

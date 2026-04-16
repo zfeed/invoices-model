@@ -1,16 +1,16 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { Commands } from '../../../http/types';
-import { parse } from '../../../http/validation';
-import { Approver } from '../domain/approver/approver';
-import { Money } from '../domain/money/money';
-import { Range } from '../domain/range/range';
-import { Order } from '../domain/order/order';
-import { Name } from '../domain/name/name';
-import { Email } from '../domain/email/email';
-import { GroupTemplate } from '../domain/groups/group-template';
-import { StepTemplate } from '../domain/step/step-template';
-import { AuthflowTemplate } from '../domain/authflow/authflow-template';
+import { Commands } from '../../../http/types.ts';
+import { parse } from '../../../http/validation.ts';
+import { Approver } from '../domain/approver/approver.ts';
+import { Money } from '../domain/money/money.ts';
+import { Range } from '../domain/range/range.ts';
+import { Order } from '../domain/order/order.ts';
+import { Name } from '../domain/name/name.ts';
+import { Email } from '../domain/email/email.ts';
+import { GroupTemplate } from '../domain/groups/group-template.ts';
+import { StepTemplate } from '../domain/step/step-template.ts';
+import { AuthflowTemplate } from '../domain/authflow/authflow-template.ts';
 import {
     approveActionSchema,
     createAuthflowPolicySchema,
@@ -18,7 +18,7 @@ import {
     groupSchema,
     stepSchema,
     templateSchema,
-} from './schemas';
+} from './schemas.ts';
 
 // Helper functions
 const buildApprover = (data: z.infer<typeof approverSchema>) =>

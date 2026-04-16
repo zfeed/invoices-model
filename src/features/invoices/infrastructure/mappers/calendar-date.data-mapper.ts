@@ -1,4 +1,4 @@
-import { CalendarDate } from '../../domain/calendar-date/calendar-date';
+import { CalendarDate } from '../../domain/calendar-date/calendar-date.ts';
 
 export type CalendarDateRecord = {
     value: string;

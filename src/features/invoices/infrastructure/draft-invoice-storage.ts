@@ -1,6 +1,6 @@
 import { sql } from 'kysely';
-import { ControlledTransaction } from '../../../../database/kysely';
-import { DraftInvoiceRecord } from './mappers/draft-invoice.data-mapper';
+import { ControlledTransaction } from '../../../../database/kysely.ts';
+import { DraftInvoiceRecord } from './mappers/draft-invoice.data-mapper.ts';
 
 export class DraftInvoiceStorage {
     constructor(private tx: ControlledTransaction) {}

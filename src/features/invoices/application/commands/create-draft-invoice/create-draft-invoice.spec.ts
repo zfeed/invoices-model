@@ -1,15 +1,15 @@
-import { Session } from '../../../../../shared/unit-of-work/unit-of-work';
-import { PersistentManager } from '../../../../../infrastructure/persistent-manager/pg-persistent-manager';
-import { InMemoryDomainEventsBus } from '../../../../../infrastructure/domain-events/in-memory-domain-events-bus';
-import { EventOutboxStorage } from '../../../../../infrastructure/event-outbox/event-outbox';
-import { kysely } from '../../../../../../database/kysely';
-import { CreateDraftInvoice } from './create-draft-invoice';
-import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
-import { DraftInvoiceCreatedEvent } from '../../../domain/draft-invoice/events/draft-invoice-created.event';
-import { DraftInvoiceUpdatedEvent } from '../../../domain/draft-invoice/events/draft-invoice-updated.event';
-import { ISSUER_TYPE } from '../../../domain/issuer/issuer';
-import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
-import { Id } from '../../../domain/id/id';
+import { Session } from '../../../../../shared/unit-of-work/unit-of-work.ts';
+import { PersistentManager } from '../../../../../infrastructure/persistent-manager/pg-persistent-manager.ts';
+import { InMemoryDomainEventsBus } from '../../../../../infrastructure/domain-events/in-memory-domain-events-bus.ts';
+import { EventOutboxStorage } from '../../../../../infrastructure/event-outbox/event-outbox.ts';
+import { kysely } from '../../../../../../database/kysely.ts';
+import { CreateDraftInvoice } from './create-draft-invoice.ts';
+import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice.ts';
+import { DraftInvoiceCreatedEvent } from '../../../domain/draft-invoice/events/draft-invoice-created.event.ts';
+import { DraftInvoiceUpdatedEvent } from '../../../domain/draft-invoice/events/draft-invoice-updated.event.ts';
+import { ISSUER_TYPE } from '../../../domain/issuer/issuer.ts';
+import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient.ts';
+import { Id } from '../../../domain/id/id.ts';
 
 describe('CreateDraftInvoice', () => {
     let session: Session;

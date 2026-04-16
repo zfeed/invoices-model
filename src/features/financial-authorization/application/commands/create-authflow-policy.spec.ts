@@ -1,16 +1,16 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes';
-import { InMemoryDomainEventsBus } from '../../../../infrastructure/domain-events/in-memory-domain-events-bus';
-import { Session } from '../../../../shared/unit-of-work/unit-of-work';
-import { PersistentManager } from '../../../../infrastructure/persistent-manager/pg-persistent-manager';
-import { EventOutboxStorage } from '../../../../infrastructure/event-outbox/event-outbox';
-import { Money } from '../../domain/money/money';
-import { Range } from '../../domain/range/range';
-import { AuthflowTemplate } from '../../domain/authflow/authflow-template';
-import { AuthflowPolicy } from '../../domain/authflow/authflow-policy';
-import { AuthflowPolicyCreatedEvent } from '../../domain/authflow/events/authflow-policy-created.event';
-import { CreateAuthflowPolicy } from './create-authflow-policy';
-import { cleanDatabase } from '../../../../infrastructure/persistent-manager/clean-database';
-import { kysely } from '../../../../../database/kysely';
+import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { InMemoryDomainEventsBus } from '../../../../infrastructure/domain-events/in-memory-domain-events-bus.ts';
+import { Session } from '../../../../shared/unit-of-work/unit-of-work.ts';
+import { PersistentManager } from '../../../../infrastructure/persistent-manager/pg-persistent-manager.ts';
+import { EventOutboxStorage } from '../../../../infrastructure/event-outbox/event-outbox.ts';
+import { Money } from '../../domain/money/money.ts';
+import { Range } from '../../domain/range/range.ts';
+import { AuthflowTemplate } from '../../domain/authflow/authflow-template.ts';
+import { AuthflowPolicy } from '../../domain/authflow/authflow-policy.ts';
+import { AuthflowPolicyCreatedEvent } from '../../domain/authflow/events/authflow-policy-created.event.ts';
+import { CreateAuthflowPolicy } from './create-authflow-policy.ts';
+import { cleanDatabase } from '../../../../infrastructure/persistent-manager/clean-database.ts';
+import { kysely } from '../../../../../database/kysely.ts';
 
 const range = (from: string, to: string) =>
     Range.create(

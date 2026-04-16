@@ -1,5 +1,5 @@
-import { Range } from '../../domain/range/range';
-import { MoneyDataMapper, MoneyRecord } from './money.data-mapper';
+import { Range } from '../../domain/range/range.ts';
+import { MoneyDataMapper, MoneyRecord } from './money.data-mapper.ts';
 
 export type RangeRecord = {
     from: MoneyRecord;

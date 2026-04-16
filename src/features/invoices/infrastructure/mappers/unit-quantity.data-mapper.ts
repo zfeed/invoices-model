@@ -1,5 +1,5 @@
-import { UnitQuantity } from '../../domain/line-item/unit-quantity/unit-quantity';
-import { NumericDataMapper, NumericRecord } from './numeric.data-mapper';
+import { UnitQuantity } from '../../domain/line-item/unit-quantity/unit-quantity.ts';
+import { NumericDataMapper, NumericRecord } from './numeric.data-mapper.ts';
 
 export type UnitQuantityRecord = {
     value: NumericRecord;

@@ -1,5 +1,5 @@
-import { Equatable, Mappable, Result } from '../../../../shared';
-import { checkOrderNonNegative } from './checks/check-order-non-negative';
+import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { checkOrderNonNegative } from './checks/check-order-non-negative.ts';
 
 export class Order implements Equatable<Order>, Mappable<number> {
     protected _value: number;

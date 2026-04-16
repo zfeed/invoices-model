@@ -1,5 +1,5 @@
-import { Equatable, Mappable, Result } from '../../../../../shared';
-import { Email } from '../../email/email';
+import { Equatable, Mappable, Result } from '../../../../../shared/index.ts';
+import { Email } from '../../email/email.ts';
 
 export class Paypal
     implements Equatable<Paypal>, Mappable<ReturnType<Paypal['toPlain']>>

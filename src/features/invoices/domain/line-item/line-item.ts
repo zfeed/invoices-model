@@ -1,8 +1,8 @@
-import { Equatable, Mappable, Result } from '../../../../shared';
-import { Id } from '../id/id';
-import { Money } from '../money/money/money';
-import { UnitDescription } from './unit-description/unit-description';
-import { UnitQuantity } from './unit-quantity/unit-quantity';
+import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { Id } from '../id/id.ts';
+import { Money } from '../money/money/money.ts';
+import { UnitDescription } from './unit-description/unit-description.ts';
+import { UnitQuantity } from './unit-quantity/unit-quantity.ts';
 
 export class LineItem
     implements Equatable<LineItem>, Mappable<ReturnType<LineItem['toPlain']>>

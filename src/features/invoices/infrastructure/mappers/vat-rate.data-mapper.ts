@@ -1,5 +1,5 @@
-import { VatRate } from '../../domain/vat-rate/vat-rate';
-import { NumericDataMapper, NumericRecord } from './numeric.data-mapper';
+import { VatRate } from '../../domain/vat-rate/vat-rate.ts';
+import { NumericDataMapper, NumericRecord } from './numeric.data-mapper.ts';
 
 export type VatRateRecord = {
     value: NumericRecord;

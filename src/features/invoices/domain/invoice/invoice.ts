@@ -3,23 +3,23 @@ import {
     DomainError,
     Mappable,
     Result,
-} from '../../../../shared';
-import { Issuer } from '../issuer/issuer';
-import { Money } from '../money/money/money';
-import { Recipient } from '../recipient/recipient';
-import { VatRate } from '../vat-rate/vat-rate';
+} from '../../../../shared/index.ts';
+import { Issuer } from '../issuer/issuer.ts';
+import { Money } from '../money/money/money.ts';
+import { Recipient } from '../recipient/recipient.ts';
+import { VatRate } from '../vat-rate/vat-rate.ts';
 
-import { PublishableEvents } from '../../../../shared/events';
-import { CalendarDate } from '../calendar-date/calendar-date';
-import { Id } from '../id/id';
-import { LineItems, ReadOnlyLineItems } from '../line-items/line-items';
-import { InvoiceStatus } from '../status/invoice-status';
-import { checkDates } from './checks/check-dates';
-import { InvoiceCancelledEvent } from './events/invoice-cancelled.event';
-import { InvoiceIssuedEvent } from './events/invoice-issued.event';
-import { InvoiceFailedEvent } from './events/invoice-failed.event';
-import { InvoicePaidEvent } from './events/invoice-paid.event';
-import { InvoiceProcessingEvent } from './events/invoice-processing.event';
+import { PublishableEvents } from '../../../../shared/events/index.ts';
+import { CalendarDate } from '../calendar-date/calendar-date.ts';
+import { Id } from '../id/id.ts';
+import { LineItems, ReadOnlyLineItems } from '../line-items/line-items.ts';
+import { InvoiceStatus } from '../status/invoice-status.ts';
+import { checkDates } from './checks/check-dates.ts';
+import { InvoiceCancelledEvent } from './events/invoice-cancelled.event.ts';
+import { InvoiceIssuedEvent } from './events/invoice-issued.event.ts';
+import { InvoiceFailedEvent } from './events/invoice-failed.event.ts';
+import { InvoicePaidEvent } from './events/invoice-paid.event.ts';
+import { InvoiceProcessingEvent } from './events/invoice-processing.event.ts';
 
 export class Invoice
     implements

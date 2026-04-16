@@ -1,1 +1,1 @@
-export { financialAuthorizationPlugin } from './routes';
+export { financialAuthorizationPlugin } from './routes.ts';

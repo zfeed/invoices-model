@@ -1,4 +1,4 @@
-import { UnitDescription } from '../../domain/line-item/unit-description/unit-description';
+import { UnitDescription } from '../../domain/line-item/unit-description/unit-description.ts';
 
 export type UnitDescriptionRecord = {
     value: string;

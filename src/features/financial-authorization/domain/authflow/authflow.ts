@@ -3,13 +3,13 @@ import {
     DomainError,
     Mappable,
     Result,
-} from '../../../../shared';
-import { Action } from '../action/action';
-import { Approval } from '../approval/approval';
-import { Id } from '../id/id';
-import { Range } from '../range/range';
-import { Step } from '../step/step';
-import { checkNoDuplicateStepOrders } from './checks/check-no-duplicate-step-orders';
+} from '../../../../shared/index.ts';
+import { Action } from '../action/action.ts';
+import { Approval } from '../approval/approval.ts';
+import { Id } from '../id/id.ts';
+import { Range } from '../range/range.ts';
+import { Step } from '../step/step.ts';
+import { checkNoDuplicateStepOrders } from './checks/check-no-duplicate-step-orders.ts';
 
 export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
     protected _id: Id;

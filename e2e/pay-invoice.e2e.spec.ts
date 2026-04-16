@@ -4,7 +4,7 @@ import {
     resolveByPath,
     tooLong,
     expectValidationError,
-} from './helpers';
+} from './helpers.ts';
 
 const { postJson, postRaw, createProcessingInvoice } = setupApp();
 

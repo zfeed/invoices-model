@@ -1,8 +1,8 @@
-import { DomainEvent } from '../../shared/events/domain-event';
-import dayjs from '../../lib/dayjs';
-import { cleanDatabase } from '../persistent-manager/clean-database';
-import { EventOutboxStorage } from './event-outbox';
-import { kysely } from '../../../database/kysely';
+import { DomainEvent } from '../../shared/events/domain-event.ts';
+import dayjs from '../../lib/dayjs.ts';
+import { cleanDatabase } from '../persistent-manager/clean-database.ts';
+import { EventOutboxStorage } from './event-outbox.ts';
+import { kysely } from '../../../database/kysely.ts';
 
 class InvoiceIssuedEvent extends DomainEvent<{ id: string }> {}
 

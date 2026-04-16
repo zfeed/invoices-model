@@ -1,7 +1,7 @@
-import { Session } from '../../../../shared/unit-of-work/unit-of-work';
-import { Action } from '../../domain/action/action';
-import { AuthflowPolicy } from '../../domain/authflow/authflow-policy';
-import { AuthflowTemplate } from '../../domain/authflow/authflow-template';
+import { Session } from '../../../../shared/unit-of-work/unit-of-work.ts';
+import { Action } from '../../domain/action/action.ts';
+import { AuthflowPolicy } from '../../domain/authflow/authflow-policy.ts';
+import { AuthflowTemplate } from '../../domain/authflow/authflow-template.ts';
 
 type CreateAuthflowPolicyRequest = {
     action: string;

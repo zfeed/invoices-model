@@ -1,5 +1,5 @@
 import { Logger as PinoInstance } from 'pino';
-import { Logger, LogContext } from '../../shared/logger/logger';
+import { Logger, LogContext } from '../../shared/logger/logger.ts';
 
 export type LoggerOptions = { pino: PinoInstance };
 

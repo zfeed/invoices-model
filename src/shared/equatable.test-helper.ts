@@ -1,4 +1,4 @@
-import { Equatable } from './equatable.interface';
+import { Equatable } from './equatable.interface.ts';
 
 export interface EquatableTestConfig<T extends Equatable<T>> {
     typeName: string;

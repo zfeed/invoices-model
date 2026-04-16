@@ -1,5 +1,5 @@
 import { sql } from 'kysely';
-import type { Kysely } from '../../../database/kysely';
+import type { Kysely } from '../../../database/kysely.ts';
 
 export const cleanDatabase = async (kysely: Kysely) => {
     await sql`

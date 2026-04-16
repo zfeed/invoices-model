@@ -1,10 +1,10 @@
-import { Approver } from '../approver/approver';
-import { Email } from '../email/email';
-import { GroupTemplate } from '../groups/group-template';
-import { Id } from '../id/id';
-import { Name } from '../name/name';
-import { Order } from '../order/order';
-import { StepTemplate } from './step-template';
+import { Approver } from '../approver/approver.ts';
+import { Email } from '../email/email.ts';
+import { GroupTemplate } from '../groups/group-template.ts';
+import { Id } from '../id/id.ts';
+import { Name } from '../name/name.ts';
+import { Order } from '../order/order.ts';
+import { StepTemplate } from './step-template.ts';
 
 const makeApprover = (id: string, name: string, email: string) =>
     Approver.create({

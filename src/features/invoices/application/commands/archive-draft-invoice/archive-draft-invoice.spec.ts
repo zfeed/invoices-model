@@ -1,12 +1,12 @@
-import { Session } from '../../../../../shared/unit-of-work/unit-of-work';
-import { PersistentManager } from '../../../../../infrastructure/persistent-manager/pg-persistent-manager';
-import { InMemoryDomainEventsBus } from '../../../../../infrastructure/domain-events/in-memory-domain-events-bus';
-import { EventOutboxStorage } from '../../../../../infrastructure/event-outbox/event-outbox';
-import { kysely } from '../../../../../../database/kysely';
-import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice';
-import { ArchiveDraftInvoice } from './archive-draft-invoice';
-import { DraftInvoiceArchivedEvent } from '../../../domain/draft-invoice/events/draft-invoice-archived.event';
-import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application/application-codes';
+import { Session } from '../../../../../shared/unit-of-work/unit-of-work.ts';
+import { PersistentManager } from '../../../../../infrastructure/persistent-manager/pg-persistent-manager.ts';
+import { InMemoryDomainEventsBus } from '../../../../../infrastructure/domain-events/in-memory-domain-events-bus.ts';
+import { EventOutboxStorage } from '../../../../../infrastructure/event-outbox/event-outbox.ts';
+import { kysely } from '../../../../../../database/kysely.ts';
+import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice.ts';
+import { ArchiveDraftInvoice } from './archive-draft-invoice.ts';
+import { DraftInvoiceArchivedEvent } from '../../../domain/draft-invoice/events/draft-invoice-archived.event.ts';
+import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application/application-codes.ts';
 
 describe('ArchiveDraftInvoice', () => {
     let session: Session;

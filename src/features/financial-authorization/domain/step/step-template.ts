@@ -1,8 +1,8 @@
-import { DomainError, Mappable, Result } from '../../../../shared';
-import { GroupTemplate } from '../groups/group-template';
-import { Id } from '../id/id';
-import { Order } from '../order/order';
-import { Step } from './step';
+import { DomainError, Mappable, Result } from '../../../../shared/index.ts';
+import { GroupTemplate } from '../groups/group-template.ts';
+import { Id } from '../id/id.ts';
+import { Order } from '../order/order.ts';
+import { Step } from './step.ts';
 
 export class StepTemplate implements Mappable<
     ReturnType<StepTemplate['toPlain']>
@@ -37,7 +37,7 @@ export class StepTemplate implements Mappable<
 
     toStep(): Result<DomainError, Step> {
         const groupResults = this._groups.reduce<
-            Result<DomainError, import('../groups/group').Group[]>
+            Result<DomainError, import('../groups/group.ts').Group[]>
         >(
             (acc, template) =>
                 acc.flatMap((groups) =>

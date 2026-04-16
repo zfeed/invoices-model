@@ -1,4 +1,4 @@
-import { Timestamp } from './timestamp';
+import { Timestamp } from './timestamp.ts';
 
 describe('Timestamp', () => {
     describe('create', () => {

@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE } from './domain-codes';
+import { DOMAIN_ERROR_CODE } from './domain-codes.ts';
 
 export class DomainError extends Error {
     code: DOMAIN_ERROR_CODE;

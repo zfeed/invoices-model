@@ -1,7 +1,7 @@
-import { Mappable, Result } from '../../../../shared';
-import { Comment } from '../comment/comment';
-import { Id } from '../id/id';
-import { Timestamp } from '../timestamp/timestamp';
+import { Mappable, Result } from '../../../../shared/index.ts';
+import { Comment } from '../comment/comment.ts';
+import { Id } from '../id/id.ts';
+import { Timestamp } from '../timestamp/timestamp.ts';
 
 export class Approval implements Mappable<ReturnType<Approval['toPlain']>> {
     protected _approverId: Id;

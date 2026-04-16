@@ -1,6 +1,6 @@
-import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes';
-import { DomainError } from '../../../../../shared/errors/domain/domain.error';
-import { Step } from '../../step/step';
+import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes.ts';
+import { DomainError } from '../../../../../shared/errors/domain/domain.error.ts';
+import { Step } from '../../step/step.ts';
 
 export function checkNoDuplicateStepOrders(steps: Step[]): DomainError | null {
     const orders = steps.map((s) => s.order.toPlain());

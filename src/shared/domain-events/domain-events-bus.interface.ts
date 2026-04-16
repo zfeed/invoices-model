@@ -1,5 +1,5 @@
-import { DomainEvent, DomainEventClass } from '../events/domain-event';
-import { PublishableEvents } from '../events/event-publisher.interface';
+import { DomainEvent, DomainEventClass } from '../events/domain-event.ts';
+import { PublishableEvents } from '../events/event-publisher.interface.ts';
 
 export type EventHandler<T = unknown> = (event: T) => Promise<void>;
 

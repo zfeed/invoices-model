@@ -1,7 +1,7 @@
 import { ApplicationFailure } from '@temporalio/activity';
-import { Session } from '../../../../shared/unit-of-work/unit-of-work';
-import { Invoice } from '../../../invoices/domain/invoice/invoice';
-import { Id } from '../../../invoices/domain/id/id';
+import { Session } from '../../../../shared/unit-of-work/unit-of-work.ts';
+import { Invoice } from '../../../invoices/domain/invoice/invoice.ts';
+import { Id } from '../../../invoices/domain/id/id.ts';
 
 export class PayInvoice {
     constructor(private session: Session) {}

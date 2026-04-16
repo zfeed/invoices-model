@@ -1,5 +1,5 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes';
-import { ReferenceId } from './reference-id';
+import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { ReferenceId } from './reference-id.ts';
 
 describe('ReferenceId', () => {
     describe('create', () => {

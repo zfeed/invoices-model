@@ -1,4 +1,4 @@
-import { Country } from '../../domain/country/country';
+import { Country } from '../../domain/country/country.ts';
 
 export type CountryRecord = {
     code: string;

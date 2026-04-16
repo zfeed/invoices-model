@@ -1,6 +1,6 @@
-import { testComparable } from '../../../../shared/comparable.test-helper';
-import { testEquatable } from '../../../../shared/equatable.test-helper';
-import { CalendarDate } from './calendar-date';
+import { testComparable } from '../../../../shared/comparable.test-helper.ts';
+import { testEquatable } from '../../../../shared/equatable.test-helper.ts';
+import { CalendarDate } from './calendar-date.ts';
 
 describe('CalendarDate', () => {
     testEquatable({

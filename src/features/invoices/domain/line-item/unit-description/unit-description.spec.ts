@@ -1,5 +1,5 @@
-import { testEquatable } from '../../../../../shared/equatable.test-helper';
-import { UnitDescription } from './unit-description';
+import { testEquatable } from '../../../../../shared/equatable.test-helper.ts';
+import { UnitDescription } from './unit-description.ts';
 
 describe('UnitDescription', () => {
     testEquatable({

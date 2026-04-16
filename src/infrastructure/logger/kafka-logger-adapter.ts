@@ -1,5 +1,5 @@
 import { KafkaJS } from '@confluentinc/kafka-javascript';
-import { Logger, LogContext } from '../../shared/logger/logger';
+import { Logger, LogContext } from '../../shared/logger/logger.ts';
 
 export const toKafkaLogger = (
     logger: Logger,

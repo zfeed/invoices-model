@@ -1,14 +1,14 @@
-import { LineItem } from '../../domain/line-item/line-item';
-import { IdDataMapper, IdRecord } from './id.data-mapper';
-import { MoneyDataMapper, MoneyRecord } from './money.data-mapper';
+import { LineItem } from '../../domain/line-item/line-item.ts';
+import { IdDataMapper, IdRecord } from './id.data-mapper.ts';
+import { MoneyDataMapper, MoneyRecord } from './money.data-mapper.ts';
 import {
     UnitDescriptionDataMapper,
     UnitDescriptionRecord,
-} from './unit-description.data-mapper';
+} from './unit-description.data-mapper.ts';
 import {
     UnitQuantityDataMapper,
     UnitQuantityRecord,
-} from './unit-quantity.data-mapper';
+} from './unit-quantity.data-mapper.ts';
 
 export type LineItemRecord = {
     id: IdRecord;

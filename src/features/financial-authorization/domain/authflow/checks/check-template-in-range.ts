@@ -1,7 +1,7 @@
-import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes';
-import { DomainError } from '../../../../../shared/errors/domain/domain.error';
-import { Money } from '../../money/money';
-import { AuthflowTemplate } from '../authflow-template';
+import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes.ts';
+import { DomainError } from '../../../../../shared/errors/domain/domain.error.ts';
+import { Money } from '../../money/money.ts';
+import { AuthflowTemplate } from '../authflow-template.ts';
 
 export function checkTemplateInRange(
     templates: AuthflowTemplate[],

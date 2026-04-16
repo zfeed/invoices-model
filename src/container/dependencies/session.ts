@@ -1,8 +1,8 @@
-import { Session } from '../../shared/unit-of-work/unit-of-work';
-import { PersistentManager } from '../../infrastructure/persistent-manager/pg-persistent-manager';
-import { DomainEventsBus } from '../../shared/domain-events/domain-events-bus.interface';
-import { EventOutboxStorage } from '../../infrastructure/event-outbox/event-outbox';
-import { kysely } from '../../../database/kysely';
+import { Session } from '../../shared/unit-of-work/unit-of-work.ts';
+import { PersistentManager } from '../../infrastructure/persistent-manager/pg-persistent-manager.ts';
+import { DomainEventsBus } from '../../shared/domain-events/domain-events-bus.interface.ts';
+import { EventOutboxStorage } from '../../infrastructure/event-outbox/event-outbox.ts';
+import { kysely } from '../../../database/kysely.ts';
 
 export const createSession = (
     domainEventsBus: DomainEventsBus,

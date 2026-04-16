@@ -1,10 +1,10 @@
-import { DomainEventsBus } from '../../../../shared/domain-events/domain-events-bus.interface';
-import { Session } from '../../../../shared/unit-of-work/unit-of-work';
-import { InvoiceIssuedEvent } from '../../../invoices/domain/invoice/events/invoice-issued.event';
-import { AuthflowPolicy } from '../../domain/authflow/authflow-policy';
-import { FinancialDocument } from '../../domain/document/document';
-import { Money } from '../../domain/money/money';
-import { ReferenceId } from '../../domain/reference-id/reference-id';
+import { DomainEventsBus } from '../../../../shared/domain-events/domain-events-bus.interface.ts';
+import { Session } from '../../../../shared/unit-of-work/unit-of-work.ts';
+import { InvoiceIssuedEvent } from '../../../invoices/domain/invoice/events/invoice-issued.event.ts';
+import { AuthflowPolicy } from '../../domain/authflow/authflow-policy.ts';
+import { FinancialDocument } from '../../domain/document/document.ts';
+import { Money } from '../../domain/money/money.ts';
+import { ReferenceId } from '../../domain/reference-id/reference-id.ts';
 
 export class OnInvoiceIssued {
     constructor(

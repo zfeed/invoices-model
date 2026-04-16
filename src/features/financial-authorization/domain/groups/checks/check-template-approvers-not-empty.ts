@@ -1,6 +1,6 @@
-import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes';
-import { DomainError } from '../../../../../shared/errors/domain/domain.error';
-import { Approver } from '../../approver/approver';
+import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes.ts';
+import { DomainError } from '../../../../../shared/errors/domain/domain.error.ts';
+import { Approver } from '../../approver/approver.ts';
 
 export function checkTemplateApproversNotEmpty(
     approvers: Approver[]

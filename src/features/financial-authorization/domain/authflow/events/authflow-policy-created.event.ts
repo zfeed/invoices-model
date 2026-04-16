@@ -1,4 +1,4 @@
-import { DomainEvent } from '../../../../../shared/events/domain-event';
+import { DomainEvent } from '../../../../../shared/events/domain-event.ts';
 
 type Data = {
     id: string;

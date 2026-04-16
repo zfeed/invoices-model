@@ -1,4 +1,4 @@
-import { Money } from '../../domain/money/money';
+import { Money } from '../../domain/money/money.ts';
 
 export type MoneyRecord = {
     amount: string;

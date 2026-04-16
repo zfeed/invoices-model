@@ -5,7 +5,7 @@ import {
     EMPTY_DRAFT_SHAPE,
     POPULATED_DRAFT_SHAPE,
     INVOICE_SHAPE,
-} from './helpers';
+} from './helpers.ts';
 
 const { postJson, post, getData } = setupApp();
 

@@ -1,11 +1,11 @@
-import { ApiClient } from '../common/api-client';
-import { Path } from '../common/path';
+import { ApiClient } from '../common/api-client.ts';
+import { Path } from '../common/path.ts';
 
 import {
     GetAccessTokenByClientCredentialsRequestBody,
     GetAccessTokenByClientCredentialsResponseBody,
     TerminateAccessTokenRequestBody,
-} from './login.types';
+} from './login.types.ts';
 
 export class Login {
     constructor(public client: ApiClient) {}

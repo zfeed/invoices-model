@@ -1,4 +1,4 @@
-import { APPLICATION_ERROR_CODE } from './application-codes';
+import { APPLICATION_ERROR_CODE } from './application-codes.ts';
 
 export class ApplicationError extends Error {
     code: APPLICATION_ERROR_CODE;

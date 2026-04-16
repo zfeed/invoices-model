@@ -1,5 +1,5 @@
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared';
-import { Numeric } from '../numeric';
+import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared/index.ts';
+import { Numeric } from '../numeric.ts';
 
 export function checkDivisionByZero(value: Numeric): DomainError | null {
     if (value.equals(Numeric.create('0').unwrap())) {

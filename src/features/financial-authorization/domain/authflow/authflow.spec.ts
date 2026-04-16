@@ -1,16 +1,16 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes';
-import { Approval } from '../approval/approval';
-import { Approver } from '../approver/approver';
-import { Email } from '../email/email';
-import { Group } from '../groups/group';
-import { Step } from '../step/step';
-import { Action } from '../action/action';
-import { Id } from '../id/id';
-import { Money } from '../money/money';
-import { Name } from '../name/name';
-import { Order } from '../order/order';
-import { Range } from '../range/range';
-import { Authflow } from './authflow';
+import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { Approval } from '../approval/approval.ts';
+import { Approver } from '../approver/approver.ts';
+import { Email } from '../email/email.ts';
+import { Group } from '../groups/group.ts';
+import { Step } from '../step/step.ts';
+import { Action } from '../action/action.ts';
+import { Id } from '../id/id.ts';
+import { Money } from '../money/money.ts';
+import { Name } from '../name/name.ts';
+import { Order } from '../order/order.ts';
+import { Range } from '../range/range.ts';
+import { Authflow } from './authflow.ts';
 
 const testRange = Range.create(
     Money.create('0', 'USD').unwrap(),

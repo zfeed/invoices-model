@@ -1,4 +1,4 @@
-import { Currency } from '../../domain/money/currency/currency';
+import { Currency } from '../../domain/money/currency/currency.ts';
 
 export type CurrencyRecord = {
     code: string;

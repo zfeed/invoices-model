@@ -1,5 +1,5 @@
-import { Issuer, ISSUER_TYPE } from '../../domain/issuer/issuer';
-import { EmailDataMapper, EmailRecord } from './email.data-mapper';
+import { Issuer, ISSUER_TYPE } from '../../domain/issuer/issuer.ts';
+import { EmailDataMapper, EmailRecord } from './email.data-mapper.ts';
 
 export type IssuerRecord = {
     type: ISSUER_TYPE;

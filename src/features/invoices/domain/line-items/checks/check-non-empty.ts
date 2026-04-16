@@ -1,5 +1,5 @@
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared';
-import { LineItem } from '../../line-item/line-item';
+import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared/index.ts';
+import { LineItem } from '../../line-item/line-item.ts';
 
 export function checkNonEmpty(items: LineItem[]): DomainError | null {
     if (items.length === 0) {

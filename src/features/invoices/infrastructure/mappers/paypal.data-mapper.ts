@@ -1,5 +1,5 @@
-import { Paypal } from '../../domain/billing/paypal/paypal';
-import { EmailDataMapper, EmailRecord } from './email.data-mapper';
+import { Paypal } from '../../domain/billing/paypal/paypal.ts';
+import { EmailDataMapper, EmailRecord } from './email.data-mapper.ts';
 
 export type PaypalRecord = {
     type: 'PAYPAL';

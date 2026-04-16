@@ -1,10 +1,10 @@
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared';
-import { CalendarDate } from '../../calendar-date/calendar-date';
-import { Issuer } from '../../issuer/issuer';
-import { LineItems } from '../../line-items/line-items';
-import { Money } from '../../money/money/money';
-import { Recipient } from '../../recipient/recipient';
-import { VatRate } from '../../vat-rate/vat-rate';
+import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared/index.ts';
+import { CalendarDate } from '../../calendar-date/calendar-date.ts';
+import { Issuer } from '../../issuer/issuer.ts';
+import { LineItems } from '../../line-items/line-items.ts';
+import { Money } from '../../money/money/money.ts';
+import { Recipient } from '../../recipient/recipient.ts';
+import { VatRate } from '../../vat-rate/vat-rate.ts';
 
 export function checkDraftInvoiceComplete({
     total,

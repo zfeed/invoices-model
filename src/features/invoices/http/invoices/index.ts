@@ -1,1 +1,1 @@
-export { invoicesPlugin } from './routes';
+export { invoicesPlugin } from './routes.ts';

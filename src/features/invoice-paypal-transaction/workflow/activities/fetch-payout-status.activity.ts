@@ -1,6 +1,6 @@
 import { ApplicationFailure } from '@temporalio/activity';
-import { Paypal } from '../../../paypal/api/paypal';
-import { BatchStatus } from '../../../paypal/api/payouts/payouts.types';
+import { Paypal } from '../../../paypal/api/paypal.ts';
+import { BatchStatus } from '../../../paypal/api/payouts/payouts.types.ts';
 
 export type FetchPayoutStatusResult =
     | { result: 'fetched'; status: BatchStatus }

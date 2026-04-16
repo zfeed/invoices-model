@@ -1,5 +1,5 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes';
-import { Email } from './email';
+import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { Email } from './email.ts';
 
 describe('Email', () => {
     describe('create', () => {

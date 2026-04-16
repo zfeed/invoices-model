@@ -1,8 +1,8 @@
 import { Decimal } from 'decimal.js';
-import { Comparable, DomainError, Equatable, Result } from '../../../../shared';
-import { checkDivisionByZero } from './checks/check-division-by-zero';
-import { checkNumericValue } from './checks/check-numeric-value';
-import { ROUNDING } from './rounding';
+import { Comparable, DomainError, Equatable, Result } from '../../../../shared/index.ts';
+import { checkDivisionByZero } from './checks/check-division-by-zero.ts';
+import { checkNumericValue } from './checks/check-numeric-value.ts';
+import { ROUNDING } from './rounding.ts';
 
 export class Numeric implements Equatable<Numeric>, Comparable<Numeric> {
     protected _value: Decimal;

@@ -1,20 +1,20 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes';
-import { Action } from '../action/action';
-import { Approval } from '../approval/approval';
-import { Approver } from '../approver/approver';
-import { Authflow } from '../authflow/authflow';
-import { Email } from '../email/email';
-import { Group } from '../groups/group';
-import { Id } from '../id/id';
-import { Money } from '../money/money';
-import { Name } from '../name/name';
-import { Order } from '../order/order';
-import { Range } from '../range/range';
-import { ReferenceId } from '../reference-id/reference-id';
-import { Step } from '../step/step';
-import { FinancialDocument } from './document';
-import { DocumentCreatedEvent } from './events/document-created.event';
-import { DocumentApprovedEvent } from './events/document-approved.event';
+import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { Action } from '../action/action.ts';
+import { Approval } from '../approval/approval.ts';
+import { Approver } from '../approver/approver.ts';
+import { Authflow } from '../authflow/authflow.ts';
+import { Email } from '../email/email.ts';
+import { Group } from '../groups/group.ts';
+import { Id } from '../id/id.ts';
+import { Money } from '../money/money.ts';
+import { Name } from '../name/name.ts';
+import { Order } from '../order/order.ts';
+import { Range } from '../range/range.ts';
+import { ReferenceId } from '../reference-id/reference-id.ts';
+import { Step } from '../step/step.ts';
+import { FinancialDocument } from './document.ts';
+import { DocumentCreatedEvent } from './events/document-created.event.ts';
+import { DocumentApprovedEvent } from './events/document-approved.event.ts';
 
 const testMoney = Money.create('10000', 'USD').unwrap();
 const testRange = Range.create(

@@ -1,6 +1,6 @@
 import { ApplicationFailure } from '@temporalio/activity';
-import { CreateBatchPayoutRequestBody } from '../../../paypal/api/payouts/payouts.types';
-import { Paypal } from '../../../paypal/api/paypal';
+import { CreateBatchPayoutRequestBody } from '../../../paypal/api/payouts/payouts.types.ts';
+import { Paypal } from '../../../paypal/api/paypal.ts';
 
 export class CreatePayout {
     constructor(private paypal: Paypal) {}

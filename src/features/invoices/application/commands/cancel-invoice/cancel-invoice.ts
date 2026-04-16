@@ -1,9 +1,9 @@
-import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application/application-codes';
-import { ApplicationError } from '../../../../../shared/errors/application/application.error';
-import { Id } from '../../../domain/id/id';
-import { Invoice } from '../../../domain/invoice/invoice';
-import { Session } from '../../../../../shared/unit-of-work/unit-of-work';
-import { InvoiceDto } from '../../queries/get-invoice/invoice.dto';
+import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application/application-codes.ts';
+import { ApplicationError } from '../../../../../shared/errors/application/application.error.ts';
+import { Id } from '../../../domain/id/id.ts';
+import { Invoice } from '../../../domain/invoice/invoice.ts';
+import { Session } from '../../../../../shared/unit-of-work/unit-of-work.ts';
+import { InvoiceDto } from '../../queries/get-invoice/invoice.dto.ts';
 
 export class CancelInvoice {
     constructor(private readonly session: Session) {}

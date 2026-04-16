@@ -1,5 +1,5 @@
-import { Paypal } from '../../features/paypal/api/paypal';
-import { config } from '../../config';
+import { Paypal } from '../../features/paypal/api/paypal.ts';
+import { config } from '../../config.ts';
 
 export const createPaypal = (): Paypal =>
     new Paypal({

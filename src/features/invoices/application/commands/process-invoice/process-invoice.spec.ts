@@ -1,15 +1,15 @@
-import { Session } from '../../../../../shared/unit-of-work/unit-of-work';
-import { PersistentManager } from '../../../../../infrastructure/persistent-manager/pg-persistent-manager';
-import { InMemoryDomainEventsBus } from '../../../../../infrastructure/domain-events/in-memory-domain-events-bus';
-import { EventOutboxStorage } from '../../../../../infrastructure/event-outbox/event-outbox';
-import { kysely } from '../../../../../../database/kysely';
-import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice';
-import { CompleteDraftInvoice } from '../complete-draft-invoice/complete-draft-invoice';
-import { ProcessInvoice } from './process-invoice';
-import { InvoiceProcessingEvent } from '../../../domain/invoice/events/invoice-processing.event';
-import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application/application-codes';
-import { ISSUER_TYPE } from '../../../domain/issuer/issuer';
-import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient';
+import { Session } from '../../../../../shared/unit-of-work/unit-of-work.ts';
+import { PersistentManager } from '../../../../../infrastructure/persistent-manager/pg-persistent-manager.ts';
+import { InMemoryDomainEventsBus } from '../../../../../infrastructure/domain-events/in-memory-domain-events-bus.ts';
+import { EventOutboxStorage } from '../../../../../infrastructure/event-outbox/event-outbox.ts';
+import { kysely } from '../../../../../../database/kysely.ts';
+import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice.ts';
+import { CompleteDraftInvoice } from '../complete-draft-invoice/complete-draft-invoice.ts';
+import { ProcessInvoice } from './process-invoice.ts';
+import { InvoiceProcessingEvent } from '../../../domain/invoice/events/invoice-processing.event.ts';
+import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application/application-codes.ts';
+import { ISSUER_TYPE } from '../../../domain/issuer/issuer.ts';
+import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient.ts';
 
 const COMPLETE_DRAFT_REQUEST = {
     lineItems: [

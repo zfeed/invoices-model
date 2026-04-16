@@ -1,6 +1,6 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes';
-import { Id } from '../id/id';
-import { Approval } from './approval';
+import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { Id } from '../id/id.ts';
+import { Approval } from './approval.ts';
 
 describe('Approval.create', () => {
     it('should create an approval with a comment', () => {

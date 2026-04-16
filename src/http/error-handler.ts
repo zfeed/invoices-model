@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { DomainError } from '../shared/errors/domain/domain.error';
-import { ApplicationError } from '../shared/errors/application/application.error';
-import { ValidationError } from './validation';
+import { DomainError } from '../shared/errors/domain/domain.error.ts';
+import { ApplicationError } from '../shared/errors/application/application.error.ts';
+import { ValidationError } from './validation.ts';
 
 const isFastifyError = (err: unknown): err is Error & { code: string } =>
     err instanceof Error && 'code' in err;

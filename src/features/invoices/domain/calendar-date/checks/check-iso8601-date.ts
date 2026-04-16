@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared';
+import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared/index.ts';
 
 export function checkIsISO8601Date(value: string): DomainError | null {
     const pattern = /^\d{4}-\d{2}-\d{2}$/;

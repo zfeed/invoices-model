@@ -1,5 +1,5 @@
-import { Equatable, Mappable, Result } from '../../../../shared';
-import { checkCommentNotBlank } from './checks/check-comment-not-blank';
+import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { checkCommentNotBlank } from './checks/check-comment-not-blank.ts';
 
 export class Comment implements Equatable<Comment>, Mappable<string | null> {
     protected _value: string | null;

@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
-import { Kysely } from '../../../../../../database/kysely';
-import { Invoice } from '../../../domain/invoice/invoice';
+import { Kysely } from '../../../../../../database/kysely.ts';
+import { Invoice } from '../../../domain/invoice/invoice.ts';
 
 export type InvoiceQueryRow = {
     id: string;

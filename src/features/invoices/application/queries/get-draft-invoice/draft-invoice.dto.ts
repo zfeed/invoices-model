@@ -1,5 +1,5 @@
-import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
-import { InvoiceLineItemDto } from '../get-invoice/invoice.dto';
+import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice.ts';
+import { InvoiceLineItemDto } from '../get-invoice/invoice.dto.ts';
 
 export type DraftInvoiceIssuerDto = {
     type: string;

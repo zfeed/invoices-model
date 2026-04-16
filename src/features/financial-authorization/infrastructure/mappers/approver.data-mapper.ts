@@ -1,7 +1,7 @@
-import { Approver } from '../../domain/approver/approver';
-import { EmailDataMapper, EmailRecord } from './email.data-mapper';
-import { IdDataMapper, IdRecord } from './id.data-mapper';
-import { NameDataMapper, NameRecord } from './name.data-mapper';
+import { Approver } from '../../domain/approver/approver.ts';
+import { EmailDataMapper, EmailRecord } from './email.data-mapper.ts';
+import { IdDataMapper, IdRecord } from './id.data-mapper.ts';
+import { NameDataMapper, NameRecord } from './name.data-mapper.ts';
 
 export type ApproverRecord = {
     id: IdRecord;

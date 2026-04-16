@@ -1,9 +1,9 @@
-import { Paypal } from '../../../paypal/api/paypal';
-import { Session } from '../../../../shared/unit-of-work/unit-of-work';
-import { CreatePayout } from './create-payout.activity';
-import { FetchPayoutStatus } from './fetch-payout-status.activity';
-import { PayInvoice } from './pay-invoice.activity';
-import { FailInvoice } from './fail-invoice.activity';
+import { Paypal } from '../../../paypal/api/paypal.ts';
+import { Session } from '../../../../shared/unit-of-work/unit-of-work.ts';
+import { CreatePayout } from './create-payout.activity.ts';
+import { FetchPayoutStatus } from './fetch-payout-status.activity.ts';
+import { PayInvoice } from './pay-invoice.activity.ts';
+import { FailInvoice } from './fail-invoice.activity.ts';
 
 export type Activities = {
     createPayout: CreatePayout['execute'];

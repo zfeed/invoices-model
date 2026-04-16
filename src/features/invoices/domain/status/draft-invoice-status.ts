@@ -1,5 +1,5 @@
-import { DOMAIN_ERROR_CODE, DomainError, Result } from '../../../../shared';
-import { DRAFT_INVOICE_STATUS, Status } from './status';
+import { DOMAIN_ERROR_CODE, DomainError, Result } from '../../../../shared/index.ts';
+import { DRAFT_INVOICE_STATUS, Status } from './status.ts';
 
 export class DraftInvoiceStatus extends Status<DRAFT_INVOICE_STATUS> {
     static draft(): DraftInvoiceStatus {

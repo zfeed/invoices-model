@@ -1,6 +1,6 @@
-import { GroupTemplate } from '../../domain/groups/group-template';
-import { ApproverDataMapper, ApproverRecord } from './approver.data-mapper';
-import { IdDataMapper, IdRecord } from './id.data-mapper';
+import { GroupTemplate } from '../../domain/groups/group-template.ts';
+import { ApproverDataMapper, ApproverRecord } from './approver.data-mapper.ts';
+import { IdDataMapper, IdRecord } from './id.data-mapper.ts';
 
 export type GroupTemplateRecord = {
     id: IdRecord;

@@ -1,25 +1,25 @@
 import dayjs from 'dayjs';
-import { Invoice } from '../../domain/invoice/invoice';
-import { INVOICE_STATUS } from '../../domain/status/status';
-import { ISSUER_TYPE } from '../../domain/issuer/issuer';
-import { RECIPIENT_TYPE } from '../../domain/recipient/recipient';
-import type { InvoiceStorage } from '../invoice-storage';
+import { Invoice } from '../../domain/invoice/invoice.ts';
+import { INVOICE_STATUS } from '../../domain/status/status.ts';
+import { ISSUER_TYPE } from '../../domain/issuer/issuer.ts';
+import { RECIPIENT_TYPE } from '../../domain/recipient/recipient.ts';
+import type { InvoiceStorage } from '../invoice-storage.ts';
 
 export type InvoiceRow = Awaited<ReturnType<InvoiceStorage['select']>>[number];
 import {
     CalendarDateDataMapper,
     CalendarDateRecord,
-} from './calendar-date.data-mapper';
-import { IdDataMapper, IdRecord } from './id.data-mapper';
+} from './calendar-date.data-mapper.ts';
+import { IdDataMapper, IdRecord } from './id.data-mapper.ts';
 import {
     InvoiceStatusDataMapper,
     InvoiceStatusRecord,
-} from './invoice-status.data-mapper';
-import { IssuerDataMapper, IssuerRecord } from './issuer.data-mapper';
-import { LineItemsDataMapper, LineItemsRecord } from './line-items.data-mapper';
-import { MoneyDataMapper, MoneyRecord } from './money.data-mapper';
-import { RecipientDataMapper, RecipientRecord } from './recipient.data-mapper';
-import { VatRateDataMapper, VatRateRecord } from './vat-rate.data-mapper';
+} from './invoice-status.data-mapper.ts';
+import { IssuerDataMapper, IssuerRecord } from './issuer.data-mapper.ts';
+import { LineItemsDataMapper, LineItemsRecord } from './line-items.data-mapper.ts';
+import { MoneyDataMapper, MoneyRecord } from './money.data-mapper.ts';
+import { RecipientDataMapper, RecipientRecord } from './recipient.data-mapper.ts';
+import { VatRateDataMapper, VatRateRecord } from './vat-rate.data-mapper.ts';
 
 export type InvoiceRecord = {
     id: IdRecord;

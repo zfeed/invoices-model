@@ -1,5 +1,5 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes';
-import { Money } from './money';
+import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { Money } from './money.ts';
 
 describe('Money', () => {
     describe('create', () => {

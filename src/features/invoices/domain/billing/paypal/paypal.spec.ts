@@ -1,5 +1,5 @@
-import { testEquatable } from '../../../../../shared/equatable.test-helper';
-import { Paypal } from './paypal';
+import { testEquatable } from '../../../../../shared/equatable.test-helper.ts';
+import { Paypal } from './paypal.ts';
 
 describe('Paypal', () => {
     testEquatable({

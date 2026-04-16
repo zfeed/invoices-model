@@ -1,11 +1,11 @@
-import { AuthflowPolicy } from '../../domain/authflow/authflow-policy';
-import type { AuthflowPolicyStorage } from '../authflow-policy-storage';
-import { ActionDataMapper, ActionRecord } from './action.data-mapper';
+import { AuthflowPolicy } from '../../domain/authflow/authflow-policy.ts';
+import type { AuthflowPolicyStorage } from '../authflow-policy-storage.ts';
+import { ActionDataMapper, ActionRecord } from './action.data-mapper.ts';
 import {
     AuthflowTemplateDataMapper,
     AuthflowTemplateRecord,
-} from './authflow-template.data-mapper';
-import { IdDataMapper, IdRecord } from './id.data-mapper';
+} from './authflow-template.data-mapper.ts';
+import { IdDataMapper, IdRecord } from './id.data-mapper.ts';
 
 export type AuthflowPolicyRecord = {
     id: IdRecord;

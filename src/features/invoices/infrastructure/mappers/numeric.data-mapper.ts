@@ -1,4 +1,4 @@
-import { Numeric } from '../../domain/numeric/numeric';
+import { Numeric } from '../../domain/numeric/numeric.ts';
 
 export type NumericRecord = {
     value: string;

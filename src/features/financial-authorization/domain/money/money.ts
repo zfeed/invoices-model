@@ -1,9 +1,9 @@
-import { Equatable, Mappable, Result } from '../../../../shared';
+import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
 import {
     checkAmountIsInteger,
     checkAmountIsNonNegative,
-} from './checks/check-amount';
-import { checkCurrencyCode } from './checks/check-currency-code';
+} from './checks/check-amount.ts';
+import { checkCurrencyCode } from './checks/check-currency-code.ts';
 
 export class Money
     implements Equatable<Money>, Mappable<ReturnType<Money['toPlain']>>

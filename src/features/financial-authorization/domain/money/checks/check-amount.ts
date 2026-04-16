@@ -1,9 +1,9 @@
-import { isInt } from 'validator';
-import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes';
-import { DomainError } from '../../../../../shared/errors/domain/domain.error';
+import validator from 'validator';
+import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes.ts';
+import { DomainError } from '../../../../../shared/errors/domain/domain.error.ts';
 
 export function checkAmountIsInteger(amount: string): DomainError | null {
-    if (!isInt(amount, { allow_leading_zeroes: false })) {
+    if (!validator.isInt(amount, { allow_leading_zeroes: false })) {
         return new DomainError({
             message: `Invalid minor units. Expected an integer, received: ${amount}`,
             code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_MONEY_AMOUNT_NOT_INTEGER,

@@ -1,4 +1,4 @@
-import { Email } from '../../domain/email/email';
+import { Email } from '../../domain/email/email.ts';
 
 export type EmailRecord = {
     value: string;

@@ -1,10 +1,10 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes';
-import { Approval } from '../approval/approval';
-import { Approver } from '../approver/approver';
-import { Email } from '../email/email';
-import { Id } from '../id/id';
-import { Name } from '../name/name';
-import { Group } from './group';
+import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { Approval } from '../approval/approval.ts';
+import { Approver } from '../approver/approver.ts';
+import { Email } from '../email/email.ts';
+import { Id } from '../id/id.ts';
+import { Name } from '../name/name.ts';
+import { Group } from './group.ts';
 
 const makeApprover = (id: string, name: string, email: string) =>
     Approver.create({

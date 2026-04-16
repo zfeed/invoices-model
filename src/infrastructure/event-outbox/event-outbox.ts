@@ -1,12 +1,12 @@
 import {
     DomainEventClass,
     SerializedDomainEvent,
-} from '../../shared/events/domain-event';
-import { type Duration } from '../../lib/dayjs';
+} from '../../shared/events/domain-event.ts';
+import { type Duration } from '../../lib/dayjs.ts';
 import { sql } from 'kysely';
-import type { Kysely, ControlledTransaction } from '../../../database/kysely';
+import type { Kysely, ControlledTransaction } from '../../../database/kysely.ts';
 import { trace, SpanKind, ROOT_CONTEXT } from '@opentelemetry/api';
-import { withSpan } from '../../shared/tracing/with-span';
+import { withSpan } from '../../shared/tracing/with-span.ts';
 
 const tracer = trace.getTracer('event-outbox');
 

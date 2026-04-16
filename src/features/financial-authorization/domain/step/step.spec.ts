@@ -1,11 +1,11 @@
-import { Approval } from '../approval/approval';
-import { Approver } from '../approver/approver';
-import { Email } from '../email/email';
-import { Group } from '../groups/group';
-import { Id } from '../id/id';
-import { Name } from '../name/name';
-import { Order } from '../order/order';
-import { Step } from './step';
+import { Approval } from '../approval/approval.ts';
+import { Approver } from '../approver/approver.ts';
+import { Email } from '../email/email.ts';
+import { Group } from '../groups/group.ts';
+import { Id } from '../id/id.ts';
+import { Name } from '../name/name.ts';
+import { Order } from '../order/order.ts';
+import { Step } from './step.ts';
 
 const makeApprover = (id: string, name: string, email: string) =>
     Approver.create({

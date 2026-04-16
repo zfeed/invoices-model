@@ -1,6 +1,6 @@
-import { Money } from '../../domain/money/money/money';
-import { CurrencyDataMapper, CurrencyRecord } from './currency.data-mapper';
-import { NumericDataMapper, NumericRecord } from './numeric.data-mapper';
+import { Money } from '../../domain/money/money/money.ts';
+import { CurrencyDataMapper, CurrencyRecord } from './currency.data-mapper.ts';
+import { NumericDataMapper, NumericRecord } from './numeric.data-mapper.ts';
 
 export type MoneyRecord = {
     amount: NumericRecord;

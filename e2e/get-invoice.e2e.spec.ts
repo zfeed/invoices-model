@@ -1,4 +1,4 @@
-import { setupApp, expectError } from './helpers';
+import { setupApp, expectError } from './helpers.ts';
 
 const { get, getData, createIssuedInvoice } = setupApp();
 

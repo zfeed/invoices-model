@@ -1,4 +1,4 @@
-import type { Collection } from './collection/collection';
+import type { Collection } from './collection/collection.ts';
 
 export type EntityClass = Function;
 

@@ -5,7 +5,7 @@ import {
     tooLong,
     expectValidationError,
     EMPTY_DRAFT_SHAPE,
-} from './helpers';
+} from './helpers.ts';
 
 const { postJson, postRaw } = setupApp();
 

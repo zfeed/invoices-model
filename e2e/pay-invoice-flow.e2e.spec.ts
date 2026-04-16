@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import { setupApp, COMPLETE_DRAFT_REQUEST, INVOICE_SHAPE } from './helpers';
+import { setupApp, COMPLETE_DRAFT_REQUEST, INVOICE_SHAPE } from './helpers.ts';
 
 const { postJson, post, get, getData } = setupApp();
 

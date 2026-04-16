@@ -1,6 +1,6 @@
-import { testEquatable } from '../../../../shared/equatable.test-helper';
-import { Email } from '../email/email';
-import { Issuer, ISSUER_TYPE } from './issuer';
+import { testEquatable } from '../../../../shared/equatable.test-helper.ts';
+import { Email } from '../email/email.ts';
+import { Issuer, ISSUER_TYPE } from './issuer.ts';
 
 describe('Issuer', () => {
     testEquatable({

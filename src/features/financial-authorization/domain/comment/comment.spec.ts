@@ -1,5 +1,5 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes';
-import { Comment } from './comment';
+import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { Comment } from './comment.ts';
 
 describe('Comment', () => {
     describe('create', () => {

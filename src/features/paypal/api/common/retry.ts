@@ -1,4 +1,4 @@
-import { Duration } from '../../../../lib/dayjs';
+import { Duration } from '../../../../lib/dayjs.ts';
 
 export type RetryConfig = {
     maxRetries: number;

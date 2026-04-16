@@ -1,4 +1,4 @@
-import { Comment } from '../../domain/comment/comment';
+import { Comment } from '../../domain/comment/comment.ts';
 
 export type CommentRecord = {
     value: string | null;

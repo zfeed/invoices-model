@@ -1,4 +1,4 @@
-import { setupApp, expectError, EMPTY_DRAFT_SHAPE } from './helpers';
+import { setupApp, expectError, EMPTY_DRAFT_SHAPE } from './helpers.ts';
 
 const { post, createDraft } = setupApp();
 

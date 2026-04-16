@@ -1,11 +1,11 @@
-import { isDecimal, isInt } from 'validator';
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared';
+import validator from 'validator';
+import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared/index.ts';
 
 export function checkPercents(percents: string): DomainError | null {
     if (
         [
-            isDecimal(percents, { decimal_digits: '0,2' }),
-            isInt(percents),
+            validator.isDecimal(percents, { decimal_digits: '0,2' }),
+            validator.isInt(percents),
         ].includes(true) === false
     ) {
         return new DomainError({

@@ -1,7 +1,7 @@
-import { Equatable, Mappable, Result } from '../../../../shared';
-import { Email } from '../email/email';
-import { Id } from '../id/id';
-import { Name } from '../name/name';
+import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { Email } from '../email/email.ts';
+import { Id } from '../id/id.ts';
+import { Name } from '../name/name.ts';
 
 export class Approver
     implements Equatable<Approver>, Mappable<ReturnType<Approver['toPlain']>>

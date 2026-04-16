@@ -1,6 +1,6 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes';
-import { Money } from '../money/money';
-import { Range } from './range';
+import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { Money } from '../money/money.ts';
+import { Range } from './range.ts';
 
 describe('Range', () => {
     describe('create', () => {

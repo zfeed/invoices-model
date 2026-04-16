@@ -1,7 +1,7 @@
-import { testEquatable } from '../../../../shared/equatable.test-helper';
-import { Money } from '../money/money/money';
-import { Numeric } from '../numeric/numeric';
-import { VatRate } from './vat-rate';
+import { testEquatable } from '../../../../shared/equatable.test-helper.ts';
+import { Money } from '../money/money/money.ts';
+import { Numeric } from '../numeric/numeric.ts';
+import { VatRate } from './vat-rate.ts';
 
 describe('VatRate', () => {
     testEquatable({

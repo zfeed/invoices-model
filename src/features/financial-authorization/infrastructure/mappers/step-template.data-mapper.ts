@@ -1,10 +1,10 @@
-import { StepTemplate } from '../../domain/step/step-template';
+import { StepTemplate } from '../../domain/step/step-template.ts';
 import {
     GroupTemplateDataMapper,
     GroupTemplateRecord,
-} from './group-template.data-mapper';
-import { IdDataMapper, IdRecord } from './id.data-mapper';
-import { OrderDataMapper, OrderRecord } from './order.data-mapper';
+} from './group-template.data-mapper.ts';
+import { IdDataMapper, IdRecord } from './id.data-mapper.ts';
+import { OrderDataMapper, OrderRecord } from './order.data-mapper.ts';
 
 export type StepTemplateRecord = {
     id: IdRecord;

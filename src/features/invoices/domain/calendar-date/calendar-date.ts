@@ -1,5 +1,5 @@
-import { Comparable, Equatable, Mappable, Result } from '../../../../shared';
-import { checkIsISO8601Date } from './checks/check-iso8601-date';
+import { Comparable, Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { checkIsISO8601Date } from './checks/check-iso8601-date.ts';
 
 export class CalendarDate
     implements

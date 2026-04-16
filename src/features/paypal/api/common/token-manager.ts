@@ -1,5 +1,5 @@
-import { Result } from '../../../../shared/result';
-import { Login } from '../login/login';
+import { Result } from '../../../../shared/result.ts';
+import { Login } from '../login/login.ts';
 
 type Credentials = {
     clientId: string;

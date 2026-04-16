@@ -1,5 +1,5 @@
-import { testEquatable } from '../../../../shared/equatable.test-helper';
-import { Email } from './email';
+import { testEquatable } from '../../../../shared/equatable.test-helper.ts';
+import { Email } from './email.ts';
 
 describe('Email', () => {
     testEquatable({

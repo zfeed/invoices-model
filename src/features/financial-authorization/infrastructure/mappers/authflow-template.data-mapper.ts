@@ -1,10 +1,10 @@
-import { AuthflowTemplate } from '../../domain/authflow/authflow-template';
-import { IdDataMapper, IdRecord } from './id.data-mapper';
-import { RangeDataMapper, RangeRecord } from './range.data-mapper';
+import { AuthflowTemplate } from '../../domain/authflow/authflow-template.ts';
+import { IdDataMapper, IdRecord } from './id.data-mapper.ts';
+import { RangeDataMapper, RangeRecord } from './range.data-mapper.ts';
 import {
     StepTemplateDataMapper,
     StepTemplateRecord,
-} from './step-template.data-mapper';
+} from './step-template.data-mapper.ts';
 
 export type AuthflowTemplateRecord = {
     id: IdRecord;

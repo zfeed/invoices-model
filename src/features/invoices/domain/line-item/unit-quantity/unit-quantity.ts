@@ -1,6 +1,6 @@
-import { Equatable, Mappable, Result } from '../../../../../shared';
-import { Numeric } from '../../numeric/numeric';
-import { checkUnitQuantity } from './checks/check-unit-quantity';
+import { Equatable, Mappable, Result } from '../../../../../shared/index.ts';
+import { Numeric } from '../../numeric/numeric.ts';
+import { checkUnitQuantity } from './checks/check-unit-quantity.ts';
 
 export class UnitQuantity implements Equatable<UnitQuantity>, Mappable<string> {
     protected _value: Numeric;

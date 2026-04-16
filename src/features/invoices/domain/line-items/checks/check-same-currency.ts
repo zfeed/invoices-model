@@ -1,5 +1,5 @@
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared';
-import { LineItem } from '../../line-item/line-item';
+import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared/index.ts';
+import { LineItem } from '../../line-item/line-item.ts';
 
 export function checkSameCurrency(items: LineItem[]): DomainError | null {
     const firstCurrency = items[0].total.currency;

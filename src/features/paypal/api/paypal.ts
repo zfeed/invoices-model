@@ -1,7 +1,7 @@
-import { ApiClient, Config } from './common/api-client';
-import { TokenManager } from './common/token-manager';
-import { Login } from './login/login';
-import { Payouts } from './payouts/payouts';
+import { ApiClient, Config } from './common/api-client.ts';
+import { TokenManager } from './common/token-manager.ts';
+import { Login } from './login/login.ts';
+import { Payouts } from './payouts/payouts.ts';
 
 type Credentials = {
     clientId: string;

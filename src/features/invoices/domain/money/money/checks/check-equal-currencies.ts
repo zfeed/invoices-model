@@ -1,5 +1,5 @@
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../../shared';
-import { Currency } from '../../currency/currency';
+import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../../shared/index.ts';
+import { Currency } from '../../currency/currency.ts';
 
 export function checkEqualCurrencies(
     currencyA: Currency,

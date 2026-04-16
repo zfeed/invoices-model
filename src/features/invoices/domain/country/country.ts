@@ -1,5 +1,5 @@
-import { Equatable, Mappable, Result } from '../../../../shared';
-import { checkCountryCode } from './checks/check-country-code';
+import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { checkCountryCode } from './checks/check-country-code.ts';
 
 export class Country implements Equatable<Country>, Mappable<string> {
     protected _code: string;

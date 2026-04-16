@@ -1,11 +1,11 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes';
-import { DomainError } from '../../../../shared/errors/domain/domain.error';
-import { Session } from '../../../../shared/unit-of-work/unit-of-work';
-import { Action } from '../../domain/action/action';
-import { Approval } from '../../domain/approval/approval';
-import { FinancialDocument } from '../../domain/document/document';
-import { Id } from '../../domain/id/id';
-import { ReferenceId } from '../../domain/reference-id/reference-id';
+import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { DomainError } from '../../../../shared/errors/domain/domain.error.ts';
+import { Session } from '../../../../shared/unit-of-work/unit-of-work.ts';
+import { Action } from '../../domain/action/action.ts';
+import { Approval } from '../../domain/approval/approval.ts';
+import { FinancialDocument } from '../../domain/document/document.ts';
+import { Id } from '../../domain/id/id.ts';
+import { ReferenceId } from '../../domain/reference-id/reference-id.ts';
 
 type ApproveActionRequest = {
     referenceId: string;

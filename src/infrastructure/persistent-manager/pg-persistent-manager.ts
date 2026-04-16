@@ -1,23 +1,23 @@
-import { AuthflowPolicy } from '../../features/financial-authorization/domain/authflow/authflow-policy';
-import { FinancialDocument } from '../../features/financial-authorization/domain/document/document';
-import { DraftInvoice } from '../../features/invoices/domain/draft-invoice/draft-invoice';
-import { Invoice } from '../../features/invoices/domain/invoice/invoice';
-import { DomainEventsBus } from '../../shared/domain-events/domain-events-bus.interface';
+import { AuthflowPolicy } from '../../features/financial-authorization/domain/authflow/authflow-policy.ts';
+import { FinancialDocument } from '../../features/financial-authorization/domain/document/document.ts';
+import { DraftInvoice } from '../../features/invoices/domain/draft-invoice/draft-invoice.ts';
+import { Invoice } from '../../features/invoices/domain/invoice/invoice.ts';
+import { DomainEventsBus } from '../../shared/domain-events/domain-events-bus.interface.ts';
 import {
     EntityClass,
     PersistentManager as PersistentManagerInterface,
-} from '../../shared/unit-of-work/unit-of-work.interface';
-import type { Collection } from '../../shared/unit-of-work/collection/collection';
-import type { Kysely, ControlledTransaction } from '../../../database/kysely';
-import { EventOutboxStorage } from '../event-outbox/event-outbox';
-import { AuthflowPolicyStorage } from '../../features/financial-authorization/infrastructure/authflow-policy-storage';
-import { DraftInvoiceStorage } from '../../features/invoices/infrastructure/draft-invoice-storage';
-import { FinancialDocumentStorage } from '../../features/financial-authorization/infrastructure/financial-document-storage';
-import { InvoiceStorage } from '../../features/invoices/infrastructure/invoice-storage';
-import { AuthflowPolicyDataMapper } from '../../features/financial-authorization/infrastructure/mappers/authflow-policy.data-mapper';
-import { FinancialDocumentDataMapper } from '../../features/financial-authorization/infrastructure/mappers/financial-document.data-mapper';
-import { DraftInvoiceDataMapper } from '../../features/invoices/infrastructure/mappers/draft-invoice.data-mapper';
-import { InvoiceDataMapper } from '../../features/invoices/infrastructure/mappers/invoice.data-mapper';
+} from '../../shared/unit-of-work/unit-of-work.interface.ts';
+import type { Collection } from '../../shared/unit-of-work/collection/collection.ts';
+import type { Kysely, ControlledTransaction } from '../../../database/kysely.ts';
+import { EventOutboxStorage } from '../event-outbox/event-outbox.ts';
+import { AuthflowPolicyStorage } from '../../features/financial-authorization/infrastructure/authflow-policy-storage.ts';
+import { DraftInvoiceStorage } from '../../features/invoices/infrastructure/draft-invoice-storage.ts';
+import { FinancialDocumentStorage } from '../../features/financial-authorization/infrastructure/financial-document-storage.ts';
+import { InvoiceStorage } from '../../features/invoices/infrastructure/invoice-storage.ts';
+import { AuthflowPolicyDataMapper } from '../../features/financial-authorization/infrastructure/mappers/authflow-policy.data-mapper.ts';
+import { FinancialDocumentDataMapper } from '../../features/financial-authorization/infrastructure/mappers/financial-document.data-mapper.ts';
+import { DraftInvoiceDataMapper } from '../../features/invoices/infrastructure/mappers/draft-invoice.data-mapper.ts';
+import { InvoiceDataMapper } from '../../features/invoices/infrastructure/mappers/invoice.data-mapper.ts';
 
 type Entity = DraftInvoice | Invoice | AuthflowPolicy | FinancialDocument;
 

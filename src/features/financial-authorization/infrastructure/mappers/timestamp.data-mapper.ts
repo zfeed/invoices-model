@@ -1,4 +1,4 @@
-import { Timestamp } from '../../domain/timestamp/timestamp';
+import { Timestamp } from '../../domain/timestamp/timestamp.ts';
 
 export type TimestampRecord = {
     value: string;

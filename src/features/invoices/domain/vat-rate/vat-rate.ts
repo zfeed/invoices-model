@@ -1,7 +1,7 @@
-import { Equatable, Mappable, Result } from '../../../../shared';
-import { Money } from '../money/money/money';
-import { Numeric } from '../numeric/numeric';
-import { checkPercents } from './checks/check-percents';
+import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { Money } from '../money/money/money.ts';
+import { Numeric } from '../numeric/numeric.ts';
+import { checkPercents } from './checks/check-percents.ts';
 export class VatRate
     implements Equatable<VatRate>, Mappable<ReturnType<VatRate['toPlain']>>
 {

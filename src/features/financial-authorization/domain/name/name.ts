@@ -1,5 +1,5 @@
-import { Equatable, Mappable, Result } from '../../../../shared';
-import { checkNameNotBlank } from './checks/check-name-not-blank';
+import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { checkNameNotBlank } from './checks/check-name-not-blank.ts';
 
 export class Name implements Equatable<Name>, Mappable<string> {
     protected _value: string;

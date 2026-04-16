@@ -1,8 +1,8 @@
-import { isISO31661Alpha2 } from 'validator';
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared';
+import validator from 'validator';
+import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared/index.ts';
 
 export function checkCountryCode(value: string): DomainError | null {
-    if (!isISO31661Alpha2(value)) {
+    if (!validator.isISO31661Alpha2(value)) {
         return new DomainError({
             message:
                 'Expected a valid ISO 3166-1 alpha-2 country code, but received: ' +

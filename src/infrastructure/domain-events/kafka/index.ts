@@ -1,1 +1,1 @@
-export * from './kafka-domain-events-bus';
+export * from './kafka-domain-events-bus.ts';

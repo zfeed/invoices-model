@@ -1,14 +1,14 @@
-import { DomainError, Mappable, Result } from '../../../../shared';
-import { DomainEvent } from '../../../../shared/events/domain-event';
-import { PublishableEvents } from '../../../../shared/events/event-publisher.interface';
-import { Action } from '../action/action';
-import { Id } from '../id/id';
-import { Money } from '../money/money';
-import { Authflow } from './authflow';
-import { AuthflowTemplate } from './authflow-template';
-import { checkNoOverlappingRanges } from './checks/check-no-overlapping-ranges';
-import { checkTemplateInRange } from './checks/check-template-in-range';
-import { AuthflowPolicyCreatedEvent } from './events/authflow-policy-created.event';
+import { DomainError, Mappable, Result } from '../../../../shared/index.ts';
+import { DomainEvent } from '../../../../shared/events/domain-event.ts';
+import { PublishableEvents } from '../../../../shared/events/event-publisher.interface.ts';
+import { Action } from '../action/action.ts';
+import { Id } from '../id/id.ts';
+import { Money } from '../money/money.ts';
+import { Authflow } from './authflow.ts';
+import { AuthflowTemplate } from './authflow-template.ts';
+import { checkNoOverlappingRanges } from './checks/check-no-overlapping-ranges.ts';
+import { checkTemplateInRange } from './checks/check-template-in-range.ts';
+import { AuthflowPolicyCreatedEvent } from './events/authflow-policy-created.event.ts';
 
 export class AuthflowPolicy
     implements

@@ -1,6 +1,6 @@
-import { Email } from '../email/email';
-import { Name } from '../name/name';
-import { Approver } from './approver';
+import { Email } from '../email/email.ts';
+import { Name } from '../name/name.ts';
+import { Approver } from './approver.ts';
 
 describe('Approver.create', () => {
     it('should create an approver with valid data', () => {

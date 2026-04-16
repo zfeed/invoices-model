@@ -1,5 +1,5 @@
-import { testEquatable } from '../../../../shared/equatable.test-helper';
-import { Country } from './country';
+import { testEquatable } from '../../../../shared/equatable.test-helper.ts';
+import { Country } from './country.ts';
 
 describe('Country', () => {
     testEquatable({

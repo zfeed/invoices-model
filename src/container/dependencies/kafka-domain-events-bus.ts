@@ -1,9 +1,9 @@
-import { KafkaDomainEventsBus } from '../../infrastructure/domain-events/kafka/kafka-domain-events-bus';
-import { EventOutboxStorage } from '../../infrastructure/event-outbox/event-outbox';
-import { Logger } from '../../shared/logger/logger';
-import { toKafkaLogger } from '../../infrastructure/logger/kafka-logger-adapter';
-import dayjs from '../../lib/dayjs';
-import { config } from '../../config';
+import { KafkaDomainEventsBus } from '../../infrastructure/domain-events/kafka/kafka-domain-events-bus.ts';
+import { EventOutboxStorage } from '../../infrastructure/event-outbox/event-outbox.ts';
+import { Logger } from '../../shared/logger/logger.ts';
+import { toKafkaLogger } from '../../infrastructure/logger/kafka-logger-adapter.ts';
+import dayjs from '../../lib/dayjs.ts';
+import { config } from '../../config.ts';
 
 export const createKafkaDomainEventsBus = (
     eventOutboxStorage: EventOutboxStorage,

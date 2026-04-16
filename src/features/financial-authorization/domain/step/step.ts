@@ -3,11 +3,11 @@ import {
     DomainError,
     Mappable,
     Result,
-} from '../../../../shared';
-import { Approval } from '../approval/approval';
-import { Group } from '../groups/group';
-import { Id } from '../id/id';
-import { Order } from '../order/order';
+} from '../../../../shared/index.ts';
+import { Approval } from '../approval/approval.ts';
+import { Group } from '../groups/group.ts';
+import { Id } from '../id/id.ts';
+import { Order } from '../order/order.ts';
 
 export class Step implements Mappable<ReturnType<Step['toPlain']>> {
     protected _id: Id;

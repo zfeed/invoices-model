@@ -1,12 +1,12 @@
 import { WorkflowClient, WorkflowIdConflictPolicy } from '@temporalio/client';
-import { DomainEventsBus } from '../../shared/domain-events/domain-events-bus.interface';
-import { InvoiceProcessingEvent } from '../invoices/domain/invoice/events/invoice-processing.event';
-import { CreateBatchPayoutRequestBody } from '../paypal/api/payouts/payouts.types';
-import { INVOICE_PAYPAL_TX_TASK_QUEUE } from './task-queue';
+import { DomainEventsBus } from '../../shared/domain-events/domain-events-bus.interface.ts';
+import { InvoiceProcessingEvent } from '../invoices/domain/invoice/events/invoice-processing.event.ts';
+import { CreateBatchPayoutRequestBody } from '../paypal/api/payouts/payouts.types.ts';
+import { INVOICE_PAYPAL_TX_TASK_QUEUE } from './task-queue.ts';
 import {
     processInvoicePaypalTransaction,
     ProcessInvoicePaypalTransactionInput,
-} from './workflow/process-invoice-paypal-transaction.workflow';
+} from './workflow/process-invoice-paypal-transaction.workflow.ts';
 
 export type PollingConfig = {
     maxAttempts: number;

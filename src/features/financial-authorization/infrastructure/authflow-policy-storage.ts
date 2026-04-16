@@ -1,6 +1,6 @@
 import { sql } from 'kysely';
-import { ControlledTransaction } from '../../../../database/kysely';
-import { AuthflowPolicyRecord } from './mappers/authflow-policy.data-mapper';
+import { ControlledTransaction } from '../../../../database/kysely.ts';
+import { AuthflowPolicyRecord } from './mappers/authflow-policy.data-mapper.ts';
 
 export class AuthflowPolicyStorage {
     constructor(private tx: ControlledTransaction) {}

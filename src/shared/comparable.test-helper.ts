@@ -1,5 +1,5 @@
-import { Comparable } from './comparable.interface';
-import { Equatable } from './equatable.interface';
+import { Comparable } from './comparable.interface.ts';
+import { Equatable } from './equatable.interface.ts';
 
 export interface ComparableTestConfig<T extends Comparable<T> & Equatable<T>> {
     typeName: string;

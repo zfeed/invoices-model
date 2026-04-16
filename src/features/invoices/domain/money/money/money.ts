@@ -1,9 +1,9 @@
-import { Equatable, Mappable, Result } from '../../../../../shared';
-import { Numeric } from '../../numeric/numeric';
-import { ROUNDING } from '../../numeric/rounding';
-import { Currency } from '../currency/currency';
-import { checkEqualCurrencies } from './checks/check-equal-currencies';
-import { checkMinorUnits } from './checks/check-minor-units';
+import { Equatable, Mappable, Result } from '../../../../../shared/index.ts';
+import { Numeric } from '../../numeric/numeric.ts';
+import { ROUNDING } from '../../numeric/rounding.ts';
+import { Currency } from '../currency/currency.ts';
+import { checkEqualCurrencies } from './checks/check-equal-currencies.ts';
+import { checkMinorUnits } from './checks/check-minor-units.ts';
 
 export class Money
     implements Equatable<Money>, Mappable<ReturnType<Money['toPlain']>>

@@ -1,6 +1,6 @@
-import { testComparable } from '../../../../shared/comparable.test-helper';
-import { testEquatable } from '../../../../shared/equatable.test-helper';
-import { Numeric } from './numeric';
+import { testComparable } from '../../../../shared/comparable.test-helper.ts';
+import { testEquatable } from '../../../../shared/equatable.test-helper.ts';
+import { Numeric } from './numeric.ts';
 
 describe('Numeric', () => {
     testEquatable({

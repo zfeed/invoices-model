@@ -1,5 +1,5 @@
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared';
-import { LineItem } from '../../line-item/line-item'; // Adjust the import path based on where LineItem is defined
+import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared/index.ts';
+import { LineItem } from '../../line-item/line-item.ts'; // Adjust the import path based on where LineItem is defined
 
 export function checkLineItems(lineItems: LineItem[]): DomainError | null {
     if (lineItems.length === 0) {

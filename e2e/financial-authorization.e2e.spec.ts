@@ -8,7 +8,7 @@ import {
     expectValidationError,
     AUTHFLOW_POLICY_SHAPE,
     DOCUMENT_SHAPE,
-} from './helpers';
+} from './helpers.ts';
 
 const { postJson, postRaw, post, get, getData } = setupApp();
 

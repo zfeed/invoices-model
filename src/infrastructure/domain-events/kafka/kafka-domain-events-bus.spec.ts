@@ -1,13 +1,13 @@
 import { hash } from 'node:crypto';
 import { setTimeout as sleep } from 'node:timers/promises';
-import { testDomainEventsBus } from '../../../shared/domain-events/domain-events-bus.test-helper';
-import { KafkaDomainEventsBus } from './kafka-domain-events-bus';
-import dayjs from '../../../lib/dayjs';
-import { EventOutboxStorage } from '../../event-outbox/event-outbox';
-import { DomainEvent } from '../../../shared/events/domain-event';
-import { cleanDatabase } from '../../persistent-manager/clean-database';
-import { kysely } from '../../../../database/kysely';
-import { config } from '../../../config';
+import { testDomainEventsBus } from '../../../shared/domain-events/domain-events-bus.test-helper.ts';
+import { KafkaDomainEventsBus } from './kafka-domain-events-bus.ts';
+import dayjs from '../../../lib/dayjs.ts';
+import { EventOutboxStorage } from '../../event-outbox/event-outbox.ts';
+import { DomainEvent } from '../../../shared/events/domain-event.ts';
+import { cleanDatabase } from '../../persistent-manager/clean-database.ts';
+import { kysely } from '../../../../database/kysely.ts';
+import { config } from '../../../config.ts';
 
 let domainEventsBus: KafkaDomainEventsBus;
 

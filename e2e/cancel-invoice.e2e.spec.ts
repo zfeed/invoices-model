@@ -1,4 +1,4 @@
-import { setupApp, expectError, INVOICE_SHAPE } from './helpers';
+import { setupApp, expectError, INVOICE_SHAPE } from './helpers.ts';
 
 const { post, createIssuedInvoice } = setupApp();
 

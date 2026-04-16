@@ -1,6 +1,6 @@
 import { sql } from 'kysely';
-import { ControlledTransaction } from '../../../../database/kysely';
-import { FinancialDocumentRecord } from './mappers/financial-document.data-mapper';
+import { ControlledTransaction } from '../../../../database/kysely.ts';
+import { FinancialDocumentRecord } from './mappers/financial-document.data-mapper.ts';
 
 export class FinancialDocumentStorage {
     constructor(private tx: ControlledTransaction) {}

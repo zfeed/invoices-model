@@ -1,6 +1,6 @@
-import { testEquatable } from '../../../../shared/equatable.test-helper';
-import { InvoiceStatus } from './invoice-status';
-import { DraftInvoiceStatus } from './draft-invoice-status';
+import { testEquatable } from '../../../../shared/equatable.test-helper.ts';
+import { InvoiceStatus } from './invoice-status.ts';
+import { DraftInvoiceStatus } from './draft-invoice-status.ts';
 
 describe('InvoiceStatus', () => {
     testEquatable({

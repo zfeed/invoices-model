@@ -1,5 +1,5 @@
-import { Equatable, Mappable, Result } from '../../../../shared';
-import { checkEmailFormat } from './checks/check-email-format';
+import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { checkEmailFormat } from './checks/check-email-format.ts';
 
 export class Email implements Equatable<Email | string>, Mappable<string> {
     protected _value: string;

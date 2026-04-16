@@ -1,5 +1,5 @@
-import { EntityClass, PersistentManager } from './unit-of-work.interface';
-import { Collection } from './collection/collection';
+import { EntityClass, PersistentManager } from './unit-of-work.interface.ts';
+import { Collection } from './collection/collection.ts';
 
 export class Session {
     constructor(private readonly persistentManager: PersistentManager) {}

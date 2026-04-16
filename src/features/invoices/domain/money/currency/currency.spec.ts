@@ -1,5 +1,5 @@
-import { testEquatable } from '../../../../../shared/equatable.test-helper';
-import { Currency } from './currency';
+import { testEquatable } from '../../../../../shared/equatable.test-helper.ts';
+import { Currency } from './currency.ts';
 
 describe('Currency', () => {
     testEquatable({

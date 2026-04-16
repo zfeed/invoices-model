@@ -1,9 +1,9 @@
 import '../instrumentation';
 import { SpanKind, trace } from '@opentelemetry/api';
-import { createApp } from './create-app';
-import { registerDependencies } from '../container/register-dependencies';
-import { Logger } from '../shared/logger/logger';
-import { withSpan } from '../shared/tracing/with-span';
+import { createApp } from './create-app.ts';
+import { registerDependencies } from '../container/register-dependencies.ts';
+import { Logger } from '../shared/logger/logger.ts';
+import { withSpan } from '../shared/tracing/with-span.ts';
 
 const tracer = trace.getTracer('application');
 

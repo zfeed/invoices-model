@@ -1,10 +1,10 @@
-import { DomainError, Mappable, Result } from '../../../../shared';
-import { Action } from '../action/action';
-import { Id } from '../id/id';
-import { Range } from '../range/range';
-import { StepTemplate } from '../step/step-template';
-import { Authflow } from './authflow';
-import { checkTemplateNoDuplicateStepOrders } from './checks/check-template-no-duplicate-step-orders';
+import { DomainError, Mappable, Result } from '../../../../shared/index.ts';
+import { Action } from '../action/action.ts';
+import { Id } from '../id/id.ts';
+import { Range } from '../range/range.ts';
+import { StepTemplate } from '../step/step-template.ts';
+import { Authflow } from './authflow.ts';
+import { checkTemplateNoDuplicateStepOrders } from './checks/check-template-no-duplicate-step-orders.ts';
 
 export class AuthflowTemplate implements Mappable<
     ReturnType<AuthflowTemplate['toPlain']>
@@ -44,7 +44,7 @@ export class AuthflowTemplate implements Mappable<
 
     toAuthflow(action: Action): Result<DomainError, Authflow> {
         const stepsResult = this._steps.reduce<
-            Result<DomainError, import('../step/step').Step[]>
+            Result<DomainError, import('../step/step.ts').Step[]>
         >(
             (acc, template) =>
                 acc.flatMap((steps) =>

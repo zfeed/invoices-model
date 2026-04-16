@@ -1,21 +1,21 @@
 import { WorkflowClient } from '@temporalio/client';
-import { Container } from './container';
-import { Session } from '../shared/unit-of-work/unit-of-work';
-import { EventOutboxStorage } from '../infrastructure/event-outbox/event-outbox';
-import { KafkaDomainEventsBus } from '../infrastructure/domain-events/kafka/kafka-domain-events-bus';
-import { TemporalWorker } from '../worker';
-import { Paypal } from '../features/paypal/api/paypal';
-import { createTemporalClient } from './dependencies/temporal-client';
-import { createPaypal } from './dependencies/paypal';
-import { createEventOutboxStorage } from './dependencies/event-outbox-storage';
-import { createKafkaDomainEventsBus } from './dependencies/kafka-domain-events-bus';
-import { createSession } from './dependencies/session';
-import { createTemporalWorker } from './dependencies/temporal-worker';
-import { Logger } from '../shared/logger/logger';
-import { createLogger } from './dependencies/logger';
-import { createPino } from './dependencies/pino';
+import { Container } from './container.ts';
+import { Session } from '../shared/unit-of-work/unit-of-work.ts';
+import { EventOutboxStorage } from '../infrastructure/event-outbox/event-outbox.ts';
+import { KafkaDomainEventsBus } from '../infrastructure/domain-events/kafka/kafka-domain-events-bus.ts';
+import { TemporalWorker } from '../worker.ts';
+import { Paypal } from '../features/paypal/api/paypal.ts';
+import { createTemporalClient } from './dependencies/temporal-client.ts';
+import { createPaypal } from './dependencies/paypal.ts';
+import { createEventOutboxStorage } from './dependencies/event-outbox-storage.ts';
+import { createKafkaDomainEventsBus } from './dependencies/kafka-domain-events-bus.ts';
+import { createSession } from './dependencies/session.ts';
+import { createTemporalWorker } from './dependencies/temporal-worker.ts';
+import { Logger } from '../shared/logger/logger.ts';
+import { createLogger } from './dependencies/logger.ts';
+import { createPino } from './dependencies/pino.ts';
 import { pino as Pino } from 'pino';
-import { config } from '../config';
+import { config } from '../config.ts';
 
 export const registerDependencies = async (): Promise<Container> => {
     const container = new Container();

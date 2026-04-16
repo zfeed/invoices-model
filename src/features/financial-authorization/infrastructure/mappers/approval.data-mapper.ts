@@ -1,7 +1,7 @@
-import { Approval } from '../../domain/approval/approval';
-import { CommentDataMapper, CommentRecord } from './comment.data-mapper';
-import { IdDataMapper, IdRecord } from './id.data-mapper';
-import { TimestampDataMapper, TimestampRecord } from './timestamp.data-mapper';
+import { Approval } from '../../domain/approval/approval.ts';
+import { CommentDataMapper, CommentRecord } from './comment.data-mapper.ts';
+import { IdDataMapper, IdRecord } from './id.data-mapper.ts';
+import { TimestampDataMapper, TimestampRecord } from './timestamp.data-mapper.ts';
 
 export type ApprovalRecord = {
     approverId: IdRecord;

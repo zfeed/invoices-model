@@ -1,6 +1,6 @@
-import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes';
-import { DomainError } from '../../../../../shared/errors/domain/domain.error';
-import { StepTemplate } from '../../step/step-template';
+import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes.ts';
+import { DomainError } from '../../../../../shared/errors/domain/domain.error.ts';
+import { StepTemplate } from '../../step/step-template.ts';
 
 export function checkTemplateNoDuplicateStepOrders(
     steps: StepTemplate[]

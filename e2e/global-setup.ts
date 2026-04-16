@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { AddressInfo } from 'net';
 import { TestProject } from 'vitest/node';
-import { createApp } from '../src/http/create-app';
+import { createApp } from '../src/http/create-app.ts';
 
 export default async function setup(project: TestProject) {
     const app = await createApp();

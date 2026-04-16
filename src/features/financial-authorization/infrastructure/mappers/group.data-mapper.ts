@@ -1,7 +1,7 @@
-import { Group } from '../../domain/groups/group';
-import { ApprovalDataMapper, ApprovalRecord } from './approval.data-mapper';
-import { ApproverDataMapper, ApproverRecord } from './approver.data-mapper';
-import { IdDataMapper, IdRecord } from './id.data-mapper';
+import { Group } from '../../domain/groups/group.ts';
+import { ApprovalDataMapper, ApprovalRecord } from './approval.data-mapper.ts';
+import { ApproverDataMapper, ApproverRecord } from './approver.data-mapper.ts';
+import { IdDataMapper, IdRecord } from './id.data-mapper.ts';
 
 export type GroupRecord = {
     id: IdRecord;

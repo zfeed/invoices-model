@@ -1,5 +1,5 @@
-import { InvoiceStatus } from '../../domain/status/invoice-status';
-import { INVOICE_STATUS } from '../../domain/status/status';
+import { InvoiceStatus } from '../../domain/status/invoice-status.ts';
+import { INVOICE_STATUS } from '../../domain/status/status.ts';
 
 export type InvoiceStatusRecord = {
     value: INVOICE_STATUS;

@@ -1,7 +1,7 @@
-import { testEquatable } from '../../../../../shared/equatable.test-helper';
-import { Numeric } from '../../numeric/numeric';
-import { Currency } from '../currency/currency';
-import { Money } from './money';
+import { testEquatable } from '../../../../../shared/equatable.test-helper.ts';
+import { Numeric } from '../../numeric/numeric.ts';
+import { Currency } from '../currency/currency.ts';
+import { Money } from './money.ts';
 
 describe('Money', () => {
     testEquatable({

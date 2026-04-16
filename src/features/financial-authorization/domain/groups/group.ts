@@ -3,14 +3,14 @@ import {
     DomainError,
     Mappable,
     Result,
-} from '../../../../shared';
-import { Approval } from '../approval/approval';
-import { Approver } from '../approver/approver';
-import { Id } from '../id/id';
-import { checkApproversNotEmpty } from './checks/check-approvers-not-empty';
-import { checkNoDuplicateApprovers } from './checks/check-no-duplicate-approvers';
-import { checkApproverExists } from './checks/check-approver-exists';
-import { checkNoDuplicateApprovals } from './checks/check-no-duplicate-approvals';
+} from '../../../../shared/index.ts';
+import { Approval } from '../approval/approval.ts';
+import { Approver } from '../approver/approver.ts';
+import { Id } from '../id/id.ts';
+import { checkApproversNotEmpty } from './checks/check-approvers-not-empty.ts';
+import { checkNoDuplicateApprovers } from './checks/check-no-duplicate-approvers.ts';
+import { checkApproverExists } from './checks/check-approver-exists.ts';
+import { checkNoDuplicateApprovals } from './checks/check-no-duplicate-approvals.ts';
 
 export class Group implements Mappable<ReturnType<Group['toPlain']>> {
     protected _id: Id;

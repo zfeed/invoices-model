@@ -1,8 +1,8 @@
-import { isISO4217 } from 'validator';
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../../shared';
+import validator from 'validator';
+import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../../shared/index.ts';
 
 export function checkCurrencyCode(value: string): DomainError | null {
-    if (!isISO4217(value)) {
+    if (!validator.isISO4217(value)) {
         return new DomainError({
             message:
                 'Expected a valid ISO 4217 currency code, but received: ' +

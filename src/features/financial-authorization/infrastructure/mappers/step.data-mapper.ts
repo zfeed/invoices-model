@@ -1,7 +1,7 @@
-import { Step } from '../../domain/step/step';
-import { GroupDataMapper, GroupRecord } from './group.data-mapper';
-import { IdDataMapper, IdRecord } from './id.data-mapper';
-import { OrderDataMapper, OrderRecord } from './order.data-mapper';
+import { Step } from '../../domain/step/step.ts';
+import { GroupDataMapper, GroupRecord } from './group.data-mapper.ts';
+import { IdDataMapper, IdRecord } from './id.data-mapper.ts';
+import { OrderDataMapper, OrderRecord } from './order.data-mapper.ts';
 
 export type StepRecord = {
     id: IdRecord;

@@ -1,9 +1,9 @@
-import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application/application-codes';
-import { ApplicationError } from '../../../../../shared/errors/application/application.error';
-import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice';
-import { Id } from '../../../domain/id/id';
-import { Session } from '../../../../../shared/unit-of-work/unit-of-work';
-import { DraftInvoiceDto } from '../../queries/get-draft-invoice/draft-invoice.dto';
+import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application/application-codes.ts';
+import { ApplicationError } from '../../../../../shared/errors/application/application.error.ts';
+import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice.ts';
+import { Id } from '../../../domain/id/id.ts';
+import { Session } from '../../../../../shared/unit-of-work/unit-of-work.ts';
+import { DraftInvoiceDto } from '../../queries/get-draft-invoice/draft-invoice.dto.ts';
 
 export class DraftDraftInvoice {
     constructor(private readonly session: Session) {}

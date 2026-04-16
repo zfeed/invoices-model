@@ -1,6 +1,6 @@
-import { LineItems } from '../../domain/line-items/line-items';
-import { LineItemDataMapper, LineItemRecord } from './line-item.data-mapper';
-import { MoneyDataMapper, MoneyRecord } from './money.data-mapper';
+import { LineItems } from '../../domain/line-items/line-items.ts';
+import { LineItemDataMapper, LineItemRecord } from './line-item.data-mapper.ts';
+import { MoneyDataMapper, MoneyRecord } from './money.data-mapper.ts';
 
 export type LineItemsRecord = {
     items: LineItemRecord[];

@@ -1,8 +1,8 @@
-import { testEquatable } from '../../../../shared/equatable.test-helper';
-import { Country } from '../country/country';
-import { Email } from '../email/email';
-import { Paypal } from '../billing/paypal/paypal';
-import { Recipient, RECIPIENT_TYPE } from './recipient';
+import { testEquatable } from '../../../../shared/equatable.test-helper.ts';
+import { Country } from '../country/country.ts';
+import { Email } from '../email/email.ts';
+import { Paypal } from '../billing/paypal/paypal.ts';
+import { Recipient, RECIPIENT_TYPE } from './recipient.ts';
 
 describe('Recipient', () => {
     testEquatable({

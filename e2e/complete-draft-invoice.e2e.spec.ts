@@ -3,7 +3,7 @@ import {
     COMPLETE_DRAFT_REQUEST,
     expectError,
     INVOICE_SHAPE,
-} from './helpers';
+} from './helpers.ts';
 
 const { post, createDraft } = setupApp();
 

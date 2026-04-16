@@ -1,8 +1,8 @@
-import { DomainError, Equatable, Mappable, Result } from '../../../../shared';
-import { checkRecipientNonEmpty } from './checks/check-recipient-non-empty';
-import { Country } from '../country/country';
-import { Email } from '../email/email';
-import { Paypal } from '../billing/paypal/paypal';
+import { DomainError, Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { checkRecipientNonEmpty } from './checks/check-recipient-non-empty.ts';
+import { Country } from '../country/country.ts';
+import { Email } from '../email/email.ts';
+import { Paypal } from '../billing/paypal/paypal.ts';
 
 export enum RECIPIENT_TYPE {
     INDIVIDUAL = 'INDIVIDUAL',
