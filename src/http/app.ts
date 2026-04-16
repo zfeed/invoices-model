@@ -4,10 +4,11 @@ import { createApp } from './create-app.ts';
 import { registerDependencies } from '../container/register-dependencies.ts';
 import { Logger } from '../shared/logger/logger.ts';
 import { withSpan } from '../shared/tracing/with-span.ts';
+import { config } from '../config.ts';
 
 const tracer = trace.getTracer('application');
 
-const PORT = 3000;
+const PORT = config.http.port;
 
 type App = Awaited<ReturnType<typeof createApp>>;
 

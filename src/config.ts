@@ -2,6 +2,9 @@ import 'dotenv/config';
 import { z } from 'zod';
 
 const schema = z.object({
+    http: z.object({
+        port: z.coerce.number().int().positive(),
+    }),
     database: z.object({
         url: z.string().url(),
     }),
@@ -52,6 +55,9 @@ const schema = z.object({
 export type Config = z.infer<typeof schema>;
 
 export const config: Config = schema.parse({
+    http: {
+        port: process.env.HTTP_PORT,
+    },
     database: {
         url: process.env.DATABASE_URL,
     },
