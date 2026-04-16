@@ -1,4 +1,9 @@
-import { DomainError, Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import {
+    DomainError,
+    Equatable,
+    Mappable,
+    Result,
+} from '../../../../shared/index.ts';
 import { checkRecipientNonEmpty } from './checks/check-recipient-non-empty.ts';
 import { Country } from '../country/country.ts';
 import { Email } from '../email/email.ts';

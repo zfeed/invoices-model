@@ -1,5 +1,10 @@
 import { Decimal } from 'decimal.js';
-import { Comparable, DomainError, Equatable, Result } from '../../../../shared/index.ts';
+import {
+    Comparable,
+    DomainError,
+    Equatable,
+    Result,
+} from '../../../../shared/index.ts';
 import { checkDivisionByZero } from './checks/check-division-by-zero.ts';
 import { checkNumericValue } from './checks/check-numeric-value.ts';
 import { ROUNDING } from './rounding.ts';

@@ -1,5 +1,8 @@
 import validator from 'validator';
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../../shared/index.ts';
+import {
+    DOMAIN_ERROR_CODE,
+    DomainError,
+} from '../../../../../../shared/index.ts';
 
 export function checkUnitQuantity(quantity: string): DomainError | null {
     if (!validator.isInt(quantity)) {

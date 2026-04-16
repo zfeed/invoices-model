@@ -1,4 +1,7 @@
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../../shared/index.ts';
+import {
+    DOMAIN_ERROR_CODE,
+    DomainError,
+} from '../../../../../../shared/index.ts';
 
 export function checkDescriptionNonEmpty(value: string): DomainError | null {
     if (value.trim().length === 0) {

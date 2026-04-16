@@ -8,7 +8,10 @@ import {
     PersistentManager as PersistentManagerInterface,
 } from '../../shared/unit-of-work/unit-of-work.interface.ts';
 import type { Collection } from '../../shared/unit-of-work/collection/collection.ts';
-import type { Kysely, ControlledTransaction } from '../../../database/kysely.ts';
+import type {
+    Kysely,
+    ControlledTransaction,
+} from '../../../database/kysely.ts';
 import { EventOutboxStorage } from '../event-outbox/event-outbox.ts';
 import { AuthflowPolicyStorage } from '../../features/financial-authorization/infrastructure/authflow-policy-storage.ts';
 import { DraftInvoiceStorage } from '../../features/invoices/infrastructure/draft-invoice-storage.ts';

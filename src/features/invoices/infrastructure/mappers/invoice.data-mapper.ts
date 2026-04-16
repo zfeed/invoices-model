@@ -16,9 +16,15 @@ import {
     InvoiceStatusRecord,
 } from './invoice-status.data-mapper.ts';
 import { IssuerDataMapper, IssuerRecord } from './issuer.data-mapper.ts';
-import { LineItemsDataMapper, LineItemsRecord } from './line-items.data-mapper.ts';
+import {
+    LineItemsDataMapper,
+    LineItemsRecord,
+} from './line-items.data-mapper.ts';
 import { MoneyDataMapper, MoneyRecord } from './money.data-mapper.ts';
-import { RecipientDataMapper, RecipientRecord } from './recipient.data-mapper.ts';
+import {
+    RecipientDataMapper,
+    RecipientRecord,
+} from './recipient.data-mapper.ts';
 import { VatRateDataMapper, VatRateRecord } from './vat-rate.data-mapper.ts';
 
 export type InvoiceRecord = {

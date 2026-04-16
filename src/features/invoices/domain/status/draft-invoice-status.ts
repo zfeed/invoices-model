@@ -1,4 +1,8 @@
-import { DOMAIN_ERROR_CODE, DomainError, Result } from '../../../../shared/index.ts';
+import {
+    DOMAIN_ERROR_CODE,
+    DomainError,
+    Result,
+} from '../../../../shared/index.ts';
 import { DRAFT_INVOICE_STATUS, Status } from './status.ts';
 
 export class DraftInvoiceStatus extends Status<DRAFT_INVOICE_STATUS> {

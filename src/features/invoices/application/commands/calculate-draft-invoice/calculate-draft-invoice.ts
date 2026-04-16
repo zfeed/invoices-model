@@ -4,7 +4,10 @@ import { Id } from '../../../domain/id/id.ts';
 import { Issuer, ISSUER_TYPE } from '../../../domain/issuer/issuer.ts';
 import { LineItem } from '../../../domain/line-item/line-item.ts';
 import { Paypal } from '../../../domain/billing/paypal/paypal.ts';
-import { Recipient, RECIPIENT_TYPE } from '../../../domain/recipient/recipient.ts';
+import {
+    Recipient,
+    RECIPIENT_TYPE,
+} from '../../../domain/recipient/recipient.ts';
 import { VatRate } from '../../../domain/vat-rate/vat-rate.ts';
 import { DraftInvoiceDto } from '../../queries/get-draft-invoice/draft-invoice.dto.ts';
 

@@ -1,5 +1,8 @@
 import validator from 'validator';
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../../shared/index.ts';
+import {
+    DOMAIN_ERROR_CODE,
+    DomainError,
+} from '../../../../../../shared/index.ts';
 
 export function checkCurrencyCode(value: string): DomainError | null {
     if (!validator.isISO4217(value)) {

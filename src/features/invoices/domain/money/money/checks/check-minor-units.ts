@@ -1,5 +1,8 @@
 import validator from 'validator';
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../../shared/index.ts';
+import {
+    DOMAIN_ERROR_CODE,
+    DomainError,
+} from '../../../../../../shared/index.ts';
 import { Numeric } from '../../../numeric/numeric.ts';
 
 const ZERO = Numeric.create('0').unwrap();

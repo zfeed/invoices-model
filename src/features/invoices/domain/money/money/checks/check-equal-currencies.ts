@@ -1,4 +1,7 @@
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../../shared/index.ts';
+import {
+    DOMAIN_ERROR_CODE,
+    DomainError,
+} from '../../../../../../shared/index.ts';
 import { Currency } from '../../currency/currency.ts';
 
 export function checkEqualCurrencies(
