@@ -1,3 +1,4 @@
-import pino from 'pino';
+import pino, { LevelWithSilent } from 'pino';
 
-export const createPino = () => pino(pino.destination('/dev/null'));
+export const createPino = (level: LevelWithSilent) =>
+    pino({ level }, pino.destination('/dev/null'));

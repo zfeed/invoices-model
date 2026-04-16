@@ -15,11 +15,12 @@ import { Logger } from '../shared/logger/logger';
 import { createLogger } from './dependencies/logger';
 import { createPino } from './dependencies/pino';
 import { pino as Pino } from 'pino';
+import { config } from '../config';
 
 export const registerDependencies = async (): Promise<Container> => {
     const container = new Container();
 
-    const pino = createPino();
+    const pino = createPino(config.logger.level);
     const logger = createLogger({ pino });
     const eventOutboxStorage = createEventOutboxStorage();
     const domainEventsBus = createKafkaDomainEventsBus(

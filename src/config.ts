@@ -31,7 +31,9 @@ const schema = z.object({
         topicPrefix: z.string().min(1),
     }),
     logger: z.object({
-        level: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+        level: z
+            .enum(['trace', 'debug', 'info', 'warn', 'error'])
+            .default('info'),
     }),
     otel: z.object({
         logsEndpoint: z.string().url(),
