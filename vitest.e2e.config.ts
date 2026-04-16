@@ -8,10 +8,6 @@ export default defineConfig({
         setupFiles: ['dotenv/config'],
         globalSetup: ['test/global-setup.ts', 'e2e/global-setup.ts'],
         fileParallelism: false,
-        coverage: {
-            enabled: true,
-            reporter: ['text', 'html'],
-        },
         typecheck: {
             enabled: true,
             checker: 'tsc',

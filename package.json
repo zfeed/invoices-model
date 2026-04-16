@@ -6,7 +6,7 @@
     "scripts": {
         "start": "tsc --noEmit && node --import tsx src/http/app.ts",
         "start:debug": "node --inspect --import tsx src/http/app.ts",
-        "test": "vitest run --typecheck",
+        "test": "vitest run",
         "test:watch": "vitest",
         "test:ui": "vitest --ui",
         "coverage": "vitest run --coverage",
