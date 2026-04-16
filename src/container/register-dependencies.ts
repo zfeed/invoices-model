@@ -20,7 +20,7 @@ import { config } from '../config.ts';
 export const registerDependencies = async (): Promise<Container> => {
     const container = new Container();
 
-    const pino = createPino(config.logger.level);
+    const pino = createPino(config.logger);
     const logger = createLogger({ pino });
     const eventOutboxStorage = createEventOutboxStorage();
     const domainEventsBus = createKafkaDomainEventsBus(

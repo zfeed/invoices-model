@@ -34,6 +34,10 @@ const schema = z.object({
         topicPrefix: z.string().min(1),
     }),
     logger: z.object({
+        stdout: z
+            .enum(['true', 'false'])
+            .default('false')
+            .transform((v) => v === 'true'),
         level: z
             .enum(['trace', 'debug', 'info', 'warn', 'error'])
             .default('info'),
@@ -84,6 +88,7 @@ export const config: Config = schema.parse({
         topicPrefix: process.env.KAFKA_TOPIC_PREFIX,
     },
     logger: {
+        stdout: process.env.LOG_STDOUT,
         level: process.env.LOG_LEVEL,
     },
     otel: {
