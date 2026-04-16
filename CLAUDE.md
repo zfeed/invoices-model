@@ -7,8 +7,8 @@ TypeScript DDD codebase with two bounded contexts: **invoices** (OOP class-based
 ## Testing
 
 - This project uses **Vitest**.
-- Run tests: `npx vitest run`
-- Run specific tests: `npx vitest run <pattern>`
+- Run tests: `npm test`
+- Run specific tests: `npm test -- <pattern>`
 - When fixing failing tests, NEVER modify production/source code unless explicitly asked. Fix the tests to match the current source contracts first. Only modify source code if a genuine bug is found.
 - Test files are co-located with source using `.spec.ts` suffix.
 - No call count assertions (e.g. `toHaveBeenCalledTimes`). No `expect(x).toBeInstanceOf(Error)` — use Result type checks instead.
