@@ -86,7 +86,10 @@ export class TemporalWorker {
             activities: this.activities,
             interceptors: {
                 workflowModules: [
-                    require.resolve('./features/invoice-paypal-transaction/workflow/workflow-interceptors'),
+                    path.resolve(
+                        __dirname,
+                        'features/invoice-paypal-transaction/workflow/workflow-interceptors.ts'
+                    ),
                 ],
                 activity: [
                     (ctx) => ({
