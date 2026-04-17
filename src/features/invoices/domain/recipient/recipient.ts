@@ -1,5 +1,5 @@
 import {
-    DomainError,
+    AppKnownError,
     Equatable,
     Mappable,
     Result,
@@ -112,7 +112,7 @@ export class Recipient
         email: string;
         taxResidenceCountry: string;
         billing: Paypal;
-    }): Result<DomainError, Recipient> {
+    }): Result<AppKnownError, Recipient> {
         const fieldError =
             checkRecipientNonEmpty('name', name) ??
             checkRecipientNonEmpty('address', address) ??

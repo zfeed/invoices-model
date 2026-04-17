@@ -1,13 +1,16 @@
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared/index.ts';
+import {
+    KNOWN_ERROR_CODE,
+    AppKnownError,
+} from '../../../../../shared/index.ts';
 
 export function checkRecipientNonEmpty(
     field: string,
     value: string
-): DomainError | null {
+): AppKnownError | null {
     if (value.trim().length === 0) {
-        return new DomainError({
+        return new AppKnownError({
             message: `Expected a non-empty value for ${field}, but received an empty string`,
-            code: DOMAIN_ERROR_CODE.RECIPIENT_EMPTY_FIELD,
+            code: KNOWN_ERROR_CODE.RECIPIENT_EMPTY_FIELD,
         });
     }
 

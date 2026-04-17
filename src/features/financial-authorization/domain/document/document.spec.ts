@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../../shared/errors/known-error-codes.ts';
 import { Action } from '../action/action.ts';
 import { Approval } from '../approval/approval.ts';
 import { Approver } from '../approver/approver.ts';
@@ -124,7 +124,7 @@ describe('createDocument', () => {
         const error = result.unwrapError();
         expect(error.message).toBe('Duplicate authflow actions found');
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_ACTION_DUPLICATE
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_ACTION_DUPLICATE
         );
     });
 
@@ -145,7 +145,7 @@ describe('createDocument', () => {
         const error = result.unwrapError();
         expect(error.message).toBe('Duplicate authflow actions found');
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_ACTION_DUPLICATE
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_ACTION_DUPLICATE
         );
     });
 
@@ -167,7 +167,7 @@ describe('createDocument', () => {
         const error = result.unwrapError();
         expect(error.message).toBe('Duplicate authflow actions found');
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_ACTION_DUPLICATE
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_ACTION_DUPLICATE
         );
     });
 
@@ -466,7 +466,7 @@ describe('approveDocument', () => {
             'Authflow with action non-existent not found'
         );
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_NOT_FOUND
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_NOT_FOUND
         );
     });
 
@@ -485,7 +485,7 @@ describe('approveDocument', () => {
         const error = result.unwrapError();
         expect(error.message).toBe('No pending steps found');
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NO_PENDING_STEPS
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NO_PENDING_STEPS
         );
     });
 
@@ -503,7 +503,7 @@ describe('approveDocument', () => {
         expect(result.isError()).toBe(true);
         const error = result.unwrapError();
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND
         );
     });
 

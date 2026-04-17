@@ -1,6 +1,6 @@
 import {
-    DOMAIN_ERROR_CODE,
-    DomainError,
+    KNOWN_ERROR_CODE,
+    AppKnownError,
     Mappable,
     Result,
 } from '../../../../shared/index.ts';
@@ -64,11 +64,11 @@ export class Authflow implements Mappable<ReturnType<Authflow['toPlain']>> {
         );
     }
 
-    apply(approval: Approval): Result<DomainError, Authflow> {
+    apply(approval: Approval): Result<AppKnownError, Authflow> {
         if (!this._currentStep) {
             return Result.error(
-                new DomainError({
-                    code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NO_PENDING_STEPS,
+                new AppKnownError({
+                    code: KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NO_PENDING_STEPS,
                     message: 'No pending steps found',
                 })
             );

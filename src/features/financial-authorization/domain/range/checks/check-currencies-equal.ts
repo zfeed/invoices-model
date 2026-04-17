@@ -1,15 +1,15 @@
-import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes.ts';
-import { DomainError } from '../../../../../shared/errors/domain/domain.error.ts';
+import { KNOWN_ERROR_CODE } from '../../../../../shared/errors/known-error-codes.ts';
+import { AppKnownError } from '../../../../../shared/errors/app-known-error.ts';
 import { Money } from '../../money/money.ts';
 
 export function checkCurrenciesEqual(
     from: Money,
     to: Money
-): DomainError | null {
+): AppKnownError | null {
     if (from.currency !== to.currency) {
-        return new DomainError({
+        return new AppKnownError({
             message: 'Range currencies must be equal',
-            code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_RANGE_CURRENCIES_NOT_EQUAL,
+            code: KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_RANGE_CURRENCIES_NOT_EQUAL,
         });
     }
 

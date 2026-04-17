@@ -7,7 +7,7 @@ import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice
 import { ArchiveDraftInvoice } from '../archive-draft-invoice/archive-draft-invoice.ts';
 import { DraftDraftInvoice } from './draft-draft-invoice.ts';
 import { DraftInvoiceDraftedEvent } from '../../../domain/draft-invoice/events/draft-invoice-drafted.event.ts';
-import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application/application-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../../../shared/errors/known-error-codes.ts';
 
 describe('DraftDraftInvoice', () => {
     let session: Session;
@@ -34,7 +34,7 @@ describe('DraftDraftInvoice', () => {
         await expect(
             draftCommand.execute('non-existing-id')
         ).rejects.toMatchObject({
-            code: APPLICATION_ERROR_CODE.ITEM_NOT_FOUND,
+            code: KNOWN_ERROR_CODE.ITEM_NOT_FOUND,
         });
     });
 

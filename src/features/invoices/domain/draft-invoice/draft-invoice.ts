@@ -1,6 +1,6 @@
 import {
-    DOMAIN_ERROR_CODE,
-    DomainError,
+    KNOWN_ERROR_CODE,
+    AppKnownError,
     Mappable,
     Result,
 } from '../../../../shared/index.ts';
@@ -117,17 +117,17 @@ export class DraftInvoice
         return this._recipient;
     }
 
-    protected _guardDraftStatus(): DomainError | null {
+    protected _guardDraftStatus(): AppKnownError | null {
         if (!this._status.equals(DraftInvoiceStatus.draft())) {
-            return new DomainError({
+            return new AppKnownError({
                 message: `Cannot modify draft invoice in status ${this._status.toString()}`,
-                code: DOMAIN_ERROR_CODE.DRAFT_INVOICE_INVALID_STATUS_TRANSITION,
+                code: KNOWN_ERROR_CODE.DRAFT_INVOICE_INVALID_STATUS_TRANSITION,
             });
         }
         return null;
     }
 
-    public toInvoice(): Result<DomainError, Invoice> {
+    public toInvoice(): Result<AppKnownError, Invoice> {
         const guardError = this._guardDraftStatus();
         if (guardError) {
             return Result.error(guardError);
@@ -165,12 +165,12 @@ export class DraftInvoice
         return result;
     }
 
-    public archive(): Result<DomainError, void> {
+    public archive(): Result<AppKnownError, void> {
         if (!this._status.equals(DraftInvoiceStatus.draft())) {
             return Result.error(
-                new DomainError({
+                new AppKnownError({
                     message: `Cannot archive draft invoice in status ${this._status.toString()}`,
-                    code: DOMAIN_ERROR_CODE.DRAFT_INVOICE_INVALID_STATUS_TRANSITION,
+                    code: KNOWN_ERROR_CODE.DRAFT_INVOICE_INVALID_STATUS_TRANSITION,
                 })
             );
         }
@@ -182,12 +182,12 @@ export class DraftInvoice
         return Result.ok(undefined);
     }
 
-    public draft(): Result<DomainError, void> {
+    public draft(): Result<AppKnownError, void> {
         if (!this._status.equals(DraftInvoiceStatus.archived())) {
             return Result.error(
-                new DomainError({
+                new AppKnownError({
                     message: `Cannot move to draft from status ${this._status.toString()}`,
-                    code: DOMAIN_ERROR_CODE.DRAFT_INVOICE_INVALID_STATUS_TRANSITION,
+                    code: KNOWN_ERROR_CODE.DRAFT_INVOICE_INVALID_STATUS_TRANSITION,
                 })
             );
         }
@@ -249,7 +249,7 @@ export class DraftInvoice
         return Result.ok(undefined);
     }
 
-    public applyVat(vatRate: VatRate): Result<DomainError, void> {
+    public applyVat(vatRate: VatRate): Result<AppKnownError, void> {
         const guardError = this._guardDraftStatus();
         if (guardError) {
             return Result.error(guardError);
@@ -267,7 +267,7 @@ export class DraftInvoice
         return Result.ok(undefined);
     }
 
-    public addIssuer(issuer: Issuer): Result<DomainError, void> {
+    public addIssuer(issuer: Issuer): Result<AppKnownError, void> {
         const guardError = this._guardDraftStatus();
         if (guardError) {
             return Result.error(guardError);
@@ -279,7 +279,7 @@ export class DraftInvoice
         return Result.ok(undefined);
     }
 
-    public addRecipient(recipient: Recipient): Result<DomainError, void> {
+    public addRecipient(recipient: Recipient): Result<AppKnownError, void> {
         const guardError = this._guardDraftStatus();
         if (guardError) {
             return Result.error(guardError);
@@ -291,7 +291,7 @@ export class DraftInvoice
         return Result.ok(undefined);
     }
 
-    public addDueDate(dueDate: CalendarDate): Result<DomainError, void> {
+    public addDueDate(dueDate: CalendarDate): Result<AppKnownError, void> {
         const guardError = this._guardDraftStatus();
         if (guardError) {
             return Result.error(guardError);
@@ -314,7 +314,7 @@ export class DraftInvoice
         return Result.ok(undefined);
     }
 
-    public addIssueDate(issueDate: CalendarDate): Result<DomainError, void> {
+    public addIssueDate(issueDate: CalendarDate): Result<AppKnownError, void> {
         const guardError = this._guardDraftStatus();
         if (guardError) {
             return Result.error(guardError);

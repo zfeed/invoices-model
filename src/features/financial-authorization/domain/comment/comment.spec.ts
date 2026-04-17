@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../../shared/errors/known-error-codes.ts';
 import { Comment } from './comment.ts';
 
 describe('Comment', () => {
@@ -19,7 +19,7 @@ describe('Comment', () => {
             const result = Comment.create('');
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
-                DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_COMMENT_BLANK
+                KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_COMMENT_BLANK
             );
         });
 
@@ -27,7 +27,7 @@ describe('Comment', () => {
             const result = Comment.create('   ');
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
-                DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_COMMENT_BLANK
+                KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_COMMENT_BLANK
             );
         });
     });

@@ -1,6 +1,6 @@
 import {
-    DOMAIN_ERROR_CODE,
-    DomainError,
+    KNOWN_ERROR_CODE,
+    AppKnownError,
     Equatable,
     Result,
 } from '../../../../shared/index.ts';
@@ -29,13 +29,13 @@ export class Status<T extends string> implements Equatable<Status<T>> {
     protected static parseEnum<E extends Record<string, string>>(
         enumObj: E,
         value: string,
-        errorCode: DOMAIN_ERROR_CODE
-    ): Result<DomainError, E[keyof E]> {
+        errorCode: KNOWN_ERROR_CODE
+    ): Result<AppKnownError, E[keyof E]> {
         const status = Object.values(enumObj).find((s) => s === value);
 
         if (!status) {
             return Result.error(
-                new DomainError({
+                new AppKnownError({
                     message: `Invalid status: ${value}`,
                     code: errorCode,
                 })

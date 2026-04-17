@@ -1,23 +1,23 @@
 import validator from 'validator';
-import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes.ts';
-import { DomainError } from '../../../../../shared/errors/domain/domain.error.ts';
+import { KNOWN_ERROR_CODE } from '../../../../../shared/errors/known-error-codes.ts';
+import { AppKnownError } from '../../../../../shared/errors/app-known-error.ts';
 
-export function checkAmountIsInteger(amount: string): DomainError | null {
+export function checkAmountIsInteger(amount: string): AppKnownError | null {
     if (!validator.isInt(amount, { allow_leading_zeroes: false })) {
-        return new DomainError({
+        return new AppKnownError({
             message: `Invalid minor units. Expected an integer, received: ${amount}`,
-            code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_MONEY_AMOUNT_NOT_INTEGER,
+            code: KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_MONEY_AMOUNT_NOT_INTEGER,
         });
     }
 
     return null;
 }
 
-export function checkAmountIsNonNegative(amount: string): DomainError | null {
+export function checkAmountIsNonNegative(amount: string): AppKnownError | null {
     if (Number(amount) < 0) {
-        return new DomainError({
+        return new AppKnownError({
             message: `Invalid minor units. Expected a non-negative integer, received: ${amount}`,
-            code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_MONEY_AMOUNT_NOT_GTE_ZERO,
+            code: KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_MONEY_AMOUNT_NOT_GTE_ZERO,
         });
     }
 

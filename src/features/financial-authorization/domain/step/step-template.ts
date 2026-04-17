@@ -1,4 +1,4 @@
-import { DomainError, Mappable, Result } from '../../../../shared/index.ts';
+import { AppKnownError, Mappable, Result } from '../../../../shared/index.ts';
 import { GroupTemplate } from '../groups/group-template.ts';
 import { Id } from '../id/id.ts';
 import { Order } from '../order/order.ts';
@@ -35,9 +35,9 @@ export class StepTemplate implements Mappable<
         );
     }
 
-    toStep(): Result<DomainError, Step> {
+    toStep(): Result<AppKnownError, Step> {
         const groupResults = this._groups.reduce<
-            Result<DomainError, import('../groups/group.ts').Group[]>
+            Result<AppKnownError, import('../groups/group.ts').Group[]>
         >(
             (acc, template) =>
                 acc.flatMap((groups) =>

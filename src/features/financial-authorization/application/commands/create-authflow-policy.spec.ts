@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../../shared/errors/known-error-codes.ts';
 import { InMemoryDomainEventsBus } from '../../../../infrastructure/domain-events/in-memory-domain-events-bus.ts';
 import { Session } from '../../../../shared/unit-of-work/unit-of-work.ts';
 import { PersistentManager } from '../../../../infrastructure/persistent-manager/pg-persistent-manager.ts';
@@ -122,7 +122,7 @@ describe('createAuthflowPolicyCommand', () => {
                 templates: [template('0', '5000'), template('3000', '10000')],
             })
         ).rejects.toMatchObject({
-            code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_POLICY_RANGES_OVERLAP,
+            code: KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_POLICY_RANGES_OVERLAP,
         });
     });
 

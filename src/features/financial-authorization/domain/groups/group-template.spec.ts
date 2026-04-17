@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../../shared/errors/known-error-codes.ts';
 import { Approver } from '../approver/approver.ts';
 import { Email } from '../email/email.ts';
 import { Id } from '../id/id.ts';
@@ -41,7 +41,7 @@ describe('GroupTemplate.create', () => {
         const error = result.unwrapError();
         expect(error.message).toBe('Approvers array cannot be empty');
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVERS_EMPTY
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVERS_EMPTY
         );
     });
 
@@ -61,7 +61,7 @@ describe('GroupTemplate.create', () => {
         const error = result.unwrapError();
         expect(error.message).toBe('Duplicate approver IDs found');
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVERS_DUPLICATE
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVERS_DUPLICATE
         );
     });
 

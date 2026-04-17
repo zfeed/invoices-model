@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../../shared/errors/known-error-codes.ts';
 import { ReferenceId } from './reference-id.ts';
 
 describe('ReferenceId', () => {
@@ -13,7 +13,7 @@ describe('ReferenceId', () => {
             const result = ReferenceId.create('');
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
-                DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_REFERENCE_ID_BLANK
+                KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_REFERENCE_ID_BLANK
             );
         });
 
@@ -21,7 +21,7 @@ describe('ReferenceId', () => {
             const result = ReferenceId.create('   ');
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
-                DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_REFERENCE_ID_BLANK
+                KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_REFERENCE_ID_BLANK
             );
         });
     });

@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../../shared/errors/known-error-codes.ts';
 import { Name } from './name.ts';
 
 describe('Name', () => {
@@ -13,7 +13,7 @@ describe('Name', () => {
             const result = Name.create('');
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
-                DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NAME_BLANK
+                KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NAME_BLANK
             );
         });
 
@@ -21,7 +21,7 @@ describe('Name', () => {
             const result = Name.create('   ');
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
-                DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NAME_BLANK
+                KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NAME_BLANK
             );
         });
     });

@@ -1,6 +1,6 @@
 import {
-    DOMAIN_ERROR_CODE,
-    DomainError,
+    KNOWN_ERROR_CODE,
+    AppKnownError,
     Mappable,
     Result,
 } from '../../../../shared/index.ts';
@@ -92,11 +92,11 @@ export class Group implements Mappable<ReturnType<Group['toPlain']>> {
         );
     }
 
-    apply(approval: Approval): Result<DomainError, Group> {
+    apply(approval: Approval): Result<AppKnownError, Group> {
         if (this.isApproved) {
             return Result.error(
-                new DomainError({
-                    code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND,
+                new AppKnownError({
+                    code: KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND,
                     message: `No eligible group found for approver ${approval.approverId.toPlain()}`,
                 })
             );
@@ -104,8 +104,8 @@ export class Group implements Mappable<ReturnType<Group['toPlain']>> {
 
         if (!this._approvers.some((a) => a.id.equals(approval.approverId))) {
             return Result.error(
-                new DomainError({
-                    code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND,
+                new AppKnownError({
+                    code: KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND,
                     message: `No eligible group found for approver ${approval.approverId.toPlain()}`,
                 })
             );

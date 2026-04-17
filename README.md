@@ -103,15 +103,14 @@ Document
 
 ## Shared Building Blocks
 
-| Component             | Description                                  |
-| --------------------- | -------------------------------------------- |
-| **Result**            | Functional error handling (Ok/Error pattern) |
-| **DomainError**       | Base class for domain-level errors           |
-| **ApplicationError**  | Base class for application-level errors      |
-| **DomainEvent**       | Base class for domain events                 |
-| **PublishableEvents** | Interface for entities that emit events      |
-| **Equatable**         | Interface for value object equality          |
-| **Comparable**        | Interface for value object comparison        |
+| Component             | Description                                        |
+| --------------------- | -------------------------------------------------- |
+| **Result**            | Functional error handling (Ok/Error pattern)       |
+| **AppKnownError**     | Base class for known (domain + application) errors |
+| **DomainEvent**       | Base class for domain events                       |
+| **PublishableEvents** | Interface for entities that emit events            |
+| **Equatable**         | Interface for value object equality                |
+| **Comparable**        | Interface for value object comparison              |
 
 ---
 

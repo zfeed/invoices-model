@@ -7,8 +7,7 @@ import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice
 import { CompleteDraftInvoice } from './complete-draft-invoice.ts';
 import { DraftInvoiceFinishedEvent } from '../../../domain/draft-invoice/events/draft-invoice-finished.event.ts';
 import { InvoiceIssuedEvent } from '../../../domain/invoice/events/invoice-issued.event.ts';
-import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application/application-codes.ts';
-import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../../../shared/errors/known-error-codes.ts';
 import { Invoice } from '../../../domain/invoice/invoice.ts';
 import { Id } from '../../../domain/id/id.ts';
 import { ISSUER_TYPE } from '../../../domain/issuer/issuer.ts';
@@ -69,7 +68,7 @@ describe('CompleteDraftInvoice', () => {
         await expect(
             completeCommand.execute('non-existing-id')
         ).rejects.toMatchObject({
-            code: APPLICATION_ERROR_CODE.ITEM_NOT_FOUND,
+            code: KNOWN_ERROR_CODE.ITEM_NOT_FOUND,
         });
     });
 
@@ -78,7 +77,7 @@ describe('CompleteDraftInvoice', () => {
 
         await expect(completeCommand.execute(created.id)).rejects.toMatchObject(
             {
-                code: DOMAIN_ERROR_CODE.DRAFT_INVOICE_NOT_FULLY_COMPLETE,
+                code: KNOWN_ERROR_CODE.DRAFT_INVOICE_NOT_FULLY_COMPLETE,
             }
         );
     });

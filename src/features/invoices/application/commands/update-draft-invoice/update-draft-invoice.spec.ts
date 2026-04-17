@@ -6,7 +6,7 @@ import { kysely } from '../../../../../../database/kysely.ts';
 import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice.ts';
 import { UpdateDraftInvoice } from './update-draft-invoice.ts';
 import { DraftInvoiceUpdatedEvent } from '../../../domain/draft-invoice/events/draft-invoice-updated.event.ts';
-import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application/application-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../../../shared/errors/known-error-codes.ts';
 import { ISSUER_TYPE } from '../../../domain/issuer/issuer.ts';
 import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient.ts';
 
@@ -33,7 +33,7 @@ describe('UpdateDraftInvoice', () => {
         await expect(
             updateCommand.execute('non-existing-id', {})
         ).rejects.toMatchObject({
-            code: APPLICATION_ERROR_CODE.ITEM_NOT_FOUND,
+            code: KNOWN_ERROR_CODE.ITEM_NOT_FOUND,
         });
     });
 

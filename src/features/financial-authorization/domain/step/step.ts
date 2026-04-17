@@ -1,6 +1,6 @@
 import {
-    DOMAIN_ERROR_CODE,
-    DomainError,
+    KNOWN_ERROR_CODE,
+    AppKnownError,
     Mappable,
     Result,
 } from '../../../../shared/index.ts';
@@ -54,11 +54,11 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
         );
     }
 
-    apply(approval: Approval): Result<DomainError, Step> {
+    apply(approval: Approval): Result<AppKnownError, Step> {
         if (this._isApproved) {
             return Result.error(
-                new DomainError({
-                    code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NO_PENDING_STEPS,
+                new AppKnownError({
+                    code: KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NO_PENDING_STEPS,
                     message: 'No pending steps found',
                 })
             );
@@ -70,8 +70,8 @@ export class Step implements Mappable<ReturnType<Step['toPlain']>> {
 
         if (groupIndex === -1) {
             return Result.error(
-                new DomainError({
-                    code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND,
+                new AppKnownError({
+                    code: KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND,
                     message: `No eligible group found for approver ${approval.approverId.toPlain()}`,
                 })
             );

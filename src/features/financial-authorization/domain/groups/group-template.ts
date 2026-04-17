@@ -1,4 +1,4 @@
-import { DomainError, Mappable, Result } from '../../../../shared/index.ts';
+import { AppKnownError, Mappable, Result } from '../../../../shared/index.ts';
 import { Approver } from '../approver/approver.ts';
 import { Id } from '../id/id.ts';
 import { Group } from './group.ts';
@@ -56,7 +56,7 @@ export class GroupTemplate implements Mappable<
         );
     }
 
-    toGroup(): Result<DomainError, Group> {
+    toGroup(): Result<AppKnownError, Group> {
         return Group.create({
             requiredApprovals: this._requiredApprovals,
             approvers: this._approvers,

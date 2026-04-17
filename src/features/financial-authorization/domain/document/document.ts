@@ -1,6 +1,6 @@
 import {
-    DOMAIN_ERROR_CODE,
-    DomainError,
+    KNOWN_ERROR_CODE,
+    AppKnownError,
     Mappable,
     Result,
 } from '../../../../shared/index.ts';
@@ -81,13 +81,16 @@ export class FinancialDocument
         return Result.ok(doc);
     }
 
-    apply(action: Action, approval: Approval): Result<DomainError, undefined> {
+    apply(
+        action: Action,
+        approval: Approval
+    ): Result<AppKnownError, undefined> {
         const authflow = this._authflows.find((a) => a.action.equals(action));
 
         if (!authflow) {
             return Result.error(
-                new DomainError({
-                    code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_NOT_FOUND,
+                new AppKnownError({
+                    code: KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_NOT_FOUND,
                     message: `Authflow with action ${action.toPlain()} not found`,
                 })
             );

@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../../shared/errors/known-error-codes.ts';
 import { Approval } from '../approval/approval.ts';
 import { Approver } from '../approver/approver.ts';
 import { Email } from '../email/email.ts';
@@ -56,7 +56,7 @@ describe('Group.create', () => {
         const error = result.unwrapError();
         expect(error.message).toBe('Approvers array cannot be empty');
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVERS_EMPTY
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVERS_EMPTY
         );
     });
 
@@ -79,7 +79,7 @@ describe('Group.create', () => {
         const error = result.unwrapError();
         expect(error.message).toBe('Duplicate approver IDs found');
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVERS_DUPLICATE
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVERS_DUPLICATE
         );
     });
 
@@ -102,7 +102,7 @@ describe('Group.create', () => {
         const error = result.unwrapError();
         expect(error.message).toBe('Duplicate approver IDs found');
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVERS_DUPLICATE
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVERS_DUPLICATE
         );
     });
 
@@ -151,7 +151,7 @@ describe('Group.create', () => {
         const error = result.unwrapError();
         expect(error.message).toBe('Duplicate approver IDs found in approvals');
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVALS_DUPLICATE
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVALS_DUPLICATE
         );
     });
 
@@ -174,7 +174,7 @@ describe('Group.create', () => {
         const error = result.unwrapError();
         expect(error.message).toBe('Duplicate approver IDs found in approvals');
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVALS_DUPLICATE
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVALS_DUPLICATE
         );
     });
 
@@ -201,7 +201,7 @@ describe('Group.create', () => {
             'Approval references non-existent approver ID: 3'
         );
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVER_NOT_FOUND
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVER_NOT_FOUND
         );
     });
 
@@ -225,7 +225,7 @@ describe('Group.create', () => {
             'Approval references non-existent approver ID: 99'
         );
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVER_NOT_FOUND
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVER_NOT_FOUND
         );
     });
 
@@ -264,7 +264,7 @@ describe('Group.create', () => {
         const error = result.unwrapError();
         expect(error.message).toBe('Approvers array cannot be empty');
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVERS_EMPTY
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVERS_EMPTY
         );
     });
 
@@ -288,7 +288,7 @@ describe('Group.create', () => {
             'Approval references non-existent approver ID: 2'
         );
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVER_NOT_FOUND
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVER_NOT_FOUND
         );
     });
 
@@ -313,7 +313,7 @@ describe('Group.create', () => {
             'Approval references non-existent approver ID: 2'
         );
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVER_NOT_FOUND
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVER_NOT_FOUND
         );
     });
 
@@ -382,7 +382,7 @@ describe('Group.create', () => {
             'Approval references non-existent approver ID: ABC123'
         );
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVER_NOT_FOUND
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVER_NOT_FOUND
         );
     });
 });
@@ -444,7 +444,7 @@ describe('Group.apply', () => {
             `No eligible group found for approver ${approver2.id.toPlain()}`
         );
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND
         );
     });
 
@@ -464,7 +464,7 @@ describe('Group.apply', () => {
             `No eligible group found for approver ${approver3.id.toPlain()}`
         );
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND
         );
     });
 
@@ -489,7 +489,7 @@ describe('Group.apply', () => {
             `No eligible group found for approver ${approver1.id.toPlain()}`
         );
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND
         );
     });
 

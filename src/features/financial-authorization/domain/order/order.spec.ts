@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../../shared/errors/known-error-codes.ts';
 import { Order } from './order.ts';
 
 describe('Order', () => {
@@ -19,7 +19,7 @@ describe('Order', () => {
             const result = Order.create(-1);
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
-                DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_STEP_ORDER_NEGATIVE
+                KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_STEP_ORDER_NEGATIVE
             );
         });
     });

@@ -1,6 +1,5 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { DomainError } from '../shared/errors/domain/domain.error.ts';
-import { ApplicationError } from '../shared/errors/application/application.error.ts';
+import { AppKnownError } from '../shared/errors/app-known-error.ts';
 import { ValidationError } from './validation.ts';
 
 const isFastifyError = (err: unknown): err is Error & { code: string } =>
@@ -27,7 +26,7 @@ export const errorHandler = (
             },
         });
     }
-    if (error instanceof DomainError || error instanceof ApplicationError) {
+    if (error instanceof AppKnownError) {
         return reply.code(422).send({
             error: { message: error.message, code: error.code },
         });

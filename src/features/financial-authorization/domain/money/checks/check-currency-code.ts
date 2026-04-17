@@ -1,12 +1,12 @@
 import validator from 'validator';
-import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes.ts';
-import { DomainError } from '../../../../../shared/errors/domain/domain.error.ts';
+import { KNOWN_ERROR_CODE } from '../../../../../shared/errors/known-error-codes.ts';
+import { AppKnownError } from '../../../../../shared/errors/app-known-error.ts';
 
-export function checkCurrencyCode(currency: string): DomainError | null {
+export function checkCurrencyCode(currency: string): AppKnownError | null {
     if (!validator.isISO4217(currency)) {
-        return new DomainError({
+        return new AppKnownError({
             message: `Expected a valid ISO 4217 currency code, but received: ${currency}`,
-            code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_MONEY_CURRENCY_NOT_ISO_4217,
+            code: KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_MONEY_CURRENCY_NOT_ISO_4217,
         });
     }
 

@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../../shared/errors/known-error-codes.ts';
 import { Approval } from '../approval/approval.ts';
 import { Approver } from '../approver/approver.ts';
 import { Email } from '../email/email.ts';
@@ -174,7 +174,7 @@ describe('createAuthflow', () => {
         const error = result.unwrapError();
         expect(error.message).toBe('Duplicate step orders found');
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_STEP_ORDER_DUPLICATE
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_STEP_ORDER_DUPLICATE
         );
     });
 
@@ -195,7 +195,7 @@ describe('createAuthflow', () => {
         const error = result.unwrapError();
         expect(error.message).toBe('Duplicate step orders found');
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_STEP_ORDER_DUPLICATE
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_STEP_ORDER_DUPLICATE
         );
     });
 
@@ -216,7 +216,7 @@ describe('createAuthflow', () => {
         const error = result.unwrapError();
         expect(error.message).toBe('Duplicate step orders found');
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_STEP_ORDER_DUPLICATE
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_STEP_ORDER_DUPLICATE
         );
     });
 
@@ -469,7 +469,7 @@ describe('createAuthflow', () => {
         const error = result.unwrapError();
         expect(error.message).toBe('Duplicate step orders found');
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_STEP_ORDER_DUPLICATE
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_STEP_ORDER_DUPLICATE
         );
     });
 });
@@ -627,7 +627,7 @@ describe('approveAuthflow', () => {
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError().code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NO_PENDING_STEPS
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_NO_PENDING_STEPS
         );
     });
 
@@ -640,7 +640,7 @@ describe('approveAuthflow', () => {
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError().code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_GROUP_NOT_FOUND
         );
     });
 

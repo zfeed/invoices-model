@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../../shared/errors/known-error-codes.ts';
 import { Money } from './money.ts';
 
 describe('Money', () => {
@@ -26,7 +26,7 @@ describe('Money', () => {
 
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
-                DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_MONEY_AMOUNT_NOT_INTEGER
+                KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_MONEY_AMOUNT_NOT_INTEGER
             );
         });
 
@@ -35,7 +35,7 @@ describe('Money', () => {
 
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
-                DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_MONEY_AMOUNT_NOT_INTEGER
+                KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_MONEY_AMOUNT_NOT_INTEGER
             );
         });
 
@@ -44,7 +44,7 @@ describe('Money', () => {
 
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
-                DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_MONEY_AMOUNT_NOT_GTE_ZERO
+                KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_MONEY_AMOUNT_NOT_GTE_ZERO
             );
         });
 
@@ -53,7 +53,7 @@ describe('Money', () => {
 
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
-                DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_MONEY_CURRENCY_NOT_ISO_4217
+                KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_MONEY_CURRENCY_NOT_ISO_4217
             );
         });
 
@@ -62,7 +62,7 @@ describe('Money', () => {
 
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
-                DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_MONEY_CURRENCY_NOT_ISO_4217
+                KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_MONEY_CURRENCY_NOT_ISO_4217
             );
         });
 
@@ -71,7 +71,7 @@ describe('Money', () => {
 
             expect(result.isError()).toBe(true);
             expect(result.unwrapError().code).toBe(
-                DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_MONEY_CURRENCY_NOT_ISO_4217
+                KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_MONEY_CURRENCY_NOT_ISO_4217
             );
         });
     });

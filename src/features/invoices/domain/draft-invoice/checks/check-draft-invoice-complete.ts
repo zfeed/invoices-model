@@ -1,4 +1,7 @@
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared/index.ts';
+import {
+    KNOWN_ERROR_CODE,
+    AppKnownError,
+} from '../../../../../shared/index.ts';
 import { CalendarDate } from '../../calendar-date/calendar-date.ts';
 import { Issuer } from '../../issuer/issuer.ts';
 import { LineItems } from '../../line-items/line-items.ts';
@@ -24,10 +27,10 @@ export function checkDraftInvoiceComplete({
     dueDate: CalendarDate | null;
     issuer: Issuer | null;
     recipient: Recipient | null;
-}): DomainError | null {
-    const invoiceIncompleteError = new DomainError({
+}): AppKnownError | null {
+    const invoiceIncompleteError = new AppKnownError({
         message: 'Draft invoice is not fully complete',
-        code: DOMAIN_ERROR_CODE.DRAFT_INVOICE_NOT_FULLY_COMPLETE,
+        code: KNOWN_ERROR_CODE.DRAFT_INVOICE_NOT_FULLY_COMPLETE,
     });
 
     if (

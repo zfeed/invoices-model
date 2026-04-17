@@ -1,11 +1,14 @@
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared/index.ts';
+import {
+    KNOWN_ERROR_CODE,
+    AppKnownError,
+} from '../../../../../shared/index.ts';
 import { LineItem } from '../../line-item/line-item.ts';
 
-export function checkNonEmpty(items: LineItem[]): DomainError | null {
+export function checkNonEmpty(items: LineItem[]): AppKnownError | null {
     if (items.length === 0) {
-        return new DomainError({
+        return new AppKnownError({
             message: 'Cannot create line items with empty array',
-            code: DOMAIN_ERROR_CODE.LINE_ITEMS_EMPTY,
+            code: KNOWN_ERROR_CODE.LINE_ITEMS_EMPTY,
         });
     }
 

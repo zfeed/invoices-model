@@ -1,11 +1,14 @@
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared/index.ts';
+import {
+    KNOWN_ERROR_CODE,
+    AppKnownError,
+} from '../../../../../shared/index.ts';
 import { LineItem } from '../../line-item/line-item.ts'; // Adjust the import path based on where LineItem is defined
 
-export function checkLineItems(lineItems: LineItem[]): DomainError | null {
+export function checkLineItems(lineItems: LineItem[]): AppKnownError | null {
     if (lineItems.length === 0) {
-        return new DomainError({
+        return new AppKnownError({
             message: 'Invoice must have at least one line item',
-            code: DOMAIN_ERROR_CODE.LINE_ITEMS_EMPTY,
+            code: KNOWN_ERROR_CODE.LINE_ITEMS_EMPTY,
         });
     }
 
@@ -17,9 +20,9 @@ export function checkLineItems(lineItems: LineItem[]): DomainError | null {
                 item.price.currency.equals(firstCurrency)
             )
         ) {
-            return new DomainError({
+            return new AppKnownError({
                 message: 'All line items must have the same currency',
-                code: DOMAIN_ERROR_CODE.LINE_ITEMS_DIFFERENT_CURRENCIES,
+                code: KNOWN_ERROR_CODE.LINE_ITEMS_DIFFERENT_CURRENCIES,
             });
         }
     }
@@ -27,9 +30,9 @@ export function checkLineItems(lineItems: LineItem[]): DomainError | null {
     for (let i = 0; i < lineItems.length; i++) {
         for (let j = i + 1; j < lineItems.length; j++) {
             if (lineItems[i].equals(lineItems[j])) {
-                return new DomainError({
+                return new AppKnownError({
                     message: 'Duplicate line item',
-                    code: DOMAIN_ERROR_CODE.LINE_ITEMS_DUPLICATE,
+                    code: KNOWN_ERROR_CODE.LINE_ITEMS_DUPLICATE,
                 });
             }
         }

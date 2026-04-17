@@ -1,6 +1,6 @@
 import {
-    DOMAIN_ERROR_CODE,
-    DomainError,
+    KNOWN_ERROR_CODE,
+    AppKnownError,
     Result,
 } from '../../../../shared/index.ts';
 import { DRAFT_INVOICE_STATUS, Status } from './status.ts';
@@ -18,11 +18,13 @@ export class DraftInvoiceStatus extends Status<DRAFT_INVOICE_STATUS> {
         return new DraftInvoiceStatus(DRAFT_INVOICE_STATUS.ARCHIVED);
     }
 
-    static fromString(value: string): Result<DomainError, DraftInvoiceStatus> {
+    static fromString(
+        value: string
+    ): Result<AppKnownError, DraftInvoiceStatus> {
         return Status.parseEnum(
             DRAFT_INVOICE_STATUS,
             value,
-            DOMAIN_ERROR_CODE.DRAFT_INVOICE_INVALID_STATUS
+            KNOWN_ERROR_CODE.DRAFT_INVOICE_INVALID_STATUS
         ).map((s) => new DraftInvoiceStatus(s));
     }
 }

@@ -1,4 +1,7 @@
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared/index.ts';
+import {
+    KNOWN_ERROR_CODE,
+    AppKnownError,
+} from '../../../../../shared/index.ts';
 import { CalendarDate } from '../../calendar-date/calendar-date.ts'; // Adjust the import path based on where LineItem is defined
 
 export function checkDates({
@@ -7,11 +10,11 @@ export function checkDates({
 }: {
     issueDate: CalendarDate;
     dueDate: CalendarDate;
-}): DomainError | null {
+}): AppKnownError | null {
     if (dueDate.lessThan(issueDate)) {
-        return new DomainError({
+        return new AppKnownError({
             message: 'Invoice due date must be after or equal to issue date',
-            code: DOMAIN_ERROR_CODE.INVOICE_DUE_DATE_ISSUE_DATE_INVALID_RANGE,
+            code: KNOWN_ERROR_CODE.INVOICE_DUE_DATE_ISSUE_DATE_INVALID_RANGE,
         });
     }
 

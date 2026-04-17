@@ -1,17 +1,17 @@
-import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes.ts';
-import { DomainError } from '../../../../../shared/errors/domain/domain.error.ts';
+import { KNOWN_ERROR_CODE } from '../../../../../shared/errors/known-error-codes.ts';
+import { AppKnownError } from '../../../../../shared/errors/app-known-error.ts';
 import { Approval } from '../../approval/approval.ts';
 
 export function checkNoDuplicateApprovals(
     approvals: Approval[]
-): DomainError | null {
+): AppKnownError | null {
     const ids = approvals.map((a) => a.approverId.toPlain());
     const uniqueIds = new Set(ids);
 
     if (ids.length !== uniqueIds.size) {
-        return new DomainError({
+        return new AppKnownError({
             message: 'Duplicate approver IDs found in approvals',
-            code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVALS_DUPLICATE,
+            code: KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_APPROVALS_DUPLICATE,
         });
     }
 

@@ -1,13 +1,13 @@
 import {
-    DOMAIN_ERROR_CODE,
-    DomainError,
+    KNOWN_ERROR_CODE,
+    AppKnownError,
 } from '../../../../../../shared/index.ts';
 
-export function checkDescriptionNonEmpty(value: string): DomainError | null {
+export function checkDescriptionNonEmpty(value: string): AppKnownError | null {
     if (value.trim().length === 0) {
-        return new DomainError({
+        return new AppKnownError({
             message: 'Description must not be empty',
-            code: DOMAIN_ERROR_CODE.LINE_ITEM_EMPTY_DESCRIPTION,
+            code: KNOWN_ERROR_CODE.LINE_ITEM_EMPTY_DESCRIPTION,
         });
     }
 

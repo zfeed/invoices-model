@@ -16,7 +16,7 @@ TypeScript DDD codebase with two bounded contexts: **invoices** (OOP class-based
 ## Domain Conventions
 
 - Always reuse existing factory methods (`create`) for entity reconstruction from persistence. Never add separate `reconstruct` or `fromPersistence` methods unless explicitly asked.
-- Error-returning functions must return `Result<DomainError, T>` — never throw.
+- Error-returning functions must return `Result<AppKnownError, T>` — never throw.
 - Domain naming matters. Use exact method names as specified (e.g., `draft()` not `toDraft()`, `create` not `reconstruct`). When a name is corrected, apply the correction across all related files immediately.
 - Version/concurrency fields belong ON the entity/document itself, not in separate internal maps or tracking structures.
 - Status types use class hierarchies with static factory methods (e.g., `InvoiceStatus.issued()`), transition guards, `fromPlain` for trusted reconstruction, and `fromString` for validated parsing.
@@ -71,13 +71,13 @@ e2e/                 # E2E tests (outside src/)
 
 ## Key Patterns
 
-- **financial-authorization value objects**: every value object (`Name`, `Email`, `Comment`, `Id`, `Order`, `Action`, `ReferenceId`, `Money`) has a factory function (`createName`, `createEmail`, etc.) that returns `Result<DomainError, T>` with validation. Each has a `checks/` folder with standalone check functions using the `ifElse(predicate, createError, Result.ok)` pattern from Ramda.
+- **financial-authorization value objects**: every value object (`Name`, `Email`, `Comment`, `Id`, `Order`, `Action`, `ReferenceId`, `Money`) has a factory function (`createName`, `createEmail`, etc.) that returns `Result<AppKnownError, T>` with validation. Each has a `checks/` folder with standalone check functions using the `ifElse(predicate, createError, Result.ok)` pattern from Ramda.
 - **financial-authorization factory inputs**: factory functions accept raw primitives (`string`, `number`, `string | null`), not domain type aliases. The factory validates and produces the domain type.
 - **financial-authorization composite factories**: composites (`createApproval`, `createApprover`) validate fields via their value-object factories using nested `flatMap`:
     ```ts
     export const createApproval = (
         data: ApprovalInput
-    ): Result<DomainError, Approval> =>
+    ): Result<AppKnownError, Approval> =>
         fromString(data.approverId).flatMap((approverId) =>
             createComment(data.comment)
                 .map((comment) => ({ approverId, comment }))

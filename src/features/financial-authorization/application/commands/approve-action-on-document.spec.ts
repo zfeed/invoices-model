@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../../shared/errors/known-error-codes.ts';
 import { InMemoryDomainEventsBus } from '../../../../infrastructure/domain-events/in-memory-domain-events-bus.ts';
 import { Session } from '../../../../shared/unit-of-work/unit-of-work.ts';
 import { PersistentManager } from '../../../../infrastructure/persistent-manager/pg-persistent-manager.ts';
@@ -139,7 +139,7 @@ describe('approveActionOnDocumentCommand', () => {
                 approverId,
             })
         ).rejects.toMatchObject({
-            code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_DOCUMENT_NOT_FOUND,
+            code: KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_DOCUMENT_NOT_FOUND,
         });
     });
 
@@ -202,7 +202,7 @@ describe('approveActionOnDocumentCommand', () => {
                 approverId,
             })
         ).rejects.toMatchObject({
-            code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_NOT_FOUND,
+            code: KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_NOT_FOUND,
         });
     });
 

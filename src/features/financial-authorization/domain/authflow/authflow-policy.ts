@@ -1,4 +1,4 @@
-import { DomainError, Mappable, Result } from '../../../../shared/index.ts';
+import { AppKnownError, Mappable, Result } from '../../../../shared/index.ts';
 import { DomainEvent } from '../../../../shared/events/domain-event.ts';
 import { PublishableEvents } from '../../../../shared/events/event-publisher.interface.ts';
 import { Action } from '../action/action.ts';
@@ -65,7 +65,7 @@ export class AuthflowPolicy
         return Result.ok(policy);
     }
 
-    selectAuthflow(amount: Money): Result<DomainError, Authflow> {
+    selectAuthflow(amount: Money): Result<AppKnownError, Authflow> {
         const rangeError = checkTemplateInRange(this._templates, amount);
         if (rangeError) {
             return Result.error(rangeError);

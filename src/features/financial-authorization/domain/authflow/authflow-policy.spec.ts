@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../../shared/errors/known-error-codes.ts';
 import { Approver } from '../approver/approver.ts';
 import { Email } from '../email/email.ts';
 import { GroupTemplate } from '../groups/group-template.ts';
@@ -91,7 +91,7 @@ describe('createAuthflowPolicy', () => {
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError().code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_POLICY_RANGES_OVERLAP
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_POLICY_RANGES_OVERLAP
         );
     });
 
@@ -103,7 +103,7 @@ describe('createAuthflowPolicy', () => {
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError().code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_POLICY_RANGES_OVERLAP
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_POLICY_RANGES_OVERLAP
         );
     });
 
@@ -115,7 +115,7 @@ describe('createAuthflowPolicy', () => {
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError().code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_POLICY_RANGES_OVERLAP
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_POLICY_RANGES_OVERLAP
         );
     });
 
@@ -127,7 +127,7 @@ describe('createAuthflowPolicy', () => {
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError().code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_POLICY_RANGES_OVERLAP
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_POLICY_RANGES_OVERLAP
         );
     });
 
@@ -251,7 +251,7 @@ describe('selectAuthflow', () => {
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError().code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_TEMPLATE_NOT_FOUND
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_TEMPLATE_NOT_FOUND
         );
     });
 
@@ -266,7 +266,7 @@ describe('selectAuthflow', () => {
 
         expect(result.isError()).toBe(true);
         expect(result.unwrapError().code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_TEMPLATE_NOT_FOUND
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_AUTHFLOW_TEMPLATE_NOT_FOUND
         );
     });
 

@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../../shared/errors/known-error-codes.ts';
 import { Approver } from '../approver/approver.ts';
 import { Email } from '../email/email.ts';
 import { GroupTemplate } from '../groups/group-template.ts';
@@ -92,7 +92,7 @@ describe('createAuthflowTemplate', () => {
         const error = result.unwrapError();
         expect(error.message).toBe('Duplicate step orders found');
         expect(error.code).toBe(
-            DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_STEP_ORDER_DUPLICATE
+            KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_STEP_ORDER_DUPLICATE
         );
     });
 

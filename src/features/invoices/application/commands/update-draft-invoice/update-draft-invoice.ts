@@ -1,5 +1,5 @@
-import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application/application-codes.ts';
-import { ApplicationError } from '../../../../../shared/errors/application/application.error.ts';
+import { KNOWN_ERROR_CODE } from '../../../../../shared/errors/known-error-codes.ts';
+import { AppKnownError } from '../../../../../shared/errors/app-known-error.ts';
 import { CalendarDate } from '../../../domain/calendar-date/calendar-date.ts';
 import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice.ts';
 import { Id } from '../../../domain/id/id.ts';
@@ -56,9 +56,9 @@ export class UpdateDraftInvoice {
             .get(Id.fromString(id));
 
         if (!draftInvoice) {
-            throw new ApplicationError({
+            throw new AppKnownError({
                 message: 'Draft invoice not found',
-                code: APPLICATION_ERROR_CODE.ITEM_NOT_FOUND,
+                code: KNOWN_ERROR_CODE.ITEM_NOT_FOUND,
             });
         }
 

@@ -1,6 +1,6 @@
 import {
-    DOMAIN_ERROR_CODE,
-    DomainError,
+    KNOWN_ERROR_CODE,
+    AppKnownError,
     Mappable,
     Result,
 } from '../../../../shared/index.ts';
@@ -136,7 +136,7 @@ export class Invoice
 
         const totalResult = vatRate
             ? vatRate.addTo(options.lineItems.subtotal)
-            : Result.ok<DomainError, Money>(options.lineItems.subtotal);
+            : Result.ok<AppKnownError, Money>(options.lineItems.subtotal);
 
         if (totalResult.isError()) {
             return totalResult.error();
@@ -145,7 +145,7 @@ export class Invoice
         const total = totalResult.unwrap();
         const vatAmountResult = vatRate
             ? total.subtract(options.lineItems.subtotal)
-            : Result.ok<DomainError, Money | null>(null);
+            : Result.ok<AppKnownError, Money | null>(null);
 
         if (vatAmountResult.isError()) {
             return vatAmountResult.error();
@@ -177,9 +177,9 @@ export class Invoice
     process() {
         if (!this._status.equals(InvoiceStatus.issued())) {
             return Result.error(
-                new DomainError({
+                new AppKnownError({
                     message: `Cannot process invoice in status ${this._status.toString()}`,
-                    code: DOMAIN_ERROR_CODE.INVOICE_INVALID_STATUS_TRANSITION,
+                    code: KNOWN_ERROR_CODE.INVOICE_INVALID_STATUS_TRANSITION,
                 })
             );
         }
@@ -194,9 +194,9 @@ export class Invoice
     pay() {
         if (!this._status.equals(InvoiceStatus.processing())) {
             return Result.error(
-                new DomainError({
+                new AppKnownError({
                     message: `Cannot pay invoice in status ${this._status.toString()}`,
-                    code: DOMAIN_ERROR_CODE.INVOICE_INVALID_STATUS_TRANSITION,
+                    code: KNOWN_ERROR_CODE.INVOICE_INVALID_STATUS_TRANSITION,
                 })
             );
         }
@@ -211,9 +211,9 @@ export class Invoice
     fail() {
         if (!this._status.equals(InvoiceStatus.processing())) {
             return Result.error(
-                new DomainError({
+                new AppKnownError({
                     message: `Cannot fail invoice in status ${this._status.toString()}`,
-                    code: DOMAIN_ERROR_CODE.INVOICE_INVALID_STATUS_TRANSITION,
+                    code: KNOWN_ERROR_CODE.INVOICE_INVALID_STATUS_TRANSITION,
                 })
             );
         }
@@ -228,9 +228,9 @@ export class Invoice
     cancel() {
         if (!this._status.equals(InvoiceStatus.issued())) {
             return Result.error(
-                new DomainError({
+                new AppKnownError({
                     message: `Cannot cancel invoice in status ${this._status.toString()}`,
-                    code: DOMAIN_ERROR_CODE.INVOICE_INVALID_STATUS_TRANSITION,
+                    code: KNOWN_ERROR_CODE.INVOICE_INVALID_STATUS_TRANSITION,
                 })
             );
         }

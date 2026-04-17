@@ -7,7 +7,7 @@ import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice
 import { CompleteDraftInvoice } from '../complete-draft-invoice/complete-draft-invoice.ts';
 import { CancelInvoice } from './cancel-invoice.ts';
 import { InvoiceCancelledEvent } from '../../../domain/invoice/events/invoice-cancelled.event.ts';
-import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application/application-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../../../shared/errors/known-error-codes.ts';
 import { ISSUER_TYPE } from '../../../domain/issuer/issuer.ts';
 import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient.ts';
 
@@ -68,7 +68,7 @@ describe('CancelInvoice', () => {
         await expect(
             cancelCommand.execute('non-existing-id')
         ).rejects.toMatchObject({
-            code: APPLICATION_ERROR_CODE.ITEM_NOT_FOUND,
+            code: KNOWN_ERROR_CODE.ITEM_NOT_FOUND,
         });
     });
 

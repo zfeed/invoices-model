@@ -1,5 +1,5 @@
-import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application/application-codes.ts';
-import { ApplicationError } from '../../../../../shared/errors/application/application.error.ts';
+import { KNOWN_ERROR_CODE } from '../../../../../shared/errors/known-error-codes.ts';
+import { AppKnownError } from '../../../../../shared/errors/app-known-error.ts';
 import { Kysely } from '../../../../../../database/kysely.ts';
 import { InvoiceDto } from './invoice.dto.ts';
 
@@ -34,9 +34,9 @@ export class GetInvoice {
             .execute();
 
         if (rows.length === 0) {
-            throw new ApplicationError({
+            throw new AppKnownError({
                 message: 'Invoice not found',
-                code: APPLICATION_ERROR_CODE.ITEM_NOT_FOUND,
+                code: KNOWN_ERROR_CODE.ITEM_NOT_FOUND,
             });
         }
 

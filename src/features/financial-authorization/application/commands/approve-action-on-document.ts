@@ -1,5 +1,5 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
-import { DomainError } from '../../../../shared/errors/domain/domain.error.ts';
+import { KNOWN_ERROR_CODE } from '../../../../shared/errors/known-error-codes.ts';
+import { AppKnownError } from '../../../../shared/errors/app-known-error.ts';
 import { Session } from '../../../../shared/unit-of-work/unit-of-work.ts';
 import { Action } from '../../domain/action/action.ts';
 import { Approval } from '../../domain/approval/approval.ts';
@@ -27,9 +27,9 @@ export class ApproveActionOnDocument {
             .findBy('referenceId', referenceId.toPlain());
 
         if (!document) {
-            throw new DomainError({
+            throw new AppKnownError({
                 message: `Document with reference ${referenceId.toPlain()} not found`,
-                code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_DOCUMENT_NOT_FOUND,
+                code: KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_DOCUMENT_NOT_FOUND,
             });
         }
 

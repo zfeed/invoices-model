@@ -1,14 +1,17 @@
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared/index.ts';
+import {
+    KNOWN_ERROR_CODE,
+    AppKnownError,
+} from '../../../../../shared/index.ts';
 import { LineItem } from '../../line-item/line-item.ts';
 
-export function checkSameCurrency(items: LineItem[]): DomainError | null {
+export function checkSameCurrency(items: LineItem[]): AppKnownError | null {
     const firstCurrency = items[0].total.currency;
 
     for (let i = 1; i < items.length; i++) {
         if (!items[i].total.currency.equals(firstCurrency)) {
-            return new DomainError({
+            return new AppKnownError({
                 message: 'All line items must have the same currency',
-                code: DOMAIN_ERROR_CODE.LINE_ITEMS_DIFFERENT_CURRENCIES,
+                code: KNOWN_ERROR_CODE.LINE_ITEMS_DIFFERENT_CURRENCIES,
             });
         }
     }

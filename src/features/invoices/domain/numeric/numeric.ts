@@ -1,7 +1,7 @@
 import { Decimal } from 'decimal.js';
 import {
     Comparable,
-    DomainError,
+    AppKnownError,
     Equatable,
     Result,
 } from '../../../../shared/index.ts';
@@ -15,7 +15,7 @@ export class Numeric implements Equatable<Numeric>, Comparable<Numeric> {
         this._value = new Decimal(value);
     }
 
-    static create(value: string): Result<DomainError, Numeric> {
+    static create(value: string): Result<AppKnownError, Numeric> {
         const error = checkNumericValue(value);
 
         if (error) {
@@ -37,7 +37,7 @@ export class Numeric implements Equatable<Numeric>, Comparable<Numeric> {
         return new Numeric(this._value.sub(value._value).toString());
     }
 
-    divideBy(value: Numeric): Result<DomainError, Numeric> {
+    divideBy(value: Numeric): Result<AppKnownError, Numeric> {
         const error = checkDivisionByZero(value);
 
         if (error) {

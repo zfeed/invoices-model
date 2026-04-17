@@ -1,11 +1,11 @@
-import { DOMAIN_ERROR_CODE } from '../../../../../shared/errors/domain/domain-codes.ts';
-import { DomainError } from '../../../../../shared/errors/domain/domain.error.ts';
+import { KNOWN_ERROR_CODE } from '../../../../../shared/errors/known-error-codes.ts';
+import { AppKnownError } from '../../../../../shared/errors/app-known-error.ts';
 
-export function checkOrderNonNegative(value: number): DomainError | null {
+export function checkOrderNonNegative(value: number): AppKnownError | null {
     if (value < 0) {
-        return new DomainError({
+        return new AppKnownError({
             message: 'Step order must be non-negative',
-            code: DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_STEP_ORDER_NEGATIVE,
+            code: KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_STEP_ORDER_NEGATIVE,
         });
     }
 

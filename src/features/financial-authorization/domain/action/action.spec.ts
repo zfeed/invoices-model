@@ -1,4 +1,4 @@
-import { DOMAIN_ERROR_CODE } from '../../../../shared/errors/domain/domain-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../../shared/errors/known-error-codes.ts';
 import { Action } from './action.ts';
 
 describe('Action', () => {
@@ -17,7 +17,7 @@ describe('Action', () => {
             const error = result.unwrapError();
             expect(error.message).toBe('Action cannot be blank');
             expect(error.code).toBe(
-                DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_ACTION_BLANK
+                KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_ACTION_BLANK
             );
         });
 
@@ -28,7 +28,7 @@ describe('Action', () => {
             const error = result.unwrapError();
             expect(error.message).toBe('Action cannot be blank');
             expect(error.code).toBe(
-                DOMAIN_ERROR_CODE.FINANCIAL_AUTHORIZATION_ACTION_BLANK
+                KNOWN_ERROR_CODE.FINANCIAL_AUTHORIZATION_ACTION_BLANK
             );
         });
     });

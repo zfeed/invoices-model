@@ -1,11 +1,14 @@
 import validator from 'validator';
-import { DOMAIN_ERROR_CODE, DomainError } from '../../../../../shared/index.ts';
+import {
+    KNOWN_ERROR_CODE,
+    AppKnownError,
+} from '../../../../../shared/index.ts';
 
-export function checkNumericValue(value: string): DomainError | null {
+export function checkNumericValue(value: string): AppKnownError | null {
     if (!validator.isDecimal(value)) {
-        return new DomainError({
+        return new AppKnownError({
             message: `Invalid numeric value: ${value}`,
-            code: DOMAIN_ERROR_CODE.NUMERIC_INVALID_VALUE,
+            code: KNOWN_ERROR_CODE.NUMERIC_INVALID_VALUE,
         });
     }
 

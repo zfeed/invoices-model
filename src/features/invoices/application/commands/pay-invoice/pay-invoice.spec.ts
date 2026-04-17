@@ -21,7 +21,7 @@ import { CompleteDraftInvoice } from '../complete-draft-invoice/complete-draft-i
 import { ProcessInvoice } from '../process-invoice/process-invoice.ts';
 import { PayInvoice } from './pay-invoice.ts';
 import { InvoicePaidEvent } from '../../../domain/invoice/events/invoice-paid.event.ts';
-import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application/application-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../../../shared/errors/known-error-codes.ts';
 import { ISSUER_TYPE } from '../../../domain/issuer/issuer.ts';
 import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient.ts';
 import { cleanDatabase } from '../../../../../infrastructure/persistent-manager/clean-database.ts';
@@ -129,7 +129,7 @@ describe('PayInvoice', () => {
                 approverId: APPROVER_ID,
             })
         ).rejects.toMatchObject({
-            code: APPLICATION_ERROR_CODE.PAYMENT_NOT_AUTHORIZED,
+            code: KNOWN_ERROR_CODE.PAYMENT_NOT_AUTHORIZED,
         });
     });
 
@@ -151,7 +151,7 @@ describe('PayInvoice', () => {
                 approverId: uuid(),
             })
         ).rejects.toMatchObject({
-            code: APPLICATION_ERROR_CODE.PAYMENT_NOT_AUTHORIZED,
+            code: KNOWN_ERROR_CODE.PAYMENT_NOT_AUTHORIZED,
         });
     });
 

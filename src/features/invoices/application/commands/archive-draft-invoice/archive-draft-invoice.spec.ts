@@ -6,7 +6,7 @@ import { kysely } from '../../../../../../database/kysely.ts';
 import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice.ts';
 import { ArchiveDraftInvoice } from './archive-draft-invoice.ts';
 import { DraftInvoiceArchivedEvent } from '../../../domain/draft-invoice/events/draft-invoice-archived.event.ts';
-import { APPLICATION_ERROR_CODE } from '../../../../../shared/errors/application/application-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../../../shared/errors/known-error-codes.ts';
 
 describe('ArchiveDraftInvoice', () => {
     let session: Session;
@@ -31,7 +31,7 @@ describe('ArchiveDraftInvoice', () => {
         await expect(
             archiveCommand.execute('non-existing-id')
         ).rejects.toMatchObject({
-            code: APPLICATION_ERROR_CODE.ITEM_NOT_FOUND,
+            code: KNOWN_ERROR_CODE.ITEM_NOT_FOUND,
         });
     });
 

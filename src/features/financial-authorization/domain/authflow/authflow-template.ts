@@ -1,4 +1,4 @@
-import { DomainError, Mappable, Result } from '../../../../shared/index.ts';
+import { AppKnownError, Mappable, Result } from '../../../../shared/index.ts';
 import { Action } from '../action/action.ts';
 import { Id } from '../id/id.ts';
 import { Range } from '../range/range.ts';
@@ -42,9 +42,9 @@ export class AuthflowTemplate implements Mappable<
         );
     }
 
-    toAuthflow(action: Action): Result<DomainError, Authflow> {
+    toAuthflow(action: Action): Result<AppKnownError, Authflow> {
         const stepsResult = this._steps.reduce<
-            Result<DomainError, import('../step/step.ts').Step[]>
+            Result<AppKnownError, import('../step/step.ts').Step[]>
         >(
             (acc, template) =>
                 acc.flatMap((steps) =>
