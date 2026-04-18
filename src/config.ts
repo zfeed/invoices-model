@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import { z } from 'zod';
 
 const schema = z.object({
@@ -58,49 +57,51 @@ const schema = z.object({
 
 export type Config = z.infer<typeof schema>;
 
-export const config: Config = schema.parse({
-    http: {
-        port: process.env.HTTP_PORT,
-    },
-    database: {
-        url: process.env.DATABASE_URL,
-    },
-    temporal: {
-        address: process.env.TEMPORAL_ADDRESS,
-        namespace: process.env.TEMPORAL_NAMESPACE,
-    },
-    paypal: {
-        baseUrl: process.env.PAYPAL_BASE_URL,
-        credentials: {
-            clientId: process.env.PAYPAL_CLIENT_ID,
-            clientSecret: process.env.PAYPAL_CLIENT_SECRET,
+export function getConfig(): Config {
+    return schema.parse({
+        http: {
+            port: process.env.HTTP_PORT,
         },
-        polling: {
-            maxAttempts: process.env.PAYPAL_POLL_MAX_ATTEMPTS,
-            initialDelayMs: process.env.PAYPAL_POLL_INITIAL_DELAY_MS,
-            factor: process.env.PAYPAL_POLL_FACTOR,
+        database: {
+            url: process.env.DATABASE_URL,
         },
-    },
-    kafka: {
-        brokers: process.env.KAFKA_BROKERS,
-        clientId: process.env.KAFKA_CLIENT_ID,
-        groupId: process.env.KAFKA_GROUP_ID,
-        topicPrefix: process.env.KAFKA_TOPIC_PREFIX,
-    },
-    logger: {
-        stdout: process.env.LOG_STDOUT,
-        level: process.env.LOG_LEVEL,
-    },
-    otel: {
-        logsEndpoint: process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT,
-        tracesEndpoint: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT,
-        metricsEndpoint: process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT,
-        metricsExportIntervalMs: process.env.OTEL_METRIC_EXPORT_INTERVAL_MS,
-    },
-    outbox: {
-        pollingIntervalSeconds: process.env.OUTBOX_POLLING_INTERVAL_S,
-        pollingTimeoutMinutes: process.env.OUTBOX_POLLING_TIMEOUT_M,
-        maxDeliveryAttempts: process.env.OUTBOX_MAX_DELIVERY_ATTEMPTS,
-        batchSize: process.env.OUTBOX_BATCH_SIZE,
-    },
-});
+        temporal: {
+            address: process.env.TEMPORAL_ADDRESS,
+            namespace: process.env.TEMPORAL_NAMESPACE,
+        },
+        paypal: {
+            baseUrl: process.env.PAYPAL_BASE_URL,
+            credentials: {
+                clientId: process.env.PAYPAL_CLIENT_ID,
+                clientSecret: process.env.PAYPAL_CLIENT_SECRET,
+            },
+            polling: {
+                maxAttempts: process.env.PAYPAL_POLL_MAX_ATTEMPTS,
+                initialDelayMs: process.env.PAYPAL_POLL_INITIAL_DELAY_MS,
+                factor: process.env.PAYPAL_POLL_FACTOR,
+            },
+        },
+        kafka: {
+            brokers: process.env.KAFKA_BROKERS,
+            clientId: process.env.KAFKA_CLIENT_ID,
+            groupId: process.env.KAFKA_GROUP_ID,
+            topicPrefix: process.env.KAFKA_TOPIC_PREFIX,
+        },
+        logger: {
+            stdout: process.env.LOG_STDOUT,
+            level: process.env.LOG_LEVEL,
+        },
+        otel: {
+            logsEndpoint: process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT,
+            tracesEndpoint: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT,
+            metricsEndpoint: process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT,
+            metricsExportIntervalMs: process.env.OTEL_METRIC_EXPORT_INTERVAL_MS,
+        },
+        outbox: {
+            pollingIntervalSeconds: process.env.OUTBOX_POLLING_INTERVAL_S,
+            pollingTimeoutMinutes: process.env.OUTBOX_POLLING_TIMEOUT_M,
+            maxDeliveryAttempts: process.env.OUTBOX_MAX_DELIVERY_ATTEMPTS,
+            batchSize: process.env.OUTBOX_BATCH_SIZE,
+        },
+    });
+}

@@ -3,11 +3,12 @@ import { EventOutboxStorage } from '../../infrastructure/event-outbox/event-outb
 import { Logger } from '../../shared/logger/logger.ts';
 import { toKafkaLogger } from '../../infrastructure/logger/kafka-logger-adapter.ts';
 import dayjs from '../../lib/dayjs.ts';
-import { config } from '../../config.ts';
+import { Config } from '../../config.ts';
 
 export const createKafkaDomainEventsBus = (
     eventOutboxStorage: EventOutboxStorage,
-    logger: Logger
+    logger: Logger,
+    config: Config
 ): KafkaDomainEventsBus =>
     new KafkaDomainEventsBus({
         eventOutboxStorage,

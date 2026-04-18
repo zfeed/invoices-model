@@ -15,7 +15,9 @@ import { NetInstrumentation } from '@opentelemetry/instrumentation-net';
 import { UndiciInstrumentation } from '@opentelemetry/instrumentation-undici';
 import { RuntimeNodeInstrumentation } from '@opentelemetry/instrumentation-runtime-node';
 import { FastifyOtelInstrumentation } from '@fastify/otel';
-import { config } from './config.ts';
+import { getConfig } from './config.ts';
+
+const config = getConfig();
 
 export const resource = resourceFromAttributes({
     [ATTR_SERVICE_NAME]: 'invoices-model',

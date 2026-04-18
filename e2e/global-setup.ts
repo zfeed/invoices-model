@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import { AddressInfo } from 'net';
 import { TestProject } from 'vitest/node';
 import { createApp } from '../src/http/create-app.ts';

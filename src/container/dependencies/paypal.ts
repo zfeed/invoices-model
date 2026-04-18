@@ -1,7 +1,7 @@
 import { Paypal } from '../../features/paypal/api/paypal.ts';
-import { config } from '../../config.ts';
+import { Config } from '../../config.ts';
 
-export const createPaypal = (): Paypal =>
+export const createPaypal = (config: Config): Paypal =>
     new Paypal({
         baseUrl: new URL(config.paypal.baseUrl),
         credentials: {

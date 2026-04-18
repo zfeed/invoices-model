@@ -4,11 +4,9 @@ import { createApp } from './create-app.ts';
 import { registerDependencies } from '../container/register-dependencies.ts';
 import { Logger } from '../shared/logger/logger.ts';
 import { withSpan } from '../shared/tracing/with-span.ts';
-import { config } from '../config.ts';
+import { Config } from '../config.ts';
 
 const tracer = trace.getTracer('application');
-
-const PORT = config.http.port;
 
 type App = Awaited<ReturnType<typeof createApp>>;
 
@@ -24,6 +22,7 @@ const startup = async () => {
     );
 
     const logger = container.getOrThrow<Logger>(Logger);
+    const config = container.getOrThrow<Config>('Config');
     const app = await createApp(container);
 
     process.on('SIGTERM', () => shutdown('SIGTERM', app, logger));
@@ -32,8 +31,11 @@ const startup = async () => {
     const address = await withSpan(
         tracer,
         'listen application',
-        () => app.listen({ port: PORT }),
-        { kind: SpanKind.INTERNAL, attributes: { 'server.port': PORT } }
+        () => app.listen({ port: config.http.port }),
+        {
+            kind: SpanKind.INTERNAL,
+            attributes: { 'server.port': config.http.port },
+        }
     );
 
     logger.info(`Server running on ${address}`);
@@ -41,7 +43,6 @@ const startup = async () => {
 
 withSpan(tracer, 'start application', startup, {
     kind: SpanKind.INTERNAL,
-    attributes: { 'server.port': PORT },
 }).catch((error: unknown) => {
     process.stderr.write(`Failed to start application: ${String(error)}\n`);
     process.exit(1);

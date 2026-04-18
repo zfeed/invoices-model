@@ -1,7 +1,10 @@
 import { startTestEnvironment } from './runtime/environment.ts';
 import { migrateToLatest } from './runtime/migrate.ts';
+import { loadEnv } from '../src/load-env.ts';
 
 export default async function setup() {
+    loadEnv('.env.test');
+
     const environment = await startTestEnvironment();
 
     Object.assign(process.env, environment.env);
