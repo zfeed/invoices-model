@@ -42,7 +42,7 @@ const metricReader = new PeriodicExportingMetricReader({
     exportIntervalMillis: config.otel.metricsExportIntervalMs,
 });
 
-const sdk = new NodeSDK({
+export const sdk = new NodeSDK({
     resource,
     spanProcessors: [spanProcessor],
     logRecordProcessor: new BatchLogRecordProcessor(logExporter),

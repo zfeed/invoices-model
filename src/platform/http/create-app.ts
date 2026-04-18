@@ -12,6 +12,7 @@ import { KafkaDomainEventsBus } from '../infrastructure/domain-events/kafka/kafk
 import { Config } from '../../config.ts';
 import { pino as Pino, Logger as PinoInstance } from 'pino';
 import { withSpan } from '../../lib/with-span/with-span.ts';
+import { sdk as otelSdk } from '../../instrumentation.ts';
 import * as plugins from './plugins.ts';
 
 const tracer = trace.getTracer('application');
@@ -63,6 +64,7 @@ export const createApp = async (container?: Container) => {
         await core.shutdown();
         await temporalClient.connection.close();
         await kysely.destroy();
+        await otelSdk.shutdown().catch(() => {});
     });
 
     plugins.init(app as any, core);
