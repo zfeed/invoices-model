@@ -54,7 +54,7 @@ TypeScript DDD codebase with two bounded contexts: **invoices** (OOP class-based
 src/
   core/                          # Business domains and shared building blocks
     bootstrap.ts                 # Wires domain modules into the app
-    building-blocks/              # Result, DomainEvent, errors, interfaces (Equatable, Comparable, Mappable), UnitOfWork, logger port
+    building-blocks/             # Result, DomainEvent, errors, interfaces (Equatable, Comparable, Mappable), UnitOfWork, logger port
     invoices/                    # OOP class-based bounded context
       domain/                    # Entities, value objects, events, checks
       application/               # Use cases
@@ -72,10 +72,12 @@ src/
     http/                        # Fastify app, error handler, plugins, validation
     infrastructure/              # Domain-events bus (in-memory + kafka), event outbox, logger, persistent manager
     worker.ts                    # Temporal worker entrypoint
+  shared/                        # Barrel re-exporting common building-blocks + lib types
   config.ts                      # Typed config loader
   instrumentation.ts             # OpenTelemetry bootstrap
 e2e/                             # E2E tests (outside src/)
 ```
+
 ## Key Patterns
 
 - **financial-authorization value objects**: every value object (`Name`, `Email`, `Comment`, `Id`, `Order`, `Action`, `ReferenceId`, `Money`) has a factory function (`createName`, `createEmail`, etc.) that returns `Result<AppKnownError, T>` with validation. Each has a `checks/` folder with standalone check functions using the `ifElse(predicate, createError, Result.ok)` pattern from Ramda.

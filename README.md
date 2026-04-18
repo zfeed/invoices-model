@@ -51,7 +51,7 @@ This prevents lost events when a write succeeds but event delivery fails, and gi
 src/
   core/                             # Business domains and shared building blocks
     bootstrap.ts                    # Wires domain modules into the app
-    building-blocks/                 # Result, DomainEvent, errors, interfaces, unit of work, logger port
+    building-blocks/                # Result, DomainEvent, errors, interfaces, unit of work, logger port
     invoices/                       # Invoice module (OOP, class-based)
       domain/                       # Entities, value objects, events, checks
       application/                  # Use cases
@@ -69,6 +69,7 @@ src/
     http/                           # Fastify app setup, error handler, plugins
     infrastructure/                 # Domain-events bus, event outbox, logger, persistent manager
     worker.ts                       # Temporal worker entrypoint
+  shared/                           # Barrel re-exporting common building-blocks + lib types
   config.ts                         # Typed config loader
   instrumentation.ts                # OpenTelemetry bootstrap
 e2e/                                # End-to-end tests
