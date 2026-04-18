@@ -1,6 +1,6 @@
 import { KafkaDomainEventsBus } from '../../infrastructure/domain-events/kafka/kafka-domain-events-bus.ts';
 import { EventOutboxStorage } from '../../infrastructure/event-outbox/event-outbox.ts';
-import { Logger } from '../../../core/bulding-blocks/logger/logger.ts';
+import { Logger } from '../../../core/building-blocks/logger/logger.ts';
 import { toKafkaLogger } from '../../infrastructure/logger/kafka-logger-adapter.ts';
 import dayjs from '../../../lib/dayjs/dayjs.ts';
 import { Config } from '../../../config.ts';

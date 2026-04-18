@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { AppKnownError } from '../../core/bulding-blocks/errors/app-known-error.ts';
+import { AppKnownError } from '../../core/building-blocks/errors/app-known-error.ts';
 import { ValidationError } from './validation.ts';
 
 const isFastifyError = (err: unknown): err is Error & { code: string } =>

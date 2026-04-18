@@ -1,5 +1,5 @@
-import { DomainEventsBus } from '../../../bulding-blocks/interfaces/domain-events-bus/domain-events-bus.interface.ts';
-import { Session } from '../../../bulding-blocks/unit-of-work/unit-of-work.ts';
+import { DomainEventsBus } from '../../../building-blocks/interfaces/domain-events-bus/domain-events-bus.interface.ts';
+import { Session } from '../../../building-blocks/unit-of-work/unit-of-work.ts';
 import { InvoiceIssuedEvent } from '../../../invoices/domain/invoice/events/invoice-issued.event.ts';
 import { AuthflowPolicy } from '../../domain/authflow/authflow-policy.ts';
 import { FinancialDocument } from '../../domain/document/document.ts';

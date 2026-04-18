@@ -2,12 +2,12 @@ import { AuthflowPolicy } from '../../../core/financial-authorization/domain/aut
 import { FinancialDocument } from '../../../core/financial-authorization/domain/document/document.ts';
 import { DraftInvoice } from '../../../core/invoices/domain/draft-invoice/draft-invoice.ts';
 import { Invoice } from '../../../core/invoices/domain/invoice/invoice.ts';
-import { DomainEventsBus } from '../../../core/bulding-blocks/interfaces/domain-events-bus/domain-events-bus.interface.ts';
+import { DomainEventsBus } from '../../../core/building-blocks/interfaces/domain-events-bus/domain-events-bus.interface.ts';
 import {
     EntityClass,
     PersistentManager as PersistentManagerInterface,
-} from '../../../core/bulding-blocks/unit-of-work/unit-of-work.interface.ts';
-import type { Collection } from '../../../core/bulding-blocks/unit-of-work/collection/collection.ts';
+} from '../../../core/building-blocks/unit-of-work/unit-of-work.interface.ts';
+import type { Collection } from '../../../core/building-blocks/unit-of-work/collection/collection.ts';
 import type {
     Kysely,
     ControlledTransaction,

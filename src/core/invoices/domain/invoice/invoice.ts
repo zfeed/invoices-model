@@ -9,7 +9,7 @@ import { Money } from '../money/money/money.ts';
 import { Recipient } from '../recipient/recipient.ts';
 import { VatRate } from '../vat-rate/vat-rate.ts';
 
-import { PublishableEvents } from '../../../bulding-blocks/events/index.ts';
+import { PublishableEvents } from '../../../building-blocks/events/index.ts';
 import { CalendarDate } from '../calendar-date/calendar-date.ts';
 import { Id } from '../id/id.ts';
 import { LineItems, ReadOnlyLineItems } from '../line-items/line-items.ts';

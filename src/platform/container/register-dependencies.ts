@@ -1,6 +1,6 @@
 import { WorkflowClient } from '@temporalio/client';
 import { Container } from '../../lib/container/container.ts';
-import { Session } from '../../core/bulding-blocks/unit-of-work/unit-of-work.ts';
+import { Session } from '../../core/building-blocks/unit-of-work/unit-of-work.ts';
 import { EventOutboxStorage } from '../infrastructure/event-outbox/event-outbox.ts';
 import { KafkaDomainEventsBus } from '../infrastructure/domain-events/kafka/kafka-domain-events-bus.ts';
 import { TemporalWorker } from '../worker.ts';
@@ -11,7 +11,7 @@ import { createEventOutboxStorage } from './dependencies/event-outbox-storage.ts
 import { createKafkaDomainEventsBus } from './dependencies/kafka-domain-events-bus.ts';
 import { createSession } from './dependencies/session.ts';
 import { createTemporalWorker } from './dependencies/temporal-worker.ts';
-import { Logger } from '../../core/bulding-blocks/logger/logger.ts';
+import { Logger } from '../../core/building-blocks/logger/logger.ts';
 import { createLogger } from './dependencies/logger.ts';
 import { createPino } from './dependencies/pino.ts';
 import { createConfig } from './dependencies/config.ts';

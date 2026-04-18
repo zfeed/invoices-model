@@ -1,12 +1,12 @@
 import {
     DomainEvent,
     DomainEventClass,
-} from '../../../../core/bulding-blocks/events/domain-event.ts';
+} from '../../../../core/building-blocks/events/domain-event.ts';
 import {
     EventHandler,
     DomainEventsBus,
-} from '../../../../core/bulding-blocks/interfaces/domain-events-bus/domain-events-bus.interface.ts';
-import { PublishableEvents } from '../../../../core/bulding-blocks/events/event-publisher.interface.ts';
+} from '../../../../core/building-blocks/interfaces/domain-events-bus/domain-events-bus.interface.ts';
+import { PublishableEvents } from '../../../../core/building-blocks/events/event-publisher.interface.ts';
 import { EventOutboxStorage } from '../../event-outbox/event-outbox.ts';
 import { Kafka, KafkaConfig } from './kafka.ts';
 import { Scheduler } from './sheduler.ts';

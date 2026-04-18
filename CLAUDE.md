@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-TypeScript DDD codebase with two bounded contexts: **invoices** (OOP class-based) and **financial-authorization** (functional/plain-object), plus the **invoice-paypal-transaction** Temporal workflow. Monadic building blocks (Result, Some, IO) live under `src/core/bulding-blocks/` and `src/lib/result/`.
+TypeScript DDD codebase with two bounded contexts: **invoices** (OOP class-based) and **financial-authorization** (functional/plain-object), plus the **invoice-paypal-transaction** Temporal workflow. Monadic building blocks (Result, Some, IO) live under `src/core/building-blocks/` and `src/lib/result/`.
 
 ## Testing
 
@@ -36,7 +36,7 @@ TypeScript DDD codebase with two bounded contexts: **invoices** (OOP class-based
 - Avoid `any` and `as` type assertions. Use `unknown`, `Record<string, unknown>`, or specific types instead. Prefer structural typing, narrowing, and lookup patterns over casts.
 - Prefer functional composition patterns: rambda `when`/`ifElse`, Result/Some/IO monads, flat pipelines.
 - Avoid class-based implementations when a functional approach is asked for. Avoid manual object reconstruction, wrapper functions, and explicit type aliases unless asked.
-- When asked for functional style, use the existing monadic types in `src/core/bulding-blocks/` and `src/lib/result/` — do not introduce new wrapper constructs.
+- When asked for functional style, use the existing monadic types in `src/core/building-blocks/` and `src/lib/result/` — do not introduce new wrapper constructs.
 - **financial-authorization** context: functional style with Ramda (`applySpec`, `prop`, `map`, `find`, `propEq`), plain types, factory functions.
 - **invoices** context: OOP style with private `#fields`, `protected constructor`, static `create`/`fromPlain` factories, `toPlain()` serialization, `Equatable<T>`. Status types use `fromPlain` for trusted reconstruction and `fromString` for validated parsing (returns `Result`).
 - Domain events in financial-authorization use `applySpec`/`prop` for data transformation in constructors.
@@ -54,7 +54,7 @@ TypeScript DDD codebase with two bounded contexts: **invoices** (OOP class-based
 src/
   core/                          # Business domains and shared building blocks
     bootstrap.ts                 # Wires domain modules into the app
-    bulding-blocks/              # Result, DomainEvent, errors, interfaces (Equatable, Comparable, Mappable), UnitOfWork, logger port
+    building-blocks/              # Result, DomainEvent, errors, interfaces (Equatable, Comparable, Mappable), UnitOfWork, logger port
     invoices/                    # OOP class-based bounded context
       domain/                    # Entities, value objects, events, checks
       application/               # Use cases
@@ -76,9 +76,6 @@ src/
   instrumentation.ts             # OpenTelemetry bootstrap
 e2e/                             # E2E tests (outside src/)
 ```
-
-Note: `core/bulding-blocks/` directory name is intentionally as-is (typo in the path); don't rename without coordinating.
-
 ## Key Patterns
 
 - **financial-authorization value objects**: every value object (`Name`, `Email`, `Comment`, `Id`, `Order`, `Action`, `ReferenceId`, `Money`) has a factory function (`createName`, `createEmail`, etc.) that returns `Result<AppKnownError, T>` with validation. Each has a `checks/` folder with standalone check functions using the `ifElse(predicate, createError, Result.ok)` pattern from Ramda.

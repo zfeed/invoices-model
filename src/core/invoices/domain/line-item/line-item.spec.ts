@@ -1,4 +1,4 @@
-import { testEquatable } from '../../../bulding-blocks/interfaces/equatable/equatable.test-helper.ts';
+import { testEquatable } from '../../../building-blocks/interfaces/equatable/equatable.test-helper.ts';
 import { Money } from '../money/money/money.ts';
 import { LineItem } from './line-item.ts';
 import { UnitDescription } from './unit-description/unit-description.ts';

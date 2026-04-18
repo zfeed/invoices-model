@@ -1,4 +1,4 @@
-import { Session } from '../../../bulding-blocks/unit-of-work/unit-of-work.ts';
+import { Session } from '../../../building-blocks/unit-of-work/unit-of-work.ts';
 import { Action } from '../../domain/action/action.ts';
 import { AuthflowPolicy } from '../../domain/authflow/authflow-policy.ts';
 import { AuthflowTemplate } from '../../domain/authflow/authflow-template.ts';

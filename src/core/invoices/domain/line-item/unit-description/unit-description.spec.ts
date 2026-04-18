@@ -1,4 +1,4 @@
-import { testEquatable } from '../../../../bulding-blocks/interfaces/equatable/equatable.test-helper.ts';
+import { testEquatable } from '../../../../building-blocks/interfaces/equatable/equatable.test-helper.ts';
 import { UnitDescription } from './unit-description.ts';
 
 describe('UnitDescription', () => {

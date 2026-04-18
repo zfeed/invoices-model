@@ -9,7 +9,7 @@ import {
     RECIPIENT_TYPE,
 } from '../../../domain/recipient/recipient.ts';
 import { VatRate } from '../../../domain/vat-rate/vat-rate.ts';
-import { Session } from '../../../../bulding-blocks/unit-of-work/unit-of-work.ts';
+import { Session } from '../../../../building-blocks/unit-of-work/unit-of-work.ts';
 import { DraftInvoiceDto } from '../../queries/get-draft-invoice/draft-invoice.dto.ts';
 
 export class CreateDraftInvoice {

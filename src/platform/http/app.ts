@@ -2,7 +2,7 @@ import '../../instrumentation.ts';
 import { SpanKind, trace } from '@opentelemetry/api';
 import { createApp } from './create-app.ts';
 import { registerDependencies } from '../container/register-dependencies.ts';
-import { Logger } from '../../core/bulding-blocks/logger/logger.ts';
+import { Logger } from '../../core/building-blocks/logger/logger.ts';
 import { withSpan } from '../../lib/with-span/with-span.ts';
 import { Config } from '../../config.ts';
 

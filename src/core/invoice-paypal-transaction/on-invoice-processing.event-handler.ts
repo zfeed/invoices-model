@@ -1,5 +1,5 @@
 import { WorkflowClient, WorkflowIdConflictPolicy } from '@temporalio/client';
-import { DomainEventsBus } from '../bulding-blocks/interfaces/domain-events-bus/domain-events-bus.interface.ts';
+import { DomainEventsBus } from '../building-blocks/interfaces/domain-events-bus/domain-events-bus.interface.ts';
 import { InvoiceProcessingEvent } from '../invoices/domain/invoice/events/invoice-processing.event.ts';
 import { CreateBatchPayoutRequestBody } from '../../lib/paypal/payouts/payouts.types.ts';
 import { INVOICE_PAYPAL_TX_TASK_QUEUE } from './task-queue.ts';

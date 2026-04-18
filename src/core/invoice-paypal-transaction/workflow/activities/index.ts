@@ -1,5 +1,5 @@
 import { Paypal } from '../../../../lib/paypal/paypal.ts';
-import { Session } from '../../../bulding-blocks/unit-of-work/unit-of-work.ts';
+import { Session } from '../../../building-blocks/unit-of-work/unit-of-work.ts';
 import { CreatePayout } from './create-payout.activity.ts';
 import { FetchPayoutStatus } from './fetch-payout-status.activity.ts';
 import { PayInvoice } from './pay-invoice.activity.ts';

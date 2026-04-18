@@ -7,7 +7,7 @@ import { TemporalWorker } from '../worker.ts';
 import { registerDependencies } from '../container/register-dependencies.ts';
 import { Container } from '../../lib/container/container.ts';
 import { bootstrap } from '../../core/bootstrap.ts';
-import { Session } from '../../core/bulding-blocks/unit-of-work/unit-of-work.ts';
+import { Session } from '../../core/building-blocks/unit-of-work/unit-of-work.ts';
 import { KafkaDomainEventsBus } from '../infrastructure/domain-events/kafka/kafka-domain-events-bus.ts';
 import { Config } from '../../config.ts';
 import { pino as Pino, Logger as PinoInstance } from 'pino';

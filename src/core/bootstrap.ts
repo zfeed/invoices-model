@@ -1,5 +1,5 @@
-import { DomainEventsBus } from './bulding-blocks/interfaces/domain-events-bus/domain-events-bus.interface.ts';
-import { Session } from './bulding-blocks/unit-of-work/unit-of-work.ts';
+import { DomainEventsBus } from './building-blocks/interfaces/domain-events-bus/domain-events-bus.interface.ts';
+import { Session } from './building-blocks/unit-of-work/unit-of-work.ts';
 import { CreateDraftInvoice } from './invoices/application/commands/create-draft-invoice/create-draft-invoice.ts';
 import { UpdateDraftInvoice } from './invoices/application/commands/update-draft-invoice/update-draft-invoice.ts';
 import { CalculateDraftInvoice } from './invoices/application/commands/calculate-draft-invoice/calculate-draft-invoice.ts';

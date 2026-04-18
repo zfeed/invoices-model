@@ -2,7 +2,7 @@ import { KafkaJS } from '@confluentinc/kafka-javascript';
 import {
     Logger,
     LogContext,
-} from '../../../core/bulding-blocks/logger/logger.ts';
+} from '../../../core/building-blocks/logger/logger.ts';
 
 export const toKafkaLogger = (
     logger: Logger,

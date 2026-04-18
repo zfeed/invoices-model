@@ -1,6 +1,6 @@
 import { AppKnownError, Mappable, Result } from '../../../../shared/index.ts';
-import { DomainEvent } from '../../../bulding-blocks/events/domain-event.ts';
-import { PublishableEvents } from '../../../bulding-blocks/events/event-publisher.interface.ts';
+import { DomainEvent } from '../../../building-blocks/events/domain-event.ts';
+import { PublishableEvents } from '../../../building-blocks/events/event-publisher.interface.ts';
 import { Action } from '../action/action.ts';
 import { Id } from '../id/id.ts';
 import { Money } from '../money/money.ts';

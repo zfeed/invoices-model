@@ -1,4 +1,4 @@
-import { Session } from '../../../../bulding-blocks/unit-of-work/unit-of-work.ts';
+import { Session } from '../../../../building-blocks/unit-of-work/unit-of-work.ts';
 import { PersistentManager } from '../../../../../platform/infrastructure/persistent-manager/pg-persistent-manager.ts';
 import { InMemoryDomainEventsBus } from '../../../../../platform/infrastructure/domain-events/in-memory-domain-events-bus.ts';
 import { EventOutboxStorage } from '../../../../../platform/infrastructure/event-outbox/event-outbox.ts';
@@ -7,7 +7,7 @@ const kysely = getTestKysely();
 import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice.ts';
 import { UpdateDraftInvoice } from './update-draft-invoice.ts';
 import { DraftInvoiceUpdatedEvent } from '../../../domain/draft-invoice/events/draft-invoice-updated.event.ts';
-import { KNOWN_ERROR_CODE } from '../../../../bulding-blocks/errors/known-error-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../../building-blocks/errors/known-error-codes.ts';
 import { ISSUER_TYPE } from '../../../domain/issuer/issuer.ts';
 import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient.ts';
 

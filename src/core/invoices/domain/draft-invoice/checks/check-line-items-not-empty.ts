@@ -1,5 +1,5 @@
 import { KNOWN_ERROR_CODE } from '../../../../../shared/index.ts';
-import { AppKnownError } from '../../../../bulding-blocks/errors/app-known-error.ts';
+import { AppKnownError } from '../../../../building-blocks/errors/app-known-error.ts';
 import { LineItems } from '../../line-items/line-items.ts';
 
 export function checkLineItemsNotEmpty(

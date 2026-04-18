@@ -51,7 +51,7 @@ This prevents lost events when a write succeeds but event delivery fails, and gi
 src/
   core/                             # Business domains and shared building blocks
     bootstrap.ts                    # Wires domain modules into the app
-    bulding-blocks/                 # Result, DomainEvent, errors, interfaces, unit of work, logger port
+    building-blocks/                 # Result, DomainEvent, errors, interfaces, unit of work, logger port
     invoices/                       # Invoice module (OOP, class-based)
       domain/                       # Entities, value objects, events, checks
       application/                  # Use cases

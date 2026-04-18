@@ -2,7 +2,7 @@ import { Logger as PinoInstance } from 'pino';
 import {
     Logger,
     LogContext,
-} from '../../../core/bulding-blocks/logger/logger.ts';
+} from '../../../core/building-blocks/logger/logger.ts';
 
 export type LoggerOptions = { pino: PinoInstance };
 

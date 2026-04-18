@@ -1,6 +1,6 @@
-import { KNOWN_ERROR_CODE } from '../../../bulding-blocks/errors/known-error-codes.ts';
-import { AppKnownError } from '../../../bulding-blocks/errors/app-known-error.ts';
-import { Session } from '../../../bulding-blocks/unit-of-work/unit-of-work.ts';
+import { KNOWN_ERROR_CODE } from '../../../building-blocks/errors/known-error-codes.ts';
+import { AppKnownError } from '../../../building-blocks/errors/app-known-error.ts';
+import { Session } from '../../../building-blocks/unit-of-work/unit-of-work.ts';
 import { Action } from '../../domain/action/action.ts';
 import { Approval } from '../../domain/approval/approval.ts';
 import { FinancialDocument } from '../../domain/document/document.ts';

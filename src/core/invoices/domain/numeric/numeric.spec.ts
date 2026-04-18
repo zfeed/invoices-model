@@ -1,5 +1,5 @@
-import { testComparable } from '../../../bulding-blocks/interfaces/comparable/comparable.test-helper.ts';
-import { testEquatable } from '../../../bulding-blocks/interfaces/equatable/equatable.test-helper.ts';
+import { testComparable } from '../../../building-blocks/interfaces/comparable/comparable.test-helper.ts';
+import { testEquatable } from '../../../building-blocks/interfaces/equatable/equatable.test-helper.ts';
 import { Numeric } from './numeric.ts';
 
 describe('Numeric', () => {

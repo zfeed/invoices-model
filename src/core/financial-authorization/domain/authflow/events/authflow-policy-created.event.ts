@@ -1,4 +1,4 @@
-import { DomainEvent } from '../../../../bulding-blocks/events/domain-event.ts';
+import { DomainEvent } from '../../../../building-blocks/events/domain-event.ts';
 
 type Data = {
     id: string;

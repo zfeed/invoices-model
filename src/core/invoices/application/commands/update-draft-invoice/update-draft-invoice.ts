@@ -1,5 +1,5 @@
-import { KNOWN_ERROR_CODE } from '../../../../bulding-blocks/errors/known-error-codes.ts';
-import { AppKnownError } from '../../../../bulding-blocks/errors/app-known-error.ts';
+import { KNOWN_ERROR_CODE } from '../../../../building-blocks/errors/known-error-codes.ts';
+import { AppKnownError } from '../../../../building-blocks/errors/app-known-error.ts';
 import { CalendarDate } from '../../../domain/calendar-date/calendar-date.ts';
 import { DraftInvoice } from '../../../domain/draft-invoice/draft-invoice.ts';
 import { Id } from '../../../domain/id/id.ts';
@@ -11,7 +11,7 @@ import {
     RECIPIENT_TYPE,
 } from '../../../domain/recipient/recipient.ts';
 import { VatRate } from '../../../domain/vat-rate/vat-rate.ts';
-import { Session } from '../../../../bulding-blocks/unit-of-work/unit-of-work.ts';
+import { Session } from '../../../../building-blocks/unit-of-work/unit-of-work.ts';
 import { DraftInvoiceDto } from '../../queries/get-draft-invoice/draft-invoice.dto.ts';
 
 export class UpdateDraftInvoice {

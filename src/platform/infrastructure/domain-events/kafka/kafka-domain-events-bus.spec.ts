@@ -1,10 +1,10 @@
 import { hash } from 'node:crypto';
 import { setTimeout as sleep } from 'node:timers/promises';
-import { testDomainEventsBus } from '../../../../core/bulding-blocks/interfaces/domain-events-bus/domain-events-bus.test-helper.ts';
+import { testDomainEventsBus } from '../../../../core/building-blocks/interfaces/domain-events-bus/domain-events-bus.test-helper.ts';
 import { KafkaDomainEventsBus } from './kafka-domain-events-bus.ts';
 import dayjs from '../../../../lib/dayjs/dayjs.ts';
 import { EventOutboxStorage } from '../../event-outbox/event-outbox.ts';
-import { DomainEvent } from '../../../../core/bulding-blocks/events/domain-event.ts';
+import { DomainEvent } from '../../../../core/building-blocks/events/domain-event.ts';
 import { cleanDatabase } from '../../persistent-manager/clean-database.ts';
 import { getTestKysely } from '../../../../../test/kysely.ts';
 const kysely = getTestKysely();

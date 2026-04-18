@@ -1,4 +1,4 @@
-import { testEquatable } from '../../../bulding-blocks/interfaces/equatable/equatable.test-helper.ts';
+import { testEquatable } from '../../../building-blocks/interfaces/equatable/equatable.test-helper.ts';
 import { Money } from '../money/money/money.ts';
 import { Numeric } from '../numeric/numeric.ts';
 import { VatRate } from './vat-rate.ts';

@@ -1,4 +1,4 @@
-import { DomainEvent } from '../../../core/bulding-blocks/events/domain-event.ts';
+import { DomainEvent } from '../../../core/building-blocks/events/domain-event.ts';
 import dayjs from '../../../lib/dayjs/dayjs.ts';
 import { cleanDatabase } from '../persistent-manager/clean-database.ts';
 import { EventOutboxStorage } from './event-outbox.ts';

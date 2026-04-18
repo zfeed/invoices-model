@@ -4,8 +4,8 @@ import {
     Mappable,
     Result,
 } from '../../../../shared/index.ts';
-import { DomainEvent } from '../../../bulding-blocks/events/domain-event.ts';
-import { PublishableEvents } from '../../../bulding-blocks/events/event-publisher.interface.ts';
+import { DomainEvent } from '../../../building-blocks/events/domain-event.ts';
+import { PublishableEvents } from '../../../building-blocks/events/event-publisher.interface.ts';
 import { Action } from '../action/action.ts';
 import { Approval } from '../approval/approval.ts';
 import { Authflow } from '../authflow/authflow.ts';

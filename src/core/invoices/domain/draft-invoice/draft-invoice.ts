@@ -4,7 +4,7 @@ import {
     Mappable,
     Result,
 } from '../../../../shared/index.ts';
-import { PublishableEvents } from '../../../bulding-blocks/events/index.ts';
+import { PublishableEvents } from '../../../building-blocks/events/index.ts';
 import { CalendarDate } from '../calendar-date/calendar-date.ts';
 import { Id } from '../id/id.ts';
 import { checkDates } from '../invoice/checks/check-dates.ts';

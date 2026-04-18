@@ -1,4 +1,4 @@
-import { KNOWN_ERROR_CODE } from '../../../bulding-blocks/errors/known-error-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../building-blocks/errors/known-error-codes.ts';
 import { Action } from '../action/action.ts';
 import { Approval } from '../approval/approval.ts';
 import { Approver } from '../approver/approver.ts';

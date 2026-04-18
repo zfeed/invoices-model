@@ -1,4 +1,4 @@
-import { Logger } from '../../../core/bulding-blocks/logger/logger.ts';
+import { Logger } from '../../../core/building-blocks/logger/logger.ts';
 import {
     PinoLogger,
     LoggerOptions,

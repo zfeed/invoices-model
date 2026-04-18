@@ -1,4 +1,4 @@
-import { testEquatable } from '../../../bulding-blocks/interfaces/equatable/equatable.test-helper.ts';
+import { testEquatable } from '../../../building-blocks/interfaces/equatable/equatable.test-helper.ts';
 import { Country } from '../country/country.ts';
 import { Email } from '../email/email.ts';
 import { Paypal } from '../billing/paypal/paypal.ts';

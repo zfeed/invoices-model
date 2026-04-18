@@ -1,5 +1,5 @@
-import { KNOWN_ERROR_CODE } from '../../../../bulding-blocks/errors/known-error-codes.ts';
-import { AppKnownError } from '../../../../bulding-blocks/errors/app-known-error.ts';
+import { KNOWN_ERROR_CODE } from '../../../../building-blocks/errors/known-error-codes.ts';
+import { AppKnownError } from '../../../../building-blocks/errors/app-known-error.ts';
 import { Approval } from '../../approval/approval.ts';
 import { Approver } from '../../approver/approver.ts';
 

@@ -10,8 +10,8 @@ import {
     OpenTelemetryActivityInboundInterceptor,
     makeWorkflowExporter,
 } from '@temporalio/interceptors-opentelemetry/lib/worker/index.js';
-import { Session } from '../core/bulding-blocks/unit-of-work/unit-of-work.ts';
-import { Logger } from '../core/bulding-blocks/logger/logger.ts';
+import { Session } from '../core/building-blocks/unit-of-work/unit-of-work.ts';
+import { Logger } from '../core/building-blocks/logger/logger.ts';
 import { resource, traceExporter } from '../instrumentation.ts';
 
 let runtimeInstalled = false;

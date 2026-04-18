@@ -1,7 +1,7 @@
 import {
     DomainEventClass,
     SerializedDomainEvent,
-} from '../../../core/bulding-blocks/events/domain-event.ts';
+} from '../../../core/building-blocks/events/domain-event.ts';
 import { type Duration } from '../../../lib/dayjs/dayjs.ts';
 import { sql } from 'kysely';
 import type {

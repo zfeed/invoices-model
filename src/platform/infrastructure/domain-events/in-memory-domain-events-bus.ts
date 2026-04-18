@@ -1,9 +1,9 @@
 import {
     DomainEvent,
     DomainEventClass,
-} from '../../../core/bulding-blocks/events/domain-event.ts';
-import { PublishableEvents } from '../../../core/bulding-blocks/events/event-publisher.interface.ts';
-import { DomainEventsBus } from '../../../core/bulding-blocks/interfaces/domain-events-bus/domain-events-bus.interface.ts';
+} from '../../../core/building-blocks/events/domain-event.ts';
+import { PublishableEvents } from '../../../core/building-blocks/events/event-publisher.interface.ts';
+import { DomainEventsBus } from '../../../core/building-blocks/interfaces/domain-events-bus/domain-events-bus.interface.ts';
 
 type EventHandler<T = any> = (event: T) => Promise<void>;
 

@@ -1,4 +1,4 @@
-import { KNOWN_ERROR_CODE } from '../../../bulding-blocks/errors/known-error-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../building-blocks/errors/known-error-codes.ts';
 import { Money } from '../money/money.ts';
 import { Range } from './range.ts';
 

@@ -1,5 +1,5 @@
 import { ApplicationFailure } from '@temporalio/activity';
-import { Session } from '../../../bulding-blocks/unit-of-work/unit-of-work.ts';
+import { Session } from '../../../building-blocks/unit-of-work/unit-of-work.ts';
 import { Invoice } from '../../../invoices/domain/invoice/invoice.ts';
 import { Id } from '../../../invoices/domain/id/id.ts';
 

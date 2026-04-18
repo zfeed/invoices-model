@@ -1,4 +1,4 @@
-import { KNOWN_ERROR_CODE } from '../../../bulding-blocks/errors/known-error-codes.ts';
+import { KNOWN_ERROR_CODE } from '../../../building-blocks/errors/known-error-codes.ts';
 import { Order } from './order.ts';
 
 describe('Order', () => {
