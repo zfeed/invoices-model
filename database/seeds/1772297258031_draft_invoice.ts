@@ -1,19 +1,19 @@
 import type { Kysely } from 'kysely';
 import { DB, DraftInvoiceStatus } from 'kysely-codegen';
-import { DraftInvoice } from '../../src/features/invoices/domain/draft-invoice/draft-invoice.ts';
-import { Id } from '../../src/features/invoices/domain/id/id.ts';
-import { LineItem } from '../../src/features/invoices/domain/line-item/line-item.ts';
-import { VatRate } from '../../src/features/invoices/domain/vat-rate/vat-rate.ts';
-import { CalendarDate } from '../../src/features/invoices/domain/calendar-date/calendar-date.ts';
+import { DraftInvoice } from '../../src/core/invoices/domain/draft-invoice/draft-invoice.ts';
+import { Id } from '../../src/core/invoices/domain/id/id.ts';
+import { LineItem } from '../../src/core/invoices/domain/line-item/line-item.ts';
+import { VatRate } from '../../src/core/invoices/domain/vat-rate/vat-rate.ts';
+import { CalendarDate } from '../../src/core/invoices/domain/calendar-date/calendar-date.ts';
 import {
     Issuer,
     ISSUER_TYPE,
-} from '../../src/features/invoices/domain/issuer/issuer.ts';
+} from '../../src/core/invoices/domain/issuer/issuer.ts';
 import {
     Recipient,
     RECIPIENT_TYPE,
-} from '../../src/features/invoices/domain/recipient/recipient.ts';
-import { Paypal } from '../../src/features/invoices/domain/billing/paypal/paypal.ts';
+} from '../../src/core/invoices/domain/recipient/recipient.ts';
+import { Paypal } from '../../src/core/invoices/domain/billing/paypal/paypal.ts';
 
 export async function seed(db: Kysely<DB>): Promise<void> {
     const id = Id.create().unwrap();

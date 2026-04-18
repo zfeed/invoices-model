@@ -1,4 +1,4 @@
-import { loadEnv } from './src/load-env.ts';
+import { loadEnv } from './src/lib/load-env/load-env.ts';
 import { defineConfig } from 'kysely-ctl';
 import { Pool } from 'pg';
 import { PostgresDialect } from 'kysely';

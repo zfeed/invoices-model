@@ -4,8 +4,8 @@
     "description": "",
     "type": "module",
     "scripts": {
-        "start": "tsc --noEmit && node --env-file-if-exists=.env --import tsx src/http/app.ts",
-        "start:debug": "node --env-file-if-exists=.env --inspect --import tsx src/http/app.ts",
+        "start": "tsc --noEmit && node --env-file-if-exists=.env --import tsx src/platform/http/app.ts",
+        "start:debug": "node --env-file-if-exists=.env --inspect --import tsx src/platform/http/app.ts",
         "test": "vitest run",
         "test:watch": "vitest",
         "test:ui": "vitest --ui",

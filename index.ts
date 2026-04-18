@@ -1,5 +1,5 @@
-import { Numeric } from './src/features/invoices/domain/numeric/numeric.ts';
-import { NumericDataMapper } from './src/features/invoices/infrastructure/mappers/numeric.data-mapper.ts';
+import { Numeric } from './src/core/invoices/domain/numeric/numeric.ts';
+import { NumericDataMapper } from './src/core/invoices/infrastructure/mappers/numeric.data-mapper.ts';
 
 // Client creates a domain Numeric — knows nothing about persistence
 const numeric = Numeric.create('123.45').unwrap();

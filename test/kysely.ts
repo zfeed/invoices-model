@@ -1,4 +1,4 @@
-import { createKysely } from '../src/container/dependencies/kysely.ts';
+import { createKysely } from '../src/platform/container/dependencies/kysely.ts';
 import { getConfig } from '../src/config.ts';
 import type { Kysely } from '../database/kysely.ts';
 
