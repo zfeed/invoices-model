@@ -56,7 +56,7 @@ describe('GET /invoices/:id', () => {
         const res = await get('/invoices/00000000-0000-0000-0000-000000000000');
         expect(res.status).toBe(422);
         const json = await res.json();
-        expect(json.error.code).toBe('A1000');
+        expect(json.error.code).toBe('13000');
         expect(json.error.message).toBe('Invoice not found');
     });
 });
