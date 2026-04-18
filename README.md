@@ -49,21 +49,29 @@ This prevents lost events when a write succeeds but event delivery fails, and gi
 
 ```
 src/
-  building-blocks/              # Result monad, DomainEvent base, errors, interfaces
-  features/
-    invoices/                   # Invoice module (OOP, class-based)
-      domain/                   # Entities, value objects, events, checks
-      application/              # Use cases
-      infrastructure/           # In-memory storage, data mappers
-      http/                     # Fastify routes and schemas
-    financial-authorization/    # Authorization module (OOP, class-based)
-      domain/                   # Entities, value objects, events, checks
-      application/              # Use cases, event handlers, queries
-      infrastructure/           # In-memory storage, data mappers
-      http/                     # Fastify routes and schemas
-  infrastructure/               # Shared infra: domain events, event outbox
-  http/                         # Shared Fastify app setup, error handler, plugins
-e2e/                            # End-to-end tests
+  core/                             # Business domains and shared building blocks
+    bootstrap.ts                    # Wires domain modules into the app
+    bulding-blocks/                 # Result, DomainEvent, errors, interfaces, unit of work, logger port
+    invoices/                       # Invoice module (OOP, class-based)
+      domain/                       # Entities, value objects, events, checks
+      application/                  # Use cases
+      infrastructure/               # In-memory storage, data mappers
+      http/                         # Fastify routes and schemas
+    financial-authorization/        # Authorization module (OOP, class-based)
+      domain/                       # Entities, value objects, events, checks
+      application/                  # Use cases, event handlers, queries
+      infrastructure/               # In-memory storage, data mappers
+      http/                         # Fastify routes and schemas
+    invoice-paypal-transaction/     # Temporal workflow integrating invoices with PayPal payouts
+  lib/                              # Generic, domain-agnostic utilities (Result, container, dayjs, paypal client, etc.)
+  platform/                         # App wiring and infrastructure adapters
+    container/                      # DI container and dependency registrations
+    http/                           # Fastify app setup, error handler, plugins
+    infrastructure/                 # Domain-events bus, event outbox, logger, persistent manager
+    worker.ts                       # Temporal worker entrypoint
+  config.ts                         # Typed config loader
+  instrumentation.ts                # OpenTelemetry bootstrap
+e2e/                                # End-to-end tests
 ```
 
 ---

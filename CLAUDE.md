@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-TypeScript DDD codebase with two bounded contexts: **invoices** (OOP class-based) and **financial-authorization** (functional/plain-object). Monadic building blocks (Result, Some, IO) in `building-blocks/`.
+TypeScript DDD codebase with two bounded contexts: **invoices** (OOP class-based) and **financial-authorization** (functional/plain-object), plus the **invoice-paypal-transaction** Temporal workflow. Monadic building blocks (Result, Some, IO) live under `src/core/bulding-blocks/` and `src/lib/result/`.
 
 ## Testing
 
@@ -36,7 +36,7 @@ TypeScript DDD codebase with two bounded contexts: **invoices** (OOP class-based
 - Avoid `any` and `as` type assertions. Use `unknown`, `Record<string, unknown>`, or specific types instead. Prefer structural typing, narrowing, and lookup patterns over casts.
 - Prefer functional composition patterns: rambda `when`/`ifElse`, Result/Some/IO monads, flat pipelines.
 - Avoid class-based implementations when a functional approach is asked for. Avoid manual object reconstruction, wrapper functions, and explicit type aliases unless asked.
-- When asked for functional style, use the existing monadic types in `building-blocks/` — do not introduce new wrapper constructs.
+- When asked for functional style, use the existing monadic types in `src/core/bulding-blocks/` and `src/lib/result/` — do not introduce new wrapper constructs.
 - **financial-authorization** context: functional style with Ramda (`applySpec`, `prop`, `map`, `find`, `propEq`), plain types, factory functions.
 - **invoices** context: OOP style with private `#fields`, `protected constructor`, static `create`/`fromPlain` factories, `toPlain()` serialization, `Equatable<T>`. Status types use `fromPlain` for trusted reconstruction and `fromString` for validated parsing (returns `Result`).
 - Domain events in financial-authorization use `applySpec`/`prop` for data transformation in constructors.
@@ -52,22 +52,32 @@ TypeScript DDD codebase with two bounded contexts: **invoices** (OOP class-based
 
 ```
 src/
-  building-blocks/   # Result monad, DomainEvent base, errors, interfaces (Equatable, Comparable), UnitOfWork
-  features/
-    invoices/          # OOP class-based bounded context
-      domain/          # Entities, value objects, events, checks
-      application/     # Use cases
-      infrastructure/  # In-memory storage, data mappers
-      http/            # Fastify routes and schemas
-    financial-authorization/  # Functional bounded context
-      domain/          # Plain types, factory functions, events, checks
-      application/     # Use cases, event handlers, queries
-      infrastructure/  # In-memory storage, data mappers
-      http/            # Fastify routes and schemas
-  infrastructure/    # Shared infra: domain-events impl, event outbox, persistent manager
-  http/              # Shared Fastify app setup, error handler, plugins
-e2e/                 # E2E tests (outside src/)
+  core/                          # Business domains and shared building blocks
+    bootstrap.ts                 # Wires domain modules into the app
+    bulding-blocks/              # Result, DomainEvent, errors, interfaces (Equatable, Comparable, Mappable), UnitOfWork, logger port
+    invoices/                    # OOP class-based bounded context
+      domain/                    # Entities, value objects, events, checks
+      application/               # Use cases
+      infrastructure/            # In-memory storage, data mappers
+      http/                      # Fastify routes and schemas
+    financial-authorization/     # Functional bounded context
+      domain/                    # Plain types, factory functions, events, checks
+      application/               # Use cases, event handlers, queries
+      infrastructure/            # In-memory storage, data mappers
+      http/                      # Fastify routes and schemas
+    invoice-paypal-transaction/  # Temporal workflow: invoice → PayPal payout
+  lib/                           # Domain-agnostic utilities: result, container, dayjs, paypal client, load-env, with-span, unflatten, assert-never
+  platform/                      # App wiring and infra adapters
+    container/                   # DI container + dependency registrations
+    http/                        # Fastify app, error handler, plugins, validation
+    infrastructure/              # Domain-events bus (in-memory + kafka), event outbox, logger, persistent manager
+    worker.ts                    # Temporal worker entrypoint
+  config.ts                      # Typed config loader
+  instrumentation.ts             # OpenTelemetry bootstrap
+e2e/                             # E2E tests (outside src/)
 ```
+
+Note: `core/bulding-blocks/` directory name is intentionally as-is (typo in the path); don't rename without coordinating.
 
 ## Key Patterns
 
