@@ -5,7 +5,8 @@ import { InMemoryDomainEventsBus } from '../../../../infrastructure/domain-event
 import { EventOutboxStorage } from '../../../../infrastructure/event-outbox/event-outbox.ts';
 import { CanApproverApprove } from './can-approver-approve.ts';
 import { cleanDatabase } from '../../../../infrastructure/persistent-manager/clean-database.ts';
-import { kysely } from '../../../../../database/kysely.ts';
+import { getTestKysely } from '../../../../../test/kysely.ts';
+const kysely = getTestKysely();
 import { Action } from '../../domain/action/action.ts';
 import { Approval } from '../../domain/approval/approval.ts';
 import { Approver } from '../../domain/approver/approver.ts';

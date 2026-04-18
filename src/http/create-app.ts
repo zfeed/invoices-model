@@ -1,7 +1,7 @@
 import Fastify from 'fastify';
 import { WorkflowClient } from '@temporalio/client';
 import { SpanKind, trace } from '@opentelemetry/api';
-import { kysely } from '../../database/kysely.ts';
+import type { Kysely } from '../../database/kysely.ts';
 import {
     draftInvoicesPlugin,
     invoicesPlugin,
@@ -14,7 +14,7 @@ import { Container } from '../container/container.ts';
 import { bootstrap } from '../bootstrap.ts';
 import { Session } from '../shared/unit-of-work/unit-of-work.ts';
 import { KafkaDomainEventsBus } from '../infrastructure/domain-events/kafka/kafka-domain-events-bus.ts';
-import { config } from '../config.ts';
+import { Config } from '../config.ts';
 import { pino as Pino, Logger as PinoInstance } from 'pino';
 import { withSpan } from '../shared/tracing/with-span.ts';
 
@@ -23,7 +23,9 @@ const tracer = trace.getTracer('application');
 const startBootstrap = async (
     container: Container,
     temporalClient: WorkflowClient,
-    invoicePaypalWorker: TemporalWorker
+    invoicePaypalWorker: TemporalWorker,
+    config: Config,
+    kysely: Kysely
 ) => {
     const commands = await bootstrap({
         session: container.getOrThrow(Session),
@@ -47,6 +49,8 @@ export const createApp = async (container?: Container) => {
         resolvedContainer.getOrThrow<WorkflowClient>(WorkflowClient);
     const invoicePaypalWorker =
         resolvedContainer.getOrThrow<TemporalWorker>(TemporalWorker);
+    const config = resolvedContainer.getOrThrow<Config>('Config');
+    const kysely = resolvedContainer.getOrThrow<Kysely>('Kysely');
 
     const commands = await withSpan(
         tracer,
@@ -55,7 +59,9 @@ export const createApp = async (container?: Container) => {
             startBootstrap(
                 resolvedContainer,
                 temporalClient,
-                invoicePaypalWorker
+                invoicePaypalWorker,
+                config,
+                kysely
             ),
         { kind: SpanKind.INTERNAL }
     );

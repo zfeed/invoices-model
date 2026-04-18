@@ -1,5 +1,5 @@
 import { EventOutboxStorage } from '../../infrastructure/event-outbox/event-outbox.ts';
-import { kysely } from '../../../database/kysely.ts';
+import type { Kysely } from '../../../database/kysely.ts';
 
-export const createEventOutboxStorage = (): EventOutboxStorage =>
+export const createEventOutboxStorage = (kysely: Kysely): EventOutboxStorage =>
     EventOutboxStorage.create(kysely);

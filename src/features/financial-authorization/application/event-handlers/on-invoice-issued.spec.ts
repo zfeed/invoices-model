@@ -12,7 +12,8 @@ import { FinancialDocument } from '../../domain/document/document.ts';
 import { ReferenceId } from '../../domain/reference-id/reference-id.ts';
 import { OnInvoiceIssued } from './on-invoice-issued.ts';
 import { cleanDatabase } from '../../../../infrastructure/persistent-manager/clean-database.ts';
-import { kysely } from '../../../../../database/kysely.ts';
+import { getTestKysely } from '../../../../../test/kysely.ts';
+const kysely = getTestKysely();
 
 const createInvoiceEvent = (id: string, amount = '100', currency = 'USD') =>
     InvoiceIssuedEvent.create({

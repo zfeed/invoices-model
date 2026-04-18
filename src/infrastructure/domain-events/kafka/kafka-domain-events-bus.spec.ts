@@ -6,15 +6,16 @@ import dayjs from '../../../lib/dayjs.ts';
 import { EventOutboxStorage } from '../../event-outbox/event-outbox.ts';
 import { DomainEvent } from '../../../shared/events/domain-event.ts';
 import { cleanDatabase } from '../../persistent-manager/clean-database.ts';
-import { kysely } from '../../../../database/kysely.ts';
-import { config } from '../../../config.ts';
+import { getTestKysely } from '../../../../test/kysely.ts';
+const kysely = getTestKysely();
+import { getConfig } from '../../../config.ts';
 
 let domainEventsBus: KafkaDomainEventsBus;
 
 const createKafkaConfig = (random: string) => ({
     global: {
         kafkaJS: {
-            brokers: config.kafka.brokers,
+            brokers: getConfig().kafka.brokers,
             clientId: `${random}-example-client`,
             logLevel: 0,
         },

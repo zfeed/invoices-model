@@ -2,7 +2,8 @@ import { DomainEvent } from '../../shared/events/domain-event.ts';
 import dayjs from '../../lib/dayjs.ts';
 import { cleanDatabase } from '../persistent-manager/clean-database.ts';
 import { EventOutboxStorage } from './event-outbox.ts';
-import { kysely } from '../../../database/kysely.ts';
+import { getTestKysely } from '../../../test/kysely.ts';
+const kysely = getTestKysely();
 
 class InvoiceIssuedEvent extends DomainEvent<{ id: string }> {}
 

@@ -5,7 +5,8 @@ import { Session } from './unit-of-work.ts';
 import { PersistentManager } from '../../infrastructure/persistent-manager/pg-persistent-manager.ts';
 import { InMemoryDomainEventsBus } from '../../infrastructure/domain-events/in-memory-domain-events-bus.ts';
 import { EventOutboxStorage } from '../../infrastructure/event-outbox/event-outbox.ts';
-import { kysely } from '../../../database/kysely.ts';
+import { getTestKysely } from '../../../test/kysely.ts';
+const kysely = getTestKysely();
 import { Invoice } from '../../features/invoices/domain/invoice/invoice.ts';
 import { CalendarDate } from '../../features/invoices/domain/calendar-date/calendar-date.ts';
 import {

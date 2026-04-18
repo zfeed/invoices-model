@@ -25,7 +25,8 @@ import { KNOWN_ERROR_CODE } from '../../../../../shared/errors/known-error-codes
 import { ISSUER_TYPE } from '../../../domain/issuer/issuer.ts';
 import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient.ts';
 import { cleanDatabase } from '../../../../../infrastructure/persistent-manager/clean-database.ts';
-import { kysely } from '../../../../../../database/kysely.ts';
+import { getTestKysely } from '../../../../../../test/kysely.ts';
+const kysely = getTestKysely();
 
 const uuid = () => crypto.randomUUID();
 

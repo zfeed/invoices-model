@@ -10,7 +10,8 @@ import { AuthflowPolicy } from '../../domain/authflow/authflow-policy.ts';
 import { AuthflowPolicyCreatedEvent } from '../../domain/authflow/events/authflow-policy-created.event.ts';
 import { CreateAuthflowPolicy } from './create-authflow-policy.ts';
 import { cleanDatabase } from '../../../../infrastructure/persistent-manager/clean-database.ts';
-import { kysely } from '../../../../../database/kysely.ts';
+import { getTestKysely } from '../../../../../test/kysely.ts';
+const kysely = getTestKysely();
 
 const range = (from: string, to: string) =>
     Range.create(

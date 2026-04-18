@@ -14,7 +14,8 @@ import { Action } from '../../domain/action/action.ts';
 import { FinancialDocument } from '../../domain/document/document.ts';
 import { OnInvoiceIssued } from './on-invoice-issued.ts';
 import { cleanDatabase } from '../../../../infrastructure/persistent-manager/clean-database.ts';
-import { kysely } from '../../../../../database/kysely.ts';
+import { getTestKysely } from '../../../../../test/kysely.ts';
+const kysely = getTestKysely();
 
 const COMPLETE_DRAFT_REQUEST = {
     lineItems: [

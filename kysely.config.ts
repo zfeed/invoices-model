@@ -1,9 +1,17 @@
-import 'dotenv/config';
+import { loadEnv } from './src/load-env.ts';
 import { defineConfig } from 'kysely-ctl';
-import { postgresDialect } from './database/kysely.ts';
+import { Pool } from 'pg';
+import { PostgresDialect } from 'kysely';
+import { getConfig } from './src/config.ts';
+
+loadEnv('.env');
+
+const config = getConfig();
 
 export default defineConfig({
-    dialect: postgresDialect,
+    dialect: new PostgresDialect({
+        pool: new Pool({ connectionString: config.database.url }),
+    }),
     migrations: {
         migrationFolder: 'database/migrations',
     },

@@ -20,7 +20,8 @@ import { CreateAuthflowPolicy } from './create-authflow-policy.ts';
 import { OnInvoiceIssued } from '../event-handlers/on-invoice-issued.ts';
 import { ApproveActionOnDocument } from './approve-action-on-document.ts';
 import { cleanDatabase } from '../../../../infrastructure/persistent-manager/clean-database.ts';
-import { kysely } from '../../../../../database/kysely.ts';
+import { getTestKysely } from '../../../../../test/kysely.ts';
+const kysely = getTestKysely();
 
 const range = (from: string, to: string) =>
     Range.create(

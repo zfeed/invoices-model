@@ -14,23 +14,32 @@ import { createTemporalWorker } from './dependencies/temporal-worker.ts';
 import { Logger } from '../shared/logger/logger.ts';
 import { createLogger } from './dependencies/logger.ts';
 import { createPino } from './dependencies/pino.ts';
+import { createConfig } from './dependencies/config.ts';
+import { createKysely } from './dependencies/kysely.ts';
 import { pino as Pino } from 'pino';
-import { config } from '../config.ts';
 
 export const registerDependencies = async (): Promise<Container> => {
     const container = new Container();
 
+    const config = createConfig();
+    const kysely = createKysely(config);
     const pino = createPino(config.logger);
     const logger = createLogger({ pino });
-    const eventOutboxStorage = createEventOutboxStorage();
+    const eventOutboxStorage = createEventOutboxStorage(kysely);
     const domainEventsBus = createKafkaDomainEventsBus(
         eventOutboxStorage,
-        logger
+        logger,
+        config
     );
-    const session = createSession(domainEventsBus, eventOutboxStorage);
-    const temporalClient = await createTemporalClient();
-    const paypal = createPaypal();
-    const temporalWorker = createTemporalWorker(paypal, session, logger);
+    const session = createSession(kysely, domainEventsBus, eventOutboxStorage);
+    const temporalClient = await createTemporalClient(config);
+    const paypal = createPaypal(config);
+    const temporalWorker = createTemporalWorker(
+        paypal,
+        session,
+        logger,
+        config
+    );
 
     container.register(Pino, pino);
     container.register(Logger, logger);
@@ -40,6 +49,8 @@ export const registerDependencies = async (): Promise<Container> => {
     container.register(WorkflowClient, temporalClient);
     container.register(Paypal, paypal);
     container.register(TemporalWorker, temporalWorker);
+    container.register('Config', config);
+    container.register('Kysely', kysely);
 
     return container;
 };
