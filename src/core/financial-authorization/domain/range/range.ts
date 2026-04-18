@@ -1,4 +1,4 @@
-import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { Equatable, Mappable, Result } from '../../../building-blocks/index.ts';
 import { Money } from '../money/money.ts';
 import { checkCurrenciesEqual } from './checks/check-currencies-equal.ts';
 import { checkFromNotGreaterThanTo } from './checks/check-from-not-greater-than-to.ts';

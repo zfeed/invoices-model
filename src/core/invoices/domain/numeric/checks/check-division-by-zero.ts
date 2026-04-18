@@ -1,7 +1,7 @@
 import {
     KNOWN_ERROR_CODE,
     AppKnownError,
-} from '../../../../../shared/index.ts';
+} from '../../../../building-blocks/index.ts';
 import { Numeric } from '../numeric.ts';
 
 export function checkDivisionByZero(value: Numeric): AppKnownError | null {

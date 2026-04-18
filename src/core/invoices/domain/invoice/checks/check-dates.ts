@@ -1,7 +1,7 @@
 import {
     KNOWN_ERROR_CODE,
     AppKnownError,
-} from '../../../../../shared/index.ts';
+} from '../../../../building-blocks/index.ts';
 import { CalendarDate } from '../../calendar-date/calendar-date.ts'; // Adjust the import path based on where LineItem is defined
 
 export function checkDates({

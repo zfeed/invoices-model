@@ -3,7 +3,7 @@ import {
     AppKnownError,
     Mappable,
     Result,
-} from '../../../../shared/index.ts';
+} from '../../../building-blocks/index.ts';
 import { DomainEvent } from '../../../building-blocks/events/domain-event.ts';
 import { PublishableEvents } from '../../../building-blocks/events/event-publisher.interface.ts';
 import { Action } from '../action/action.ts';

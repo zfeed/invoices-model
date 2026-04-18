@@ -1,4 +1,8 @@
-import { Equatable, Mappable, Result } from '../../../../../shared/index.ts';
+import {
+    Equatable,
+    Mappable,
+    Result,
+} from '../../../../building-blocks/index.ts';
 import { Email } from '../../email/email.ts';
 
 export class Paypal

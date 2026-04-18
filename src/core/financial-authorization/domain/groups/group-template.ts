@@ -1,4 +1,8 @@
-import { AppKnownError, Mappable, Result } from '../../../../shared/index.ts';
+import {
+    AppKnownError,
+    Mappable,
+    Result,
+} from '../../../building-blocks/index.ts';
 import { Approver } from '../approver/approver.ts';
 import { Id } from '../id/id.ts';
 import { Group } from './group.ts';

@@ -1,4 +1,4 @@
-import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { Equatable, Mappable, Result } from '../../../building-blocks/index.ts';
 import { checkOrderNonNegative } from './checks/check-order-non-negative.ts';
 
 export class Order implements Equatable<Order>, Mappable<number> {

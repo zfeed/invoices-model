@@ -3,7 +3,7 @@ import {
     AppKnownError,
     Mappable,
     Result,
-} from '../../../../shared/index.ts';
+} from '../../../building-blocks/index.ts';
 import { Issuer } from '../issuer/issuer.ts';
 import { Money } from '../money/money/money.ts';
 import { Recipient } from '../recipient/recipient.ts';

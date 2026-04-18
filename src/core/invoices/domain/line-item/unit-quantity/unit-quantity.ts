@@ -1,4 +1,8 @@
-import { Equatable, Mappable, Result } from '../../../../../shared/index.ts';
+import {
+    Equatable,
+    Mappable,
+    Result,
+} from '../../../../building-blocks/index.ts';
 import { Numeric } from '../../numeric/numeric.ts';
 import { checkUnitQuantity } from './checks/check-unit-quantity.ts';
 

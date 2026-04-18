@@ -1,4 +1,8 @@
-import { Equatable, Mappable, Result } from '../../../../../shared/index.ts';
+import {
+    Equatable,
+    Mappable,
+    Result,
+} from '../../../../building-blocks/index.ts';
 import { checkDescriptionNonEmpty } from './checks/check-description-non-empty.ts';
 
 export class UnitDescription

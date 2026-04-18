@@ -1,4 +1,4 @@
-import { Mappable, Result } from '../../../../shared/index.ts';
+import { Mappable, Result } from '../../../building-blocks/index.ts';
 import { Comment } from '../comment/comment.ts';
 import { Id } from '../id/id.ts';
 import { Timestamp } from '../timestamp/timestamp.ts';

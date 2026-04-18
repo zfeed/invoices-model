@@ -3,7 +3,7 @@ import {
     AppKnownError,
     Equatable,
     Result,
-} from '../../../../shared/index.ts';
+} from '../../../building-blocks/index.ts';
 
 export enum INVOICE_STATUS {
     ISSUED = 'ISSUED',

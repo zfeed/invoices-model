@@ -2,7 +2,7 @@ import {
     KNOWN_ERROR_CODE,
     AppKnownError,
     Result,
-} from '../../../../shared/index.ts';
+} from '../../../building-blocks/index.ts';
 import { INVOICE_STATUS, Status } from './status.ts';
 
 export class InvoiceStatus extends Status<INVOICE_STATUS> {

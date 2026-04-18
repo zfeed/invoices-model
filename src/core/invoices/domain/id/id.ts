@@ -1,5 +1,5 @@
 import { v7 as uuidv7 } from 'uuid';
-import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { Equatable, Mappable, Result } from '../../../building-blocks/index.ts';
 
 export class Id implements Equatable<Id>, Mappable<string> {
     protected _value: string;

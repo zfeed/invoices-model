@@ -1,7 +1,7 @@
 import {
     KNOWN_ERROR_CODE,
     AppKnownError,
-} from '../../../../../../shared/index.ts';
+} from '../../../../../building-blocks/index.ts';
 import { Currency } from '../../currency/currency.ts';
 
 export function checkEqualCurrencies(

@@ -1,4 +1,4 @@
-import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { Equatable, Mappable, Result } from '../../../building-blocks/index.ts';
 import { Email } from '../email/email.ts';
 import { Id } from '../id/id.ts';
 import { Name } from '../name/name.ts';

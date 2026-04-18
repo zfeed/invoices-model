@@ -1,4 +1,4 @@
-import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { Equatable, Mappable, Result } from '../../../building-blocks/index.ts';
 import { checkCountryCode } from './checks/check-country-code.ts';
 
 export class Country implements Equatable<Country>, Mappable<string> {

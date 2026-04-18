@@ -1,7 +1,7 @@
 import {
     KNOWN_ERROR_CODE,
     AppKnownError,
-} from '../../../../../shared/index.ts';
+} from '../../../../building-blocks/index.ts';
 
 export function checkIsISO8601Date(value: string): AppKnownError | null {
     const pattern = /^\d{4}-\d{2}-\d{2}$/;

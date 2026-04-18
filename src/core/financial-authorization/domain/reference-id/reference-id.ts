@@ -1,4 +1,4 @@
-import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { Equatable, Mappable, Result } from '../../../building-blocks/index.ts';
 import { checkReferenceIdNotBlank } from './checks/check-reference-id-not-blank.ts';
 
 export class ReferenceId implements Equatable<ReferenceId>, Mappable<string> {

@@ -2,7 +2,7 @@ import validator from 'validator';
 import {
     KNOWN_ERROR_CODE,
     AppKnownError,
-} from '../../../../../shared/index.ts';
+} from '../../../../building-blocks/index.ts';
 
 export function checkCountryCode(value: string): AppKnownError | null {
     if (!validator.isISO31661Alpha2(value)) {

@@ -1,4 +1,4 @@
-import { Equatable, Result } from '../../../../../shared/index.ts';
+import { Equatable, Result } from '../../../../building-blocks/index.ts';
 import { checkCurrencyCode } from './checks/check-currency-code.ts';
 
 export class Currency implements Equatable<Currency> {

@@ -2,7 +2,7 @@ import validator from 'validator';
 import {
     KNOWN_ERROR_CODE,
     AppKnownError,
-} from '../../../../../shared/index.ts';
+} from '../../../../building-blocks/index.ts';
 
 export function checkPercents(percents: string): AppKnownError | null {
     if (

@@ -1,7 +1,7 @@
 import {
     KNOWN_ERROR_CODE,
     AppKnownError,
-} from '../../../../../shared/index.ts';
+} from '../../../../building-blocks/index.ts';
 import { LineItem } from '../../line-item/line-item.ts'; // Adjust the import path based on where LineItem is defined
 
 export function checkLineItems(lineItems: LineItem[]): AppKnownError | null {

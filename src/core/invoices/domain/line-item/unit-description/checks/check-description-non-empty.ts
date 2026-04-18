@@ -1,7 +1,7 @@
 import {
     KNOWN_ERROR_CODE,
     AppKnownError,
-} from '../../../../../../shared/index.ts';
+} from '../../../../../building-blocks/index.ts';
 
 export function checkDescriptionNonEmpty(value: string): AppKnownError | null {
     if (value.trim().length === 0) {

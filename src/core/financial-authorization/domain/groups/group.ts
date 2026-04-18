@@ -3,7 +3,7 @@ import {
     AppKnownError,
     Mappable,
     Result,
-} from '../../../../shared/index.ts';
+} from '../../../building-blocks/index.ts';
 import { Approval } from '../approval/approval.ts';
 import { Approver } from '../approver/approver.ts';
 import { Id } from '../id/id.ts';

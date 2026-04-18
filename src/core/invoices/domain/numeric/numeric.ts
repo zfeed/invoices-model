@@ -4,7 +4,7 @@ import {
     AppKnownError,
     Equatable,
     Result,
-} from '../../../../shared/index.ts';
+} from '../../../building-blocks/index.ts';
 import { checkDivisionByZero } from './checks/check-division-by-zero.ts';
 import { checkNumericValue } from './checks/check-numeric-value.ts';
 import { ROUNDING } from './rounding.ts';

@@ -3,7 +3,7 @@ import {
     AppKnownError,
     Mappable,
     Result,
-} from '../../../../shared/index.ts';
+} from '../../../building-blocks/index.ts';
 import { PublishableEvents } from '../../../building-blocks/events/index.ts';
 import { CalendarDate } from '../calendar-date/calendar-date.ts';
 import { Id } from '../id/id.ts';

@@ -1,7 +1,7 @@
 import {
     KNOWN_ERROR_CODE,
     AppKnownError,
-} from '../../../../../shared/index.ts';
+} from '../../../../building-blocks/index.ts';
 import { LineItem } from '../../line-item/line-item.ts';
 
 export function checkNonEmpty(items: LineItem[]): AppKnownError | null {

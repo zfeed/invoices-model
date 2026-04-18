@@ -1,4 +1,4 @@
-import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { Equatable, Mappable, Result } from '../../../building-blocks/index.ts';
 import { checkActionNotBlank } from './checks/check-action-not-blank.ts';
 
 export class Action implements Equatable<Action>, Mappable<string> {

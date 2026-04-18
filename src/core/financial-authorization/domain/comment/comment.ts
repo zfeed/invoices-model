@@ -1,4 +1,4 @@
-import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { Equatable, Mappable, Result } from '../../../building-blocks/index.ts';
 import { checkCommentNotBlank } from './checks/check-comment-not-blank.ts';
 
 export class Comment implements Equatable<Comment>, Mappable<string | null> {

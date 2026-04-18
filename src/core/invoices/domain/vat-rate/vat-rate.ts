@@ -1,4 +1,4 @@
-import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { Equatable, Mappable, Result } from '../../../building-blocks/index.ts';
 import { Money } from '../money/money/money.ts';
 import { Numeric } from '../numeric/numeric.ts';
 import { checkPercents } from './checks/check-percents.ts';

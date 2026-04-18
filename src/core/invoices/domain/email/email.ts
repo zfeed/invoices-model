@@ -1,4 +1,4 @@
-import { Equatable, Mappable, Result } from '../../../../shared/index.ts';
+import { Equatable, Mappable, Result } from '../../../building-blocks/index.ts';
 import { checkEmailFormat } from './checks/check-email-format.ts';
 
 export class Email implements Equatable<Email | string>, Mappable<string> {

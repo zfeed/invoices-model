@@ -72,7 +72,6 @@ src/
     http/                        # Fastify app, error handler, plugins, validation
     infrastructure/              # Domain-events bus (in-memory + kafka), event outbox, logger, persistent manager
     worker.ts                    # Temporal worker entrypoint
-  shared/                        # Barrel re-exporting common building-blocks + lib types
   config.ts                      # Typed config loader
   instrumentation.ts             # OpenTelemetry bootstrap
 e2e/                             # E2E tests (outside src/)
