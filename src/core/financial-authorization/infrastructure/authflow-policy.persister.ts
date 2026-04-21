@@ -200,10 +200,13 @@ const mergeAuthflowPolicy = async (
     }
 };
 
-export const authflowPolicyPersister: EntityPersister<AuthflowPolicy> = {
-    entityClass: AuthflowPolicy,
+export class AuthflowPolicyPersister implements EntityPersister<AuthflowPolicy> {
+    readonly entityClass = AuthflowPolicy;
 
-    async select(tx, id) {
+    async select(
+        tx: ControlledTransaction,
+        id: string
+    ): Promise<AuthflowPolicy | null> {
         const rows = await selectAuthflowPolicy(tx, id);
 
         if (!rows) {
@@ -211,14 +214,21 @@ export const authflowPolicyPersister: EntityPersister<AuthflowPolicy> = {
         }
 
         return AuthflowPolicyDataMapper.fromRows(rows);
-    },
+    }
 
-    async merge(tx, entity) {
+    async merge(
+        tx: ControlledTransaction,
+        entity: AuthflowPolicy
+    ): Promise<void> {
         const record = AuthflowPolicyDataMapper.from(entity).toRecord();
         await mergeAuthflowPolicy(tx, record);
-    },
+    }
 
-    async findBy(tx, key, value) {
+    async findBy(
+        tx: ControlledTransaction,
+        key: string,
+        value: string
+    ): Promise<AuthflowPolicy | null> {
         if (key !== 'action') {
             throw new Error(
                 `AuthflowPolicy does not support findBy key: ${key}`
@@ -232,5 +242,5 @@ export const authflowPolicyPersister: EntityPersister<AuthflowPolicy> = {
         }
 
         return AuthflowPolicyDataMapper.fromRows(rows);
-    },
-};
+    }
+}

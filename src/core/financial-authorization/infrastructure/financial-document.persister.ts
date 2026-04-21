@@ -228,10 +228,13 @@ const mergeFinancialDocument = async (
     }
 };
 
-export const financialDocumentPersister: EntityPersister<FinancialDocument> = {
-    entityClass: FinancialDocument,
+export class FinancialDocumentPersister implements EntityPersister<FinancialDocument> {
+    readonly entityClass = FinancialDocument;
 
-    async select(tx, id) {
+    async select(
+        tx: ControlledTransaction,
+        id: string
+    ): Promise<FinancialDocument | null> {
         const rows = await selectFinancialDocument(tx, id);
 
         if (!rows) {
@@ -239,14 +242,21 @@ export const financialDocumentPersister: EntityPersister<FinancialDocument> = {
         }
 
         return FinancialDocumentDataMapper.fromRows(rows);
-    },
+    }
 
-    async merge(tx, entity) {
+    async merge(
+        tx: ControlledTransaction,
+        entity: FinancialDocument
+    ): Promise<void> {
         const record = FinancialDocumentDataMapper.from(entity).toRecord();
         await mergeFinancialDocument(tx, record);
-    },
+    }
 
-    async findBy(tx, key, value) {
+    async findBy(
+        tx: ControlledTransaction,
+        key: string,
+        value: string
+    ): Promise<FinancialDocument | null> {
         if (key !== 'referenceId') {
             throw new Error(
                 `FinancialDocument does not support findBy key: ${key}`
@@ -260,5 +270,5 @@ export const financialDocumentPersister: EntityPersister<FinancialDocument> = {
         }
 
         return FinancialDocumentDataMapper.fromRows(rows);
-    },
-};
+    }
+}
