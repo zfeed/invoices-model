@@ -1,5 +1,5 @@
 import { AuthflowPolicy } from '../../domain/authflow/authflow-policy.ts';
-import type { AuthflowPolicyStorage } from '../authflow-policy-storage.ts';
+import type { selectAuthflowPolicy } from '../authflow-policy.persister.ts';
 import { ActionDataMapper, ActionRecord } from './action.data-mapper.ts';
 import {
     AuthflowTemplateDataMapper,
@@ -14,7 +14,7 @@ export type AuthflowPolicyRecord = {
 };
 
 export type AuthflowPolicyRows = NonNullable<
-    Awaited<ReturnType<AuthflowPolicyStorage['select']>>
+    Awaited<ReturnType<typeof selectAuthflowPolicy>>
 >;
 
 export class AuthflowPolicyDataMapper extends AuthflowPolicy {

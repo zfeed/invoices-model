@@ -3,6 +3,7 @@ import { Id } from '../../invoices/domain/id/id.ts';
 import { LineItem } from '../../invoices/domain/line-item/line-item.ts';
 import { Session } from './unit-of-work.ts';
 import { PersistentManager } from '../../../platform/infrastructure/persistent-manager/pg-persistent-manager.ts';
+import { defaultPersisters } from '../../../platform/infrastructure/persistent-manager/default-persisters.ts';
 import { InMemoryDomainEventsBus } from '../../../platform/infrastructure/domain-events/in-memory-domain-events-bus.ts';
 import { EventOutboxStorage } from '../../../platform/infrastructure/event-outbox/event-outbox.ts';
 import { getTestKysely } from '../../../../test/kysely.ts';
@@ -24,7 +25,8 @@ describe('UnitOfWork contract', () => {
                 new PersistentManager(
                     kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create(kysely)
+                    EventOutboxStorage.create(kysely),
+                    defaultPersisters
                 )
             );
 
@@ -44,7 +46,8 @@ describe('UnitOfWork contract', () => {
                 new PersistentManager(
                     kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create(kysely)
+                    EventOutboxStorage.create(kysely),
+                    defaultPersisters
                 )
             );
 
@@ -66,7 +69,8 @@ describe('UnitOfWork contract', () => {
                 new PersistentManager(
                     kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create(kysely)
+                    EventOutboxStorage.create(kysely),
+                    defaultPersisters
                 )
             );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
@@ -91,7 +95,8 @@ describe('UnitOfWork contract', () => {
                 new PersistentManager(
                     kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create(kysely)
+                    EventOutboxStorage.create(kysely),
+                    defaultPersisters
                 )
             );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
@@ -138,7 +143,8 @@ describe('UnitOfWork contract', () => {
                 new PersistentManager(
                     kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create(kysely)
+                    EventOutboxStorage.create(kysely),
+                    defaultPersisters
                 )
             );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
@@ -165,7 +171,8 @@ describe('UnitOfWork contract', () => {
                 new PersistentManager(
                     kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create(kysely)
+                    EventOutboxStorage.create(kysely),
+                    defaultPersisters
                 )
             );
 
@@ -184,7 +191,8 @@ describe('UnitOfWork contract', () => {
                 new PersistentManager(
                     kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create(kysely)
+                    EventOutboxStorage.create(kysely),
+                    defaultPersisters
                 )
             );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
@@ -224,7 +232,8 @@ describe('UnitOfWork contract', () => {
                 new PersistentManager(
                     kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create(kysely)
+                    EventOutboxStorage.create(kysely),
+                    defaultPersisters
                 )
             );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();
@@ -248,7 +257,8 @@ describe('UnitOfWork contract', () => {
                 new PersistentManager(
                     kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create(kysely)
+                    EventOutboxStorage.create(kysely),
+                    defaultPersisters
                 )
             );
             const draft = DraftInvoice.create(Id.create().unwrap()).unwrap();

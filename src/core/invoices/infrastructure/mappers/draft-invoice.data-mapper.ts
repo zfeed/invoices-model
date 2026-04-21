@@ -3,11 +3,8 @@ import { DraftInvoice } from '../../domain/draft-invoice/draft-invoice.ts';
 import { DRAFT_INVOICE_STATUS } from '../../domain/status/status.ts';
 import { ISSUER_TYPE } from '../../domain/issuer/issuer.ts';
 import { RECIPIENT_TYPE } from '../../domain/recipient/recipient.ts';
-import type { DraftInvoiceStorage } from '../draft-invoice-storage.ts';
-
-export type DraftInvoiceRow = Awaited<
-    ReturnType<DraftInvoiceStorage['select']>
->[number];
+import type { DraftInvoiceRow } from '../draft-invoice.persister.ts';
+export type { DraftInvoiceRow };
 import {
     CalendarDateDataMapper,
     CalendarDateRecord,

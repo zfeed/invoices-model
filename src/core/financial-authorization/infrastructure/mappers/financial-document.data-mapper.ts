@@ -1,5 +1,5 @@
 import { FinancialDocument } from '../../domain/document/document.ts';
-import type { FinancialDocumentStorage } from '../financial-document-storage.ts';
+import type { selectFinancialDocument } from '../financial-document.persister.ts';
 import { AuthflowDataMapper, AuthflowRecord } from './authflow.data-mapper.ts';
 import { IdDataMapper, IdRecord } from './id.data-mapper.ts';
 import { MoneyDataMapper, MoneyRecord } from './money.data-mapper.ts';
@@ -16,7 +16,7 @@ export type FinancialDocumentRecord = {
 };
 
 export type FinancialDocumentRows = NonNullable<
-    Awaited<ReturnType<FinancialDocumentStorage['select']>>
+    Awaited<ReturnType<typeof selectFinancialDocument>>
 >;
 
 export class FinancialDocumentDataMapper extends FinancialDocument {

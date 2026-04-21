@@ -3,9 +3,8 @@ import { Invoice } from '../../domain/invoice/invoice.ts';
 import { INVOICE_STATUS } from '../../domain/status/status.ts';
 import { ISSUER_TYPE } from '../../domain/issuer/issuer.ts';
 import { RECIPIENT_TYPE } from '../../domain/recipient/recipient.ts';
-import type { InvoiceStorage } from '../invoice-storage.ts';
-
-export type InvoiceRow = Awaited<ReturnType<InvoiceStorage['select']>>[number];
+import type { InvoiceRow } from '../invoice.persister.ts';
+export type { InvoiceRow };
 import {
     CalendarDateDataMapper,
     CalendarDateRecord,

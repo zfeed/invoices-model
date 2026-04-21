@@ -1,5 +1,6 @@
 import { Session } from '../../../../building-blocks/unit-of-work/unit-of-work.ts';
 import { PersistentManager } from '../../../../../platform/infrastructure/persistent-manager/pg-persistent-manager.ts';
+import { defaultPersisters } from '../../../../../platform/infrastructure/persistent-manager/default-persisters.ts';
 import { InMemoryDomainEventsBus } from '../../../../../platform/infrastructure/domain-events/in-memory-domain-events-bus.ts';
 import { EventOutboxStorage } from '../../../../../platform/infrastructure/event-outbox/event-outbox.ts';
 import { CanApproverApprove } from '../../../../financial-authorization/application/queries/can-approver-approve.ts';
@@ -113,7 +114,8 @@ describe('PayInvoice', () => {
             new PersistentManager(
                 kysely,
                 domainEventsBus,
-                EventOutboxStorage.create(kysely)
+                EventOutboxStorage.create(kysely),
+                defaultPersisters
             )
         );
         const canApproverApprove = new CanApproverApprove(session);

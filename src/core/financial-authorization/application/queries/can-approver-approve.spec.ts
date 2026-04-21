@@ -1,6 +1,7 @@
 import { FinancialDocument } from '../../domain/document/document.ts';
 import { Session } from '../../../building-blocks/unit-of-work/unit-of-work.ts';
 import { PersistentManager } from '../../../../platform/infrastructure/persistent-manager/pg-persistent-manager.ts';
+import { defaultPersisters } from '../../../../platform/infrastructure/persistent-manager/default-persisters.ts';
 import { InMemoryDomainEventsBus } from '../../../../platform/infrastructure/domain-events/in-memory-domain-events-bus.ts';
 import { EventOutboxStorage } from '../../../../platform/infrastructure/event-outbox/event-outbox.ts';
 import { CanApproverApprove } from './can-approver-approve.ts';
@@ -84,7 +85,8 @@ describe('CanApproverApprove', () => {
             new PersistentManager(
                 kysely,
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create(kysely)
+                EventOutboxStorage.create(kysely),
+                defaultPersisters
             )
         );
         const question = new CanApproverApprove(session);
@@ -103,7 +105,8 @@ describe('CanApproverApprove', () => {
             new PersistentManager(
                 kysely,
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create(kysely)
+                EventOutboxStorage.create(kysely),
+                defaultPersisters
             )
         );
         const approverId = uuid();
@@ -133,7 +136,8 @@ describe('CanApproverApprove', () => {
             new PersistentManager(
                 kysely,
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create(kysely)
+                EventOutboxStorage.create(kysely),
+                defaultPersisters
             )
         );
         const approverId = uuid();
@@ -163,7 +167,8 @@ describe('CanApproverApprove', () => {
             new PersistentManager(
                 kysely,
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create(kysely)
+                EventOutboxStorage.create(kysely),
+                defaultPersisters
             )
         );
         const approverId = uuid();
@@ -212,7 +217,8 @@ describe('CanApproverApprove', () => {
             new PersistentManager(
                 kysely,
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create(kysely)
+                EventOutboxStorage.create(kysely),
+                defaultPersisters
             )
         );
         const approverId = uuid();
@@ -242,7 +248,8 @@ describe('CanApproverApprove', () => {
             new PersistentManager(
                 kysely,
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create(kysely)
+                EventOutboxStorage.create(kysely),
+                defaultPersisters
             )
         );
         const approverId1 = uuid();
