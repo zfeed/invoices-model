@@ -116,28 +116,57 @@ const mergeDraftInvoice = async (
         })
         .execute();
 
-    await tx
-        .deleteFrom('draft_invoice_line_items')
-        .where('draft_invoice_id', '=', record.id.value)
-        .execute();
+    const currentLineItems = record.lineItems?.items ?? [];
 
-    if (record.lineItems) {
+    for (const item of currentLineItems) {
         await tx
-            .insertInto('draft_invoice_line_items')
-            .values(
-                record.lineItems.items.map((item) => ({
-                    id: item.id.value,
-                    draft_invoice_id: record.id.value,
-                    description: item.description.value,
-                    price_amount: item.price.amount.value,
-                    price_currency: item.price.currency.code,
-                    quantity: item.quantity.value.value,
-                    total_amount: item.total.amount.value,
-                    total_currency: item.total.currency.code,
-                }))
+            .mergeInto('draft_invoice_line_items')
+            .using(
+                sql<{ id: string }>`(SELECT ${item.id.value}::uuid AS id)`.as(
+                    'source'
+                ),
+                (join) =>
+                    join.onRef('draft_invoice_line_items.id', '=', 'source.id')
             )
+            .whenMatched()
+            .thenUpdateSet({
+                description: item.description.value,
+                price_amount: item.price.amount.value,
+                price_currency: item.price.currency.code,
+                quantity: item.quantity.value.value,
+                total_amount: item.total.amount.value,
+                total_currency: item.total.currency.code,
+                updated_at: now,
+            })
+            .whenNotMatched()
+            .thenInsertValues({
+                id: item.id.value,
+                draft_invoice_id: record.id.value,
+                description: item.description.value,
+                price_amount: item.price.amount.value,
+                price_currency: item.price.currency.code,
+                quantity: item.quantity.value.value,
+                total_amount: item.total.amount.value,
+                total_currency: item.total.currency.code,
+                created_at: now,
+                updated_at: now,
+            })
             .execute();
     }
+
+    let pruneQuery = tx
+        .deleteFrom('draft_invoice_line_items')
+        .where('draft_invoice_id', '=', record.id.value);
+
+    if (currentLineItems.length > 0) {
+        pruneQuery = pruneQuery.where(
+            'id',
+            'not in',
+            currentLineItems.map((item) => item.id.value)
+        );
+    }
+
+    await pruneQuery.execute();
 
     if (record.recipient?.billing) {
         await tx
