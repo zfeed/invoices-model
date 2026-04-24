@@ -15,6 +15,7 @@ import { trace, SpanKind } from '@opentelemetry/api';
 import { KafkaJS } from '@confluentinc/kafka-javascript';
 import { extractKafkaContext, injectKafkaHeaders } from './kafka-tracing.ts';
 import { withSpan } from '../../../../lib/with-span/with-span.ts';
+import { Logger } from '../../../../core/building-blocks/logger/logger.ts';
 
 const tracer = trace.getTracer('domain-events-bus');
 
@@ -39,6 +40,7 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
         topicPrefix?: string;
         forceTopicCreation?: boolean;
         polling: PollingConfig;
+        logger: Logger;
     }) {
         this.kafka = new Kafka(config.kafka);
         this.eventOutboxStorage = config.eventOutboxStorage;
@@ -48,6 +50,7 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
         this.sheduler = new Scheduler({
             job: this.outbox.bind(this),
             interval: config.polling.interval,
+            logger: config.logger,
         });
     }
 

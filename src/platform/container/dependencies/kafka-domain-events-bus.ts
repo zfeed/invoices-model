@@ -12,6 +12,7 @@ export const createKafkaDomainEventsBus = (
 ): KafkaDomainEventsBus =>
     new KafkaDomainEventsBus({
         eventOutboxStorage,
+        logger,
         topicPrefix: config.kafka.topicPrefix,
         forceTopicCreation: true,
         kafka: {

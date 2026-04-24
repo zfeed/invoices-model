@@ -9,6 +9,9 @@ import { cleanDatabase } from '../../persistent-manager/clean-database.ts';
 import { getTestKysely } from '../../../../../test/kysely.ts';
 const kysely = getTestKysely();
 import { getConfig } from '../../../../config.ts';
+import { getTestLogger } from '../../../../../test/logger.ts';
+
+const logger = getTestLogger();
 
 let domainEventsBus: KafkaDomainEventsBus;
 
@@ -33,6 +36,7 @@ testDomainEventsBus({
 
         domainEventsBus = new KafkaDomainEventsBus({
             eventOutboxStorage: EventOutboxStorage.create(kysely),
+            logger,
             forceTopicCreation: true,
             topicPrefix: random,
             kafka: createKafkaConfig(random),
@@ -77,6 +81,7 @@ describe('KafkaDomainEventsBus - outbox polling', () => {
 
         bus = new KafkaDomainEventsBus({
             eventOutboxStorage,
+            logger,
             forceTopicCreation: true,
             topicPrefix: random,
             kafka: createKafkaConfig(random),
