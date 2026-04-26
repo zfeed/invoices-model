@@ -45,8 +45,8 @@ export class Scheduler {
 
             try {
                 await this.job();
-            } catch (error) {
-                this.logger.error('scheduler job failed', { error });
+            } catch (error: any) {
+                this.logger.error('scheduler job failed', error);
             }
         }
     }
