@@ -218,41 +218,65 @@ export class KafkaDomainEventsBus implements DomainEventsBus {
         return { event, handlers };
     }
 
-    private getEventClassByEventName(eventName: string) {
-        const eventClasses = [...this.handlers.keys()];
-
-        const eventClass = eventClasses.find(
-            (eventClass) => eventClass.eventName() === eventName
-        );
-
-        return eventClass;
-    }
-
     private async outbox() {
         const records = await this.eventOutboxStorage.poll(
             this.polling.batchSize,
             {
-                eventNames: [...this.handlers.keys()].map((eventClass) =>
-                    eventClass.eventName()
-                ),
                 timeout: this.polling.timeout,
                 maxDeliveryAttempts: this.polling.maxDeliveryAttempts,
             }
         );
 
-        const publishers = records
-            .map(({ eventName, payload }) => {
-                const EventClass = this.getEventClassByEventName(eventName);
-                if (!EventClass) {
-                    throw new Error('Unexpected, EventClass not registered');
-                }
+        if (records.length === 0) {
+            return;
+        }
 
-                return EventClass.deserialize(payload as any);
-            })
-            .map((event) => ({
-                events: [event],
-            }));
+        const topicMessages = [
+            ...records
+                .reduce<
+                    Map<string, { value: string; headers: KafkaJS.IHeaders }[]>
+                >((acc, { eventName, payload }) => {
+                    const topic = this.applyTopicPrefix(eventName);
+                    const messages = acc.get(topic) ?? [];
+                    messages.push({
+                        value: JSON.stringify(payload),
+                        headers: injectKafkaHeaders(),
+                    });
+                    acc.set(topic, messages);
+                    return acc;
+                }, new Map())
+                .entries(),
+        ].map(([topic, messages]) => ({ topic, messages }));
 
-        await this.publishEvents(...publishers);
+        await withSpan(
+            tracer,
+            'republish events',
+            async (span) => {
+                span.setAttribute(
+                    'messaging.destination.names',
+                    topicMessages.map((tm) => tm.topic)
+                );
+                span.setAttribute(
+                    'messaging.batch.message_count',
+                    records.length
+                );
+
+                await this.kafka.producer.sendBatch({ topicMessages });
+
+                await Promise.all(
+                    records.map(({ id }) =>
+                        this.eventOutboxStorage.delivered(id)
+                    )
+                );
+            },
+            {
+                kind: SpanKind.PRODUCER,
+                attributes: {
+                    'messaging.system': 'kafka',
+                    'messaging.operation.type': 'send',
+                    'messaging.operation.name': 'publish',
+                },
+            }
+        );
     }
 }

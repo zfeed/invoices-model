@@ -24,7 +24,6 @@ type Options = {
 type PollOptions = Options & {
     maxDeliveryAttempts: number;
     timeout: Duration;
-    eventNames: string[];
 };
 
 type Payload = Record<string, unknown>;
@@ -110,7 +109,6 @@ export class EventOutboxStorage<T extends EventClass = EventClass> {
                                     ),
                                 ])
                             )
-                            .where('event_name', 'in', options.eventNames)
                             .orderBy('created_at', 'asc')
                             .limit(limit)
                             .forUpdate()
@@ -120,6 +118,7 @@ export class EventOutboxStorage<T extends EventClass = EventClass> {
                     .execute();
 
                 const results = rows.map((row) => ({
+                    id: row.id,
                     eventName: row.event_name,
                     payload: row.payload as Payload,
                 }));

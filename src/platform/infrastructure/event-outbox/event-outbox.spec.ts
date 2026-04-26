@@ -22,18 +22,6 @@ class EventSecondEvent extends DomainEvent<Record<string, { id: string }>> {}
 const ZERO_TIMEOUT = dayjs.duration(-1, 'seconds');
 const LONG_TIMEOUT = dayjs.duration(30, 'seconds');
 
-const REGISTRY = [
-    InvoiceIssuedEvent,
-    InvoicePaidEvent,
-    EventOneEvent,
-    EventTwoEvent,
-    EventThreeEvent,
-    EventFirstEvent,
-    EventSecondEvent,
-];
-
-const EVENT_NAMES = REGISTRY.map((eventClass) => eventClass.eventName());
-
 const serializeEvent = (event: DomainEvent<unknown>) => ({
     id: event.id,
     name: event.name,
@@ -52,7 +40,6 @@ describe('EventOutboxStorage', () => {
             await storage.insert([serializeEvent(event)]);
 
             const events = await storage.poll(10, {
-                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: LONG_TIMEOUT,
             });
@@ -72,7 +59,6 @@ describe('EventOutboxStorage', () => {
             ]);
 
             const events = await storage.poll(10, {
-                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: LONG_TIMEOUT,
             });
@@ -87,7 +73,6 @@ describe('EventOutboxStorage', () => {
             await storage.insert([]);
 
             const events = await storage.poll(10, {
-                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: LONG_TIMEOUT,
             });
@@ -102,14 +87,12 @@ describe('EventOutboxStorage', () => {
             await storage.insert([serializeEvent(event)]);
 
             await storage.poll(10, {
-                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: ZERO_TIMEOUT,
             });
             await storage.delivered(event.id);
 
             const events = await storage.poll(10, {
-                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: ZERO_TIMEOUT,
             });
@@ -128,7 +111,6 @@ describe('EventOutboxStorage', () => {
             ]);
 
             const events = await storage.poll(10, {
-                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: LONG_TIMEOUT,
             });
@@ -147,7 +129,6 @@ describe('EventOutboxStorage', () => {
             ]);
 
             const events = await storage.poll(2, {
-                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: LONG_TIMEOUT,
             });
@@ -163,7 +144,6 @@ describe('EventOutboxStorage', () => {
             ]);
 
             const opts = {
-                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: maxAttempts,
                 timeout: ZERO_TIMEOUT,
             };
@@ -181,14 +161,12 @@ describe('EventOutboxStorage', () => {
             ]);
 
             const first = await storage.poll(10, {
-                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: LONG_TIMEOUT,
             });
             expect(first).toHaveLength(1);
 
             const second = await storage.poll(10, {
-                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: LONG_TIMEOUT,
             });
@@ -202,13 +180,11 @@ describe('EventOutboxStorage', () => {
             ]);
 
             await storage.poll(10, {
-                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: ZERO_TIMEOUT,
             });
 
             const events = await storage.poll(10, {
-                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: ZERO_TIMEOUT,
             });
@@ -223,7 +199,6 @@ describe('EventOutboxStorage', () => {
             ]);
 
             const opts = {
-                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: maxAttempts,
                 timeout: ZERO_TIMEOUT,
             };
@@ -235,30 +210,12 @@ describe('EventOutboxStorage', () => {
             expect(events).toHaveLength(0);
         });
 
-        it('should return only events matching the requested event names', async () => {
-            const storage = EventOutboxStorage.create(kysely);
-            await storage.insert([
-                serializeEvent(InvoiceIssuedEvent.create({ id: '1' })),
-                serializeEvent(InvoicePaidEvent.create({ id: '2' })),
-            ]);
-
-            const events = await storage.poll(10, {
-                eventNames: ['invoice.paid'],
-                maxDeliveryAttempts: 5,
-                timeout: LONG_TIMEOUT,
-            });
-
-            expect(events).toHaveLength(1);
-            expect(events[0].eventName).toBe('invoice.paid');
-        });
-
         it('should pick oldest events first when limited', async () => {
             const storage = EventOutboxStorage.create(kysely);
             await storage.insert([serializeEvent(EventFirstEvent.create({}))]);
             await storage.insert([serializeEvent(EventSecondEvent.create({}))]);
 
             const events = await storage.poll(1, {
-                eventNames: EVENT_NAMES,
                 maxDeliveryAttempts: 5,
                 timeout: LONG_TIMEOUT,
             });

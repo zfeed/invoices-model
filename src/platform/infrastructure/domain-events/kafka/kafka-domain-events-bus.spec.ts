@@ -143,7 +143,6 @@ describe('KafkaDomainEventsBus - outbox polling', () => {
         await sleep(dayjs.duration(2, 'seconds').asMilliseconds());
 
         const remaining = await eventOutboxStorage.poll(10, {
-            eventNames: [OutboxOrderPlacedEvent.eventName()],
             timeout: dayjs.duration(0, 'seconds'),
             maxDeliveryAttempts: 10,
         });
@@ -162,5 +161,20 @@ describe('KafkaDomainEventsBus - outbox polling', () => {
         await sleep(dayjs.duration(2, 'seconds').asMilliseconds());
 
         expect(collected).toHaveLength(0);
+    });
+
+    it('should republish events even when no handler is registered for them', async () => {
+        const event = OutboxOrderPlacedEvent.create({ orderId: 'no-handler' });
+
+        await eventOutboxStorage.insert([serializeEvent(event)]);
+        await bus.start();
+        await sleep(dayjs.duration(2, 'seconds').asMilliseconds());
+
+        const remaining = await eventOutboxStorage.poll(10, {
+            timeout: dayjs.duration(0, 'seconds'),
+            maxDeliveryAttempts: 10,
+        });
+
+        expect(remaining).toHaveLength(0);
     });
 });
