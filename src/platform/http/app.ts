@@ -1,4 +1,3 @@
-import '../../instrumentation.ts';
 import { SpanKind, trace } from '@opentelemetry/api';
 import { createApp } from './create-app.ts';
 import { registerDependencies } from '../container/register-dependencies.ts';
