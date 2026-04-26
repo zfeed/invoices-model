@@ -6,6 +6,7 @@ const schema = z.object({
     }),
     database: z.object({
         url: z.string().url(),
+        poolSize: z.coerce.number().int().positive().default(10),
     }),
     temporal: z.object({
         address: z.string().min(1),
@@ -64,6 +65,7 @@ export function getConfig(): Config {
         },
         database: {
             url: process.env.DATABASE_URL,
+            poolSize: process.env.DATABASE_POOL_SIZE,
         },
         temporal: {
             address: process.env.TEMPORAL_ADDRESS,

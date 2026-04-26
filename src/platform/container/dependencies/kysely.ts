@@ -7,6 +7,9 @@ import type { Kysely } from '../../../../database/kysely.ts';
 export const createKysely = (config: Config): Kysely =>
     new BaseKysely<DB>({
         dialect: new PostgresDialect({
-            pool: new Pool({ connectionString: config.database.url }),
+            pool: new Pool({
+                connectionString: config.database.url,
+                max: config.database.poolSize,
+            }),
         }),
     });
