@@ -10,6 +10,7 @@ export const createKysely = (config: Config): Kysely =>
             pool: new Pool({
                 connectionString: config.database.url,
                 max: config.database.poolSize,
+                connectionTimeoutMillis: config.database.poolAcquireTimeoutMs,
             }),
         }),
     });
