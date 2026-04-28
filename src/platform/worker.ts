@@ -62,6 +62,10 @@ export class TemporalWorker {
             Runtime.install({
                 logger: this.logger,
                 telemetryOptions: {
+                    logging: {
+                        forward: {},
+                        filter: { core: 'WARN', other: 'ERROR' },
+                    },
                     metrics: {
                         otel: {
                             url: this.temporal.metrics.endpoint,
