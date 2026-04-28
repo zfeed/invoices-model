@@ -1,4 +1,5 @@
 import { DomainEventsBus } from '../../../core/building-blocks/interfaces/domain-events-bus/domain-events-bus.interface.ts';
+import { Logger } from '../../../core/building-blocks/logger/logger.ts';
 import {
     EntityClass,
     PersistentManager as PersistentManagerInterface,
@@ -28,7 +29,8 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         private readonly kysely: Kysely,
         private readonly domainEventsBus: DomainEventsBus,
         private readonly eventOutboxStorage: EventOutboxStorage,
-        private readonly persisters: EntityPersister<unknown>[]
+        private readonly persisters: EntityPersister<unknown>[],
+        private readonly logger?: Logger
     ) {}
 
     async fork(): Promise<PersistentManagerInterface<Entity>> {
@@ -36,7 +38,8 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
             this.kysely,
             this.domainEventsBus,
             this.eventOutboxStorage,
-            this.persisters
+            this.persisters,
+            this.logger
         );
         await newManager.initTransaction();
 
@@ -82,6 +85,7 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         }
 
         if (this.transaction) {
+            this.logger?.debug('Rolling back persistent manager transaction');
             await this.transaction.rollback().execute();
         }
     }
@@ -117,10 +121,16 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
 
         await tx.commit().execute();
         this.committed = true;
-        await this.domainEventsBus.publishEvents(...allEntities);
+        this.logger?.debug('Committed persistent manager transaction', {
+            entityCount: allEntities.length,
+        });
+        this.domainEventsBus.publishEvents(...allEntities).catch((error) => {
+            (this.logger || console).error(error);
+        });
     }
 
     private async initTransaction(): Promise<void> {
+        this.logger?.debug('Starting persistent manager transaction');
         this.transaction = await this.kysely.startTransaction().execute();
     }
 

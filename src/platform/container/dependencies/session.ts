@@ -2,19 +2,22 @@ import { Session } from '../../../core/building-blocks/unit-of-work/unit-of-work
 import { PersistentManager } from '../../infrastructure/persistent-manager/pg-persistent-manager.ts';
 import { defaultPersisters } from '../../infrastructure/persistent-manager/default-persisters.ts';
 import { DomainEventsBus } from '../../../core/building-blocks/interfaces/domain-events-bus/domain-events-bus.interface.ts';
+import { Logger } from '../../../core/building-blocks/logger/logger.ts';
 import { EventOutboxStorage } from '../../infrastructure/event-outbox/event-outbox.ts';
 import type { Kysely } from '../../../../database/kysely.ts';
 
 export const createSession = (
     kysely: Kysely,
     domainEventsBus: DomainEventsBus,
-    eventOutboxStorage: EventOutboxStorage
+    eventOutboxStorage: EventOutboxStorage,
+    logger: Logger
 ): Session =>
     new Session(
         new PersistentManager(
             kysely,
             domainEventsBus,
             eventOutboxStorage,
-            defaultPersisters
+            defaultPersisters,
+            logger
         )
     );

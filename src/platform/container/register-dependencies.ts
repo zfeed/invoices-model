@@ -31,7 +31,12 @@ export const registerDependencies = async (): Promise<Container> => {
         logger,
         config
     );
-    const session = createSession(kysely, domainEventsBus, eventOutboxStorage);
+    const session = createSession(
+        kysely,
+        domainEventsBus,
+        eventOutboxStorage,
+        logger
+    );
     const temporalClient = await createTemporalClient(config);
     const paypal = createPaypal(config);
     const temporalWorker = createTemporalWorker(
