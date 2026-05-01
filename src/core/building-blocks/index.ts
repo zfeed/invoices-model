@@ -6,5 +6,6 @@ export * from './interfaces/mappable/mappable.interface.ts';
 export * from './errors/known-error-codes.ts';
 export * from './errors/app-known-error.ts';
 export * from '../../lib/result/result.ts';
-export * from '../../lib/assert-never/assert-never.ts';
+export * from '../../lib/asserts/assert-not-null.ts';
+export * from '../../lib/asserts/assert-never.ts';
 export * from '../../lib/unflatten/unflatten.ts';
