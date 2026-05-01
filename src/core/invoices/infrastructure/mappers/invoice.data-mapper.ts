@@ -64,7 +64,16 @@ export class InvoiceDataMapper extends Invoice {
                 value: record.status,
             }),
             LineItemsDataMapper.fromRecord({
-                items: [],
+                items: record.line_items.map((item) => ({
+                    id: item.id,
+                    invoice_id: item.invoice_id,
+                    description: item.description,
+                    price_amount: item.price_amount,
+                    price_currency: item.price_currency,
+                    quantity: item.quantity,
+                    total_amount: item.total_amount,
+                    total_currency: item.total_currency,
+                })),
                 subtotal: {
                     amount: {
                         value: record.subtotal_amount,
@@ -163,7 +172,7 @@ export class InvoiceDataMapper extends Invoice {
             issuer_name: issuerRecord.issuer_name,
             issuer_address: issuerRecord.issuer_address,
             issuer_tax_id: issuerRecord.issuer_tax_id,
-            issuer_email: issuerRecord.issuer_name,
+            issuer_email: issuerRecord.issuer_email,
             recipient_type: recipientRecord.recipient_type,
             recipient_name: recipientRecord.recipient_name,
             recipient_address: recipientRecord.recipient_address,
