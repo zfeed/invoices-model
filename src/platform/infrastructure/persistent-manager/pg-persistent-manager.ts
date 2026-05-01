@@ -124,9 +124,7 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         this.logger?.debug('Committed persistent manager transaction', {
             entityCount: allEntities.length,
         });
-        this.domainEventsBus.publishEvents(...allEntities).catch((error) => {
-            (this.logger || console).error(error);
-        });
+        await this.domainEventsBus.publishEvents(...allEntities);
     }
 
     private async initTransaction(): Promise<void> {
