@@ -1,10 +1,4 @@
-import dayjs from 'dayjs';
 import { Invoice } from '../../domain/invoice/invoice.ts';
-import { INVOICE_STATUS } from '../../domain/status/status.ts';
-import { ISSUER_TYPE } from '../../domain/issuer/issuer.ts';
-import { RECIPIENT_TYPE } from '../../domain/recipient/recipient.ts';
-import type { InvoiceRow } from '../invoice.persister.ts';
-export type { InvoiceRow };
 import {
     CalendarDateDataMapper,
     CalendarDateRecord,
@@ -15,10 +9,9 @@ import {
     InvoiceStatusRecord,
 } from './invoice-status.data-mapper.ts';
 import { IssuerDataMapper, IssuerRecord } from './issuer.data-mapper.ts';
-import {
-    LineItemsDataMapper,
-    LineItemsRecord,
-} from './line-items.data-mapper.ts';
+import { LineItemsDataMapper } from './line-items.data-mapper.ts';
+
+import { LineItemRecord } from './line-item.data-mapper.ts';
 import { MoneyDataMapper, MoneyRecord } from './money.data-mapper.ts';
 import {
     RecipientDataMapper,
@@ -27,16 +20,33 @@ import {
 import { VatRateDataMapper, VatRateRecord } from './vat-rate.data-mapper.ts';
 
 export type InvoiceRecord = {
-    id: IdRecord;
-    status: InvoiceStatusRecord;
-    lineItems: LineItemsRecord;
-    total: MoneyRecord;
-    vatRate: VatRateRecord | null;
-    vatAmount: MoneyRecord | null;
-    issueDate: CalendarDateRecord;
-    dueDate: CalendarDateRecord;
-    issuer: IssuerRecord;
-    recipient: RecipientRecord;
+    id: IdRecord['value'];
+    status: InvoiceStatusRecord['value'];
+    vat_rate: VatRateRecord['value']['value'] | null;
+    vat_amount: MoneyRecord['amount']['value'] | null;
+    vat_currency: MoneyRecord['currency']['code'] | null;
+    subtotal_amount: MoneyRecord['amount']['value'];
+    subtotal_currency: MoneyRecord['currency']['code'];
+    total_amount: MoneyRecord['amount']['value'];
+    total_currency: MoneyRecord['currency']['code'];
+    issue_date: CalendarDateRecord['value'];
+    due_date: CalendarDateRecord['value'];
+    issuer_type: IssuerRecord['issuer_type'];
+    issuer_name: IssuerRecord['issuer_name'];
+    issuer_address: IssuerRecord['issuer_address'];
+    issuer_tax_id: IssuerRecord['issuer_tax_id'];
+    issuer_email: IssuerRecord['issuer_email'];
+    recipient_type: RecipientRecord['recipient_type'];
+    recipient_name: RecipientRecord['recipient_name'];
+    recipient_address: RecipientRecord['recipient_address'];
+    recipient_tax_id: RecipientRecord['recipient_tax_id'];
+    recipient_email: RecipientRecord['recipient_email'];
+    recipient_tax_residence_country: RecipientRecord['recipient_tax_residence_country'];
+    line_items: LineItemRecord[];
+    invoice_paypal_billings: {
+        invoice_id: string;
+        email: string;
+    };
 };
 
 export class InvoiceDataMapper extends Invoice {
@@ -47,132 +57,122 @@ export class InvoiceDataMapper extends Invoice {
         ) as InvoiceDataMapper;
     }
 
-    static fromRows(rows: InvoiceRow[]): InvoiceDataMapper {
-        const row = rows[0];
-        const lineItemRows = rows.filter(
-            (r) => r.invoice_line_item_id !== null
-        );
-
-        const record: InvoiceRecord = {
-            id: { value: row.id },
-            status: { value: row.status as INVOICE_STATUS },
-            lineItems: {
-                items: lineItemRows.map((r) => ({
-                    id: { value: r.invoice_line_item_id! },
-                    description: {
-                        value: r.invoice_line_item_description!,
-                    },
-                    price: {
-                        amount: {
-                            value: r.invoice_line_item_price_amount!,
-                        },
-                        currency: {
-                            code: r.invoice_line_item_price_currency!,
-                        },
-                    },
-                    quantity: {
-                        value: {
-                            value: r.invoice_line_item_quantity!,
-                        },
-                    },
-                    total: {
-                        amount: {
-                            value: r.invoice_line_item_total_amount!,
-                        },
-                        currency: {
-                            code: r.invoice_line_item_total_currency!,
-                        },
-                    },
-                })),
-                subtotal: {
-                    amount: { value: row.subtotal_amount },
-                    currency: { code: row.subtotal_currency },
-                },
-            },
-            total: {
-                amount: { value: row.total_amount },
-                currency: { code: row.total_currency },
-            },
-            vatRate:
-                row.vat_rate !== null
-                    ? { value: { value: row.vat_rate } }
-                    : null,
-            vatAmount:
-                row.vat_amount !== null
-                    ? {
-                          amount: { value: row.vat_amount },
-                          currency: { code: row.vat_currency! },
-                      }
-                    : null,
-            issueDate: {
-                value: dayjs(row.issue_date).format('YYYY-MM-DD'),
-            },
-            dueDate: { value: dayjs(row.due_date).format('YYYY-MM-DD') },
-            issuer: {
-                type: row.issuer_type as ISSUER_TYPE,
-                name: row.issuer_name,
-                address: row.issuer_address,
-                taxId: row.issuer_tax_id,
-                email: { value: row.issuer_email },
-            },
-            recipient: {
-                type: row.recipient_type as RECIPIENT_TYPE,
-                name: row.recipient_name,
-                address: row.recipient_address,
-                taxId: row.recipient_tax_id,
-                email: { value: row.recipient_email },
-                taxResidenceCountry: {
-                    code: row.recipient_tax_residence_country,
-                },
-                billing: {
-                    type: 'PAYPAL' as const,
-                    data: {
-                        email: {
-                            value: row.invoice_paypal_billing_email!,
-                        },
-                    },
-                },
-            },
-        };
-
-        return InvoiceDataMapper.fromRecord(record);
-    }
-
     static fromRecord(record: InvoiceRecord): InvoiceDataMapper {
         return new InvoiceDataMapper(
-            IdDataMapper.fromRecord(record.id),
-            InvoiceStatusDataMapper.fromRecord(record.status),
-            LineItemsDataMapper.fromRecord(record.lineItems),
-            MoneyDataMapper.fromRecord(record.total),
-            record.vatRate
-                ? VatRateDataMapper.fromRecord(record.vatRate)
+            IdDataMapper.fromRecord({ value: record.id }),
+            InvoiceStatusDataMapper.fromRecord({
+                value: record.status,
+            }),
+            LineItemsDataMapper.fromRecord({
+                items: [],
+                subtotal: {
+                    amount: {
+                        value: record.subtotal_amount,
+                    },
+                    currency: {
+                        code: record.subtotal_currency,
+                    },
+                },
+            }),
+            MoneyDataMapper.fromRecord({
+                amount: {
+                    value: record.total_amount,
+                },
+                currency: {
+                    code: record.total_currency,
+                },
+            }),
+            record.vat_rate
+                ? VatRateDataMapper.fromRecord({
+                      value: {
+                          value: record.vat_rate,
+                      },
+                  })
                 : null,
-            record.vatAmount
-                ? MoneyDataMapper.fromRecord(record.vatAmount)
+            record.vat_amount && record.vat_currency
+                ? MoneyDataMapper.fromRecord({
+                      amount: {
+                          value: record.vat_amount,
+                      },
+                      currency: {
+                          code: record.vat_currency,
+                      },
+                  })
                 : null,
-            CalendarDateDataMapper.fromRecord(record.issueDate),
-            CalendarDateDataMapper.fromRecord(record.dueDate),
-            IssuerDataMapper.fromRecord(record.issuer),
-            RecipientDataMapper.fromRecord(record.recipient)
+            CalendarDateDataMapper.fromRecord({
+                value: record.issue_date,
+            }),
+            CalendarDateDataMapper.fromRecord({
+                value: record.due_date,
+            }),
+            IssuerDataMapper.fromRecord({
+                issuer_type: record.issuer_type,
+                issuer_name: record.issuer_name,
+                issuer_address: record.issuer_address,
+                issuer_tax_id: record.issuer_tax_id,
+                issuer_email: record.issuer_email,
+            }),
+            RecipientDataMapper.fromRecord({
+                recipient_type: record.recipient_type,
+                recipient_name: record.recipient_name,
+                recipient_address: record.recipient_address,
+                recipient_tax_id: record.recipient_tax_id,
+                recipient_email: record.recipient_email,
+                recipient_tax_residence_country:
+                    record.recipient_tax_residence_country,
+                billing: record.invoice_paypal_billings,
+            })
         );
     }
 
     toRecord(): InvoiceRecord {
+        const invoice_id = IdDataMapper.from(this._id).toRecord().value;
+        const vatAmountRecord = this._vatAmount
+            ? MoneyDataMapper.from(this._vatAmount).toRecord()
+            : null;
+
+        const lineItemsRecord = LineItemsDataMapper.from(
+            this._lineItems
+        ).toRecord({
+            invoice_id,
+        });
+
+        const totalAmountRecord = MoneyDataMapper.from(this._total).toRecord();
+        const issuerRecord = IssuerDataMapper.from(this._issuer).toRecord();
+        const recipientRecord = RecipientDataMapper.from(
+            this._recipient
+        ).toRecord({ invoice_id });
+
         return {
-            id: IdDataMapper.from(this._id).toRecord(),
-            status: InvoiceStatusDataMapper.from(this._status).toRecord(),
-            lineItems: LineItemsDataMapper.from(this._lineItems).toRecord(),
-            total: MoneyDataMapper.from(this._total).toRecord(),
-            vatRate: this._vatRate
-                ? VatRateDataMapper.from(this._vatRate).toRecord()
+            id: IdDataMapper.from(this._id).toRecord().value,
+            status: InvoiceStatusDataMapper.from(this._status).toRecord().value,
+            vat_rate: this._vatRate
+                ? VatRateDataMapper.from(this._vatRate).toRecord().value.value
                 : null,
-            vatAmount: this._vatAmount
-                ? MoneyDataMapper.from(this._vatAmount).toRecord()
-                : null,
-            issueDate: CalendarDateDataMapper.from(this._issueDate).toRecord(),
-            dueDate: CalendarDateDataMapper.from(this._dueDate).toRecord(),
-            issuer: IssuerDataMapper.from(this._issuer).toRecord(),
-            recipient: RecipientDataMapper.from(this._recipient).toRecord(),
+            vat_amount: vatAmountRecord?.amount.value ?? null,
+            vat_currency: vatAmountRecord?.currency.code ?? null,
+            subtotal_amount: lineItemsRecord.subtotal.amount.value,
+            subtotal_currency: lineItemsRecord.subtotal.currency.code,
+            total_amount: totalAmountRecord.amount.value,
+            total_currency: totalAmountRecord.currency.code,
+            issue_date: CalendarDateDataMapper.from(this._issueDate).toRecord()
+                .value,
+            due_date: CalendarDateDataMapper.from(this._dueDate).toRecord()
+                .value,
+            issuer_type: issuerRecord.issuer_type,
+            issuer_name: issuerRecord.issuer_name,
+            issuer_address: issuerRecord.issuer_address,
+            issuer_tax_id: issuerRecord.issuer_tax_id,
+            issuer_email: issuerRecord.issuer_name,
+            recipient_type: recipientRecord.recipient_type,
+            recipient_name: recipientRecord.recipient_name,
+            recipient_address: recipientRecord.recipient_address,
+            recipient_tax_id: recipientRecord.recipient_tax_id,
+            recipient_email: recipientRecord.recipient_email,
+            recipient_tax_residence_country:
+                recipientRecord.recipient_tax_residence_country,
+            line_items: lineItemsRecord.items,
+            invoice_paypal_billings: recipientRecord.billing,
         };
     }
 }

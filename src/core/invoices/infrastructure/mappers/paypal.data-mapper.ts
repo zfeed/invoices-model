@@ -2,10 +2,8 @@ import { Paypal } from '../../domain/billing/paypal/paypal.ts';
 import { EmailDataMapper, EmailRecord } from './email.data-mapper.ts';
 
 export type PaypalRecord = {
-    type: 'PAYPAL';
-    data: {
-        email: EmailRecord;
-    };
+    invoice_id: string;
+    email: string;
 };
 
 export class PaypalDataMapper extends Paypal {
@@ -18,16 +16,16 @@ export class PaypalDataMapper extends Paypal {
 
     static fromRecord(record: PaypalRecord): PaypalDataMapper {
         return new PaypalDataMapper({
-            email: EmailDataMapper.fromRecord(record.data.email),
+            email: EmailDataMapper.fromRecord({
+                value: record.email,
+            }),
         });
     }
 
-    toRecord(): PaypalRecord {
+    toRecord(data: { invoice_id: string }): PaypalRecord {
         return {
-            type: this.type,
-            data: {
-                email: EmailDataMapper.from(this.data.email).toRecord(),
-            },
+            invoice_id: data.invoice_id,
+            email: EmailDataMapper.from(this.data.email).toRecord().value,
         };
     }
 }

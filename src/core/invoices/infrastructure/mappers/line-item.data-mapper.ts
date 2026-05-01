@@ -11,11 +11,14 @@ import {
 } from './unit-quantity.data-mapper.ts';
 
 export type LineItemRecord = {
-    id: IdRecord;
-    description: UnitDescriptionRecord;
-    price: MoneyRecord;
-    quantity: UnitQuantityRecord;
-    total: MoneyRecord;
+    id: IdRecord['value'];
+    invoice_id: IdRecord['value'];
+    description: UnitDescriptionRecord['value'];
+    price_amount: MoneyRecord['amount']['value'];
+    price_currency: MoneyRecord['currency']['code'];
+    quantity: UnitQuantityRecord['value']['value'];
+    total_amount: MoneyRecord['amount']['value'];
+    total_currency: MoneyRecord['currency']['code'];
 };
 
 export class LineItemDataMapper extends LineItem {
@@ -28,23 +31,44 @@ export class LineItemDataMapper extends LineItem {
 
     static fromRecord(record: LineItemRecord): LineItemDataMapper {
         return new LineItemDataMapper(
-            IdDataMapper.fromRecord(record.id),
-            UnitDescriptionDataMapper.fromRecord(record.description),
-            MoneyDataMapper.fromRecord(record.price),
-            UnitQuantityDataMapper.fromRecord(record.quantity),
-            MoneyDataMapper.fromRecord(record.total)
+            IdDataMapper.fromRecord({ value: record.id }),
+            UnitDescriptionDataMapper.fromRecord({ value: record.description }),
+            MoneyDataMapper.fromRecord({
+                amount: { value: record.price_amount },
+                currency: {
+                    code: record.price_currency,
+                },
+            }),
+            UnitQuantityDataMapper.fromRecord({
+                value: {
+                    value: record.quantity,
+                },
+            }),
+            MoneyDataMapper.fromRecord({
+                amount: { value: record.total_amount },
+                currency: {
+                    code: record.total_currency,
+                },
+            })
         );
     }
 
-    toRecord(): LineItemRecord {
+    toRecord(data: { invoice_id: string }): LineItemRecord {
+        const priceRecord = MoneyDataMapper.from(this._price).toRecord();
+        const totalRecord = MoneyDataMapper.from(this._total).toRecord();
+
         return {
-            id: IdDataMapper.from(this._id).toRecord(),
+            id: IdDataMapper.from(this._id).toRecord().value,
+            invoice_id: data.invoice_id,
             description: UnitDescriptionDataMapper.from(
                 this._description
-            ).toRecord(),
-            price: MoneyDataMapper.from(this._price).toRecord(),
-            quantity: UnitQuantityDataMapper.from(this._quantity).toRecord(),
-            total: MoneyDataMapper.from(this._total).toRecord(),
+            ).toRecord().value,
+            price_amount: priceRecord.amount.value,
+            price_currency: priceRecord.currency.code,
+            quantity: UnitQuantityDataMapper.from(this._quantity).toRecord()
+                .value.value,
+            total_amount: totalRecord.amount.value,
+            total_currency: totalRecord.currency.code,
         };
     }
 }

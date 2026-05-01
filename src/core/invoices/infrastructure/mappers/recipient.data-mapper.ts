@@ -4,12 +4,12 @@ import { EmailDataMapper, EmailRecord } from './email.data-mapper.ts';
 import { PaypalDataMapper, PaypalRecord } from './paypal.data-mapper.ts';
 
 export type RecipientRecord = {
-    type: RECIPIENT_TYPE;
-    name: string;
-    address: string;
-    taxId: string;
-    email: EmailRecord;
-    taxResidenceCountry: CountryRecord;
+    recipient_type: RECIPIENT_TYPE;
+    recipient_name: string;
+    recipient_address: string;
+    recipient_tax_id: string;
+    recipient_email: EmailRecord['value'];
+    recipient_tax_residence_country: CountryRecord['code'];
     billing: PaypalRecord;
 };
 
@@ -23,27 +23,29 @@ export class RecipientDataMapper extends Recipient {
 
     static fromRecord(record: RecipientRecord): RecipientDataMapper {
         return new RecipientDataMapper(
-            record.type,
-            record.name,
-            record.address,
-            record.taxId,
-            EmailDataMapper.fromRecord(record.email),
-            CountryDataMapper.fromRecord(record.taxResidenceCountry),
+            record.recipient_type,
+            record.recipient_name,
+            record.recipient_address,
+            record.recipient_tax_id,
+            EmailDataMapper.fromRecord({ value: record.recipient_email }),
+            CountryDataMapper.fromRecord({
+                code: record.recipient_tax_residence_country,
+            }),
             PaypalDataMapper.fromRecord(record.billing)
         );
     }
 
-    toRecord(): RecipientRecord {
+    toRecord(data: { invoice_id: string }): RecipientRecord {
         return {
-            type: this._type,
-            name: this._name,
-            address: this._address,
-            taxId: this._taxId,
-            email: EmailDataMapper.from(this._email).toRecord(),
-            taxResidenceCountry: CountryDataMapper.from(
+            recipient_type: this._type,
+            recipient_name: this._name,
+            recipient_address: this._address,
+            recipient_tax_id: this._taxId,
+            recipient_email: EmailDataMapper.from(this._email).toRecord().value,
+            recipient_tax_residence_country: CountryDataMapper.from(
                 this._taxResidenceCountry
-            ).toRecord(),
-            billing: PaypalDataMapper.from(this._billing).toRecord(),
+            ).toRecord().code,
+            billing: PaypalDataMapper.from(this._billing).toRecord(data),
         };
     }
 }

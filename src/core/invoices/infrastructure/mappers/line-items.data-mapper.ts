@@ -22,10 +22,10 @@ export class LineItemsDataMapper extends LineItems {
         );
     }
 
-    toRecord(): LineItemsRecord {
+    toRecord(data: { invoice_id: string }): LineItemsRecord {
         return {
             items: this._items.map((item) =>
-                LineItemDataMapper.from(item).toRecord()
+                LineItemDataMapper.from(item).toRecord(data)
             ),
             subtotal: MoneyDataMapper.from(this._subtotal).toRecord(),
         };
