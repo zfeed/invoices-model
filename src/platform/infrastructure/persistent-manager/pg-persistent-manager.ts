@@ -109,10 +109,16 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         const allEntities: Entity[] = [];
 
         for (const [, collection] of collections) {
-            for (const entity of collection.values()) {
+            for (const { entity, state } of collection.entries()) {
                 const persister = this.findPersisterByInstance(entity);
-                await withSpan(tracer, `${entity.constructor.name}.merge`, () =>
-                    persister.merge(tx, entity)
+                const operation = state === 'new' ? 'create' : 'merge';
+                await withSpan(
+                    tracer,
+                    `${entity.constructor.name}.${operation}`,
+                    () =>
+                        state === 'new'
+                            ? persister.create(tx, entity)
+                            : persister.merge(tx, entity)
                 );
                 allEntities.push(entity);
             }

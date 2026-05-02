@@ -98,70 +98,10 @@ const selectFinancialDocumentByReferenceId = async (
     return loadChildren(tx, document);
 };
 
-const mergeFinancialDocument = async (
+const insertChildren = async (
     tx: ControlledTransaction,
     record: FinancialDocumentRecord
 ) => {
-    await tx
-        .mergeInto('documents')
-        .using(
-            sql<{
-                id: string;
-            }>`(SELECT ${record.id.value}::uuid AS id)`.as('source'),
-            (join) => join.onRef('documents.id', '=', 'source.id')
-        )
-        .whenMatched()
-        .thenUpdateSet({
-            reference_id: record.referenceId.value,
-            value_amount: record.value.amount,
-            value_currency: record.value.currency,
-        })
-        .whenNotMatched()
-        .thenInsertValues({
-            id: record.id.value,
-            reference_id: record.referenceId.value,
-            value_amount: record.value.amount,
-            value_currency: record.value.currency,
-        })
-        .execute();
-
-    const authflowIds = tx
-        .selectFrom('authflows')
-        .select('id')
-        .where('document_id', '=', record.id.value);
-
-    const stepIds = tx
-        .selectFrom('steps')
-        .select('id')
-        .where('authflow_id', 'in', authflowIds);
-
-    const groupIds = tx
-        .selectFrom('groups')
-        .select('id')
-        .where('step_id', 'in', stepIds);
-
-    await tx
-        .deleteFrom('approvals')
-        .where('group_id', 'in', groupIds)
-        .execute();
-
-    await tx
-        .deleteFrom('approvers')
-        .where('group_id', 'in', groupIds)
-        .execute();
-
-    await tx.deleteFrom('groups').where('step_id', 'in', stepIds).execute();
-
-    await tx
-        .deleteFrom('steps')
-        .where('authflow_id', 'in', authflowIds)
-        .execute();
-
-    await tx
-        .deleteFrom('authflows')
-        .where('document_id', '=', record.id.value)
-        .execute();
-
     for (const authflow of record.authflows) {
         await tx
             .insertInto('authflows')
@@ -228,6 +168,96 @@ const mergeFinancialDocument = async (
     }
 };
 
+const deleteChildren = async (
+    tx: ControlledTransaction,
+    documentId: string
+) => {
+    const authflowIds = tx
+        .selectFrom('authflows')
+        .select('id')
+        .where('document_id', '=', documentId);
+
+    const stepIds = tx
+        .selectFrom('steps')
+        .select('id')
+        .where('authflow_id', 'in', authflowIds);
+
+    const groupIds = tx
+        .selectFrom('groups')
+        .select('id')
+        .where('step_id', 'in', stepIds);
+
+    await tx
+        .deleteFrom('approvals')
+        .where('group_id', 'in', groupIds)
+        .execute();
+
+    await tx
+        .deleteFrom('approvers')
+        .where('group_id', 'in', groupIds)
+        .execute();
+
+    await tx.deleteFrom('groups').where('step_id', 'in', stepIds).execute();
+
+    await tx
+        .deleteFrom('steps')
+        .where('authflow_id', 'in', authflowIds)
+        .execute();
+
+    await tx
+        .deleteFrom('authflows')
+        .where('document_id', '=', documentId)
+        .execute();
+};
+
+const createFinancialDocument = async (
+    tx: ControlledTransaction,
+    record: FinancialDocumentRecord
+) => {
+    await tx
+        .insertInto('documents')
+        .values({
+            id: record.id.value,
+            reference_id: record.referenceId.value,
+            value_amount: record.value.amount,
+            value_currency: record.value.currency,
+        })
+        .execute();
+
+    await insertChildren(tx, record);
+};
+
+const mergeFinancialDocument = async (
+    tx: ControlledTransaction,
+    record: FinancialDocumentRecord
+) => {
+    await tx
+        .mergeInto('documents')
+        .using(
+            sql<{
+                id: string;
+            }>`(SELECT ${record.id.value}::uuid AS id)`.as('source'),
+            (join) => join.onRef('documents.id', '=', 'source.id')
+        )
+        .whenMatched()
+        .thenUpdateSet({
+            reference_id: record.referenceId.value,
+            value_amount: record.value.amount,
+            value_currency: record.value.currency,
+        })
+        .whenNotMatched()
+        .thenInsertValues({
+            id: record.id.value,
+            reference_id: record.referenceId.value,
+            value_amount: record.value.amount,
+            value_currency: record.value.currency,
+        })
+        .execute();
+
+    await deleteChildren(tx, record.id.value);
+    await insertChildren(tx, record);
+};
+
 export class FinancialDocumentPersister implements EntityPersister<FinancialDocument> {
     readonly entityClass = FinancialDocument;
 
@@ -242,6 +272,14 @@ export class FinancialDocumentPersister implements EntityPersister<FinancialDocu
         }
 
         return FinancialDocumentDataMapper.fromRows(rows);
+    }
+
+    async create(
+        tx: ControlledTransaction,
+        entity: FinancialDocument
+    ): Promise<void> {
+        const record = FinancialDocumentDataMapper.from(entity).toRecord();
+        await createFinancialDocument(tx, record);
     }
 
     async merge(

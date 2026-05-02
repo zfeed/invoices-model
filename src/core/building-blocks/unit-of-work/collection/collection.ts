@@ -1,5 +1,10 @@
 import { EntityClass, PersistentManager } from '../unit-of-work.interface.ts';
-import { IdentityMap } from '../identity-map/identity-map.ts';
+import { EntityState, IdentityMap } from '../identity-map/identity-map.ts';
+
+export type TrackedEntity<T> = {
+    entity: T;
+    state: EntityState;
+};
 
 export class Collection<T extends { id: { toString(): string } }> {
     private readonly identityMap = new IdentityMap<T>();
@@ -27,7 +32,7 @@ export class Collection<T extends { id: { toString(): string } }> {
             return null;
         }
 
-        return this.identityMap.setIfAbsent(key, entity);
+        return this.identityMap.setIfAbsent(key, entity, 'managed');
     }
 
     async findBy(key: string, value: string): Promise<T | undefined> {
@@ -44,16 +49,23 @@ export class Collection<T extends { id: { toString(): string } }> {
 
         const entityKey = entity.id.toString();
 
-        return this.identityMap.setIfAbsent(entityKey, entity);
+        return this.identityMap.setIfAbsent(entityKey, entity, 'managed');
     }
 
     async add(object: T): Promise<void> {
         const key = object.id.toString();
-        this.identityMap.setIfAbsent(key, object);
+        this.identityMap.setIfAbsent(key, object, 'new');
     }
 
     values(): T[] {
         return this.trackedEntities();
+    }
+
+    entries(): TrackedEntity<T>[] {
+        return [...this.identityMap.entries()].map(([, entry]) => ({
+            entity: entry.entity,
+            state: entry.state,
+        }));
     }
 
     private trackedEntities(): T[] {

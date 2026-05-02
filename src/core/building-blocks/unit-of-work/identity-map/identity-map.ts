@@ -1,5 +1,8 @@
+export type EntityState = 'new' | 'managed';
+
 type TrackedEntry<T> = {
     entity: T;
+    state: EntityState;
 };
 
 export class IdentityMap<T> {
@@ -9,18 +12,18 @@ export class IdentityMap<T> {
         return this.tracked.get(key)?.entity;
     }
 
-    set(key: string, entity: T): void {
-        this.tracked.set(key, { entity });
+    set(key: string, entity: T, state: EntityState): void {
+        this.tracked.set(key, { entity, state });
     }
 
-    setIfAbsent(key: string, entity: T): T {
+    setIfAbsent(key: string, entity: T, state: EntityState): T {
         const existing = this.tracked.get(key);
 
         if (existing) {
             return existing.entity;
         }
 
-        this.tracked.set(key, { entity });
+        this.tracked.set(key, { entity, state });
         return entity;
     }
 

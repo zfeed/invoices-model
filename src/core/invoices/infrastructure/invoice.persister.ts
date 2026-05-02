@@ -12,7 +12,6 @@ import {
 
 export class InvoicePersister implements EntityPersister<Invoice> {
     readonly entityClass = Invoice;
-    private readonly selectedInvoices = new WeakSet<Invoice>();
 
     async select(
         tx: ControlledTransaction,
@@ -112,164 +111,43 @@ export class InvoicePersister implements EntityPersister<Invoice> {
             invoice_paypal_billings: row.invoice_paypal_billings,
         };
 
-        const entity = InvoiceDataMapper.fromRecord(record);
-        this.selectedInvoices.add(entity);
-
-        return entity;
+        return InvoiceDataMapper.fromRecord(record);
     }
 
-    async merge(tx: ControlledTransaction, entity: Invoice): Promise<void> {
+    async create(tx: ControlledTransaction, entity: Invoice): Promise<void> {
         const record = InvoiceDataMapper.from(entity).toRecord();
         const now = new Date();
-        const isSelectedInvoice = this.selectedInvoices.has(entity);
 
-        if (isSelectedInvoice) {
-            await tx
-                .updateTable('invoices')
-                .set({
-                    status: record.status,
-                    vat_rate: record.vat_rate,
-                    vat_amount: record.vat_amount,
-                    vat_currency: record.vat_currency,
-                    subtotal_amount: record.subtotal_amount,
-                    subtotal_currency: record.subtotal_currency,
-                    total_amount: record.total_amount,
-                    total_currency: record.total_currency,
-                    issue_date: record.issue_date,
-                    due_date: record.due_date,
-                    issuer_type: record.issuer_type,
-                    issuer_name: record.issuer_name,
-                    issuer_address: record.issuer_address,
-                    issuer_tax_id: record.issuer_tax_id,
-                    issuer_email: record.issuer_email,
-                    recipient_type: record.recipient_type,
-                    recipient_name: record.recipient_name,
-                    recipient_address: record.recipient_address,
-                    recipient_tax_id: record.recipient_tax_id,
-                    recipient_email: record.recipient_email,
-                    recipient_tax_residence_country:
-                        record.recipient_tax_residence_country,
-                    updated_at: now,
-                })
-                .where('id', '=', record.id)
-                .execute();
-        } else {
-            await tx
-                .insertInto('invoices')
-                .values({
-                    id: record.id,
-                    status: record.status,
-                    vat_rate: record.vat_rate,
-                    vat_amount: record.vat_amount,
-                    vat_currency: record.vat_currency,
-                    subtotal_amount: record.subtotal_amount,
-                    subtotal_currency: record.subtotal_currency,
-                    total_amount: record.total_amount,
-                    total_currency: record.total_currency,
-                    issue_date: record.issue_date,
-                    due_date: record.due_date,
-                    issuer_type: record.issuer_type,
-                    issuer_name: record.issuer_name,
-                    issuer_address: record.issuer_address,
-                    issuer_tax_id: record.issuer_tax_id,
-                    issuer_email: record.issuer_email,
-                    recipient_type: record.recipient_type,
-                    recipient_name: record.recipient_name,
-                    recipient_address: record.recipient_address,
-                    recipient_tax_id: record.recipient_tax_id,
-                    recipient_email: record.recipient_email,
-                    recipient_tax_residence_country:
-                        record.recipient_tax_residence_country,
-                    created_at: now,
-                    updated_at: now,
-                })
-                .execute();
-        }
-
-        this.selectedInvoices.add(entity);
-
-        if (isSelectedInvoice) {
-            for (const item of record.line_items) {
-                await tx
-                    .mergeInto('invoice_line_items')
-                    .using(
-                        sql<{ id: string }>`(SELECT ${item.id}::uuid AS id)`.as(
-                            'source'
-                        ),
-                        (join) =>
-                            join.onRef(
-                                'invoice_line_items.id',
-                                '=',
-                                'source.id'
-                            )
-                    )
-                    .whenMatched()
-                    .thenUpdateSet({
-                        description: item.description,
-                        price_amount: item.price_amount,
-                        price_currency: item.price_currency,
-                        quantity: item.quantity,
-                        total_amount: item.total_amount,
-                        total_currency: item.total_currency,
-                        updated_at: now,
-                    })
-                    .whenNotMatched()
-                    .thenInsertValues({
-                        id: item.id,
-                        invoice_id: record.id,
-                        description: item.description,
-                        price_amount: item.price_amount,
-                        price_currency: item.price_currency,
-                        quantity: item.quantity,
-                        total_amount: item.total_amount,
-                        total_currency: item.total_currency,
-                        created_at: now,
-                        updated_at: now,
-                    })
-                    .execute();
-            }
-
-            let pruneQuery = tx
-                .deleteFrom('invoice_line_items')
-                .where('invoice_id', '=', record.id);
-
-            if (record.line_items.length > 0) {
-                pruneQuery = pruneQuery.where(
-                    'id',
-                    'not in',
-                    record.line_items.map((item) => item.id)
-                );
-            }
-
-            await pruneQuery.execute();
-
-            await tx
-                .mergeInto('invoice_paypal_billings')
-                .using(
-                    sql<{
-                        invoice_id: string;
-                    }>`(SELECT ${record.id}::uuid AS invoice_id)`.as('source'),
-                    (join) =>
-                        join.onRef(
-                            'invoice_paypal_billings.invoice_id',
-                            '=',
-                            'source.invoice_id'
-                        )
-                )
-                .whenMatched()
-                .thenUpdateSet({
-                    email: record.invoice_paypal_billings.email,
-                    updated_at: now,
-                })
-                .whenNotMatched()
-                .thenInsertValues({
-                    invoice_id: record.id,
-                    email: record.invoice_paypal_billings.email,
-                })
-                .execute();
-
-            return;
-        }
+        await tx
+            .insertInto('invoices')
+            .values({
+                id: record.id,
+                status: record.status,
+                vat_rate: record.vat_rate,
+                vat_amount: record.vat_amount,
+                vat_currency: record.vat_currency,
+                subtotal_amount: record.subtotal_amount,
+                subtotal_currency: record.subtotal_currency,
+                total_amount: record.total_amount,
+                total_currency: record.total_currency,
+                issue_date: record.issue_date,
+                due_date: record.due_date,
+                issuer_type: record.issuer_type,
+                issuer_name: record.issuer_name,
+                issuer_address: record.issuer_address,
+                issuer_tax_id: record.issuer_tax_id,
+                issuer_email: record.issuer_email,
+                recipient_type: record.recipient_type,
+                recipient_name: record.recipient_name,
+                recipient_address: record.recipient_address,
+                recipient_tax_id: record.recipient_tax_id,
+                recipient_email: record.recipient_email,
+                recipient_tax_residence_country:
+                    record.recipient_tax_residence_country,
+                created_at: now,
+                updated_at: now,
+            })
+            .execute();
 
         if (record.line_items.length > 0) {
             await tx
@@ -294,6 +172,116 @@ export class InvoicePersister implements EntityPersister<Invoice> {
         await tx
             .insertInto('invoice_paypal_billings')
             .values({
+                invoice_id: record.id,
+                email: record.invoice_paypal_billings.email,
+            })
+            .execute();
+    }
+
+    async merge(tx: ControlledTransaction, entity: Invoice): Promise<void> {
+        const record = InvoiceDataMapper.from(entity).toRecord();
+        const now = new Date();
+
+        await tx
+            .updateTable('invoices')
+            .set({
+                status: record.status,
+                vat_rate: record.vat_rate,
+                vat_amount: record.vat_amount,
+                vat_currency: record.vat_currency,
+                subtotal_amount: record.subtotal_amount,
+                subtotal_currency: record.subtotal_currency,
+                total_amount: record.total_amount,
+                total_currency: record.total_currency,
+                issue_date: record.issue_date,
+                due_date: record.due_date,
+                issuer_type: record.issuer_type,
+                issuer_name: record.issuer_name,
+                issuer_address: record.issuer_address,
+                issuer_tax_id: record.issuer_tax_id,
+                issuer_email: record.issuer_email,
+                recipient_type: record.recipient_type,
+                recipient_name: record.recipient_name,
+                recipient_address: record.recipient_address,
+                recipient_tax_id: record.recipient_tax_id,
+                recipient_email: record.recipient_email,
+                recipient_tax_residence_country:
+                    record.recipient_tax_residence_country,
+                updated_at: now,
+            })
+            .where('id', '=', record.id)
+            .execute();
+
+        for (const item of record.line_items) {
+            await tx
+                .mergeInto('invoice_line_items')
+                .using(
+                    sql<{ id: string }>`(SELECT ${item.id}::uuid AS id)`.as(
+                        'source'
+                    ),
+                    (join) =>
+                        join.onRef('invoice_line_items.id', '=', 'source.id')
+                )
+                .whenMatched()
+                .thenUpdateSet({
+                    description: item.description,
+                    price_amount: item.price_amount,
+                    price_currency: item.price_currency,
+                    quantity: item.quantity,
+                    total_amount: item.total_amount,
+                    total_currency: item.total_currency,
+                    updated_at: now,
+                })
+                .whenNotMatched()
+                .thenInsertValues({
+                    id: item.id,
+                    invoice_id: record.id,
+                    description: item.description,
+                    price_amount: item.price_amount,
+                    price_currency: item.price_currency,
+                    quantity: item.quantity,
+                    total_amount: item.total_amount,
+                    total_currency: item.total_currency,
+                    created_at: now,
+                    updated_at: now,
+                })
+                .execute();
+        }
+
+        let pruneQuery = tx
+            .deleteFrom('invoice_line_items')
+            .where('invoice_id', '=', record.id);
+
+        if (record.line_items.length > 0) {
+            pruneQuery = pruneQuery.where(
+                'id',
+                'not in',
+                record.line_items.map((item) => item.id)
+            );
+        }
+
+        await pruneQuery.execute();
+
+        await tx
+            .mergeInto('invoice_paypal_billings')
+            .using(
+                sql<{
+                    invoice_id: string;
+                }>`(SELECT ${record.id}::uuid AS invoice_id)`.as('source'),
+                (join) =>
+                    join.onRef(
+                        'invoice_paypal_billings.invoice_id',
+                        '=',
+                        'source.invoice_id'
+                    )
+            )
+            .whenMatched()
+            .thenUpdateSet({
+                email: record.invoice_paypal_billings.email,
+                updated_at: now,
+            })
+            .whenNotMatched()
+            .thenInsertValues({
                 invoice_id: record.id,
                 email: record.invoice_paypal_billings.email,
             })

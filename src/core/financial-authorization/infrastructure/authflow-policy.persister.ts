@@ -91,64 +91,10 @@ const selectAuthflowPolicyByAction = async (
     return loadChildren(tx, policy);
 };
 
-const mergeAuthflowPolicy = async (
+const insertChildren = async (
     tx: ControlledTransaction,
     record: AuthflowPolicyRecord
 ) => {
-    await tx
-        .mergeInto('policies')
-        .using(
-            sql<{
-                id: string;
-            }>`(SELECT ${record.id.value}::uuid AS id)`.as('source'),
-            (join) => join.onRef('policies.id', '=', 'source.id')
-        )
-        .whenMatched()
-        .thenUpdateSet({
-            action: record.action.value,
-        })
-        .whenNotMatched()
-        .thenInsertValues({
-            id: record.id.value,
-            action: record.action.value,
-        })
-        .execute();
-
-    const templateIds = tx
-        .selectFrom('templates')
-        .select('id')
-        .where('policy_id', '=', record.id.value);
-
-    const stepTemplateIds = tx
-        .selectFrom('step_templates')
-        .select('id')
-        .where('template_id', 'in', templateIds);
-
-    const groupTemplateIds = tx
-        .selectFrom('group_templates')
-        .select('id')
-        .where('step_template_id', 'in', stepTemplateIds);
-
-    await tx
-        .deleteFrom('template_approvers')
-        .where('group_template_id', 'in', groupTemplateIds)
-        .execute();
-
-    await tx
-        .deleteFrom('group_templates')
-        .where('step_template_id', 'in', stepTemplateIds)
-        .execute();
-
-    await tx
-        .deleteFrom('step_templates')
-        .where('template_id', 'in', templateIds)
-        .execute();
-
-    await tx
-        .deleteFrom('templates')
-        .where('policy_id', '=', record.id.value)
-        .execute();
-
     for (const template of record.templates) {
         await tx
             .insertInto('templates')
@@ -200,6 +146,85 @@ const mergeAuthflowPolicy = async (
     }
 };
 
+const deleteChildren = async (tx: ControlledTransaction, policyId: string) => {
+    const templateIds = tx
+        .selectFrom('templates')
+        .select('id')
+        .where('policy_id', '=', policyId);
+
+    const stepTemplateIds = tx
+        .selectFrom('step_templates')
+        .select('id')
+        .where('template_id', 'in', templateIds);
+
+    const groupTemplateIds = tx
+        .selectFrom('group_templates')
+        .select('id')
+        .where('step_template_id', 'in', stepTemplateIds);
+
+    await tx
+        .deleteFrom('template_approvers')
+        .where('group_template_id', 'in', groupTemplateIds)
+        .execute();
+
+    await tx
+        .deleteFrom('group_templates')
+        .where('step_template_id', 'in', stepTemplateIds)
+        .execute();
+
+    await tx
+        .deleteFrom('step_templates')
+        .where('template_id', 'in', templateIds)
+        .execute();
+
+    await tx
+        .deleteFrom('templates')
+        .where('policy_id', '=', policyId)
+        .execute();
+};
+
+const createAuthflowPolicy = async (
+    tx: ControlledTransaction,
+    record: AuthflowPolicyRecord
+) => {
+    await tx
+        .insertInto('policies')
+        .values({
+            id: record.id.value,
+            action: record.action.value,
+        })
+        .execute();
+
+    await insertChildren(tx, record);
+};
+
+const mergeAuthflowPolicy = async (
+    tx: ControlledTransaction,
+    record: AuthflowPolicyRecord
+) => {
+    await tx
+        .mergeInto('policies')
+        .using(
+            sql<{
+                id: string;
+            }>`(SELECT ${record.id.value}::uuid AS id)`.as('source'),
+            (join) => join.onRef('policies.id', '=', 'source.id')
+        )
+        .whenMatched()
+        .thenUpdateSet({
+            action: record.action.value,
+        })
+        .whenNotMatched()
+        .thenInsertValues({
+            id: record.id.value,
+            action: record.action.value,
+        })
+        .execute();
+
+    await deleteChildren(tx, record.id.value);
+    await insertChildren(tx, record);
+};
+
 export class AuthflowPolicyPersister implements EntityPersister<AuthflowPolicy> {
     readonly entityClass = AuthflowPolicy;
 
@@ -214,6 +239,14 @@ export class AuthflowPolicyPersister implements EntityPersister<AuthflowPolicy> 
         }
 
         return AuthflowPolicyDataMapper.fromRows(rows);
+    }
+
+    async create(
+        tx: ControlledTransaction,
+        entity: AuthflowPolicy
+    ): Promise<void> {
+        const record = AuthflowPolicyDataMapper.from(entity).toRecord();
+        await createAuthflowPolicy(tx, record);
     }
 
     async merge(

@@ -4,6 +4,7 @@ import type { EntityClass } from '../../../core/building-blocks/unit-of-work/uni
 export interface EntityPersister<E> {
     readonly entityClass: EntityClass;
     select(tx: ControlledTransaction, id: string): Promise<E | null>;
+    create(tx: ControlledTransaction, entity: E): Promise<void>;
     merge(tx: ControlledTransaction, entity: E): Promise<void>;
     findBy?(
         tx: ControlledTransaction,
