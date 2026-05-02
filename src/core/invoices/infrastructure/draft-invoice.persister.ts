@@ -4,6 +4,8 @@ import type { ControlledTransaction } from '../../../../database/kysely.ts';
 import dayjs from '../../../lib/dayjs/dayjs.ts';
 import type { EntityPersister } from '../../../platform/infrastructure/persistent-manager/entity-persister.ts';
 import { DraftInvoice } from '../domain/draft-invoice/draft-invoice.ts';
+import { assertNotNull } from '../../../lib/asserts/assert-not-null.ts';
+import { addedDiff, deletedDiff, updatedDiff } from 'deep-object-diff';
 import {
     DraftInvoiceDataMapper,
     DraftInvoiceRecord,
@@ -196,122 +198,120 @@ export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
         const record = DraftInvoiceDataMapper.from(entity).toRecord();
         const now = new Date();
 
-        await tx
-            .updateTable('draft_invoices')
-            .set({
-                status: record.status,
-                vat_rate: record.vat_rate,
-                vat_amount: record.vat_amount,
-                vat_currency: record.vat_currency,
-                subtotal_amount: record.subtotal_amount,
-                subtotal_currency: record.subtotal_currency,
-                total_amount: record.total_amount,
-                total_currency: record.total_currency,
-                issue_date: record.issue_date,
-                due_date: record.due_date,
-                issuer_type: record.issuer_type,
-                issuer_name: record.issuer_name,
-                issuer_address: record.issuer_address,
-                issuer_tax_id: record.issuer_tax_id,
-                issuer_email: record.issuer_email,
-                recipient_type: record.recipient_type,
-                recipient_name: record.recipient_name,
-                recipient_address: record.recipient_address,
-                recipient_tax_id: record.recipient_tax_id,
-                recipient_email: record.recipient_email,
-                recipient_tax_residence_country:
-                    record.recipient_tax_residence_country,
+        const originalRecord = this.#records.get(entity);
+
+        assertNotNull(originalRecord);
+
+        const {
+            line_items: originalLineItems,
+            draft_invoice_paypal_billings: originalPaypal,
+            ...originalScalars
+        } = originalRecord;
+        const {
+            line_items: newLineItems,
+            draft_invoice_paypal_billings: newPaypal,
+            ...newScalars
+        } = record;
+
+        const invoiceChanges = updatedDiff(
+            originalScalars,
+            newScalars
+        ) as Partial<typeof newScalars>;
+
+        if (Object.keys(invoiceChanges).length > 0) {
+            await tx
+                .updateTable('draft_invoices')
+                .set({ ...invoiceChanges, updated_at: now })
+                .where('id', '=', record.id)
+                .execute();
+        }
+
+        const originalLineItemsById = Object.fromEntries(
+            originalLineItems.map((item) => [item.id, item])
+        );
+        const newLineItemsById = Object.fromEntries(
+            newLineItems.map((item) => [item.id, item])
+        );
+
+        const addedLineItems = addedDiff(
+            originalLineItemsById,
+            newLineItemsById
+        ) as Record<string, (typeof newLineItems)[number]>;
+        const deletedLineItems = deletedDiff(
+            originalLineItemsById,
+            newLineItemsById
+        ) as Record<string, unknown>;
+        const updatedLineItems = updatedDiff(
+            originalLineItemsById,
+            newLineItemsById
+        ) as Record<string, Partial<(typeof newLineItems)[number]>>;
+
+        const deletedLineItemIds = Object.keys(deletedLineItems);
+        if (deletedLineItemIds.length > 0) {
+            await tx
+                .deleteFrom('draft_invoice_line_items')
+                .where('id', 'in', deletedLineItemIds)
+                .execute();
+        }
+
+        const addedLineItemValues = Object.keys(addedLineItems).map((id) => {
+            const item = newLineItemsById[id];
+            return {
+                id: item.id,
+                draft_invoice_id: record.id,
+                description: item.description,
+                price_amount: item.price_amount,
+                price_currency: item.price_currency,
+                quantity: item.quantity,
+                total_amount: item.total_amount,
+                total_currency: item.total_currency,
+                created_at: now,
                 updated_at: now,
-            })
-            .where('id', '=', record.id)
-            .execute();
+            };
+        });
 
-        for (const item of record.line_items) {
+        if (addedLineItemValues.length > 0) {
             await tx
-                .mergeInto('draft_invoice_line_items')
-                .using(
-                    sql<{ id: string }>`(SELECT ${item.id}::uuid AS id)`.as(
-                        'source'
-                    ),
-                    (join) =>
-                        join.onRef(
-                            'draft_invoice_line_items.id',
-                            '=',
-                            'source.id'
-                        )
-                )
-                .whenMatched()
-                .thenUpdateSet({
-                    description: item.description,
-                    price_amount: item.price_amount,
-                    price_currency: item.price_currency,
-                    quantity: item.quantity,
-                    total_amount: item.total_amount,
-                    total_currency: item.total_currency,
-                    updated_at: now,
-                })
-                .whenNotMatched()
-                .thenInsertValues({
-                    id: item.id,
-                    draft_invoice_id: record.id,
-                    description: item.description,
-                    price_amount: item.price_amount,
-                    price_currency: item.price_currency,
-                    quantity: item.quantity,
-                    total_amount: item.total_amount,
-                    total_currency: item.total_currency,
-                    created_at: now,
-                    updated_at: now,
-                })
+                .insertInto('draft_invoice_line_items')
+                .values(addedLineItemValues)
                 .execute();
         }
 
-        let pruneQuery = tx
-            .deleteFrom('draft_invoice_line_items')
-            .where('draft_invoice_id', '=', record.id);
-
-        if (record.line_items.length > 0) {
-            pruneQuery = pruneQuery.where(
-                'id',
-                'not in',
-                record.line_items.map((item) => item.id)
-            );
+        for (const [id, changes] of Object.entries(updatedLineItems)) {
+            if (Object.keys(changes).length === 0) continue;
+            await tx
+                .updateTable('draft_invoice_line_items')
+                .set({ ...changes, updated_at: now })
+                .where('id', '=', id)
+                .execute();
         }
 
-        await pruneQuery.execute();
-
-        if (record.draft_invoice_paypal_billings) {
-            await tx
-                .mergeInto('draft_invoice_paypal_billings')
-                .using(
-                    sql<{
-                        draft_invoice_id: string;
-                    }>`(SELECT ${record.id}::uuid AS draft_invoice_id)`.as(
-                        'source'
-                    ),
-                    (join) =>
-                        join.onRef(
-                            'draft_invoice_paypal_billings.draft_invoice_id',
-                            '=',
-                            'source.draft_invoice_id'
-                        )
-                )
-                .whenMatched()
-                .thenUpdateSet({
-                    email: record.draft_invoice_paypal_billings.email,
-                    updated_at: now,
-                })
-                .whenNotMatched()
-                .thenInsertValues({
-                    draft_invoice_id: record.id,
-                    email: record.draft_invoice_paypal_billings.email,
-                })
-                .execute();
-        } else {
+        if (originalPaypal && !newPaypal) {
             await tx
                 .deleteFrom('draft_invoice_paypal_billings')
                 .where('draft_invoice_id', '=', record.id)
                 .execute();
+        } else if (!originalPaypal && newPaypal) {
+            await tx
+                .insertInto('draft_invoice_paypal_billings')
+                .values({
+                    draft_invoice_id: record.id,
+                    email: newPaypal.email,
+                })
+                .execute();
+        } else if (originalPaypal && newPaypal) {
+            const paypalChanges = updatedDiff(
+                originalPaypal,
+                newPaypal
+            ) as Partial<typeof newPaypal>;
+
+            if (Object.keys(paypalChanges).length > 0) {
+                await tx
+                    .updateTable('draft_invoice_paypal_billings')
+                    .set({ ...paypalChanges, updated_at: now })
+                    .where('draft_invoice_id', '=', record.id)
+                    .execute();
+            }
         }
     }
 }
