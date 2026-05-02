@@ -12,6 +12,8 @@ import {
 export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
     readonly entityClass = DraftInvoice;
 
+    readonly #records = new WeakMap<DraftInvoice, DraftInvoiceRecord>();
+
     async select(
         tx: ControlledTransaction,
         id: string
@@ -112,7 +114,10 @@ export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
             draft_invoice_paypal_billings: row.draft_invoice_paypal_billings,
         };
 
-        return DraftInvoiceDataMapper.fromRecord(record);
+        const entity = DraftInvoiceDataMapper.fromRecord(record);
+        this.#records.set(entity, record);
+
+        return entity;
     }
 
     async create(
