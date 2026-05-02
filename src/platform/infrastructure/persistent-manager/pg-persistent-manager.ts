@@ -1,3 +1,5 @@
+import { trace } from '@opentelemetry/api';
+import { withSpan } from '../../../lib/with-span/with-span.ts';
 import { DomainEventsBus } from '../../../core/building-blocks/interfaces/domain-events-bus/domain-events-bus.interface.ts';
 import { Logger } from '../../../core/building-blocks/logger/logger.ts';
 import {
@@ -13,6 +15,8 @@ import type {
 } from '../../../../database/kysely.ts';
 import { EventOutboxStorage } from '../event-outbox/event-outbox.ts';
 import type { EntityPersister } from './entity-persister.ts';
+
+const tracer = trace.getTracer('persistent-manager');
 
 type Entity = {
     id: { toString(): string };
@@ -52,7 +56,11 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         }
 
         const persister = this.findPersisterByClass(entityClass);
-        const entity = await persister.select(this.getTransaction(), id);
+        const entity = await withSpan(
+            tracer,
+            `${entityClass.name}.select`,
+            () => persister.select(this.getTransaction(), id)
+        );
 
         return entity as Entity | null;
     }
@@ -103,7 +111,9 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         for (const [, collection] of collections) {
             for (const entity of collection.values()) {
                 const persister = this.findPersisterByInstance(entity);
-                await persister.merge(tx, entity);
+                await withSpan(tracer, `${entity.constructor.name}.merge`, () =>
+                    persister.merge(tx, entity)
+                );
                 allEntities.push(entity);
             }
         }
