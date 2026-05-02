@@ -1,7 +1,7 @@
 import { sql } from 'kysely';
+import { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/postgres';
 import type { ControlledTransaction } from '../../../../database/kysely.ts';
 import dayjs from '../../../lib/dayjs/dayjs.ts';
-import { pick } from '../../../lib/pick/pick.ts';
 import type { EntityPersister } from '../../../platform/infrastructure/persistent-manager/entity-persister.ts';
 import { DraftInvoice } from '../domain/draft-invoice/draft-invoice.ts';
 import {
@@ -17,109 +17,100 @@ export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
         tx: ControlledTransaction,
         id: string
     ): Promise<DraftInvoice | null> {
-        const rows = await tx
+        const row = await tx
             .selectFrom('draft_invoices')
-            .leftJoin(
-                'draft_invoice_line_items',
-                'draft_invoice_line_items.draft_invoice_id',
-                'draft_invoices.id'
-            )
-            .leftJoin(
-                'draft_invoice_paypal_billings',
-                'draft_invoice_paypal_billings.draft_invoice_id',
-                'draft_invoices.id'
-            )
             .where('draft_invoices.id', '=', id)
             .modifyEnd(sql`for update of draft_invoices`)
-            .select([
-                'draft_invoices.id as inv_id',
-                'draft_invoices.status as inv_status',
-                'draft_invoices.vat_rate as inv_vat_rate',
-                'draft_invoices.vat_amount as inv_vat_amount',
-                'draft_invoices.vat_currency as inv_vat_currency',
-                'draft_invoices.subtotal_amount as inv_subtotal_amount',
-                'draft_invoices.subtotal_currency as inv_subtotal_currency',
-                'draft_invoices.total_amount as inv_total_amount',
-                'draft_invoices.total_currency as inv_total_currency',
-                'draft_invoices.issue_date as inv_issue_date',
-                'draft_invoices.due_date as inv_due_date',
-                'draft_invoices.issuer_type as inv_issuer_type',
-                'draft_invoices.issuer_name as inv_issuer_name',
-                'draft_invoices.issuer_address as inv_issuer_address',
-                'draft_invoices.issuer_tax_id as inv_issuer_tax_id',
-                'draft_invoices.issuer_email as inv_issuer_email',
-                'draft_invoices.recipient_type as inv_recipient_type',
-                'draft_invoices.recipient_name as inv_recipient_name',
-                'draft_invoices.recipient_address as inv_recipient_address',
-                'draft_invoices.recipient_tax_id as inv_recipient_tax_id',
-                'draft_invoices.recipient_email as inv_recipient_email',
-                'draft_invoices.recipient_tax_residence_country as inv_recipient_tax_residence_country',
-                'draft_invoice_line_items.id as li_id',
-                'draft_invoice_line_items.draft_invoice_id as li_draft_invoice_id',
-                'draft_invoice_line_items.description as li_description',
-                'draft_invoice_line_items.price_amount as li_price_amount',
-                'draft_invoice_line_items.price_currency as li_price_currency',
-                'draft_invoice_line_items.quantity as li_quantity',
-                'draft_invoice_line_items.total_amount as li_total_amount',
-                'draft_invoice_line_items.total_currency as li_total_currency',
-                'draft_invoice_paypal_billings.draft_invoice_id as pb_draft_invoice_id',
-                'draft_invoice_paypal_billings.email as pb_email',
+            .select((eb) => [
+                'draft_invoices.id',
+                'draft_invoices.status',
+                'draft_invoices.vat_rate',
+                'draft_invoices.vat_amount',
+                'draft_invoices.vat_currency',
+                'draft_invoices.subtotal_amount',
+                'draft_invoices.subtotal_currency',
+                'draft_invoices.total_amount',
+                'draft_invoices.total_currency',
+                'draft_invoices.issue_date',
+                'draft_invoices.due_date',
+                'draft_invoices.issuer_type',
+                'draft_invoices.issuer_name',
+                'draft_invoices.issuer_address',
+                'draft_invoices.issuer_tax_id',
+                'draft_invoices.issuer_email',
+                'draft_invoices.recipient_type',
+                'draft_invoices.recipient_name',
+                'draft_invoices.recipient_address',
+                'draft_invoices.recipient_tax_id',
+                'draft_invoices.recipient_email',
+                'draft_invoices.recipient_tax_residence_country',
+                jsonArrayFrom(
+                    eb
+                        .selectFrom('draft_invoice_line_items')
+                        .whereRef(
+                            'draft_invoice_line_items.draft_invoice_id',
+                            '=',
+                            'draft_invoices.id'
+                        )
+                        .select([
+                            'draft_invoice_line_items.id',
+                            'draft_invoice_line_items.draft_invoice_id',
+                            'draft_invoice_line_items.description',
+                            'draft_invoice_line_items.price_amount',
+                            'draft_invoice_line_items.price_currency',
+                            'draft_invoice_line_items.quantity',
+                            'draft_invoice_line_items.total_amount',
+                            'draft_invoice_line_items.total_currency',
+                        ])
+                ).as('line_items'),
+                jsonObjectFrom(
+                    eb
+                        .selectFrom('draft_invoice_paypal_billings')
+                        .whereRef(
+                            'draft_invoice_paypal_billings.draft_invoice_id',
+                            '=',
+                            'draft_invoices.id'
+                        )
+                        .select(['draft_invoice_id', 'email'])
+                ).as('draft_invoice_paypal_billings'),
             ])
-            .execute();
+            .executeTakeFirst();
 
-        if (rows.length === 0) {
+        if (!row) {
             return null;
         }
 
-        const draftInvoice = pick(rows, 'inv_')[0];
-        const paypalRow = pick(rows, 'pb_')[0];
-        const paypalBilling =
-            paypalRow.draft_invoice_id !== null && paypalRow.email !== null
-                ? {
-                      draft_invoice_id: paypalRow.draft_invoice_id,
-                      email: paypalRow.email,
-                  }
-                : null;
-        const lineItems = pick(rows, 'li_').filter(
-            (
-                item
-            ): item is {
-                [K in keyof typeof item]: NonNullable<(typeof item)[K]>;
-            } => item.id !== null
-        );
-
         const record: DraftInvoiceRecord = {
-            id: draftInvoice.id,
-            status: draftInvoice.status as DraftInvoiceRecord['status'],
-            vat_rate: draftInvoice.vat_rate,
-            vat_amount: draftInvoice.vat_amount,
-            vat_currency: draftInvoice.vat_currency,
-            subtotal_amount: draftInvoice.subtotal_amount,
-            subtotal_currency: draftInvoice.subtotal_currency,
-            total_amount: draftInvoice.total_amount,
-            total_currency: draftInvoice.total_currency,
-            issue_date: draftInvoice.issue_date
-                ? dayjs(draftInvoice.issue_date).format('YYYY-MM-DD')
+            id: row.id,
+            status: row.status as DraftInvoiceRecord['status'],
+            vat_rate: row.vat_rate,
+            vat_amount: row.vat_amount,
+            vat_currency: row.vat_currency,
+            subtotal_amount: row.subtotal_amount,
+            subtotal_currency: row.subtotal_currency,
+            total_amount: row.total_amount,
+            total_currency: row.total_currency,
+            issue_date: row.issue_date
+                ? dayjs(row.issue_date).format('YYYY-MM-DD')
                 : null,
-            due_date: draftInvoice.due_date
-                ? dayjs(draftInvoice.due_date).format('YYYY-MM-DD')
+            due_date: row.due_date
+                ? dayjs(row.due_date).format('YYYY-MM-DD')
                 : null,
-            issuer_type:
-                draftInvoice.issuer_type as DraftInvoiceRecord['issuer_type'],
-            issuer_name: draftInvoice.issuer_name,
-            issuer_address: draftInvoice.issuer_address,
-            issuer_tax_id: draftInvoice.issuer_tax_id,
-            issuer_email: draftInvoice.issuer_email,
+            issuer_type: row.issuer_type as DraftInvoiceRecord['issuer_type'],
+            issuer_name: row.issuer_name,
+            issuer_address: row.issuer_address,
+            issuer_tax_id: row.issuer_tax_id,
+            issuer_email: row.issuer_email,
             recipient_type:
-                draftInvoice.recipient_type as DraftInvoiceRecord['recipient_type'],
-            recipient_name: draftInvoice.recipient_name,
-            recipient_address: draftInvoice.recipient_address,
-            recipient_tax_id: draftInvoice.recipient_tax_id,
-            recipient_email: draftInvoice.recipient_email,
+                row.recipient_type as DraftInvoiceRecord['recipient_type'],
+            recipient_name: row.recipient_name,
+            recipient_address: row.recipient_address,
+            recipient_tax_id: row.recipient_tax_id,
+            recipient_email: row.recipient_email,
             recipient_tax_residence_country:
-                draftInvoice.recipient_tax_residence_country,
-            line_items: lineItems,
-            draft_invoice_paypal_billings: paypalBilling,
+                row.recipient_tax_residence_country,
+            line_items: row.line_items,
+            draft_invoice_paypal_billings: row.draft_invoice_paypal_billings,
         };
 
         const entity = DraftInvoiceDataMapper.fromRecord(record);
