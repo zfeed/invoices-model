@@ -125,9 +125,8 @@ export class InvoicePersister implements EntityPersister<Invoice> {
 
         const now = new Date();
 
-        await tx
-            .insertInto('invoices')
-            .values({
+        const withInvoice = tx.with('new_invoice', (db) =>
+            db.insertInto('invoices').values({
                 id: record.id,
                 status: record.status,
                 vat_rate: record.vat_rate,
@@ -154,35 +153,40 @@ export class InvoicePersister implements EntityPersister<Invoice> {
                 created_at: now,
                 updated_at: now,
             })
-            .execute();
+        );
+
+        const paypalBilling = {
+            invoice_id: record.id,
+            email: record.invoice_paypal_billings.email,
+        };
 
         if (record.line_items.length > 0) {
-            await tx
-                .insertInto('invoice_line_items')
-                .values(
-                    record.line_items.map((item) => ({
-                        id: item.id,
-                        invoice_id: record.id,
-                        description: item.description,
-                        price_amount: item.price_amount,
-                        price_currency: item.price_currency,
-                        quantity: item.quantity,
-                        total_amount: item.total_amount,
-                        total_currency: item.total_currency,
-                        created_at: now,
-                        updated_at: now,
-                    }))
+            await withInvoice
+                .with('new_line_items', (db) =>
+                    db.insertInto('invoice_line_items').values(
+                        record.line_items.map((item) => ({
+                            id: item.id,
+                            invoice_id: record.id,
+                            description: item.description,
+                            price_amount: item.price_amount,
+                            price_currency: item.price_currency,
+                            quantity: item.quantity,
+                            total_amount: item.total_amount,
+                            total_currency: item.total_currency,
+                            created_at: now,
+                            updated_at: now,
+                        }))
+                    )
                 )
+                .insertInto('invoice_paypal_billings')
+                .values(paypalBilling)
+                .execute();
+        } else {
+            await withInvoice
+                .insertInto('invoice_paypal_billings')
+                .values(paypalBilling)
                 .execute();
         }
-
-        await tx
-            .insertInto('invoice_paypal_billings')
-            .values({
-                invoice_id: record.id,
-                email: record.invoice_paypal_billings.email,
-            })
-            .execute();
     }
 
     async merge(tx: ControlledTransaction, entity: Invoice): Promise<void> {

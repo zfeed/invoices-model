@@ -129,66 +129,90 @@ export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
         const record = DraftInvoiceDataMapper.from(entity).toRecord();
         const now = new Date();
 
-        await tx
-            .insertInto('draft_invoices')
-            .values({
-                id: record.id,
-                status: record.status,
-                vat_rate: record.vat_rate,
-                vat_amount: record.vat_amount,
-                vat_currency: record.vat_currency,
-                subtotal_amount: record.subtotal_amount,
-                subtotal_currency: record.subtotal_currency,
-                total_amount: record.total_amount,
-                total_currency: record.total_currency,
-                issue_date: record.issue_date,
-                due_date: record.due_date,
-                issuer_type: record.issuer_type,
-                issuer_name: record.issuer_name,
-                issuer_address: record.issuer_address,
-                issuer_tax_id: record.issuer_tax_id,
-                issuer_email: record.issuer_email,
-                recipient_type: record.recipient_type,
-                recipient_name: record.recipient_name,
-                recipient_address: record.recipient_address,
-                recipient_tax_id: record.recipient_tax_id,
-                recipient_email: record.recipient_email,
-                recipient_tax_residence_country:
-                    record.recipient_tax_residence_country,
-                created_at: now,
-                updated_at: now,
-            })
-            .execute();
+        const invoiceValues = {
+            id: record.id,
+            status: record.status,
+            vat_rate: record.vat_rate,
+            vat_amount: record.vat_amount,
+            vat_currency: record.vat_currency,
+            subtotal_amount: record.subtotal_amount,
+            subtotal_currency: record.subtotal_currency,
+            total_amount: record.total_amount,
+            total_currency: record.total_currency,
+            issue_date: record.issue_date,
+            due_date: record.due_date,
+            issuer_type: record.issuer_type,
+            issuer_name: record.issuer_name,
+            issuer_address: record.issuer_address,
+            issuer_tax_id: record.issuer_tax_id,
+            issuer_email: record.issuer_email,
+            recipient_type: record.recipient_type,
+            recipient_name: record.recipient_name,
+            recipient_address: record.recipient_address,
+            recipient_tax_id: record.recipient_tax_id,
+            recipient_email: record.recipient_email,
+            recipient_tax_residence_country:
+                record.recipient_tax_residence_country,
+            created_at: now,
+            updated_at: now,
+        };
 
-        if (record.line_items.length > 0) {
+        const lineItemValues = record.line_items.map((item) => ({
+            id: item.id,
+            draft_invoice_id: record.id,
+            description: item.description,
+            price_amount: item.price_amount,
+            price_currency: item.price_currency,
+            quantity: item.quantity,
+            total_amount: item.total_amount,
+            total_currency: item.total_currency,
+            created_at: now,
+            updated_at: now,
+        }));
+
+        const paypal = record.draft_invoice_paypal_billings;
+        const hasLineItems = lineItemValues.length > 0;
+
+        if (!paypal && !hasLineItems) {
             await tx
+                .insertInto('draft_invoices')
+                .values(invoiceValues)
+                .execute();
+            return;
+        }
+
+        const withInvoice = tx.with('new_draft_invoice', (db) =>
+            db.insertInto('draft_invoices').values(invoiceValues)
+        );
+
+        if (!paypal) {
+            await withInvoice
                 .insertInto('draft_invoice_line_items')
-                .values(
-                    record.line_items.map((item) => ({
-                        id: item.id,
-                        draft_invoice_id: record.id,
-                        description: item.description,
-                        price_amount: item.price_amount,
-                        price_currency: item.price_currency,
-                        quantity: item.quantity,
-                        total_amount: item.total_amount,
-                        total_currency: item.total_currency,
-                        created_at: now,
-                        updated_at: now,
-                    }))
-                )
+                .values(lineItemValues)
                 .execute();
+            return;
         }
 
-        if (record.draft_invoice_paypal_billings) {
-            await tx
+        const paypalValues = {
+            draft_invoice_id: record.id,
+            email: paypal.email,
+        };
+
+        if (!hasLineItems) {
+            await withInvoice
                 .insertInto('draft_invoice_paypal_billings')
-                .values({
-                    draft_invoice_id: record.id,
-                    email: record.draft_invoice_paypal_billings.email,
-                })
+                .values(paypalValues)
                 .execute();
+            return;
         }
+
+        await withInvoice
+            .with('new_line_items', (db) =>
+                db.insertInto('draft_invoice_line_items').values(lineItemValues)
+            )
+            .insertInto('draft_invoice_paypal_billings')
+            .values(paypalValues)
+            .execute();
     }
 
     async merge(
