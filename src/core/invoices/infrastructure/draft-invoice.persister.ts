@@ -1,6 +1,7 @@
 import { sql } from 'kysely';
 import type { ControlledTransaction } from '../../../../database/kysely.ts';
 import dayjs from '../../../lib/dayjs/dayjs.ts';
+import { pick } from '../../../lib/pick/pick.ts';
 import type { EntityPersister } from '../../../platform/infrastructure/persistent-manager/entity-persister.ts';
 import { DraftInvoice } from '../domain/draft-invoice/draft-invoice.ts';
 import {
@@ -16,37 +17,76 @@ export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
         tx: ControlledTransaction,
         id: string
     ): Promise<DraftInvoice | null> {
-        const draftInvoice = await tx
+        const rows = await tx
             .selectFrom('draft_invoices')
-            .selectAll()
+            .leftJoin(
+                'draft_invoice_line_items',
+                'draft_invoice_line_items.draft_invoice_id',
+                'draft_invoices.id'
+            )
+            .leftJoin(
+                'draft_invoice_paypal_billings',
+                'draft_invoice_paypal_billings.draft_invoice_id',
+                'draft_invoices.id'
+            )
             .where('draft_invoices.id', '=', id)
-            .forUpdate()
-            .executeTakeFirst();
+            .modifyEnd(sql`for update of draft_invoices`)
+            .select([
+                'draft_invoices.id as inv_id',
+                'draft_invoices.status as inv_status',
+                'draft_invoices.vat_rate as inv_vat_rate',
+                'draft_invoices.vat_amount as inv_vat_amount',
+                'draft_invoices.vat_currency as inv_vat_currency',
+                'draft_invoices.subtotal_amount as inv_subtotal_amount',
+                'draft_invoices.subtotal_currency as inv_subtotal_currency',
+                'draft_invoices.total_amount as inv_total_amount',
+                'draft_invoices.total_currency as inv_total_currency',
+                'draft_invoices.issue_date as inv_issue_date',
+                'draft_invoices.due_date as inv_due_date',
+                'draft_invoices.issuer_type as inv_issuer_type',
+                'draft_invoices.issuer_name as inv_issuer_name',
+                'draft_invoices.issuer_address as inv_issuer_address',
+                'draft_invoices.issuer_tax_id as inv_issuer_tax_id',
+                'draft_invoices.issuer_email as inv_issuer_email',
+                'draft_invoices.recipient_type as inv_recipient_type',
+                'draft_invoices.recipient_name as inv_recipient_name',
+                'draft_invoices.recipient_address as inv_recipient_address',
+                'draft_invoices.recipient_tax_id as inv_recipient_tax_id',
+                'draft_invoices.recipient_email as inv_recipient_email',
+                'draft_invoices.recipient_tax_residence_country as inv_recipient_tax_residence_country',
+                'draft_invoice_line_items.id as li_id',
+                'draft_invoice_line_items.draft_invoice_id as li_draft_invoice_id',
+                'draft_invoice_line_items.description as li_description',
+                'draft_invoice_line_items.price_amount as li_price_amount',
+                'draft_invoice_line_items.price_currency as li_price_currency',
+                'draft_invoice_line_items.quantity as li_quantity',
+                'draft_invoice_line_items.total_amount as li_total_amount',
+                'draft_invoice_line_items.total_currency as li_total_currency',
+                'draft_invoice_paypal_billings.draft_invoice_id as pb_draft_invoice_id',
+                'draft_invoice_paypal_billings.email as pb_email',
+            ])
+            .execute();
 
-        if (!draftInvoice) {
+        if (rows.length === 0) {
             return null;
         }
 
-        const lineItems = await tx
-            .selectFrom('draft_invoice_line_items')
-            .select([
-                'id',
-                'draft_invoice_id',
-                'description',
-                'price_amount',
-                'price_currency',
-                'quantity',
-                'total_amount',
-                'total_currency',
-            ])
-            .where('draft_invoice_id', '=', id)
-            .execute();
-
-        const paypalBilling = await tx
-            .selectFrom('draft_invoice_paypal_billings')
-            .select(['draft_invoice_id', 'email'])
-            .where('draft_invoice_id', '=', id)
-            .executeTakeFirst();
+        const draftInvoice = pick(rows, 'inv_')[0];
+        const paypalRow = pick(rows, 'pb_')[0];
+        const paypalBilling =
+            paypalRow.draft_invoice_id !== null && paypalRow.email !== null
+                ? {
+                      draft_invoice_id: paypalRow.draft_invoice_id,
+                      email: paypalRow.email,
+                  }
+                : null;
+        const lineItems = pick(rows, 'li_').filter(
+            (
+                item
+            ): item is {
+                [K in keyof typeof item]: NonNullable<(typeof item)[K]>;
+            } => item.id !== null
+        );
 
         const record: DraftInvoiceRecord = {
             id: draftInvoice.id,
@@ -64,7 +104,8 @@ export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
             due_date: draftInvoice.due_date
                 ? dayjs(draftInvoice.due_date).format('YYYY-MM-DD')
                 : null,
-            issuer_type: draftInvoice.issuer_type as DraftInvoiceRecord['issuer_type'],
+            issuer_type:
+                draftInvoice.issuer_type as DraftInvoiceRecord['issuer_type'],
             issuer_name: draftInvoice.issuer_name,
             issuer_address: draftInvoice.issuer_address,
             issuer_tax_id: draftInvoice.issuer_tax_id,
@@ -78,7 +119,7 @@ export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
             recipient_tax_residence_country:
                 draftInvoice.recipient_tax_residence_country,
             line_items: lineItems,
-            draft_invoice_paypal_billings: paypalBilling ?? null,
+            draft_invoice_paypal_billings: paypalBilling,
         };
 
         const entity = DraftInvoiceDataMapper.fromRecord(record);

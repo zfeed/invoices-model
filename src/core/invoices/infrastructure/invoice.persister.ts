@@ -1,6 +1,7 @@
 import { sql } from 'kysely';
 import type { ControlledTransaction } from '../../../../database/kysely.ts';
 import dayjs from '../../../lib/dayjs/dayjs.ts';
+import { pick } from '../../../lib/pick/pick.ts';
 import type { EntityPersister } from '../../../platform/infrastructure/persistent-manager/entity-persister.ts';
 import { Invoice } from '../domain/invoice/invoice.ts';
 import {
@@ -16,37 +17,69 @@ export class InvoicePersister implements EntityPersister<Invoice> {
         tx: ControlledTransaction,
         id: string
     ): Promise<Invoice | null> {
-        const invoice = await tx
+        const rows = await tx
             .selectFrom('invoices')
-            .selectAll()
+            .leftJoin(
+                'invoice_line_items',
+                'invoice_line_items.invoice_id',
+                'invoices.id'
+            )
+            .innerJoin(
+                'invoice_paypal_billings',
+                'invoice_paypal_billings.invoice_id',
+                'invoices.id'
+            )
             .where('invoices.id', '=', id)
-            .forUpdate()
-            .executeTakeFirst();
+            .modifyEnd(sql`for update of invoices`)
+            .select([
+                'invoices.id as inv_id',
+                'invoices.status as inv_status',
+                'invoices.vat_rate as inv_vat_rate',
+                'invoices.vat_amount as inv_vat_amount',
+                'invoices.vat_currency as inv_vat_currency',
+                'invoices.subtotal_amount as inv_subtotal_amount',
+                'invoices.subtotal_currency as inv_subtotal_currency',
+                'invoices.total_amount as inv_total_amount',
+                'invoices.total_currency as inv_total_currency',
+                'invoices.issue_date as inv_issue_date',
+                'invoices.due_date as inv_due_date',
+                'invoices.issuer_type as inv_issuer_type',
+                'invoices.issuer_name as inv_issuer_name',
+                'invoices.issuer_address as inv_issuer_address',
+                'invoices.issuer_tax_id as inv_issuer_tax_id',
+                'invoices.issuer_email as inv_issuer_email',
+                'invoices.recipient_type as inv_recipient_type',
+                'invoices.recipient_name as inv_recipient_name',
+                'invoices.recipient_address as inv_recipient_address',
+                'invoices.recipient_tax_id as inv_recipient_tax_id',
+                'invoices.recipient_email as inv_recipient_email',
+                'invoices.recipient_tax_residence_country as inv_recipient_tax_residence_country',
+                'invoice_line_items.id as li_id',
+                'invoice_line_items.invoice_id as li_invoice_id',
+                'invoice_line_items.description as li_description',
+                'invoice_line_items.price_amount as li_price_amount',
+                'invoice_line_items.price_currency as li_price_currency',
+                'invoice_line_items.quantity as li_quantity',
+                'invoice_line_items.total_amount as li_total_amount',
+                'invoice_line_items.total_currency as li_total_currency',
+                'invoice_paypal_billings.invoice_id as pb_invoice_id',
+                'invoice_paypal_billings.email as pb_email',
+            ])
+            .execute();
 
-        if (!invoice) {
+        if (rows.length === 0) {
             return null;
         }
 
-        const lineItems = await tx
-            .selectFrom('invoice_line_items')
-            .select([
-                'id',
-                'invoice_id',
-                'description',
-                'price_amount',
-                'price_currency',
-                'quantity',
-                'total_amount',
-                'total_currency',
-            ])
-            .where('invoice_id', '=', id)
-            .execute();
-
-        const paypalBilling = await tx
-            .selectFrom('invoice_paypal_billings')
-            .select(['invoice_id', 'email'])
-            .where('invoice_id', '=', id)
-            .executeTakeFirstOrThrow();
+        const invoice = pick(rows, 'inv_')[0];
+        const paypalBilling = pick(rows, 'pb_')[0];
+        const lineItems = pick(rows, 'li_').filter(
+            (
+                item
+            ): item is {
+                [K in keyof typeof item]: NonNullable<(typeof item)[K]>;
+            } => item.id !== null
+        );
 
         const record: InvoiceRecord = {
             id: invoice.id,
