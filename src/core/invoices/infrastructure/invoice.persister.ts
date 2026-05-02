@@ -272,12 +272,49 @@ export class InvoicePersister implements EntityPersister<Invoice> {
                 .execute();
         }
 
-        for (const [id, changes] of Object.entries(updatedLineItems)) {
-            if (Object.keys(changes).length === 0) continue;
+        const updatedLineItemEntries = Object.entries(updatedLineItems).filter(
+            ([, changes]) => Object.keys(changes).length > 0
+        );
+
+        if (updatedLineItemEntries.length > 0) {
+            const items = updatedLineItemEntries.map(
+                ([id]) => newLineItemsById[id]
+            );
+
+            const buildRow = (item: (typeof items)[number]) =>
+                tx.selectNoFrom([
+                    sql<string>`${item.id}::uuid`.as('id'),
+                    sql<string>`${item.description}`.as('description'),
+                    sql<string>`${item.price_amount}::numeric`.as(
+                        'price_amount'
+                    ),
+                    sql<string>`${item.price_currency}`.as('price_currency'),
+                    sql<string>`${item.quantity}::bigint`.as('quantity'),
+                    sql<string>`${item.total_amount}::numeric`.as(
+                        'total_amount'
+                    ),
+                    sql<string>`${item.total_currency}`.as('total_currency'),
+                ]);
+
+            const [first, ...rest] = items;
+            const valuesQuery = rest.reduce(
+                (q, item) => q.unionAll(buildRow(item)),
+                buildRow(first)
+            );
+
             await tx
                 .updateTable('invoice_line_items')
-                .set({ ...changes, updated_at: now })
-                .where('id', '=', id)
+                .from(valuesQuery.as('v'))
+                .set((eb) => ({
+                    description: eb.ref('v.description'),
+                    price_amount: eb.ref('v.price_amount'),
+                    price_currency: eb.ref('v.price_currency'),
+                    quantity: eb.ref('v.quantity'),
+                    total_amount: eb.ref('v.total_amount'),
+                    total_currency: eb.ref('v.total_currency'),
+                    updated_at: now,
+                }))
+                .whereRef('invoice_line_items.id', '=', 'v.id')
                 .execute();
         }
 
