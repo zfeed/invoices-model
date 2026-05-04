@@ -30,7 +30,7 @@ const startup = async () => {
     const address = await withSpan(
         tracer,
         'listen application',
-        () => app.listen({ port: config.http.port }),
+        () => app.listen({ port: config.http.port, host: '0.0.0.0' }),
         {
             kind: SpanKind.INTERNAL,
             attributes: { 'server.port': config.http.port },
