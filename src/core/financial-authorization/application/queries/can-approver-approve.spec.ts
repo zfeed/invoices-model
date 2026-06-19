@@ -3,7 +3,6 @@ import { Session } from '../../../building-blocks/unit-of-work/unit-of-work.ts';
 import { PersistentManager } from '../../../../platform/infrastructure/persistent-manager/pg-persistent-manager.ts';
 import { defaultPersisters } from '../../../../platform/infrastructure/persistent-manager/default-persisters.ts';
 import { InMemoryDomainEventsBus } from '../../../../platform/infrastructure/domain-events/in-memory-domain-events-bus.ts';
-import { EventOutboxStorage } from '../../../../platform/infrastructure/event-outbox/event-outbox.ts';
 import { CanApproverApprove } from './can-approver-approve.ts';
 import { cleanDatabase } from '../../../../platform/infrastructure/persistent-manager/clean-database.ts';
 import { getTestKysely } from '../../../../../test/kysely.ts';
@@ -85,7 +84,6 @@ describe('CanApproverApprove', () => {
             new PersistentManager(
                 kysely,
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create(kysely),
                 defaultPersisters
             )
         );
@@ -105,7 +103,6 @@ describe('CanApproverApprove', () => {
             new PersistentManager(
                 kysely,
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create(kysely),
                 defaultPersisters
             )
         );
@@ -136,7 +133,6 @@ describe('CanApproverApprove', () => {
             new PersistentManager(
                 kysely,
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create(kysely),
                 defaultPersisters
             )
         );
@@ -167,7 +163,6 @@ describe('CanApproverApprove', () => {
             new PersistentManager(
                 kysely,
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create(kysely),
                 defaultPersisters
             )
         );
@@ -217,7 +212,6 @@ describe('CanApproverApprove', () => {
             new PersistentManager(
                 kysely,
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create(kysely),
                 defaultPersisters
             )
         );
@@ -248,7 +242,6 @@ describe('CanApproverApprove', () => {
             new PersistentManager(
                 kysely,
                 new InMemoryDomainEventsBus(),
-                EventOutboxStorage.create(kysely),
                 defaultPersisters
             )
         );

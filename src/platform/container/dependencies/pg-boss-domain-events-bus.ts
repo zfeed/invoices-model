@@ -8,5 +8,8 @@ export const createPgBossDomainEventsBus = (
 ): PgBossDomainEventsBus =>
     new PgBossDomainEventsBus({
         connectionString: config.database.url,
+        // pg-boss workers poll for jobs; its default is 2s. Poll at the
+        // minimum 0.5s so domain events are delivered with low latency.
+        pollingIntervalSeconds: 0.5,
         logger,
     });

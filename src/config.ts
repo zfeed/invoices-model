@@ -25,15 +25,6 @@ const schema = z.object({
             factor: z.coerce.number().positive(),
         }),
     }),
-    kafka: z.object({
-        brokers: z
-            .string()
-            .min(1)
-            .transform((s) => s.split(',')),
-        clientId: z.string().min(1),
-        groupId: z.string().min(1),
-        topicPrefix: z.string().min(1),
-    }),
     logger: z.object({
         stdout: z
             .enum(['true', 'false'])
@@ -48,12 +39,6 @@ const schema = z.object({
         tracesEndpoint: z.string().url(),
         metricsEndpoint: z.string().url(),
         metricsExportIntervalMs: z.coerce.number().int().positive(),
-    }),
-    outbox: z.object({
-        pollingIntervalSeconds: z.coerce.number().int().positive(),
-        pollingTimeoutMinutes: z.coerce.number().int().positive(),
-        maxDeliveryAttempts: z.coerce.number().int().positive(),
-        batchSize: z.coerce.number().int().positive(),
     }),
 });
 
@@ -85,12 +70,6 @@ export function getConfig(): Config {
                 factor: process.env.PAYPAL_POLL_FACTOR,
             },
         },
-        kafka: {
-            brokers: process.env.KAFKA_BROKERS,
-            clientId: process.env.KAFKA_CLIENT_ID,
-            groupId: process.env.KAFKA_GROUP_ID,
-            topicPrefix: process.env.KAFKA_TOPIC_PREFIX,
-        },
         logger: {
             stdout: process.env.LOG_STDOUT,
             level: process.env.LOG_LEVEL,
@@ -100,12 +79,6 @@ export function getConfig(): Config {
             tracesEndpoint: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT,
             metricsEndpoint: process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT,
             metricsExportIntervalMs: process.env.OTEL_METRIC_EXPORT_INTERVAL_MS,
-        },
-        outbox: {
-            pollingIntervalSeconds: process.env.OUTBOX_POLLING_INTERVAL_S,
-            pollingTimeoutMinutes: process.env.OUTBOX_POLLING_TIMEOUT_M,
-            maxDeliveryAttempts: process.env.OUTBOX_MAX_DELIVERY_ATTEMPTS,
-            batchSize: process.env.OUTBOX_BATCH_SIZE,
         },
     });
 }

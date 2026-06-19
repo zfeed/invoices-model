@@ -5,7 +5,6 @@ import { Session } from './unit-of-work.ts';
 import { PersistentManager } from '../../../platform/infrastructure/persistent-manager/pg-persistent-manager.ts';
 import { defaultPersisters } from '../../../platform/infrastructure/persistent-manager/default-persisters.ts';
 import { InMemoryDomainEventsBus } from '../../../platform/infrastructure/domain-events/in-memory-domain-events-bus.ts';
-import { EventOutboxStorage } from '../../../platform/infrastructure/event-outbox/event-outbox.ts';
 import { getTestKysely } from '../../../../test/kysely.ts';
 const kysely = getTestKysely();
 import { Invoice } from '../../invoices/domain/invoice/invoice.ts';
@@ -25,7 +24,6 @@ describe('UnitOfWork contract', () => {
                 new PersistentManager(
                     kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create(kysely),
                     defaultPersisters
                 )
             );
@@ -46,7 +44,6 @@ describe('UnitOfWork contract', () => {
                 new PersistentManager(
                     kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create(kysely),
                     defaultPersisters
                 )
             );
@@ -69,7 +66,6 @@ describe('UnitOfWork contract', () => {
                 new PersistentManager(
                     kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create(kysely),
                     defaultPersisters
                 )
             );
@@ -95,7 +91,6 @@ describe('UnitOfWork contract', () => {
                 new PersistentManager(
                     kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create(kysely),
                     defaultPersisters
                 )
             );
@@ -143,7 +138,6 @@ describe('UnitOfWork contract', () => {
                 new PersistentManager(
                     kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create(kysely),
                     defaultPersisters
                 )
             );
@@ -171,7 +165,6 @@ describe('UnitOfWork contract', () => {
                 new PersistentManager(
                     kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create(kysely),
                     defaultPersisters
                 )
             );
@@ -191,7 +184,6 @@ describe('UnitOfWork contract', () => {
                 new PersistentManager(
                     kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create(kysely),
                     defaultPersisters
                 )
             );
@@ -232,7 +224,6 @@ describe('UnitOfWork contract', () => {
                 new PersistentManager(
                     kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create(kysely),
                     defaultPersisters
                 )
             );
@@ -257,7 +248,6 @@ describe('UnitOfWork contract', () => {
                 new PersistentManager(
                     kysely,
                     new InMemoryDomainEventsBus(),
-                    EventOutboxStorage.create(kysely),
                     defaultPersisters
                 )
             );

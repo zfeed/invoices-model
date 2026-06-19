@@ -8,7 +8,7 @@ import { registerDependencies } from '../container/register-dependencies.ts';
 import { Container } from '../../lib/container/container.ts';
 import { bootstrap } from '../../core/bootstrap.ts';
 import { Session } from '../../core/building-blocks/unit-of-work/unit-of-work.ts';
-import { KafkaDomainEventsBus } from '../infrastructure/domain-events/kafka/kafka-domain-events-bus.ts';
+import { PgBossDomainEventsBus } from '../infrastructure/domain-events/pg-boss/pg-boss-domain-events-bus.ts';
 import { Config } from '../../config.ts';
 import { pino as Pino, Logger as PinoInstance } from 'pino';
 import { withSpan } from '../../lib/with-span/with-span.ts';
@@ -28,10 +28,9 @@ export const createApp = async (container?: Container) => {
     const config = resolvedContainer.getOrThrow<Config>('Config');
     const kysely = resolvedContainer.getOrThrow<Kysely>('Kysely');
     const session = resolvedContainer.getOrThrow<Session>(Session);
-    const domainEventsBus =
-        resolvedContainer.getOrThrow<KafkaDomainEventsBus>(
-            KafkaDomainEventsBus
-        );
+    const domainEventsBus = resolvedContainer.getOrThrow<PgBossDomainEventsBus>(
+        PgBossDomainEventsBus
+    );
 
     const core = await withSpan(
         tracer,

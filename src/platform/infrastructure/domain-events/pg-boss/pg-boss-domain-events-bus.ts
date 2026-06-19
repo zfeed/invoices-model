@@ -33,7 +33,7 @@ export class PgBossDomainEventsBus implements DomainEventsBus {
         pollingIntervalSeconds?: number;
     }) {
         this.boss = new PgBoss({
-          connectionString: config.connectionString,
+            connectionString: config.connectionString,
             schema: config.schema,
         });
         this.queuePrefix = config.queuePrefix;

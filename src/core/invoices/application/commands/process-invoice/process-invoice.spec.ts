@@ -2,7 +2,6 @@ import { Session } from '../../../../building-blocks/unit-of-work/unit-of-work.t
 import { PersistentManager } from '../../../../../platform/infrastructure/persistent-manager/pg-persistent-manager.ts';
 import { defaultPersisters } from '../../../../../platform/infrastructure/persistent-manager/default-persisters.ts';
 import { InMemoryDomainEventsBus } from '../../../../../platform/infrastructure/domain-events/in-memory-domain-events-bus.ts';
-import { EventOutboxStorage } from '../../../../../platform/infrastructure/event-outbox/event-outbox.ts';
 import { getTestKysely } from '../../../../../../test/kysely.ts';
 const kysely = getTestKysely();
 import { CreateDraftInvoice } from '../create-draft-invoice/create-draft-invoice.ts';
@@ -55,12 +54,7 @@ describe('ProcessInvoice', () => {
     beforeEach(() => {
         domainEventsBus = new InMemoryDomainEventsBus();
         session = new Session(
-            new PersistentManager(
-                kysely,
-                domainEventsBus,
-                EventOutboxStorage.create(kysely),
-                defaultPersisters
-            )
+            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
         );
         createCommand = new CreateDraftInvoice(session);
         completeCommand = new CompleteDraftInvoice(session);

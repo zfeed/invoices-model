@@ -1,5 +1,6 @@
 import { DomainEvent, DomainEventClass } from '../../events/domain-event.ts';
 import { PublishableEvents } from '../../events/event-publisher.interface.ts';
+import type { ControlledTransaction } from '../../../../../database/kysely.ts';
 
 export type EventHandler<T = unknown> = (event: T) => Promise<void>;
 
@@ -8,6 +9,10 @@ export interface DomainEventsBus {
     stop(): Promise<void>;
 
     publishEvents(
+        ...objects: PublishableEvents<DomainEvent<unknown>>[]
+    ): Promise<void>;
+    publishEvents(
+        transaction: ControlledTransaction,
         ...objects: PublishableEvents<DomainEvent<unknown>>[]
     ): Promise<void>;
 

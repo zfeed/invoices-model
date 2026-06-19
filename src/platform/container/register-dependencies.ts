@@ -1,14 +1,12 @@
 import { WorkflowClient } from '@temporalio/client';
 import { Container } from '../../lib/container/container.ts';
 import { Session } from '../../core/building-blocks/unit-of-work/unit-of-work.ts';
-import { EventOutboxStorage } from '../infrastructure/event-outbox/event-outbox.ts';
-import { KafkaDomainEventsBus } from '../infrastructure/domain-events/kafka/kafka-domain-events-bus.ts';
+import { PgBossDomainEventsBus } from '../infrastructure/domain-events/pg-boss/pg-boss-domain-events-bus.ts';
 import { TemporalWorker } from '../worker.ts';
 import { Paypal } from '../../lib/paypal/paypal.ts';
 import { createTemporalClient } from './dependencies/temporal-client.ts';
 import { createPaypal } from './dependencies/paypal.ts';
-import { createEventOutboxStorage } from './dependencies/event-outbox-storage.ts';
-import { createKafkaDomainEventsBus } from './dependencies/kafka-domain-events-bus.ts';
+import { createPgBossDomainEventsBus } from './dependencies/pg-boss-domain-events-bus.ts';
 import { createSession } from './dependencies/session.ts';
 import { createTemporalWorker } from './dependencies/temporal-worker.ts';
 import { Logger } from '../../core/building-blocks/logger/logger.ts';
@@ -25,18 +23,8 @@ export const registerDependencies = async (): Promise<Container> => {
     const kysely = createKysely(config);
     const pino = createPino(config.logger);
     const logger = createLogger({ pino });
-    const eventOutboxStorage = createEventOutboxStorage(kysely);
-    const domainEventsBus = createKafkaDomainEventsBus(
-        eventOutboxStorage,
-        logger,
-        config
-    );
-    const session = createSession(
-        kysely,
-        domainEventsBus,
-        eventOutboxStorage,
-        logger
-    );
+    const domainEventsBus = createPgBossDomainEventsBus(logger, config);
+    const session = createSession(kysely, domainEventsBus, logger);
     const temporalClient = await createTemporalClient(config);
     const paypal = createPaypal(config);
     const temporalWorker = createTemporalWorker(
@@ -49,8 +37,7 @@ export const registerDependencies = async (): Promise<Container> => {
     container.register(Pino, pino);
     container.register(Logger, logger);
     container.register(Session, session);
-    container.register(EventOutboxStorage, eventOutboxStorage);
-    container.register(KafkaDomainEventsBus, domainEventsBus);
+    container.register(PgBossDomainEventsBus, domainEventsBus);
     container.register(WorkflowClient, temporalClient);
     container.register(Paypal, paypal);
     container.register(TemporalWorker, temporalWorker);

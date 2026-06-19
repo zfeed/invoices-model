@@ -2,7 +2,6 @@ import { InMemoryDomainEventsBus } from '../../../../platform/infrastructure/dom
 import { Session } from '../../../building-blocks/unit-of-work/unit-of-work.ts';
 import { PersistentManager } from '../../../../platform/infrastructure/persistent-manager/pg-persistent-manager.ts';
 import { defaultPersisters } from '../../../../platform/infrastructure/persistent-manager/default-persisters.ts';
-import { EventOutboxStorage } from '../../../../platform/infrastructure/event-outbox/event-outbox.ts';
 import { CreateDraftInvoice } from '../../../invoices/application/commands/create-draft-invoice/create-draft-invoice.ts';
 import { CompleteDraftInvoice } from '../../../invoices/application/commands/complete-draft-invoice/complete-draft-invoice.ts';
 import { ISSUER_TYPE } from '../../../invoices/domain/issuer/issuer.ts';
@@ -82,12 +81,7 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
         await cleanDatabase(kysely);
         domainEventsBus = new InMemoryDomainEventsBus();
         session = new Session(
-            new PersistentManager(
-                kysely,
-                domainEventsBus,
-                EventOutboxStorage.create(kysely),
-                defaultPersisters
-            )
+            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
         );
         createCommand = new CreateDraftInvoice(session);
         completeCommand = new CompleteDraftInvoice(session);

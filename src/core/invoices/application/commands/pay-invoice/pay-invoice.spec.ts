@@ -2,7 +2,6 @@ import { Session } from '../../../../building-blocks/unit-of-work/unit-of-work.t
 import { PersistentManager } from '../../../../../platform/infrastructure/persistent-manager/pg-persistent-manager.ts';
 import { defaultPersisters } from '../../../../../platform/infrastructure/persistent-manager/default-persisters.ts';
 import { InMemoryDomainEventsBus } from '../../../../../platform/infrastructure/domain-events/in-memory-domain-events-bus.ts';
-import { EventOutboxStorage } from '../../../../../platform/infrastructure/event-outbox/event-outbox.ts';
 import { CanApproverApprove } from '../../../../financial-authorization/application/queries/can-approver-approve.ts';
 import { FinancialDocument } from '../../../../financial-authorization/domain/document/document.ts';
 import { Authflow } from '../../../../financial-authorization/domain/authflow/authflow.ts';
@@ -111,12 +110,7 @@ describe('PayInvoice', () => {
         await cleanDatabase(kysely);
         domainEventsBus = new InMemoryDomainEventsBus();
         session = new Session(
-            new PersistentManager(
-                kysely,
-                domainEventsBus,
-                EventOutboxStorage.create(kysely),
-                defaultPersisters
-            )
+            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
         );
         const canApproverApprove = new CanApproverApprove(session);
         createCommand = new CreateDraftInvoice(session);

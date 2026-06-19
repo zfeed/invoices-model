@@ -3,7 +3,6 @@ import { InMemoryDomainEventsBus } from '../../../../platform/infrastructure/dom
 import { Session } from '../../../building-blocks/unit-of-work/unit-of-work.ts';
 import { PersistentManager } from '../../../../platform/infrastructure/persistent-manager/pg-persistent-manager.ts';
 import { defaultPersisters } from '../../../../platform/infrastructure/persistent-manager/default-persisters.ts';
-import { EventOutboxStorage } from '../../../../platform/infrastructure/event-outbox/event-outbox.ts';
 import { Money } from '../../domain/money/money.ts';
 import { Range } from '../../domain/range/range.ts';
 import { AuthflowTemplate } from '../../domain/authflow/authflow-template.ts';
@@ -31,12 +30,7 @@ describe('createAuthflowPolicyCommand', () => {
     it('should create and save a policy', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(
-                kysely,
-                domainEventsBus,
-                EventOutboxStorage.create(kysely),
-                defaultPersisters
-            )
+            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
         );
         const command = new CreateAuthflowPolicy(session);
 
@@ -56,12 +50,7 @@ describe('createAuthflowPolicyCommand', () => {
     it('should persist the policy in storage', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(
-                kysely,
-                domainEventsBus,
-                EventOutboxStorage.create(kysely),
-                defaultPersisters
-            )
+            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
         );
         const command = new CreateAuthflowPolicy(session);
 
@@ -83,12 +72,7 @@ describe('createAuthflowPolicyCommand', () => {
     it('should publish an AuthflowPolicyCreatedEvent', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(
-                kysely,
-                domainEventsBus,
-                EventOutboxStorage.create(kysely),
-                defaultPersisters
-            )
+            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
         );
         const command = new CreateAuthflowPolicy(session);
 
@@ -113,12 +97,7 @@ describe('createAuthflowPolicyCommand', () => {
     it('should throw when ranges overlap', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(
-                kysely,
-                domainEventsBus,
-                EventOutboxStorage.create(kysely),
-                defaultPersisters
-            )
+            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
         );
         const command = new CreateAuthflowPolicy(session);
 
@@ -135,12 +114,7 @@ describe('createAuthflowPolicyCommand', () => {
     it('should not persist the policy when validation fails', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(
-                kysely,
-                domainEventsBus,
-                EventOutboxStorage.create(kysely),
-                defaultPersisters
-            )
+            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
         );
         const command = new CreateAuthflowPolicy(session);
 
@@ -163,12 +137,7 @@ describe('createAuthflowPolicyCommand', () => {
     it('should not publish events when validation fails', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(
-            new PersistentManager(
-                kysely,
-                domainEventsBus,
-                EventOutboxStorage.create(kysely),
-                defaultPersisters
-            )
+            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
         );
         const command = new CreateAuthflowPolicy(session);
 

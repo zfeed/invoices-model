@@ -13,7 +13,6 @@ import type {
     Kysely,
     ControlledTransaction,
 } from '../../../../database/kysely.ts';
-import { EventOutboxStorage } from '../event-outbox/event-outbox.ts';
 import type { EntityPersister } from './entity-persister.ts';
 
 const tracer = trace.getTracer('persistent-manager');
@@ -32,7 +31,6 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
     constructor(
         private readonly kysely: Kysely,
         private readonly domainEventsBus: DomainEventsBus,
-        private readonly eventOutboxStorage: EventOutboxStorage,
         private readonly persisters: EntityPersister<unknown>[],
         private readonly logger?: Logger
     ) {}
@@ -41,7 +39,6 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
         const newManager = new PersistentManager(
             this.kysely,
             this.domainEventsBus,
-            this.eventOutboxStorage,
             this.persisters,
             this.logger
         );
@@ -124,25 +121,13 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
             }
         }
 
-        await this.eventOutboxStorage.insert(
-            allEntities
-                .flatMap((entity) => entity.events)
-                .map((event) => ({
-                    id: event.id,
-                    name: event.name,
-                    payload: event.serialize(),
-                })),
-            { transaction: tx }
-        );
+        await this.domainEventsBus.publishEvents(tx, ...allEntities);
 
         await tx.commit().execute();
         this.committed = true;
         this.logger?.debug('Committed persistent manager transaction', {
             entityCount: allEntities.length,
         });
-        await this.domainEventsBus
-            .publishEvents(...allEntities)
-            .catch(this.logger?.error);
     }
 
     private async initTransaction(): Promise<void> {

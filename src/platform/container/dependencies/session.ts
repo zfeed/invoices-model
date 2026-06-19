@@ -3,20 +3,17 @@ import { PersistentManager } from '../../infrastructure/persistent-manager/pg-pe
 import { defaultPersisters } from '../../infrastructure/persistent-manager/default-persisters.ts';
 import { DomainEventsBus } from '../../../core/building-blocks/interfaces/domain-events-bus/domain-events-bus.interface.ts';
 import { Logger } from '../../../core/building-blocks/logger/logger.ts';
-import { EventOutboxStorage } from '../../infrastructure/event-outbox/event-outbox.ts';
 import type { Kysely } from '../../../../database/kysely.ts';
 
 export const createSession = (
     kysely: Kysely,
     domainEventsBus: DomainEventsBus,
-    eventOutboxStorage: EventOutboxStorage,
     logger: Logger
 ): Session =>
     new Session(
         new PersistentManager(
             kysely,
             domainEventsBus,
-            eventOutboxStorage,
             defaultPersisters,
             logger
         )

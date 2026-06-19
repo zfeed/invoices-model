@@ -3,7 +3,6 @@ import { InMemoryDomainEventsBus } from '../../../../platform/infrastructure/dom
 import { Session } from '../../../building-blocks/unit-of-work/unit-of-work.ts';
 import { PersistentManager } from '../../../../platform/infrastructure/persistent-manager/pg-persistent-manager.ts';
 import { defaultPersisters } from '../../../../platform/infrastructure/persistent-manager/default-persisters.ts';
-import { EventOutboxStorage } from '../../../../platform/infrastructure/event-outbox/event-outbox.ts';
 import { Approver } from '../../domain/approver/approver.ts';
 import { AuthflowTemplate } from '../../domain/authflow/authflow-template.ts';
 import { FinancialDocument } from '../../domain/document/document.ts';
@@ -108,12 +107,7 @@ describe('approveActionOnDocumentCommand', () => {
 
         domainEventsBus = new InMemoryDomainEventsBus();
         session = new Session(
-            new PersistentManager(
-                kysely,
-                domainEventsBus,
-                EventOutboxStorage.create(kysely),
-                defaultPersisters
-            )
+            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
         );
 
         const createPolicy = new CreateAuthflowPolicy(session);
