@@ -29,19 +29,17 @@ type Infrastructure = {
     kysely: Kysely;
 };
 
-export const bootstrap = async (infra: Infrastructure) => {
+export const bootstrap = (infra: Infrastructure) => {
     const onInvoiceIssued = new OnInvoiceIssued(
         infra.session,
         infra.domainEventsBus
     );
-    await onInvoiceIssued.register();
 
     const onInvoiceProcessing = new OnInvoiceProcessing(
         infra.domainEventsBus,
         infra.temporalClient,
         infra.paypalPolling
     );
-    await onInvoiceProcessing.register();
 
     const canApproverApprove = new CanApproverApprove(infra.session);
 
@@ -59,7 +57,11 @@ export const bootstrap = async (infra: Infrastructure) => {
         createAuthflowPolicy: new CreateAuthflowPolicy(infra.session),
         approveActionOnDocument: new ApproveActionOnDocument(infra.session),
         canApproverApprove,
-        start: async () => infra.domainEventsBus.start(),
+        start: async () => {
+            await onInvoiceIssued.register();
+            await onInvoiceProcessing.register();
+            await infra.domainEventsBus.start();
+        },
         shutdown: async () => infra.domainEventsBus.stop(),
     };
 };
