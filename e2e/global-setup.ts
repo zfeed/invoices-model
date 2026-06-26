@@ -1,6 +1,6 @@
 import { AddressInfo } from 'net';
 import { TestProject } from 'vitest/node';
-import { init } from '../src/init.ts';
+import { init } from '../src/platform/application/init.ts';
 
 export default async function setup(project: TestProject) {
     const { app } = await init();

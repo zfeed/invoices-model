@@ -1,4 +1,4 @@
-import { init } from './init.ts';
+import { init } from './platform/application/init.ts';
 
 const { app, config } = await init();
 

@@ -1,18 +1,18 @@
 import { App } from './app.ts';
-import { sdk as otelSdk } from './instrumentation.ts';
+import { sdk as otelSdk } from '../../instrumentation.ts';
 
-import { registerDependencies } from './platform/container/register-dependencies.ts';
+import { registerDependencies } from '../container/register-dependencies.ts';
 
 import { WorkflowClient } from '@temporalio/client';
-import type { Kysely } from '../database/kysely.ts';
-import { TemporalWorker } from './platform/worker.ts';
-import { bootstrap } from './core/bootstrap.ts';
-import { Session } from './core/building-blocks/unit-of-work/unit-of-work.ts';
-import { PgBossDomainEventsBus } from './platform/infrastructure/domain-events/pg-boss/pg-boss-domain-events-bus.ts';
-import { Config } from './config.ts';
+import type { Kysely } from '../../../database/kysely.ts';
+import { TemporalWorker } from '../worker.ts';
+import { bootstrap } from '../../core/bootstrap.ts';
+import { Session } from '../../core/building-blocks/unit-of-work/unit-of-work.ts';
+import { PgBossDomainEventsBus } from '../infrastructure/domain-events/pg-boss/pg-boss-domain-events-bus.ts';
+import { Config } from '../../config.ts';
 import { pino as Pino, Logger as PinoInstance } from 'pino';
-import { errorHandler } from './platform/http/error-handler.ts';
-import * as plugins from './platform/http/plugins.ts';
+import { errorHandler } from '../http/error-handler.ts';
+import * as plugins from '../http/plugins.ts';
 
 export async function init() {
     const container = await registerDependencies();
