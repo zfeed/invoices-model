@@ -24,6 +24,8 @@ export class PgBossDomainEventsBus implements DomainEventsBus {
     private readonly logger: Logger;
     private readonly pollingIntervalSeconds?: number;
     private readonly ensuredQueues = new Set<string>();
+    private readonly workedEvents = new Set<DomainEventClass>();
+    private started = false;
 
     constructor(config: {
         connectionString: string;
@@ -47,33 +49,15 @@ export class PgBossDomainEventsBus implements DomainEventsBus {
         );
 
         await this.boss.start();
-
-        const workOptions: WorkOptions =
-            this.pollingIntervalSeconds !== undefined
-                ? { pollingIntervalSeconds: this.pollingIntervalSeconds }
-                : {};
+        this.started = true;
 
         for (const eventClass of this.handlers.keys()) {
-            const queue = this.applyQueuePrefix(eventClass.eventName());
-            await this.ensureQueue(queue);
-
-            await this.boss.work<SerializedDomainEvent>(
-                queue,
-                workOptions,
-                async (jobs: Job<SerializedDomainEvent>[]) => {
-                    const handlers = this.handlers.get(eventClass) ?? [];
-                    for (const job of jobs) {
-                        const event = eventClass.deserialize(job.data);
-                        await Promise.all(
-                            handlers.map((handler) => handler(event))
-                        );
-                    }
-                }
-            );
+            await this.registerWorker(eventClass);
         }
     }
 
     async stop(): Promise<void> {
+        this.started = false;
         await this.boss.stop();
     }
 
@@ -125,6 +109,39 @@ export class PgBossDomainEventsBus implements DomainEventsBus {
         const handlers = this.handlers.get(eventClass) ?? [];
         handlers.push(handler as EventHandler);
         this.handlers.set(eventClass, handlers);
+
+        if (this.started) {
+            await this.registerWorker(eventClass);
+        }
+    }
+
+    private async registerWorker(eventClass: DomainEventClass): Promise<void> {
+        if (this.workedEvents.has(eventClass)) {
+            return;
+        }
+        this.workedEvents.add(eventClass);
+
+        const workOptions: WorkOptions =
+            this.pollingIntervalSeconds !== undefined
+                ? { pollingIntervalSeconds: this.pollingIntervalSeconds }
+                : {};
+
+        const queue = this.applyQueuePrefix(eventClass.eventName());
+        await this.ensureQueue(queue);
+
+        await this.boss.work<SerializedDomainEvent>(
+            queue,
+            workOptions,
+            async (jobs: Job<SerializedDomainEvent>[]) => {
+                const handlers = this.handlers.get(eventClass) ?? [];
+                for (const job of jobs) {
+                    const event = eventClass.deserialize(job.data);
+                    await Promise.all(
+                        handlers.map((handler) => handler(event))
+                    );
+                }
+            }
+        );
     }
 
     private async ensureQueue(queue: string): Promise<void> {
