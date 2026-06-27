@@ -1,5 +1,5 @@
 import { KNOWN_ERROR_CODE } from '../../../../core/building-blocks/errors/known-error-codes.ts';
-import { InMemoryDomainEventsBus } from '../../../../platform/infrastructure/domain-events/in-memory-domain-events-bus.ts';
+import { createPgBossDomainEventsBus } from '../../../../platform/container/dependencies/pg-boss-domain-events-bus.ts';
 import { Session } from '../../../building-blocks/unit-of-work/unit-of-work.ts';
 import { PersistentManager } from '../../../../platform/infrastructure/persistent-manager/pg-persistent-manager.ts';
 import { defaultPersisters } from '../../../../platform/infrastructure/persistent-manager/default-persisters.ts';
@@ -21,7 +21,25 @@ import { OnInvoiceIssued } from '../event-handlers/on-invoice-issued.ts';
 import { ApproveActionOnDocument } from './approve-action-on-document.ts';
 import { cleanDatabase } from '../../../../platform/infrastructure/persistent-manager/clean-database.ts';
 import { getTestKysely } from '../../../../../test/kysely.ts';
+import { getTestLogger } from '../../../../../test/logger.ts';
+import { getConfig } from '../../../../config.ts';
 const kysely = getTestKysely();
+
+// pg-boss delivers events asynchronously, so the OnInvoiceIssued handler
+// produces its document after the polling worker picks up the event. Tests
+// poll for that state rather than reading it back synchronously.
+const TEST_TIMEOUT = 30_000;
+
+const waitForDocument = (session: Session, referenceId: string) =>
+    vi.waitUntil(
+        async () => {
+            await using uow = await session.begin();
+            return await uow
+                .collection(FinancialDocument)
+                .findBy('referenceId', referenceId);
+        },
+        { timeout: TEST_TIMEOUT, interval: 100 }
+    );
 
 const range = (from: string, to: string) =>
     Range.create(
@@ -95,7 +113,7 @@ const INVOICE_DATA = {
 
 describe('approveActionOnDocumentCommand', () => {
     let session: Session;
-    let domainEventsBus: InMemoryDomainEventsBus;
+    let domainEventsBus: ReturnType<typeof createPgBossDomainEventsBus>;
     let command: ApproveActionOnDocument;
     let approverId: string;
 
@@ -105,7 +123,11 @@ describe('approveActionOnDocumentCommand', () => {
         const fixtures = createTemplate();
         approverId = fixtures.approver.id.toPlain();
 
-        domainEventsBus = new InMemoryDomainEventsBus();
+        domainEventsBus = createPgBossDomainEventsBus(
+            getTestLogger(),
+            getConfig()
+        );
+        await domainEventsBus.start();
         session = new Session(
             new PersistentManager(kysely, domainEventsBus, defaultPersisters)
         );
@@ -125,7 +147,15 @@ describe('approveActionOnDocumentCommand', () => {
             events: [InvoiceIssuedEvent.create(INVOICE_DATA)],
         });
 
+        // The handler creates the document asynchronously; wait for it before
+        // running the approval tests that depend on it existing.
+        await waitForDocument(session, INVOICE_DATA.id);
+
         command = new ApproveActionOnDocument(session);
+    }, TEST_TIMEOUT);
+
+    afterEach(async () => {
+        await domainEventsBus.stop();
     });
 
     it('should throw when document is not found', async () => {
@@ -171,25 +201,33 @@ describe('approveActionOnDocumentCommand', () => {
         }
     });
 
-    it('should publish DocumentApprovedEvent', async () => {
-        const approvedEvents: DocumentApprovedEvent[] = [];
-        await domainEventsBus.subscribeToEvent(
-            DocumentApprovedEvent,
-            async (e) => {
-                approvedEvents.push(e);
-            }
-        );
+    it(
+        'should publish DocumentApprovedEvent',
+        async () => {
+            const approvedEvents: DocumentApprovedEvent[] = [];
+            await domainEventsBus.subscribeToEvent(
+                DocumentApprovedEvent,
+                async (e) => {
+                    approvedEvents.push(e);
+                }
+            );
 
-        await command.execute({
-            referenceId: 'invoice-123',
-            action: 'pay',
-            approverId,
-        });
+            await command.execute({
+                referenceId: 'invoice-123',
+                action: 'pay',
+                approverId,
+            });
 
-        expect(approvedEvents).toHaveLength(1);
-        expect(approvedEvents[0]).toBeInstanceOf(DocumentApprovedEvent);
-        expect(approvedEvents[0].data.referenceId).toBe('invoice-123');
-    });
+            await vi.waitUntil(() => approvedEvents.length === 1, {
+                timeout: TEST_TIMEOUT,
+                interval: 100,
+            });
+
+            expect(approvedEvents[0]).toBeInstanceOf(DocumentApprovedEvent);
+            expect(approvedEvents[0].data.referenceId).toBe('invoice-123');
+        },
+        TEST_TIMEOUT
+    );
 
     it('should throw when authflow for action is not found', async () => {
         await expect(
