@@ -1,7 +1,8 @@
 import { Session } from '../../../building-blocks/unit-of-work/unit-of-work.ts';
 import { PersistentManager } from '../../../../platform/infrastructure/persistent-manager/pg-persistent-manager.ts';
 import { defaultPersisters } from '../../../../platform/infrastructure/persistent-manager/default-persisters.ts';
-import { InMemoryDomainEventsBus } from '../../../../platform/infrastructure/domain-events/in-memory-domain-events-bus.ts';
+import { createPgBossDomainEventsBus } from '../../../../platform/container/dependencies/pg-boss-domain-events-bus.ts';
+import { DomainEventsBus } from '../../../building-blocks/interfaces/domain-events-bus/domain-events-bus.interface.ts';
 import { InvoiceIssuedEvent } from '../../../invoices/domain/invoice/events/invoice-issued.event.ts';
 import { Money } from '../../domain/money/money.ts';
 import { Range } from '../../domain/range/range.ts';
@@ -13,7 +14,15 @@ import { ReferenceId } from '../../domain/reference-id/reference-id.ts';
 import { OnInvoiceIssued } from './on-invoice-issued.ts';
 import { cleanDatabase } from '../../../../platform/infrastructure/persistent-manager/clean-database.ts';
 import { getTestKysely } from '../../../../../test/kysely.ts';
+import { getTestLogger } from '../../../../../test/logger.ts';
+import { getConfig } from '../../../../config.ts';
 const kysely = getTestKysely();
+
+// pg-boss delivers events through workers that poll the database, so each
+// test must wait for the document to materialize rather than reading it back
+// synchronously. The slowest case publishes many events, so give the tests a
+// generous timeout.
+const TEST_TIMEOUT = 60_000;
 
 const createInvoiceEvent = (id: string, amount = '100', currency = 'USD') =>
     InvoiceIssuedEvent.create({
@@ -83,405 +92,418 @@ const seedPolicy = async (session: Session) => {
 };
 
 const publishEvent = async (
-    domainEventsBus: InMemoryDomainEventsBus,
+    domainEventsBus: DomainEventsBus,
     event: InvoiceIssuedEvent
 ) => {
     await domainEventsBus.publishEvents({ events: [event] });
 };
 
+const findDocument = async (session: Session, referenceId: string) => {
+    await using uow = await session.begin();
+    return await uow
+        .collection(FinancialDocument)
+        .findBy('referenceId', referenceId);
+};
+
+const waitForDocument = (
+    session: Session,
+    referenceId: string,
+    timeout = 30_000
+) =>
+    vi.waitUntil(() => findDocument(session, referenceId), {
+        timeout,
+        interval: 100,
+    });
+
 describe('onInvoiceIssued', () => {
+    const buses: { stop(): Promise<void> }[] = [];
+
+    const startBus = async () => {
+        const bus = createPgBossDomainEventsBus(getTestLogger(), getConfig());
+        buses.push(bus);
+        await bus.start();
+        return bus;
+    };
+
     beforeEach(() => cleanDatabase(kysely));
 
-    it('should create a new financial document when invoice is created', async () => {
-        const domainEventsBus = new InMemoryDomainEventsBus();
-        const session = new Session(
-            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
-        );
-
-        await seedPolicy(session);
-        const handler = new OnInvoiceIssued(session, domainEventsBus);
-        await handler.register();
-        await publishEvent(domainEventsBus, createInvoiceEvent('INV-001'));
-
-        let result: FinancialDocument | undefined;
-        {
-            await using uow = await session.begin();
-            result = await uow
-                .collection(FinancialDocument)
-                .findBy('referenceId', 'INV-001');
-        }
-
-        expect(result).toBeDefined();
-        expect(result!.referenceId.toPlain()).toBe('INV-001');
+    afterEach(async () => {
+        await Promise.all(buses.map((bus) => bus.stop()));
+        buses.length = 0;
     });
 
-    it('should create a document with an authflow selected from the policy', async () => {
-        const domainEventsBus = new InMemoryDomainEventsBus();
-        const session = new Session(
-            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
-        );
+    it(
+        'should create a new financial document when invoice is created',
+        async () => {
+            const domainEventsBus = await startBus();
+            const session = new Session(
+                new PersistentManager(
+                    kysely,
+                    domainEventsBus,
+                    defaultPersisters
+                )
+            );
 
-        await seedPolicy(session);
-        const handler = new OnInvoiceIssued(session, domainEventsBus);
-        await handler.register();
-        await publishEvent(
-            domainEventsBus,
-            createInvoiceEvent('INV-001', '500')
-        );
+            await seedPolicy(session);
+            const handler = new OnInvoiceIssued(session, domainEventsBus);
+            await handler.register();
+            await publishEvent(domainEventsBus, createInvoiceEvent('INV-001'));
 
-        let result: FinancialDocument | undefined;
-        {
-            await using uow = await session.begin();
-            result = await uow
-                .collection(FinancialDocument)
-                .findBy('referenceId', 'INV-001');
-        }
+            const result = await waitForDocument(session, 'INV-001');
 
-        expect(result!.authflows).toHaveLength(1);
-        expect(result!.authflows[0].action.toPlain()).toBe('pay');
-        expect(result!.authflows[0].range.from.amount).toBe('0');
-        expect(result!.authflows[0].range.to.amount).toBe('999');
-    });
+            expect(result.referenceId.toPlain()).toBe('INV-001');
+        },
+        TEST_TIMEOUT
+    );
 
-    it('should select the correct authflow range for the invoice amount', async () => {
-        const domainEventsBus = new InMemoryDomainEventsBus();
-        const session = new Session(
-            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
-        );
+    it(
+        'should create a document with an authflow selected from the policy',
+        async () => {
+            const domainEventsBus = await startBus();
+            const session = new Session(
+                new PersistentManager(
+                    kysely,
+                    domainEventsBus,
+                    defaultPersisters
+                )
+            );
 
-        await seedPolicy(session);
-        const handler = new OnInvoiceIssued(session, domainEventsBus);
-        await handler.register();
-        await publishEvent(
-            domainEventsBus,
-            createInvoiceEvent('INV-001', '5000')
-        );
+            await seedPolicy(session);
+            const handler = new OnInvoiceIssued(session, domainEventsBus);
+            await handler.register();
+            await publishEvent(
+                domainEventsBus,
+                createInvoiceEvent('INV-001', '500')
+            );
 
-        let result: FinancialDocument | undefined;
-        {
-            await using uow = await session.begin();
-            result = await uow
-                .collection(FinancialDocument)
-                .findBy('referenceId', 'INV-001');
-        }
+            const result = await waitForDocument(session, 'INV-001');
 
-        expect(result!.authflows).toHaveLength(1);
-        expect(result!.authflows[0].range.from.amount).toBe('1000');
-        expect(result!.authflows[0].range.to.amount).toBe('9999');
-    });
+            expect(result.authflows).toHaveLength(1);
+            expect(result.authflows[0].action.toPlain()).toBe('pay');
+            expect(result.authflows[0].range.from.amount).toBe('0');
+            expect(result.authflows[0].range.to.amount).toBe('999');
+        },
+        TEST_TIMEOUT
+    );
 
-    it('should create a document with empty authflows when no policy exists', async () => {
-        const domainEventsBus = new InMemoryDomainEventsBus();
-        const session = new Session(
-            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
-        );
+    it(
+        'should select the correct authflow range for the invoice amount',
+        async () => {
+            const domainEventsBus = await startBus();
+            const session = new Session(
+                new PersistentManager(
+                    kysely,
+                    domainEventsBus,
+                    defaultPersisters
+                )
+            );
 
-        const handler = new OnInvoiceIssued(session, domainEventsBus);
-        await handler.register();
-        await publishEvent(domainEventsBus, createInvoiceEvent('INV-001'));
+            await seedPolicy(session);
+            const handler = new OnInvoiceIssued(session, domainEventsBus);
+            await handler.register();
+            await publishEvent(
+                domainEventsBus,
+                createInvoiceEvent('INV-001', '5000')
+            );
 
-        let result: FinancialDocument | undefined;
-        {
-            await using uow = await session.begin();
-            result = await uow
-                .collection(FinancialDocument)
-                .findBy('referenceId', 'INV-001');
-        }
+            const result = await waitForDocument(session, 'INV-001');
 
-        expect(result!.authflows).toEqual([]);
-    });
+            expect(result.authflows).toHaveLength(1);
+            expect(result.authflows[0].range.from.amount).toBe('1000');
+            expect(result.authflows[0].range.to.amount).toBe('9999');
+        },
+        TEST_TIMEOUT
+    );
 
-    it('should create a document with empty authflows when amount is outside policy ranges', async () => {
-        const domainEventsBus = new InMemoryDomainEventsBus();
-        const session = new Session(
-            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
-        );
+    it(
+        'should create a document with empty authflows when no policy exists',
+        async () => {
+            const domainEventsBus = await startBus();
+            const session = new Session(
+                new PersistentManager(
+                    kysely,
+                    domainEventsBus,
+                    defaultPersisters
+                )
+            );
 
-        await seedPolicy(session);
-        const handler = new OnInvoiceIssued(session, domainEventsBus);
-        await handler.register();
-        await publishEvent(
-            domainEventsBus,
-            createInvoiceEvent('INV-001', '999999')
-        );
+            const handler = new OnInvoiceIssued(session, domainEventsBus);
+            await handler.register();
+            await publishEvent(domainEventsBus, createInvoiceEvent('INV-001'));
 
-        let result: FinancialDocument | undefined;
-        {
-            await using uow = await session.begin();
-            result = await uow
-                .collection(FinancialDocument)
-                .findBy('referenceId', 'INV-001');
-        }
+            const result = await waitForDocument(session, 'INV-001');
 
-        expect(result!.authflows).toEqual([]);
-    });
+            expect(result.authflows).toEqual([]);
+        },
+        TEST_TIMEOUT
+    );
 
-    it('should create documents with different referenceIds for different invoices', async () => {
-        const domainEventsBus = new InMemoryDomainEventsBus();
-        const session = new Session(
-            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
-        );
+    it(
+        'should create a document with empty authflows when amount is outside policy ranges',
+        async () => {
+            const domainEventsBus = await startBus();
+            const session = new Session(
+                new PersistentManager(
+                    kysely,
+                    domainEventsBus,
+                    defaultPersisters
+                )
+            );
 
-        await seedPolicy(session);
-        const handler = new OnInvoiceIssued(session, domainEventsBus);
-        await handler.register();
-        await publishEvent(domainEventsBus, createInvoiceEvent('INV-001'));
-        await publishEvent(domainEventsBus, createInvoiceEvent('INV-002'));
+            await seedPolicy(session);
+            const handler = new OnInvoiceIssued(session, domainEventsBus);
+            await handler.register();
+            await publishEvent(
+                domainEventsBus,
+                createInvoiceEvent('INV-001', '999999')
+            );
 
-        let result1: FinancialDocument | undefined;
-        {
-            await using uow = await session.begin();
-            result1 = await uow
-                .collection(FinancialDocument)
-                .findBy('referenceId', 'INV-001');
-        }
-        let result2: FinancialDocument | undefined;
-        {
-            await using uow = await session.begin();
-            result2 = await uow
-                .collection(FinancialDocument)
-                .findBy('referenceId', 'INV-002');
-        }
+            const result = await waitForDocument(session, 'INV-001');
 
-        expect(result1).toBeDefined();
-        expect(result2).toBeDefined();
+            expect(result.authflows).toEqual([]);
+        },
+        TEST_TIMEOUT
+    );
 
-        const id1 = result1?.id.toPlain();
-        const id2 = result2?.id.toPlain();
+    it(
+        'should create documents with different referenceIds for different invoices',
+        async () => {
+            const domainEventsBus = await startBus();
+            const session = new Session(
+                new PersistentManager(
+                    kysely,
+                    domainEventsBus,
+                    defaultPersisters
+                )
+            );
 
-        expect(id1).not.toBe(id2);
-    });
+            await seedPolicy(session);
+            const handler = new OnInvoiceIssued(session, domainEventsBus);
+            await handler.register();
+            await publishEvent(domainEventsBus, createInvoiceEvent('INV-001'));
+            await publishEvent(domainEventsBus, createInvoiceEvent('INV-002'));
 
-    it('should not create a duplicate document when invoice with same id is created twice', async () => {
-        const domainEventsBus = new InMemoryDomainEventsBus();
-        const session = new Session(
-            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
-        );
+            const result1 = await waitForDocument(session, 'INV-001');
+            const result2 = await waitForDocument(session, 'INV-002');
 
-        await seedPolicy(session);
-        const handler = new OnInvoiceIssued(session, domainEventsBus);
-        await handler.register();
-        await publishEvent(domainEventsBus, createInvoiceEvent('INV-001'));
+            expect(result1.id.toPlain()).not.toBe(result2.id.toPlain());
+        },
+        TEST_TIMEOUT
+    );
 
-        let firstResult: FinancialDocument | undefined;
-        {
-            await using uow = await session.begin();
-            firstResult = await uow
-                .collection(FinancialDocument)
-                .findBy('referenceId', 'INV-001');
-        }
-        const firstId = firstResult?.id.toPlain();
+    it(
+        'should not create a duplicate document when invoice with same id is created twice',
+        async () => {
+            const domainEventsBus = await startBus();
+            const session = new Session(
+                new PersistentManager(
+                    kysely,
+                    domainEventsBus,
+                    defaultPersisters
+                )
+            );
 
-        await publishEvent(domainEventsBus, createInvoiceEvent('INV-001'));
+            await seedPolicy(session);
+            const handler = new OnInvoiceIssued(session, domainEventsBus);
+            await handler.register();
+            await publishEvent(domainEventsBus, createInvoiceEvent('INV-001'));
 
-        let secondResult: FinancialDocument | undefined;
-        {
-            await using uow = await session.begin();
-            secondResult = await uow
-                .collection(FinancialDocument)
-                .findBy('referenceId', 'INV-001');
-        }
-        const secondId = secondResult?.id.toPlain();
+            const firstResult = await waitForDocument(session, 'INV-001');
+            const firstId = firstResult.id.toPlain();
 
-        expect(firstId).toBe(secondId);
-    });
+            await publishEvent(domainEventsBus, createInvoiceEvent('INV-001'));
 
-    it('should not create a document when no event is published', async () => {
-        const domainEventsBus = new InMemoryDomainEventsBus();
-        const session = new Session(
-            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
-        );
+            const secondResult = await waitForDocument(session, 'INV-001');
+            const secondId = secondResult.id.toPlain();
 
-        const handler = new OnInvoiceIssued(session, domainEventsBus);
-        await handler.register();
+            expect(firstId).toBe(secondId);
+        },
+        TEST_TIMEOUT
+    );
 
-        let result: FinancialDocument | undefined;
-        {
-            await using uow = await session.begin();
-            result = await uow
-                .collection(FinancialDocument)
-                .findBy('referenceId', 'INV-001');
-        }
+    it(
+        'should not create a document when no event is published',
+        async () => {
+            const domainEventsBus = await startBus();
+            const session = new Session(
+                new PersistentManager(
+                    kysely,
+                    domainEventsBus,
+                    defaultPersisters
+                )
+            );
 
-        expect(result).toBeUndefined();
-    });
+            const handler = new OnInvoiceIssued(session, domainEventsBus);
+            await handler.register();
 
-    it('should use event data id as the document referenceId', async () => {
-        const domainEventsBus = new InMemoryDomainEventsBus();
-        const session = new Session(
-            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
-        );
+            const result = await findDocument(session, 'INV-001');
 
-        await seedPolicy(session);
-        const handler = new OnInvoiceIssued(session, domainEventsBus);
-        await handler.register();
-        await publishEvent(
-            domainEventsBus,
-            createInvoiceEvent('my-custom-ref-123')
-        );
+            expect(result).toBeUndefined();
+        },
+        TEST_TIMEOUT
+    );
 
-        let result: FinancialDocument | undefined;
-        {
-            await using uow = await session.begin();
-            result = await uow
-                .collection(FinancialDocument)
-                .findBy('referenceId', 'my-custom-ref-123');
-        }
+    it(
+        'should use event data id as the document referenceId',
+        async () => {
+            const domainEventsBus = await startBus();
+            const session = new Session(
+                new PersistentManager(
+                    kysely,
+                    domainEventsBus,
+                    defaultPersisters
+                )
+            );
 
-        expect(result).toBeDefined();
-        expect(result!.referenceId.toPlain()).toBe('my-custom-ref-123');
-    });
+            await seedPolicy(session);
+            const handler = new OnInvoiceIssued(session, domainEventsBus);
+            await handler.register();
+            await publishEvent(
+                domainEventsBus,
+                createInvoiceEvent('my-custom-ref-123')
+            );
 
-    it('should generate a unique document id for each new document', async () => {
-        const domainEventsBus = new InMemoryDomainEventsBus();
-        const session = new Session(
-            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
-        );
+            const result = await waitForDocument(session, 'my-custom-ref-123');
 
-        await seedPolicy(session);
-        const handler = new OnInvoiceIssued(session, domainEventsBus);
-        await handler.register();
-        await publishEvent(domainEventsBus, createInvoiceEvent('INV-001'));
-        await publishEvent(domainEventsBus, createInvoiceEvent('INV-002'));
-        await publishEvent(domainEventsBus, createInvoiceEvent('INV-003'));
+            expect(result.referenceId.toPlain()).toBe('my-custom-ref-123');
+        },
+        TEST_TIMEOUT
+    );
 
-        const ids = await Promise.all(
-            ['INV-001', 'INV-002', 'INV-003'].map(async (ref) => {
-                await using uow = await session.begin();
-                const result = await uow
-                    .collection(FinancialDocument)
-                    .findBy('referenceId', ref);
-                return result?.id.toPlain();
-            })
-        );
+    it(
+        'should generate a unique document id for each new document',
+        async () => {
+            const domainEventsBus = await startBus();
+            const session = new Session(
+                new PersistentManager(
+                    kysely,
+                    domainEventsBus,
+                    defaultPersisters
+                )
+            );
 
-        const uniqueIds = new Set(ids);
-        expect(uniqueIds.size).toBe(3);
-    });
+            await seedPolicy(session);
+            const handler = new OnInvoiceIssued(session, domainEventsBus);
+            await handler.register();
+            await publishEvent(domainEventsBus, createInvoiceEvent('INV-001'));
+            await publishEvent(domainEventsBus, createInvoiceEvent('INV-002'));
+            await publishEvent(domainEventsBus, createInvoiceEvent('INV-003'));
 
-    it('should not overwrite a pre-existing document in storage', async () => {
-        const domainEventsBus = new InMemoryDomainEventsBus();
-        const session = new Session(
-            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
-        );
+            const ids = await Promise.all(
+                ['INV-001', 'INV-002', 'INV-003'].map(async (ref) => {
+                    const result = await waitForDocument(session, ref);
+                    return result.id.toPlain();
+                })
+            );
 
-        const existing = FinancialDocument.create({
-            referenceId: ReferenceId.create('INV-001').unwrap(),
-            value: Money.create('100', 'USD').unwrap(),
-            authflows: [],
-        }).unwrap();
-        {
-            await using uow = await session.begin();
-            await uow.collection(FinancialDocument).add(existing);
-            await uow.commit();
-        }
+            const uniqueIds = new Set(ids);
+            expect(uniqueIds.size).toBe(3);
+        },
+        TEST_TIMEOUT
+    );
 
-        await seedPolicy(session);
-        const handler = new OnInvoiceIssued(session, domainEventsBus);
-        await handler.register();
-        await publishEvent(domainEventsBus, createInvoiceEvent('INV-001'));
+    it(
+        'should not overwrite a pre-existing document in storage',
+        async () => {
+            const domainEventsBus = await startBus();
+            const session = new Session(
+                new PersistentManager(
+                    kysely,
+                    domainEventsBus,
+                    defaultPersisters
+                )
+            );
 
-        let result: FinancialDocument | undefined;
-        {
-            await using uow = await session.begin();
-            result = await uow
-                .collection(FinancialDocument)
-                .findBy('referenceId', 'INV-001');
-        }
-
-        expect(result!.id.toPlain()).toBe(existing.id.toPlain());
-    });
-
-    it('should handle many events for different invoices', async () => {
-        const domainEventsBus = new InMemoryDomainEventsBus();
-        const session = new Session(
-            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
-        );
-
-        await seedPolicy(session);
-        const handler = new OnInvoiceIssued(session, domainEventsBus);
-        await handler.register();
-
-        const count = 50;
-        for (let i = 0; i < count; i++) {
-            await publishEvent(domainEventsBus, createInvoiceEvent(`INV-${i}`));
-        }
-
-        for (let i = 0; i < count; i++) {
-            let result: FinancialDocument | undefined;
+            const existing = FinancialDocument.create({
+                referenceId: ReferenceId.create('INV-001').unwrap(),
+                value: Money.create('100', 'USD').unwrap(),
+                authflows: [],
+            }).unwrap();
             {
                 await using uow = await session.begin();
-                result = await uow
-                    .collection(FinancialDocument)
-                    .findBy('referenceId', `INV-${i}`);
+                await uow.collection(FinancialDocument).add(existing);
+                await uow.commit();
             }
-            expect(result).toBeDefined();
-        }
-    });
 
-    it('should only react to events published after subscription', async () => {
-        const domainEventsBus = new InMemoryDomainEventsBus();
-        const session = new Session(
-            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
-        );
+            await seedPolicy(session);
+            const handler = new OnInvoiceIssued(session, domainEventsBus);
+            await handler.register();
+            await publishEvent(domainEventsBus, createInvoiceEvent('INV-001'));
 
-        await publishEvent(domainEventsBus, createInvoiceEvent('INV-BEFORE'));
+            const result = await waitForDocument(session, 'INV-001');
 
-        await seedPolicy(session);
-        const handler = new OnInvoiceIssued(session, domainEventsBus);
-        await handler.register();
+            expect(result.id.toPlain()).toBe(existing.id.toPlain());
+        },
+        TEST_TIMEOUT
+    );
 
-        await publishEvent(domainEventsBus, createInvoiceEvent('INV-AFTER'));
+    it(
+        'should deliver events published before the worker is registered',
+        async () => {
+            // pg-boss queues are durable: an event published before its worker is
+            // registered is retained and delivered once the worker comes online.
+            const domainEventsBus = await startBus();
+            const session = new Session(
+                new PersistentManager(
+                    kysely,
+                    domainEventsBus,
+                    defaultPersisters
+                )
+            );
 
-        let before: FinancialDocument | undefined;
-        {
-            await using uow = await session.begin();
-            before = await uow
-                .collection(FinancialDocument)
-                .findBy('referenceId', 'INV-BEFORE');
-        }
-        let after: FinancialDocument | undefined;
-        {
-            await using uow = await session.begin();
-            after = await uow
-                .collection(FinancialDocument)
-                .findBy('referenceId', 'INV-AFTER');
-        }
+            await seedPolicy(session);
+            await publishEvent(
+                domainEventsBus,
+                createInvoiceEvent('INV-BEFORE')
+            );
 
-        expect(before).toBeUndefined();
-        expect(after).toBeDefined();
-    });
+            const handler = new OnInvoiceIssued(session, domainEventsBus);
+            await handler.register();
 
-    it('should see committed documents across separate session instances', async () => {
-        const domainEventsBus = new InMemoryDomainEventsBus();
-        const session1 = new Session(
-            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
-        );
-        const session2 = new Session(
-            new PersistentManager(kysely, domainEventsBus, defaultPersisters)
-        );
+            await publishEvent(
+                domainEventsBus,
+                createInvoiceEvent('INV-AFTER')
+            );
 
-        await seedPolicy(session1);
-        const handler = new OnInvoiceIssued(session1, domainEventsBus);
-        await handler.register();
-        await publishEvent(domainEventsBus, createInvoiceEvent('INV-001'));
+            const before = await waitForDocument(session, 'INV-BEFORE');
+            const after = await waitForDocument(session, 'INV-AFTER');
 
-        let inSession1: FinancialDocument | undefined;
-        {
-            await using uow = await session1.begin();
-            inSession1 = await uow
-                .collection(FinancialDocument)
-                .findBy('referenceId', 'INV-001');
-        }
-        let inSession2: FinancialDocument | undefined;
-        {
-            await using uow = await session2.begin();
-            inSession2 = await uow
-                .collection(FinancialDocument)
-                .findBy('referenceId', 'INV-001');
-        }
+            expect(before).toBeDefined();
+            expect(after).toBeDefined();
+        },
+        TEST_TIMEOUT
+    );
 
-        expect(inSession1).toBeDefined();
-        expect(inSession2).toBeDefined();
-    });
+    it(
+        'should see committed documents across separate session instances',
+        async () => {
+            const domainEventsBus = await startBus();
+            const session1 = new Session(
+                new PersistentManager(
+                    kysely,
+                    domainEventsBus,
+                    defaultPersisters
+                )
+            );
+            const session2 = new Session(
+                new PersistentManager(
+                    kysely,
+                    domainEventsBus,
+                    defaultPersisters
+                )
+            );
+
+            await seedPolicy(session1);
+            const handler = new OnInvoiceIssued(session1, domainEventsBus);
+            await handler.register();
+            await publishEvent(domainEventsBus, createInvoiceEvent('INV-001'));
+
+            const inSession1 = await waitForDocument(session1, 'INV-001');
+            const inSession2 = await findDocument(session2, 'INV-001');
+
+            expect(inSession1).toBeDefined();
+            expect(inSession2).toBeDefined();
+        },
+        TEST_TIMEOUT
+    );
 });
