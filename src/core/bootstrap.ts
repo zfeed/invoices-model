@@ -14,6 +14,7 @@ import { CreateAuthflowPolicy } from './financial-authorization/application/comm
 import { ApproveActionOnDocument } from './financial-authorization/application/commands/approve-action-on-document.ts';
 import { CanApproverApprove } from './financial-authorization/application/queries/can-approver-approve.ts';
 import { OnInvoiceIssued } from './financial-authorization/application/event-handlers/on-invoice-issued.ts';
+import { createOrganization } from './organizations/commands/create-organization.ts';
 import { WorkflowClient } from '@temporalio/client';
 import {
     OnInvoiceProcessing,
@@ -57,6 +58,7 @@ export const bootstrap = (infra: Infrastructure) => {
         createAuthflowPolicy: new CreateAuthflowPolicy(infra.session),
         approveActionOnDocument: new ApproveActionOnDocument(infra.session),
         canApproverApprove,
+        createOrganization: createOrganization(infra.kysely),
         start: async () => {
             await onInvoiceIssued.register();
             await onInvoiceProcessing.register();
