@@ -46,7 +46,7 @@ export async function init() {
 
         void invoicePaypalWorker.start();
 
-        plugins.init(app.http as any, core);
+        plugins.init(app.http as any, core, kysely);
 
         app.onShutdown(async () => {
             await invoicePaypalWorker.shutdown();

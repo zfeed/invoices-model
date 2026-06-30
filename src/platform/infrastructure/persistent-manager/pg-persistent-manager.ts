@@ -14,15 +14,13 @@ import type {
     ControlledTransaction,
 } from '../../../../database/kysely.ts';
 import type { EntityPersister } from './entity-persister.ts';
+import { isUUID } from '../../../lib/is-uuid/is-uuid.ts';
 
 const tracer = trace.getTracer('persistent-manager');
 
 type Entity = {
     id: { toString(): string };
 } & PublishableEvents<DomainEvent<unknown>>;
-
-const UUID_RE =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export class PersistentManager implements PersistentManagerInterface<Entity> {
     private committed = false;
@@ -48,7 +46,7 @@ export class PersistentManager implements PersistentManagerInterface<Entity> {
     }
 
     async get(entityClass: EntityClass, id: string): Promise<Entity | null> {
-        if (!UUID_RE.test(id)) {
+        if (!isUUID(id)) {
             return null;
         }
 

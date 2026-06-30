@@ -39,6 +39,10 @@ type TestResponse = {
 
 export const setupApp = () => {
     const baseUrl = inject('e2eBaseUrl');
+    const authHeaders = {
+        'x-organization-id': inject('e2eOrganizationId'),
+        'x-member-id': inject('e2eMemberId'),
+    };
 
     const postJson = async (
         path: string,
@@ -46,22 +50,22 @@ export const setupApp = () => {
     ): Promise<TestResponse> =>
         fetch(`${baseUrl}${path}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...authHeaders },
             body: JSON.stringify(body),
         });
 
     const postRaw = async (path: string, body: string): Promise<TestResponse> =>
         fetch(`${baseUrl}${path}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...authHeaders },
             body,
         });
 
     const post = async (path: string): Promise<TestResponse> =>
-        fetch(`${baseUrl}${path}`, { method: 'POST' });
+        fetch(`${baseUrl}${path}`, { method: 'POST', headers: authHeaders });
 
     const get = async (path: string): Promise<TestResponse> =>
-        fetch(`${baseUrl}${path}`);
+        fetch(`${baseUrl}${path}`, { headers: authHeaders });
 
     const getData = async (res: TestResponse) => (await res.json()).data;
 
