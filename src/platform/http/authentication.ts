@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify';
+import { FastifyReply, FastifyRequest, HookHandlerDoneFunction } from 'fastify';
 import type { Kysely } from '../../../database/kysely.ts';
 import { organizationContext } from '../../lib/organization-context/organization-context.ts';
 import { isUUID } from '../../lib/is-uuid/is-uuid.ts';
@@ -16,25 +16,32 @@ const unauthorized = (reply: FastifyReply) =>
 
 export const createAuthHook =
     (kysely: Kysely) =>
-    async (request: FastifyRequest, reply: FastifyReply) => {
-        const organizationId = readId(request, ORGANIZATION_HEADER);
-        const memberId = readId(request, MEMBER_HEADER);
+    (
+        request: FastifyRequest,
+        reply: FastifyReply,
+        done: HookHandlerDoneFunction
+    ): void => {
+        void (async () => {
+            const organizationId = readId(request, ORGANIZATION_HEADER);
+            const memberId = readId(request, MEMBER_HEADER);
 
-        if (!organizationId || !memberId) {
-            return unauthorized(reply);
-        }
+            if (!organizationId || !memberId) {
+                await unauthorized(reply);
+                return;
+            }
 
-        const member = await kysely
-            .selectFrom('members')
-            .where('members.id', '=', memberId)
-            .where('members.organization_id', '=', organizationId)
-            .select('members.id')
-            .executeTakeFirst();
+            const member = await kysely
+                .selectFrom('members')
+                .where('members.id', '=', memberId)
+                .where('members.organization_id', '=', organizationId)
+                .select('members.id')
+                .executeTakeFirst();
 
-        if (!member) {
-            return unauthorized(reply);
-        }
+            if (!member) {
+                await unauthorized(reply);
+                return;
+            }
 
-        organizationContext.setOrganizationId(organizationId);
-        organizationContext.setMemberId(memberId);
+            organizationContext.run({ organizationId, memberId }, done);
+        })().catch(done);
     };

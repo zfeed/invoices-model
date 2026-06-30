@@ -1,45 +1,31 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 
 type Store = {
-    organizationId?: string;
-    memberId?: string;
+    organizationId: string;
+    memberId: string;
 };
 
 export class OrganizationContext {
     readonly #storage = new AsyncLocalStorage<Store>();
 
-    #store(): Store {
-        const store = this.#storage.getStore();
-        if (store) {
-            return store;
-        }
-        const created: Store = {};
-        this.#storage.enterWith(created);
-        return created;
-    }
-
-    setOrganizationId(organizationId: string): void {
-        this.#store().organizationId = organizationId;
-    }
-
-    setMemberId(memberId: string): void {
-        this.#store().memberId = memberId;
+    run<T>(store: Store, callback: () => T): T {
+        return this.#storage.run(store, callback);
     }
 
     getOrganizationId(): string {
-        const organizationId = this.#storage.getStore()?.organizationId;
-        if (organizationId === undefined) {
+        const store = this.#storage.getStore();
+        if (store === undefined) {
             throw new Error('Organization id is not set in context');
         }
-        return organizationId;
+        return store.organizationId;
     }
 
     getMemberId(): string {
-        const memberId = this.#storage.getStore()?.memberId;
-        if (memberId === undefined) {
+        const store = this.#storage.getStore();
+        if (store === undefined) {
             throw new Error('Member id is not set in context');
         }
-        return memberId;
+        return store.memberId;
     }
 }
 
