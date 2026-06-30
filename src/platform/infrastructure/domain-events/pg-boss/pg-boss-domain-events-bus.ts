@@ -11,6 +11,7 @@ import {
 import { PublishableEvents } from '../../../../core/building-blocks/events/event-publisher.interface.ts';
 import { Logger } from '../../../../core/building-blocks/logger/logger.ts';
 import { ControlledTransaction } from '../../../../../database/kysely.ts';
+import { organizationContext } from '../../../../lib/organization-context/organization-context.ts';
 
 const isPublishableEvents = (
     value: unknown
@@ -136,8 +137,12 @@ export class PgBossDomainEventsBus implements DomainEventsBus {
                 const handlers = this.handlers.get(eventClass) ?? [];
                 for (const job of jobs) {
                     const event = eventClass.deserialize(job.data);
-                    await Promise.all(
-                        handlers.map((handler) => handler(event))
+                    await organizationContext.run(
+                        { organizationId: event.organizationId },
+                        () =>
+                            Promise.all(
+                                handlers.map((handler) => handler(event))
+                            )
                     );
                 }
             }

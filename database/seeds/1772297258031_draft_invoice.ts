@@ -77,10 +77,17 @@ export async function seed(db: Kysely<DB>): Promise<void> {
     const now = new Date();
 
     await db.transaction().execute(async (trx) => {
+        const organization = await trx
+            .insertInto('organizations')
+            .values({ name: 'Acme Software GmbH' })
+            .returning('id')
+            .executeTakeFirstOrThrow();
+
         await trx
             .insertInto('draft_invoices')
             .values({
                 id: plain.id,
+                organization_id: organization.id,
                 status: plain.status as DraftInvoiceStatus,
                 vat_rate: plain.vatRate,
                 vat_amount: plain.vatAmount?.amount ?? null,
@@ -115,6 +122,7 @@ export async function seed(db: Kysely<DB>): Promise<void> {
             .values(
                 lineItemsPlain.map((item) => ({
                     draft_invoice_id: plain.id,
+                    organization_id: organization.id,
                     description: item.description,
                     price_amount: item.price.amount,
                     price_currency: item.price.currency,
@@ -129,6 +137,7 @@ export async function seed(db: Kysely<DB>): Promise<void> {
             .insertInto('draft_invoice_paypal_billings')
             .values({
                 draft_invoice_id: plain.id,
+                organization_id: organization.id,
                 email: plain.recipient!.billing.data.email,
             })
             .execute();

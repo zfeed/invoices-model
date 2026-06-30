@@ -1,6 +1,7 @@
 import { KNOWN_ERROR_CODE } from '../../../../building-blocks/errors/known-error-codes.ts';
 import { AppKnownError } from '../../../../building-blocks/errors/app-known-error.ts';
 import { Kysely } from '../../../../../../database/kysely.ts';
+import { organizationContext } from '../../../../../lib/organization-context/organization-context.ts';
 import { InvoiceDto } from './invoice.dto.ts';
 
 export class GetInvoice {
@@ -10,6 +11,11 @@ export class GetInvoice {
         const rows = await this.kysely
             .selectFrom('invoices')
             .where('invoices.id', '=', id)
+            .where(
+                'invoices.organization_id',
+                '=',
+                organizationContext.getOrganizationId()
+            )
             .leftJoin(
                 'invoice_line_items',
                 'invoice_line_items.invoice_id',

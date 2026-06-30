@@ -6,6 +6,7 @@ import {
     FinancialDocumentDataMapper,
     FinancialDocumentRecord,
 } from './mappers/financial-document.data-mapper.ts';
+import { organizationContext } from '../../../lib/organization-context/organization-context.ts';
 
 const loadChildren = async (
     tx: ControlledTransaction,
@@ -14,11 +15,13 @@ const loadChildren = async (
         reference_id: string;
         value_amount: string;
         value_currency: string;
-    }
+    },
+    organizationId: string
 ) => {
     const authflows = await tx
         .selectFrom('authflows')
         .where('document_id', '=', document.id)
+        .where('organization_id', '=', organizationId)
         .selectAll()
         .execute();
 
@@ -29,6 +32,7 @@ const loadChildren = async (
             ? await tx
                   .selectFrom('steps')
                   .where('authflow_id', 'in', authflowIds)
+                  .where('organization_id', '=', organizationId)
                   .selectAll()
                   .execute()
             : [];
@@ -40,6 +44,7 @@ const loadChildren = async (
             ? await tx
                   .selectFrom('groups')
                   .where('step_id', 'in', stepIds)
+                  .where('organization_id', '=', organizationId)
                   .selectAll()
                   .execute()
             : [];
@@ -51,6 +56,7 @@ const loadChildren = async (
             ? await tx
                   .selectFrom('approvers')
                   .where('group_id', 'in', groupIds)
+                  .where('organization_id', '=', organizationId)
                   .selectAll()
                   .execute()
             : [];
@@ -60,6 +66,7 @@ const loadChildren = async (
             ? await tx
                   .selectFrom('approvals')
                   .where('group_id', 'in', groupIds)
+                  .where('organization_id', '=', organizationId)
                   .selectAll()
                   .execute()
             : [];
@@ -69,38 +76,43 @@ const loadChildren = async (
 
 export const selectFinancialDocument = async (
     tx: ControlledTransaction,
-    id: string
+    id: string,
+    organizationId: string
 ) => {
     const document = await tx
         .selectFrom('documents')
         .where('id', '=', id)
+        .where('organization_id', '=', organizationId)
         .selectAll()
         .forUpdate()
         .executeTakeFirst();
 
     if (!document) return null;
 
-    return loadChildren(tx, document);
+    return loadChildren(tx, document, organizationId);
 };
 
 const selectFinancialDocumentByReferenceId = async (
     tx: ControlledTransaction,
-    referenceId: string
+    referenceId: string,
+    organizationId: string
 ) => {
     const document = await tx
         .selectFrom('documents')
         .where('reference_id', '=', referenceId)
+        .where('organization_id', '=', organizationId)
         .selectAll()
         .executeTakeFirst();
 
     if (!document) return null;
 
-    return loadChildren(tx, document);
+    return loadChildren(tx, document, organizationId);
 };
 
 const insertChildren = async (
     tx: ControlledTransaction,
-    record: FinancialDocumentRecord
+    record: FinancialDocumentRecord,
+    organizationId: string
 ) => {
     for (const authflow of record.authflows) {
         await tx
@@ -108,6 +120,7 @@ const insertChildren = async (
             .values({
                 id: authflow.id.value,
                 document_id: record.id.value,
+                organization_id: organizationId,
                 action: authflow.action.value,
                 range_from_amount: authflow.range.from.amount,
                 range_from_currency: authflow.range.from.currency,
@@ -122,6 +135,7 @@ const insertChildren = async (
                 .values({
                     id: step.id.value,
                     authflow_id: authflow.id.value,
+                    organization_id: organizationId,
                     order: step.order.value,
                 })
                 .execute();
@@ -132,6 +146,7 @@ const insertChildren = async (
                     .values({
                         id: group.id.value,
                         step_id: step.id.value,
+                        organization_id: organizationId,
                         required_approvals: group.requiredApprovals,
                     })
                     .execute();
@@ -143,6 +158,7 @@ const insertChildren = async (
                             group.approvers.map((approver) => ({
                                 id: approver.id.value,
                                 group_id: group.id.value,
+                                organization_id: organizationId,
                                 name: approver.name.value,
                                 email: approver.email.value,
                             }))
@@ -156,6 +172,7 @@ const insertChildren = async (
                         .values(
                             group.approvals.map((approval) => ({
                                 group_id: group.id.value,
+                                organization_id: organizationId,
                                 approver_id: approval.approverId.value,
                                 created_at: approval.createdAt.value,
                                 comment: approval.comment.value,
@@ -170,66 +187,81 @@ const insertChildren = async (
 
 const deleteChildren = async (
     tx: ControlledTransaction,
-    documentId: string
+    documentId: string,
+    organizationId: string
 ) => {
     const authflowIds = tx
         .selectFrom('authflows')
         .select('id')
-        .where('document_id', '=', documentId);
+        .where('document_id', '=', documentId)
+        .where('organization_id', '=', organizationId);
 
     const stepIds = tx
         .selectFrom('steps')
         .select('id')
-        .where('authflow_id', 'in', authflowIds);
+        .where('authflow_id', 'in', authflowIds)
+        .where('organization_id', '=', organizationId);
 
     const groupIds = tx
         .selectFrom('groups')
         .select('id')
-        .where('step_id', 'in', stepIds);
+        .where('step_id', 'in', stepIds)
+        .where('organization_id', '=', organizationId);
 
     await tx
         .deleteFrom('approvals')
         .where('group_id', 'in', groupIds)
+        .where('organization_id', '=', organizationId)
         .execute();
 
     await tx
         .deleteFrom('approvers')
         .where('group_id', 'in', groupIds)
+        .where('organization_id', '=', organizationId)
         .execute();
 
-    await tx.deleteFrom('groups').where('step_id', 'in', stepIds).execute();
+    await tx
+        .deleteFrom('groups')
+        .where('step_id', 'in', stepIds)
+        .where('organization_id', '=', organizationId)
+        .execute();
 
     await tx
         .deleteFrom('steps')
         .where('authflow_id', 'in', authflowIds)
+        .where('organization_id', '=', organizationId)
         .execute();
 
     await tx
         .deleteFrom('authflows')
         .where('document_id', '=', documentId)
+        .where('organization_id', '=', organizationId)
         .execute();
 };
 
 const createFinancialDocument = async (
     tx: ControlledTransaction,
-    record: FinancialDocumentRecord
+    record: FinancialDocumentRecord,
+    organizationId: string
 ) => {
     await tx
         .insertInto('documents')
         .values({
             id: record.id.value,
+            organization_id: organizationId,
             reference_id: record.referenceId.value,
             value_amount: record.value.amount,
             value_currency: record.value.currency,
         })
         .execute();
 
-    await insertChildren(tx, record);
+    await insertChildren(tx, record, organizationId);
 };
 
 const mergeFinancialDocument = async (
     tx: ControlledTransaction,
-    record: FinancialDocumentRecord
+    record: FinancialDocumentRecord,
+    organizationId: string
 ) => {
     await tx
         .mergeInto('documents')
@@ -237,7 +269,10 @@ const mergeFinancialDocument = async (
             sql<{
                 id: string;
             }>`(SELECT ${record.id.value}::uuid AS id)`.as('source'),
-            (join) => join.onRef('documents.id', '=', 'source.id')
+            (join) =>
+                join
+                    .onRef('documents.id', '=', 'source.id')
+                    .on('documents.organization_id', '=', organizationId)
         )
         .whenMatched()
         .thenUpdateSet({
@@ -248,14 +283,15 @@ const mergeFinancialDocument = async (
         .whenNotMatched()
         .thenInsertValues({
             id: record.id.value,
+            organization_id: organizationId,
             reference_id: record.referenceId.value,
             value_amount: record.value.amount,
             value_currency: record.value.currency,
         })
         .execute();
 
-    await deleteChildren(tx, record.id.value);
-    await insertChildren(tx, record);
+    await deleteChildren(tx, record.id.value, organizationId);
+    await insertChildren(tx, record, organizationId);
 };
 
 export class FinancialDocumentPersister implements EntityPersister<FinancialDocument> {
@@ -265,7 +301,8 @@ export class FinancialDocumentPersister implements EntityPersister<FinancialDocu
         tx: ControlledTransaction,
         id: string
     ): Promise<FinancialDocument | null> {
-        const rows = await selectFinancialDocument(tx, id);
+        const organizationId = organizationContext.getOrganizationId();
+        const rows = await selectFinancialDocument(tx, id, organizationId);
 
         if (!rows) {
             return null;
@@ -278,16 +315,18 @@ export class FinancialDocumentPersister implements EntityPersister<FinancialDocu
         tx: ControlledTransaction,
         entity: FinancialDocument
     ): Promise<void> {
+        const organizationId = organizationContext.getOrganizationId();
         const record = FinancialDocumentDataMapper.from(entity).toRecord();
-        await createFinancialDocument(tx, record);
+        await createFinancialDocument(tx, record, organizationId);
     }
 
     async merge(
         tx: ControlledTransaction,
         entity: FinancialDocument
     ): Promise<void> {
+        const organizationId = organizationContext.getOrganizationId();
         const record = FinancialDocumentDataMapper.from(entity).toRecord();
-        await mergeFinancialDocument(tx, record);
+        await mergeFinancialDocument(tx, record, organizationId);
     }
 
     async findBy(
@@ -301,7 +340,12 @@ export class FinancialDocumentPersister implements EntityPersister<FinancialDocu
             );
         }
 
-        const rows = await selectFinancialDocumentByReferenceId(tx, value);
+        const organizationId = organizationContext.getOrganizationId();
+        const rows = await selectFinancialDocumentByReferenceId(
+            tx,
+            value,
+            organizationId
+        );
 
         if (!rows) {
             return null;

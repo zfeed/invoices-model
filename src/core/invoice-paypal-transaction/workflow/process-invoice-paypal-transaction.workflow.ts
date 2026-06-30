@@ -4,6 +4,7 @@ import type { Activities } from './activities/index.ts';
 
 export type ProcessInvoicePaypalTransactionInput = {
     invoiceId: string;
+    organizationId: string;
     payoutRequest: CreateBatchPayoutRequestBody;
     polling: {
         maxAttempts: number;
@@ -28,7 +29,7 @@ export async function processInvoicePaypalTransaction(
     );
 
     if (createResult.result === 'failed') {
-        await acts.failInvoice(input.invoiceId);
+        await acts.failInvoice(input.invoiceId, input.organizationId);
         return;
     }
 
@@ -42,19 +43,19 @@ export async function processInvoicePaypalTransaction(
         const fetchResult = await acts.fetchPayoutStatus(payoutBatchId);
 
         if (fetchResult.result === 'failed') {
-            await acts.failInvoice(input.invoiceId);
+            await acts.failInvoice(input.invoiceId, input.organizationId);
             return;
         }
 
         const status = fetchResult.status;
 
         if (status === 'SUCCESS') {
-            await acts.payInvoice(input.invoiceId);
+            await acts.payInvoice(input.invoiceId, input.organizationId);
             return;
         }
 
         if (status === 'DENIED' || status === 'CANCELED') {
-            await acts.failInvoice(input.invoiceId);
+            await acts.failInvoice(input.invoiceId, input.organizationId);
             return;
         }
 

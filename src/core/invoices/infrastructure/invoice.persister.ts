@@ -10,6 +10,7 @@ import {
     InvoiceDataMapper,
     InvoiceRecord,
 } from './mappers/invoice.data-mapper.ts';
+import { organizationContext } from '../../../lib/organization-context/organization-context.ts';
 
 export class InvoicePersister implements EntityPersister<Invoice> {
     readonly entityClass = Invoice;
@@ -20,9 +21,11 @@ export class InvoicePersister implements EntityPersister<Invoice> {
         tx: ControlledTransaction,
         id: string
     ): Promise<Invoice | null> {
+        const organizationId = organizationContext.getOrganizationId();
         const row = await tx
             .selectFrom('invoices')
             .where('invoices.id', '=', id)
+            .where('invoices.organization_id', '=', organizationId)
             .modifyEnd(sql`for update of invoices`)
             .select((eb) => [
                 'invoices.id',
@@ -55,6 +58,11 @@ export class InvoicePersister implements EntityPersister<Invoice> {
                             '=',
                             'invoices.id'
                         )
+                        .where(
+                            'invoice_line_items.organization_id',
+                            '=',
+                            organizationId
+                        )
                         .select([
                             'id',
                             'invoice_id',
@@ -73,6 +81,11 @@ export class InvoicePersister implements EntityPersister<Invoice> {
                             'invoice_paypal_billings.invoice_id',
                             '=',
                             'invoices.id'
+                        )
+                        .where(
+                            'invoice_paypal_billings.organization_id',
+                            '=',
+                            organizationId
                         )
                         .select(['invoice_id', 'email'])
                 ).as('invoice_paypal_billings'),
@@ -121,6 +134,7 @@ export class InvoicePersister implements EntityPersister<Invoice> {
     }
 
     async create(tx: ControlledTransaction, entity: Invoice): Promise<void> {
+        const organizationId = organizationContext.getOrganizationId();
         const record = InvoiceDataMapper.from(entity).toRecord();
 
         const now = new Date();
@@ -128,6 +142,7 @@ export class InvoicePersister implements EntityPersister<Invoice> {
         const withInvoice = tx.with('new_invoice', (db) =>
             db.insertInto('invoices').values({
                 id: record.id,
+                organization_id: organizationId,
                 status: record.status,
                 vat_rate: record.vat_rate,
                 vat_amount: record.vat_amount,
@@ -157,6 +172,7 @@ export class InvoicePersister implements EntityPersister<Invoice> {
 
         const paypalBilling = {
             invoice_id: record.id,
+            organization_id: organizationId,
             email: record.invoice_paypal_billings.email,
         };
 
@@ -167,6 +183,7 @@ export class InvoicePersister implements EntityPersister<Invoice> {
                         record.line_items.map((item) => ({
                             id: item.id,
                             invoice_id: record.id,
+                            organization_id: organizationId,
                             description: item.description,
                             price_amount: item.price_amount,
                             price_currency: item.price_currency,
@@ -190,6 +207,7 @@ export class InvoicePersister implements EntityPersister<Invoice> {
     }
 
     async merge(tx: ControlledTransaction, entity: Invoice): Promise<void> {
+        const organizationId = organizationContext.getOrganizationId();
         const record = InvoiceDataMapper.from(entity).toRecord();
         const now = new Date();
 
@@ -218,6 +236,7 @@ export class InvoicePersister implements EntityPersister<Invoice> {
                 .updateTable('invoices')
                 .set({ ...invoiceChanges, updated_at: now })
                 .where('id', '=', record.id)
+                .where('organization_id', '=', organizationId)
                 .execute();
         }
 
@@ -246,6 +265,7 @@ export class InvoicePersister implements EntityPersister<Invoice> {
             await tx
                 .deleteFrom('invoice_line_items')
                 .where('id', 'in', deletedLineItemIds)
+                .where('organization_id', '=', organizationId)
                 .execute();
         }
 
@@ -254,6 +274,7 @@ export class InvoicePersister implements EntityPersister<Invoice> {
             return {
                 id: item.id,
                 invoice_id: record.id,
+                organization_id: organizationId,
                 description: item.description,
                 price_amount: item.price_amount,
                 price_currency: item.price_currency,
@@ -315,6 +336,11 @@ export class InvoicePersister implements EntityPersister<Invoice> {
                     updated_at: now,
                 }))
                 .whereRef('invoice_line_items.id', '=', 'v.id')
+                .where(
+                    'invoice_line_items.organization_id',
+                    '=',
+                    organizationId
+                )
                 .execute();
         }
 
@@ -327,6 +353,7 @@ export class InvoicePersister implements EntityPersister<Invoice> {
                 .updateTable('invoice_paypal_billings')
                 .set({ ...paypalChanges, updated_at: now })
                 .where('invoice_id', '=', record.id)
+                .where('organization_id', '=', organizationId)
                 .execute();
         }
     }

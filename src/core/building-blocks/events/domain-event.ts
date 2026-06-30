@@ -1,4 +1,5 @@
 import { v7 as uuidv7 } from 'uuid';
+import { organizationContext } from '../../../lib/organization-context/organization-context.ts';
 
 function deriveName(className: string): string {
     const words = className
@@ -12,6 +13,7 @@ function deriveName(className: string): string {
 export type SerializedDomainEvent<T = unknown> = {
     id: string;
     name: string;
+    organizationId: string;
     createdAt: string;
     data: T;
 };
@@ -28,12 +30,14 @@ export type DomainEventClass<E extends DomainEvent<any> = DomainEvent<any>> = {
 export abstract class DomainEvent<T> {
     id: string;
     name: string;
+    organizationId: string;
     createdAt: string;
     data: T;
 
     protected constructor(fields: SerializedDomainEvent<T>) {
         this.id = fields.id;
         this.name = fields.name;
+        this.organizationId = fields.organizationId;
         this.createdAt = fields.createdAt;
         this.data = fields.data;
     }
@@ -49,6 +53,7 @@ export abstract class DomainEvent<T> {
         return new EventCtor({
             id: uuidv7(),
             name: deriveName(this.name),
+            organizationId: organizationContext.getOrganizationId(),
             createdAt: new Date().toISOString(),
             data,
         });
@@ -62,6 +67,7 @@ export abstract class DomainEvent<T> {
         return {
             id: this.id,
             name: this.name,
+            organizationId: this.organizationId,
             createdAt: this.createdAt,
             data: this.data,
         };

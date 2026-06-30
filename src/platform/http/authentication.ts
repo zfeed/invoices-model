@@ -42,6 +42,6 @@ export const createAuthHook =
                 return;
             }
 
-            organizationContext.run({ organizationId, memberId }, done);
+            organizationContext.run({ organizationId }, done);
         })().catch(done);
     };

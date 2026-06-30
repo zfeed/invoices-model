@@ -2,27 +2,30 @@ import { ApplicationFailure } from '@temporalio/activity';
 import { Session } from '../../../building-blocks/unit-of-work/unit-of-work.ts';
 import { Invoice } from '../../../invoices/domain/invoice/invoice.ts';
 import { Id } from '../../../invoices/domain/id/id.ts';
+import { organizationContext } from '../../../../lib/organization-context/organization-context.ts';
 
 export class PayInvoice {
     constructor(private session: Session) {}
 
-    async execute(invoiceId: string): Promise<void> {
-        await using uow = await this.session.begin();
+    async execute(invoiceId: string, organizationId: string): Promise<void> {
+        await organizationContext.run({ organizationId }, async () => {
+            await using uow = await this.session.begin();
 
-        const invoice = await uow
-            .collection(Invoice)
-            .get(Id.fromString(invoiceId));
+            const invoice = await uow
+                .collection(Invoice)
+                .get(Id.fromString(invoiceId));
 
-        if (!invoice) {
-            throw ApplicationFailure.create({
-                message: `Invoice ${invoiceId} not found`,
-                type: 'InvoiceNotFound',
-                nonRetryable: true,
-            });
-        }
+            if (!invoice) {
+                throw ApplicationFailure.create({
+                    message: `Invoice ${invoiceId} not found`,
+                    type: 'InvoiceNotFound',
+                    nonRetryable: true,
+                });
+            }
 
-        invoice.pay().unwrap();
+            invoice.pay().unwrap();
 
-        await uow.commit();
+            await uow.commit();
+        });
     }
 }

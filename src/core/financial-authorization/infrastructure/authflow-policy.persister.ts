@@ -6,14 +6,17 @@ import {
     AuthflowPolicyDataMapper,
     AuthflowPolicyRecord,
 } from './mappers/authflow-policy.data-mapper.ts';
+import { organizationContext } from '../../../lib/organization-context/organization-context.ts';
 
 const loadChildren = async (
     tx: ControlledTransaction,
-    policy: { id: string; action: string }
+    policy: { id: string; action: string },
+    organizationId: string
 ) => {
     const templates = await tx
         .selectFrom('templates')
         .where('policy_id', '=', policy.id)
+        .where('organization_id', '=', organizationId)
         .selectAll()
         .execute();
 
@@ -24,6 +27,7 @@ const loadChildren = async (
             ? await tx
                   .selectFrom('step_templates')
                   .where('template_id', 'in', templateIds)
+                  .where('organization_id', '=', organizationId)
                   .selectAll()
                   .execute()
             : [];
@@ -35,6 +39,7 @@ const loadChildren = async (
             ? await tx
                   .selectFrom('group_templates')
                   .where('step_template_id', 'in', stepTemplateIds)
+                  .where('organization_id', '=', organizationId)
                   .selectAll()
                   .execute()
             : [];
@@ -46,6 +51,7 @@ const loadChildren = async (
             ? await tx
                   .selectFrom('template_approvers')
                   .where('group_template_id', 'in', groupTemplateIds)
+                  .where('organization_id', '=', organizationId)
                   .selectAll()
                   .execute()
             : [];
@@ -61,39 +67,44 @@ const loadChildren = async (
 
 export const selectAuthflowPolicy = async (
     tx: ControlledTransaction,
-    id: string
+    id: string,
+    organizationId: string
 ) => {
     const policy = await tx
         .selectFrom('policies')
         .where('id', '=', id)
+        .where('organization_id', '=', organizationId)
         .selectAll()
         .forUpdate()
         .executeTakeFirst();
 
     if (!policy) return null;
 
-    return loadChildren(tx, policy);
+    return loadChildren(tx, policy, organizationId);
 };
 
 const selectAuthflowPolicyByAction = async (
     tx: ControlledTransaction,
-    action: string
+    action: string,
+    organizationId: string
 ) => {
     const policy = await tx
         .selectFrom('policies')
         .where('action', '=', action)
+        .where('organization_id', '=', organizationId)
         .orderBy('id', 'desc')
         .selectAll()
         .executeTakeFirst();
 
     if (!policy) return null;
 
-    return loadChildren(tx, policy);
+    return loadChildren(tx, policy, organizationId);
 };
 
 const insertChildren = async (
     tx: ControlledTransaction,
-    record: AuthflowPolicyRecord
+    record: AuthflowPolicyRecord,
+    organizationId: string
 ) => {
     for (const template of record.templates) {
         await tx
@@ -101,6 +112,7 @@ const insertChildren = async (
             .values({
                 id: template.id.value,
                 policy_id: record.id.value,
+                organization_id: organizationId,
                 range_from_amount: template.range.from.amount,
                 range_from_currency: template.range.from.currency,
                 range_to_amount: template.range.to.amount,
@@ -114,6 +126,7 @@ const insertChildren = async (
                 .values({
                     id: step.id.value,
                     template_id: template.id.value,
+                    organization_id: organizationId,
                     order: step.order.value,
                 })
                 .execute();
@@ -124,6 +137,7 @@ const insertChildren = async (
                     .values({
                         id: group.id.value,
                         step_template_id: step.id.value,
+                        organization_id: organizationId,
                         required_approvals: group.requiredApprovals,
                     })
                     .execute();
@@ -135,6 +149,7 @@ const insertChildren = async (
                             group.approvers.map((approver) => ({
                                 id: approver.id.value,
                                 group_template_id: group.id.value,
+                                organization_id: organizationId,
                                 name: approver.name.value,
                                 email: approver.email.value,
                             }))
@@ -146,61 +161,75 @@ const insertChildren = async (
     }
 };
 
-const deleteChildren = async (tx: ControlledTransaction, policyId: string) => {
+const deleteChildren = async (
+    tx: ControlledTransaction,
+    policyId: string,
+    organizationId: string
+) => {
     const templateIds = tx
         .selectFrom('templates')
         .select('id')
-        .where('policy_id', '=', policyId);
+        .where('policy_id', '=', policyId)
+        .where('organization_id', '=', organizationId);
 
     const stepTemplateIds = tx
         .selectFrom('step_templates')
         .select('id')
-        .where('template_id', 'in', templateIds);
+        .where('template_id', 'in', templateIds)
+        .where('organization_id', '=', organizationId);
 
     const groupTemplateIds = tx
         .selectFrom('group_templates')
         .select('id')
-        .where('step_template_id', 'in', stepTemplateIds);
+        .where('step_template_id', 'in', stepTemplateIds)
+        .where('organization_id', '=', organizationId);
 
     await tx
         .deleteFrom('template_approvers')
         .where('group_template_id', 'in', groupTemplateIds)
+        .where('organization_id', '=', organizationId)
         .execute();
 
     await tx
         .deleteFrom('group_templates')
         .where('step_template_id', 'in', stepTemplateIds)
+        .where('organization_id', '=', organizationId)
         .execute();
 
     await tx
         .deleteFrom('step_templates')
         .where('template_id', 'in', templateIds)
+        .where('organization_id', '=', organizationId)
         .execute();
 
     await tx
         .deleteFrom('templates')
         .where('policy_id', '=', policyId)
+        .where('organization_id', '=', organizationId)
         .execute();
 };
 
 const createAuthflowPolicy = async (
     tx: ControlledTransaction,
-    record: AuthflowPolicyRecord
+    record: AuthflowPolicyRecord,
+    organizationId: string
 ) => {
     await tx
         .insertInto('policies')
         .values({
             id: record.id.value,
+            organization_id: organizationId,
             action: record.action.value,
         })
         .execute();
 
-    await insertChildren(tx, record);
+    await insertChildren(tx, record, organizationId);
 };
 
 const mergeAuthflowPolicy = async (
     tx: ControlledTransaction,
-    record: AuthflowPolicyRecord
+    record: AuthflowPolicyRecord,
+    organizationId: string
 ) => {
     await tx
         .mergeInto('policies')
@@ -208,7 +237,10 @@ const mergeAuthflowPolicy = async (
             sql<{
                 id: string;
             }>`(SELECT ${record.id.value}::uuid AS id)`.as('source'),
-            (join) => join.onRef('policies.id', '=', 'source.id')
+            (join) =>
+                join
+                    .onRef('policies.id', '=', 'source.id')
+                    .on('policies.organization_id', '=', organizationId)
         )
         .whenMatched()
         .thenUpdateSet({
@@ -217,12 +249,13 @@ const mergeAuthflowPolicy = async (
         .whenNotMatched()
         .thenInsertValues({
             id: record.id.value,
+            organization_id: organizationId,
             action: record.action.value,
         })
         .execute();
 
-    await deleteChildren(tx, record.id.value);
-    await insertChildren(tx, record);
+    await deleteChildren(tx, record.id.value, organizationId);
+    await insertChildren(tx, record, organizationId);
 };
 
 export class AuthflowPolicyPersister implements EntityPersister<AuthflowPolicy> {
@@ -232,7 +265,8 @@ export class AuthflowPolicyPersister implements EntityPersister<AuthflowPolicy> 
         tx: ControlledTransaction,
         id: string
     ): Promise<AuthflowPolicy | null> {
-        const rows = await selectAuthflowPolicy(tx, id);
+        const organizationId = organizationContext.getOrganizationId();
+        const rows = await selectAuthflowPolicy(tx, id, organizationId);
 
         if (!rows) {
             return null;
@@ -245,16 +279,18 @@ export class AuthflowPolicyPersister implements EntityPersister<AuthflowPolicy> 
         tx: ControlledTransaction,
         entity: AuthflowPolicy
     ): Promise<void> {
+        const organizationId = organizationContext.getOrganizationId();
         const record = AuthflowPolicyDataMapper.from(entity).toRecord();
-        await createAuthflowPolicy(tx, record);
+        await createAuthflowPolicy(tx, record, organizationId);
     }
 
     async merge(
         tx: ControlledTransaction,
         entity: AuthflowPolicy
     ): Promise<void> {
+        const organizationId = organizationContext.getOrganizationId();
         const record = AuthflowPolicyDataMapper.from(entity).toRecord();
-        await mergeAuthflowPolicy(tx, record);
+        await mergeAuthflowPolicy(tx, record, organizationId);
     }
 
     async findBy(
@@ -268,7 +304,12 @@ export class AuthflowPolicyPersister implements EntityPersister<AuthflowPolicy> 
             );
         }
 
-        const rows = await selectAuthflowPolicyByAction(tx, value);
+        const organizationId = organizationContext.getOrganizationId();
+        const rows = await selectAuthflowPolicyByAction(
+            tx,
+            value,
+            organizationId
+        );
 
         if (!rows) {
             return null;

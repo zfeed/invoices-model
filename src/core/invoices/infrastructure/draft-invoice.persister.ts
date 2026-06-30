@@ -10,6 +10,7 @@ import {
     DraftInvoiceDataMapper,
     DraftInvoiceRecord,
 } from './mappers/draft-invoice.data-mapper.ts';
+import { organizationContext } from '../../../lib/organization-context/organization-context.ts';
 
 export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
     readonly entityClass = DraftInvoice;
@@ -20,9 +21,11 @@ export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
         tx: ControlledTransaction,
         id: string
     ): Promise<DraftInvoice | null> {
+        const organizationId = organizationContext.getOrganizationId();
         const row = await tx
             .selectFrom('draft_invoices')
             .where('draft_invoices.id', '=', id)
+            .where('draft_invoices.organization_id', '=', organizationId)
             .modifyEnd(sql`for update of draft_invoices`)
             .select((eb) => [
                 'draft_invoices.id',
@@ -55,6 +58,11 @@ export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
                             '=',
                             'draft_invoices.id'
                         )
+                        .where(
+                            'draft_invoice_line_items.organization_id',
+                            '=',
+                            organizationId
+                        )
                         .select([
                             'draft_invoice_line_items.id',
                             'draft_invoice_line_items.draft_invoice_id',
@@ -73,6 +81,11 @@ export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
                             'draft_invoice_paypal_billings.draft_invoice_id',
                             '=',
                             'draft_invoices.id'
+                        )
+                        .where(
+                            'draft_invoice_paypal_billings.organization_id',
+                            '=',
+                            organizationId
                         )
                         .select(['draft_invoice_id', 'email'])
                 ).as('draft_invoice_paypal_billings'),
@@ -126,11 +139,13 @@ export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
         tx: ControlledTransaction,
         entity: DraftInvoice
     ): Promise<void> {
+        const organizationId = organizationContext.getOrganizationId();
         const record = DraftInvoiceDataMapper.from(entity).toRecord();
         const now = new Date();
 
         const invoiceValues = {
             id: record.id,
+            organization_id: organizationId,
             status: record.status,
             vat_rate: record.vat_rate,
             vat_amount: record.vat_amount,
@@ -160,6 +175,7 @@ export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
         const lineItemValues = record.line_items.map((item) => ({
             id: item.id,
             draft_invoice_id: record.id,
+            organization_id: organizationId,
             description: item.description,
             price_amount: item.price_amount,
             price_currency: item.price_currency,
@@ -195,6 +211,7 @@ export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
 
         const paypalValues = {
             draft_invoice_id: record.id,
+            organization_id: organizationId,
             email: paypal.email,
         };
 
@@ -219,6 +236,7 @@ export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
         tx: ControlledTransaction,
         entity: DraftInvoice
     ): Promise<void> {
+        const organizationId = organizationContext.getOrganizationId();
         const record = DraftInvoiceDataMapper.from(entity).toRecord();
         const now = new Date();
 
@@ -247,6 +265,7 @@ export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
                 .updateTable('draft_invoices')
                 .set({ ...invoiceChanges, updated_at: now })
                 .where('id', '=', record.id)
+                .where('organization_id', '=', organizationId)
                 .execute();
         }
 
@@ -275,6 +294,7 @@ export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
             await tx
                 .deleteFrom('draft_invoice_line_items')
                 .where('id', 'in', deletedLineItemIds)
+                .where('organization_id', '=', organizationId)
                 .execute();
         }
 
@@ -283,6 +303,7 @@ export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
             return {
                 id: item.id,
                 draft_invoice_id: record.id,
+                organization_id: organizationId,
                 description: item.description,
                 price_amount: item.price_amount,
                 price_currency: item.price_currency,
@@ -344,6 +365,11 @@ export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
                     updated_at: now,
                 }))
                 .whereRef('draft_invoice_line_items.id', '=', 'v.id')
+                .where(
+                    'draft_invoice_line_items.organization_id',
+                    '=',
+                    organizationId
+                )
                 .execute();
         }
 
@@ -351,12 +377,14 @@ export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
             await tx
                 .deleteFrom('draft_invoice_paypal_billings')
                 .where('draft_invoice_id', '=', record.id)
+                .where('organization_id', '=', organizationId)
                 .execute();
         } else if (!originalPaypal && newPaypal) {
             await tx
                 .insertInto('draft_invoice_paypal_billings')
                 .values({
                     draft_invoice_id: record.id,
+                    organization_id: organizationId,
                     email: newPaypal.email,
                 })
                 .execute();
@@ -371,6 +399,7 @@ export class DraftInvoicePersister implements EntityPersister<DraftInvoice> {
                     .updateTable('draft_invoice_paypal_billings')
                     .set({ ...paypalChanges, updated_at: now })
                     .where('draft_invoice_id', '=', record.id)
+                    .where('organization_id', '=', organizationId)
                     .execute();
             }
         }
