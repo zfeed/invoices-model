@@ -8,6 +8,7 @@ export default defineConfig({
         include: ['src/**/*.spec.ts'],
         exclude: ['node_modules/**'],
         globalSetup: ['test/global-setup.ts'],
+        setupFiles: ['test/organization-context.ts'],
         fileParallelism: false,
         typecheck: {
             enabled: true,

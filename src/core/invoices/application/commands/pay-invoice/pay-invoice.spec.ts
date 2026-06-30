@@ -24,7 +24,6 @@ import { InvoicePaidEvent } from '../../../domain/invoice/events/invoice-paid.ev
 import { KNOWN_ERROR_CODE } from '../../../../building-blocks/errors/known-error-codes.ts';
 import { ISSUER_TYPE } from '../../../domain/issuer/issuer.ts';
 import { RECIPIENT_TYPE } from '../../../domain/recipient/recipient.ts';
-import { cleanDatabase } from '../../../../../platform/infrastructure/persistent-manager/clean-database.ts';
 import { getTestKysely } from '../../../../../../test/kysely.ts';
 const kysely = getTestKysely();
 
@@ -107,7 +106,6 @@ describe('PayInvoice', () => {
     let payCommand: PayInvoice;
 
     beforeEach(async () => {
-        await cleanDatabase(kysely);
         domainEventsBus = new InMemoryDomainEventsBus();
         session = new Session(
             new PersistentManager(kysely, domainEventsBus, defaultPersisters)

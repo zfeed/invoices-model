@@ -195,14 +195,18 @@ describe('selectAuthflow', () => {
             steps,
         }).unwrap();
 
-    const policy = AuthflowPolicy.create({
-        action: Action.create('approve-invoice').unwrap(),
-        templates: [
-            templateWithSteps('0', '999'),
-            templateWithSteps('1000', '4999'),
-            templateWithSteps('5000', '10000'),
-        ],
-    }).unwrap();
+    let policy: AuthflowPolicy;
+
+    beforeEach(() => {
+        policy = AuthflowPolicy.create({
+            action: Action.create('approve-invoice').unwrap(),
+            templates: [
+                templateWithSteps('0', '999'),
+                templateWithSteps('1000', '4999'),
+                templateWithSteps('5000', '10000'),
+            ],
+        }).unwrap();
+    });
 
     it('should select authflow for amount in first range', () => {
         const amount = Money.create('500', 'USD').unwrap();

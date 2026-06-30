@@ -2,6 +2,10 @@ import { sql } from 'kysely';
 import type { Kysely } from '../../../../database/kysely.ts';
 
 export const cleanDatabase = async (kysely: Kysely) => {
+    // organizations is the tenant root: truncating it cascades to every table
+    // that references it, so clear it first, then the remaining tables.
+    await sql`TRUNCATE TABLE organizations CASCADE`.execute(kysely);
+
     await sql`
         DO $$ DECLARE r record;
         BEGIN

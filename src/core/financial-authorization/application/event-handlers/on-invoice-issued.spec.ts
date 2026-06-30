@@ -12,7 +12,6 @@ import { Action } from '../../domain/action/action.ts';
 import { FinancialDocument } from '../../domain/document/document.ts';
 import { ReferenceId } from '../../domain/reference-id/reference-id.ts';
 import { OnInvoiceIssued } from './on-invoice-issued.ts';
-import { cleanDatabase } from '../../../../platform/infrastructure/persistent-manager/clean-database.ts';
 import { getTestKysely } from '../../../../../test/kysely.ts';
 import { getTestLogger } from '../../../../../test/logger.ts';
 import { getConfig } from '../../../../config.ts';
@@ -124,8 +123,6 @@ describe('onInvoiceIssued', () => {
         await bus.start();
         return bus;
     };
-
-    beforeEach(() => cleanDatabase(kysely));
 
     afterEach(async () => {
         await Promise.all(buses.map((bus) => bus.stop()));

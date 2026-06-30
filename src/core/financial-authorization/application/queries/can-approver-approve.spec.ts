@@ -4,7 +4,6 @@ import { PersistentManager } from '../../../../platform/infrastructure/persisten
 import { defaultPersisters } from '../../../../platform/infrastructure/persistent-manager/default-persisters.ts';
 import { InMemoryDomainEventsBus } from '../../../../platform/infrastructure/domain-events/in-memory-domain-events-bus.ts';
 import { CanApproverApprove } from './can-approver-approve.ts';
-import { cleanDatabase } from '../../../../platform/infrastructure/persistent-manager/clean-database.ts';
 import { getTestKysely } from '../../../../../test/kysely.ts';
 const kysely = getTestKysely();
 import { Action } from '../../domain/action/action.ts';
@@ -77,8 +76,6 @@ const createDocumentFixture = (overrides: {
 };
 
 describe('CanApproverApprove', () => {
-    beforeEach(() => cleanDatabase(kysely));
-
     it('should return UNKNOWN when document does not exist', async () => {
         const session = new Session(
             new PersistentManager(

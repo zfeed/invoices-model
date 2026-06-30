@@ -13,7 +13,6 @@ import { AuthflowPolicy } from '../../domain/authflow/authflow-policy.ts';
 import { Action } from '../../domain/action/action.ts';
 import { FinancialDocument } from '../../domain/document/document.ts';
 import { OnInvoiceIssued } from './on-invoice-issued.ts';
-import { cleanDatabase } from '../../../../platform/infrastructure/persistent-manager/clean-database.ts';
 import { getTestKysely } from '../../../../../test/kysely.ts';
 import { getTestLogger } from '../../../../../test/logger.ts';
 import { getConfig } from '../../../../config.ts';
@@ -98,7 +97,6 @@ describe('CompleteDraftInvoice + onInvoiceIssued integration', () => {
     let completeCommand: CompleteDraftInvoice;
 
     beforeEach(async () => {
-        await cleanDatabase(kysely);
         domainEventsBus = createPgBossDomainEventsBus(
             getTestLogger(),
             getConfig()

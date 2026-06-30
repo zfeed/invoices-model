@@ -9,7 +9,6 @@ import { AuthflowTemplate } from '../../domain/authflow/authflow-template.ts';
 import { AuthflowPolicy } from '../../domain/authflow/authflow-policy.ts';
 import { AuthflowPolicyCreatedEvent } from '../../domain/authflow/events/authflow-policy-created.event.ts';
 import { CreateAuthflowPolicy } from './create-authflow-policy.ts';
-import { cleanDatabase } from '../../../../platform/infrastructure/persistent-manager/clean-database.ts';
 import { getTestKysely } from '../../../../../test/kysely.ts';
 const kysely = getTestKysely();
 
@@ -26,7 +25,6 @@ const template = (from: string, to: string) =>
     }).unwrap();
 
 describe('createAuthflowPolicyCommand', () => {
-    beforeEach(() => cleanDatabase(kysely));
     it('should create and save a policy', async () => {
         const domainEventsBus = new InMemoryDomainEventsBus();
         const session = new Session(

@@ -19,7 +19,6 @@ import { InvoiceIssuedEvent } from '../../../invoices/domain/invoice/events/invo
 import { CreateAuthflowPolicy } from './create-authflow-policy.ts';
 import { OnInvoiceIssued } from '../event-handlers/on-invoice-issued.ts';
 import { ApproveActionOnDocument } from './approve-action-on-document.ts';
-import { cleanDatabase } from '../../../../platform/infrastructure/persistent-manager/clean-database.ts';
 import { getTestKysely } from '../../../../../test/kysely.ts';
 import { getTestLogger } from '../../../../../test/logger.ts';
 import { getConfig } from '../../../../config.ts';
@@ -118,8 +117,6 @@ describe('approveActionOnDocumentCommand', () => {
     let approverId: string;
 
     beforeEach(async () => {
-        await cleanDatabase(kysely);
-
         const fixtures = createTemplate();
         approverId = fixtures.approver.id.toPlain();
 
