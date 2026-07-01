@@ -27,5 +27,20 @@ export const createOrganization =
                 .returningAll()
                 .executeTakeFirstOrThrow();
 
-            return { organization, member };
+            return {
+                organization: {
+                    id: organization.id,
+                    name: organization.name,
+                    createdAt: organization.created_at,
+                    updatedAt: organization.updated_at,
+                },
+                member: {
+                    id: member.id,
+                    organizationId: member.organization_id,
+                    firstName: member.first_name,
+                    lastName: member.last_name,
+                    createdAt: member.created_at,
+                    updatedAt: member.updated_at,
+                },
+            };
         });

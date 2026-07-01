@@ -18,9 +18,9 @@ export const createOrganizationResponseSchema = z.object({
     member: z
         .object({
             id: z.string(),
-            organization_id: z.string(),
-            first_name: z.string(),
-            last_name: z.string(),
+            organizationId: z.string(),
+            firstName: z.string(),
+            lastName: z.string(),
         })
         .loose(),
 });
