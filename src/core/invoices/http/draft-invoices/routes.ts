@@ -68,8 +68,8 @@ const createDraftInvoice =
 
 const updateDraftInvoice =
     (commands: Commands) => async (app: FastifyInstance) => {
-        app.withTypeProvider<ZodTypeProvider>().post(
-            '/invoices/drafts/:id/update',
+        app.withTypeProvider<ZodTypeProvider>().patch(
+            '/invoices/drafts/:id',
             {
                 schema: {
                     tags,

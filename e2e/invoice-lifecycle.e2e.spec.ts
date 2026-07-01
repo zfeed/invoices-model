@@ -7,7 +7,7 @@ import {
     INVOICE_SHAPE,
 } from './helpers.ts';
 
-const { postJson, post, getData } = setupApp();
+const { postJson, patchJson, post, getData } = setupApp();
 
 describe('Invoice lifecycle flows', () => {
     describe('create -> update -> complete -> process', () => {
@@ -18,8 +18,8 @@ describe('Invoice lifecycle flows', () => {
             expect(draft).toEqual(EMPTY_DRAFT_SHAPE);
             expect(draft.status).toBe('DRAFT');
 
-            const updateRes = await postJson(
-                `/invoices/drafts/${draft.id}/update`,
+            const updateRes = await patchJson(
+                `/invoices/drafts/${draft.id}`,
                 COMPLETE_DRAFT_REQUEST
             );
             expect(updateRes.status).toBe(200);

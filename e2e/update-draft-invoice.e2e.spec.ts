@@ -6,12 +6,12 @@ import {
     EMPTY_DRAFT_SHAPE,
 } from './helpers.ts';
 
-const { postJson, postRaw, createDraft } = setupApp();
+const { patchJson, patchRaw, createDraft } = setupApp();
 
-describe('POST /invoices/drafts/:id/update', () => {
+describe('PATCH /invoices/drafts/:id', () => {
     it('updates a draft invoice', async () => {
         const draft = await createDraft();
-        const res = await postJson(`/invoices/drafts/${draft.id}/update`, {
+        const res = await patchJson(`/invoices/drafts/${draft.id}`, {
             lineItems: [
                 {
                     description: 'Consulting',
@@ -46,7 +46,7 @@ describe('POST /invoices/drafts/:id/update', () => {
 
     it('updates with empty body', async () => {
         const draft = await createDraft();
-        const res = await postJson(`/invoices/drafts/${draft.id}/update`, {});
+        const res = await patchJson(`/invoices/drafts/${draft.id}`, {});
         expect(res.status).toBe(200);
         const json = await res.json();
         expect(json.data).toEqual({ ...EMPTY_DRAFT_SHAPE, id: draft.id });
@@ -54,7 +54,7 @@ describe('POST /invoices/drafts/:id/update', () => {
 
     it('returns 400 when string fields exceed max length', async () => {
         const draft = await createDraft();
-        const res = await postJson(`/invoices/drafts/${draft.id}/update`, {
+        const res = await patchJson(`/invoices/drafts/${draft.id}`, {
             lineItems: [
                 {
                     description: tooLong(255),
@@ -75,19 +75,13 @@ describe('POST /invoices/drafts/:id/update', () => {
     });
 
     it('returns 422 for non-existent draft', async () => {
-        const res = await postJson(
-            '/invoices/drafts/non-existent-id/update',
-            {}
-        );
+        const res = await patchJson('/invoices/drafts/non-existent-id', {});
         await expectError(res, 422);
     });
 
     it('returns 400 for invalid JSON', async () => {
         const draft = await createDraft();
-        const res = await postRaw(
-            `/invoices/drafts/${draft.id}/update`,
-            'not json'
-        );
+        const res = await patchRaw(`/invoices/drafts/${draft.id}`, 'not json');
         expect(res.status).toBe(400);
         const json = await res.json();
         expect(json).toEqual({

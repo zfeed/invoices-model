@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 import { setupApp, INVOICE_SHAPE, POPULATED_DRAFT_SHAPE } from './helpers.ts';
 
-const { postJson, post, get, getData } = setupApp();
+const { postJson, patchJson, post, get, getData } = setupApp();
 
 const DRAFT_REQUEST = {
     lineItems: [
@@ -42,7 +42,7 @@ describe('Invoice PayPal transaction flow', () => {
         expect(empty.status).toBe('DRAFT');
 
         const filled = await getData(
-            await postJson(`/invoices/drafts/${empty.id}/update`, DRAFT_REQUEST)
+            await patchJson(`/invoices/drafts/${empty.id}`, DRAFT_REQUEST)
         );
         expect(filled).toEqual(POPULATED_DRAFT_SHAPE);
         expect(filled.id).toBe(empty.id);

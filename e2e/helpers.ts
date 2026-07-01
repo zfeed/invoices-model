@@ -61,6 +61,26 @@ export const setupApp = () => {
             body,
         });
 
+    const patchJson = async (
+        path: string,
+        body: unknown
+    ): Promise<TestResponse> =>
+        fetch(`${baseUrl}${path}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', ...authHeaders },
+            body: JSON.stringify(body),
+        });
+
+    const patchRaw = async (
+        path: string,
+        body: string
+    ): Promise<TestResponse> =>
+        fetch(`${baseUrl}${path}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', ...authHeaders },
+            body,
+        });
+
     const post = async (path: string): Promise<TestResponse> =>
         fetch(`${baseUrl}${path}`, { method: 'POST', headers: authHeaders });
 
@@ -89,6 +109,8 @@ export const setupApp = () => {
     return {
         postJson,
         postRaw,
+        patchJson,
+        patchRaw,
         post,
         get,
         getData,
