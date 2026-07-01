@@ -3,8 +3,8 @@ import type { Kysely } from '../../../database/kysely.ts';
 import { organizationContext } from '../../lib/organization-context/organization-context.ts';
 import { isUUID } from '../../lib/is-uuid/is-uuid.ts';
 
-const ORGANIZATION_HEADER = 'x-organization-id';
-const MEMBER_HEADER = 'x-member-id';
+export const ORGANIZATION_HEADER = 'x-organization-id';
+export const MEMBER_HEADER = 'x-member-id';
 
 const readId = (request: FastifyRequest, name: string): string | undefined => {
     const value = request.headers[name];
