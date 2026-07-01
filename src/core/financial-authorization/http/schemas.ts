@@ -37,3 +37,29 @@ export const createAuthflowPolicySchema = z.object({
     action: z.string().max(10),
     templates: z.array(templateSchema),
 });
+
+export const referenceIdParamSchema = z.object({
+    referenceId: z.string(),
+});
+
+export const canApproveQuerySchema = z.object({
+    approverId: z.string(),
+    action: z.string(),
+});
+
+export const authflowPolicyDtoSchema = z.object({
+    id: z.string(),
+    action: z.string(),
+    templates: z.array(z.unknown()),
+});
+
+export const documentDtoSchema = z.object({
+    id: z.string(),
+    referenceId: z.string(),
+    value: moneySchema,
+    authflows: z.array(z.unknown()),
+});
+
+export const canApproveResponseSchema = z.object({
+    answer: z.string(),
+});

@@ -1,6 +1,32 @@
 import { z } from 'zod';
 import { ISSUER_TYPE } from '../../domain/issuer/issuer.ts';
 import { RECIPIENT_TYPE } from '../../domain/recipient/recipient.ts';
+import {
+    issuerDtoSchema,
+    lineItemDtoSchema,
+    recipientDtoSchema,
+} from '../invoices/schemas.ts';
+
+export const draftInvoiceIdParamSchema = z.object({
+    id: z.string(),
+});
+
+export const draftInvoiceDtoSchema = z.object({
+    id: z.string(),
+    status: z.string(),
+    subtotalAmount: z.string().nullable(),
+    subtotalCurrency: z.string().nullable(),
+    totalAmount: z.string().nullable(),
+    totalCurrency: z.string().nullable(),
+    vatRate: z.string().nullable(),
+    vatAmount: z.string().nullable(),
+    vatCurrency: z.string().nullable(),
+    issueDate: z.string().nullable(),
+    dueDate: z.string().nullable(),
+    issuer: issuerDtoSchema.nullable(),
+    recipient: recipientDtoSchema.nullable(),
+    lineItems: z.array(lineItemDtoSchema).nullable(),
+});
 
 export const draftInvoiceSchema = z.object({
     lineItems: z

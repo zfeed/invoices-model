@@ -7,8 +7,11 @@ import { invoicesPlugin } from '../../core/invoices/http/invoices/index.ts';
 import { financialAuthorizationPlugin } from '../../core/financial-authorization/http/index.ts';
 import { organizationsPlugin } from '../../core/organizations/http/index.ts';
 import { createAuthHook } from './authentication.ts';
+import { registerSwagger } from './swagger.ts';
 
 export function init(fastify: FastifyInstance, core: Core, kysely: Kysely) {
+    registerSwagger(fastify);
+
     fastify.register(organizationsPlugin(core));
 
     fastify.register(async (protectedRoutes) => {

@@ -8,6 +8,10 @@ import Fastify, {
     FastifyRequest,
 } from 'fastify';
 import { Logger as PinoInstance } from 'pino';
+import {
+    serializerCompiler,
+    validatorCompiler,
+} from 'fastify-type-provider-zod';
 
 type LifecycleCallback = () => void | Promise<void>;
 
@@ -37,6 +41,8 @@ export class App {
 
     constructor({ logger, errorHandler }: AppOptions) {
         this.http = Fastify({ loggerInstance: logger });
+        this.http.setValidatorCompiler(validatorCompiler);
+        this.http.setSerializerCompiler(serializerCompiler);
         this.http.setErrorHandler(errorHandler);
 
         this.onShutdown(() => this.http.close());
